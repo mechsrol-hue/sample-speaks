@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Speaks Workspace</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- Auth Container -->
+    <div id="auth-container" class="container active glass-panel">
+        <h2>Sample Speaks</h2>
+        <div class="auth-box">
+            <input type="text" id="username" placeholder="Assigned To (e.g., Dinesh C) or 'admin'">
+            <input type="password" id="password" placeholder="Password (default: admin123)">
+            <button onclick="login()">Login to Workspace</button>
+            <p style="font-size: 0.85rem; margin-top: 10px; text-align: center;">First time? <a href="javascript:void(0)" onclick="register()">Register here</a></p>
+        </div>
+    </div>
+
+    <!-- Dashboard Container -->
+    <div id="dashboard-container" class="container">
+        <header>
+            <div class="brand">
+                <h1>Sample Speaks Workspace</h1>
+                <p id="user-welcome">Welcome, User</p>
+            </div>
+            <button class="logout-btn" onclick="logout()">Secure Logout</button>
+        </header>
+
+        <!-- Admin Only Panel -->
+        <div id="admin-panel" class="admin-panel glass-panel" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>Upload Engine</h3>
+                <button onclick="viewHistory()" style="background:rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">View Audit Logs</button>
+            </div>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom: 15px;">Upload your 10-column master format. The engine automatically reconciles duplicates via Encoded Code.</p>
+            <input type="file" id="excel-file" accept=".xlsx,.xls">
+            <button onclick="uploadExcel()">Analyze Document</button>
+        </div>
+
+        <!-- KPI / Overview -->
+        <div class="kpi-row">
+            <div class="kpi-card glass-panel clickable" id="kpi-card-total" onclick="toggleKpiFilter('ALL')">
+                <h4>Total Assigned</h4>
+                <div id="kpi-total" class="kpi-val">0</div>
+            </div>
+            <div class="kpi-card glass-panel priority-kpi clickable" id="kpi-card-priority" onclick="toggleKpiFilter('Priority')">
+                <h4>Priority Queue</h4>
+                <div id="kpi-p-suffix" class="kpi-val">0</div>
+            </div>
+            <div class="kpi-card glass-panel danger-kpi clickable" id="kpi-card-urgent" onclick="toggleKpiFilter('Urgent')">
+                <h4>SLA Alert (> 15 Days)</h4>
+                <div id="kpi-urgent" class="kpi-val">0</div>
+            </div>
+            <div class="kpi-card glass-panel clickable" id="kpi-card-submitted" onclick="toggleKpiFilter('Submitted')">
+                <h4>In Disposal Cycle</h4>
+                <div id="kpi-submitted" class="kpi-val">0</div>
+            </div>
+        </div>
+
+        <!-- Filter & Search -->
+        <div class="controls-bar">
+            <input type="text" id="search-input" placeholder="Search Encoded Code, IS Number, Assigned To..." oninput="renderTable()" class="glass-panel" style="border-radius: 8px;">
+            <select id="tp-filter" onchange="renderTable()" class="glass-panel" style="border-radius: 8px;">
+                <option value="ALL">All Assigned To</option>
+            </select>
+            <select id="status-filter" onchange="renderTable()" class="glass-panel" style="border-radius: 8px;">
+                <option value="ALL">All Workflow Statuses</option>
+                <option value="Pending">Pending Testing</option>
+                <option value="Submitted">Submitted (Pass/Fail)</option>
+            </select>
+        </div>
+
+        <!-- Sample Queue Table -->
+        <div class="table-container glass-panel">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Level</th>
+                        <th>Encoded Code</th>
+                        <th>IS Number</th>
+                        <th>Quantity</th>
+                        <th>Received On</th>
+                        <th>Forwarded On</th>
+                        <th>Assigned To</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Rows rendered dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Submit Modal -->
+    <div id="submit-modal" class="modal">
+        <div class="modal-content glass-panel">
+            <h3>Submit Test Results</h3>
+            <p>Declare outcome for <strong id="modal-sno" style="color:var(--accent);"></strong>.</p>
+            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 6px; margin: 15px 0;">
+                <p style="font-size: 0.85rem; color: var(--success); margin:0 0 5px 0;">✓ Passed: Immediate disposal authorized.</p>
+                <p style="font-size: 0.85rem; color: var(--warning); margin:0;">⚠ Failed: Remnant retained for 45 days.</p>
+            </div>
+            <select id="pass-fail-select" style="width: 100%;">
+                <option value="Pass">Pass</option>
+                <option value="Fail">Fail</option>
+            </select>
+            <div class="modal-actions">
+                <button onclick="closeModal()" style="background: transparent; border: 1px solid var(--glass-border);">Cancel</button>
+                <button class="primary" onclick="confirmSubmit()">Confirm Submission</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Review Modal -->
+    <div id="review-modal" class="modal">
+        <div class="modal-content large-modal glass-panel">
+            <h3 style="color: var(--accent);">Reconciliation Engine</h3>
+            <p>Duplicates caught via Encoded Code will be ignored. Review and commit fresh records.</p>
+            
+            <div class="review-split">
+                <div class="review-section">
+                    <h4 style="color: var(--success);">Fresh Inject (<span id="fresh-count">0</span>)</h4>
+                    <div class="table-container small-table" style="border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <table>
+                            <thead><tr><th>Encoded Code</th><th>Assigned To</th><th>Priority</th></tr></thead>
+                            <tbody id="fresh-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="review-section">
+                    <h4 style="color: var(--danger);">Duplicates Blocked (<span id="duplicate-count">0</span>)</h4>
+                    <div class="table-container small-table" style="border: 1px solid rgba(239, 68, 68, 0.2);">
+                        <table>
+                            <thead><tr><th>Encoded Code</th><th>Assigned To</th><th>Priority</th></tr></thead>
+                            <tbody id="duplicate-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button onclick="closeReviewModal()" style="background: transparent; border: 1px solid var(--glass-border);">Cancel Upload</button>
+                <button class="primary" onclick="commitUpload()" id="commit-btn">Commit to Master</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload History Modal -->
+    <div id="history-modal" class="modal">
+        <div class="modal-content large-modal glass-panel">
+            <h3>Audit Trail</h3>
+            <p>Chronological log of master database injections.</p>
+            <div class="table-container" style="max-height: 400px; border: 1px solid var(--glass-border);">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Upload Date</th>
+                            <th>File Name</th>
+                            <th>Fresh Records</th>
+                            <th>Duplicates Ignored</th>
+                            <th>Uploaded By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <!-- Rendered by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeHistoryModal()" style="background: transparent; border: 1px solid var(--glass-border);">Close Audit Log</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batch Details Modal (Phase 7) -->
+    <div id="batch-details-modal" class="modal">
+        <div class="modal-content glass-panel">
+            <h3 style="color: var(--accent);">Batch Injection Details</h3>
+            <p>Showing exact samples committed during batch <strong id="batch-id-display"></strong>.</p>
+            <div class="table-container small-table" style="max-height: 300px; border: 1px solid var(--glass-border);">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Encoded Code</th>
+                            <th>Assigned To</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batch-details-tbody">
+                        <!-- Rendered by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeBatchDetailsModal()" style="background: transparent; border: 1px solid var(--glass-border);">Back to History</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

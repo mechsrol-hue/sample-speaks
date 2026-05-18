@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Speaks | Laboratory Quality Control Dashboard</title>
+    <meta name="description" content="An interactive sample tracking dashboard featuring natural language processing querying and real-time status management.">
+    <meta name="author" content="Saurabh Shantaram Dangale">
+    
+    <!-- Design Stylesheet -->
+    <link rel="stylesheet" href="index.css">
+    
+    <!-- SheetJS Library for drag-and-drop excel loading client-side -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        
+        <!-- Header -->
+        <header class="glass-panel">
+            <div class="brand-section">
+                <div class="logo-icon">🗣️</div>
+                <div>
+                    <h1 class="brand-title" id="app-main-title">Sample Speaks</h1>
+                    <div class="brand-subtitle">Interactive Quality Control Sample Dashboard</div>
+                </div>
+            </div>
+            <div class="header-meta">
+                <div class="data-indicator" id="dataset-indicator">
+                    <span class="data-indicator-dot"></span>
+                    <span id="data-status-text">Pending Excel Data Active (413 Records)</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- KPI Metric Cards Row -->
+        <section class="metrics-grid" aria-label="Key Performance Indicators">
+            <div class="glass-panel metric-card total" id="metric-card-total" onclick="resetAllFilters()">
+                <div class="metric-label">
+                    <span>Total Pending Samples</span>
+                    <span class="metric-label-icon">🧪</span>
+                </div>
+                <div class="metric-val" id="kpi-total">413</div>
+                <div class="metric-trend">Click to reset filters</div>
+            </div>
+            
+            <div class="glass-panel metric-card forwarded" id="metric-card-forwarded" onclick="filterBySampleStatus('Forwarded For Testing')">
+                <div class="metric-label">
+                    <span>Forwarded For Testing</span>
+                    <span class="metric-label-icon">📬</span>
+                </div>
+                <div class="metric-val" id="kpi-forwarded">276</div>
+                <div class="metric-trend" id="kpi-forwarded-percent">66.8% of total</div>
+            </div>
+
+            <div class="glass-panel metric-card progress" id="metric-card-progress" onclick="filterBySampleStatus('Testing in Progress')">
+                <div class="metric-label">
+                    <span>Testing in Progress</span>
+                    <span class="metric-label-icon">⚙️</span>
+                </div>
+                <div class="metric-val" id="kpi-progress">132</div>
+                <div class="metric-trend" id="kpi-progress-percent">32.0% of total</div>
+            </div>
+
+            <div class="glass-panel metric-card partial" id="metric-card-partial" onclick="filterByReportStatus('Partial Report Issued')">
+                <div class="metric-label">
+                    <span>Partial Reports Issued</span>
+                    <span class="metric-label-icon">📑</span>
+                </div>
+                <div class="metric-val" id="kpi-partial">102</div>
+                <div class="metric-trend" id="kpi-partial-percent">24.7% of total</div>
+            </div>
+        </section>
+
+        <!-- NLP Query & Tester Workloads -->
+        <div class="middle-grid">
+            
+            <!-- Speaks NLP Console -->
+            <section class="glass-panel nlp-section" aria-labelledby="nlp-console-heading">
+                <h2 id="nlp-console-heading" style="font-size: 1.1rem; font-weight: 600;">Sample Speaks Conversational Console</h2>
+                <div class="nlp-input-wrapper">
+                    <span class="nlp-icon-left">💬</span>
+                    <input type="text" id="nlp-query-input" class="nlp-input" placeholder="Ask Sample Speaks (e.g., 'Saurabh\'s samples', 'partial reports', 'IS 14756', 'received in March')...">
+                    <button id="nlp-clear-btn" class="nlp-clear-btn" onclick="clearNLPInput()">✕</button>
+                </div>
+                
+                <!-- Suggestions Row -->
+                <div class="nlp-suggestions">
+                    <span class="nlp-suggestions-label">Try asking:</span>
+                    <button class="suggestion-chip" onclick="applyNLPQuery('Saurabh\'s samples')">SAURABH's active samples</button>
+                    <button class="suggestion-chip" onclick="applyNLPQuery('Testing in progress')">Testing in progress</button>
+                    <button class="suggestion-chip" onclick="applyNLPQuery('IS 14756 (2024)')">IS 14756 (2024) standards</button>
+                    <button class="suggestion-chip" onclick="applyNLPQuery('due by 30-05-2026')">Urgent samples</button>
+                </div>
+
+                <!-- Speaks NLP Response Feedback -->
+                <div class="nlp-response-box" id="nlp-response-box">
+                    <span class="nlp-response-icon">🗣️</span>
+                    <div id="nlp-response-text">Console loaded. Type a query above to filter real-time data!</div>
+                </div>
+            </section>
+
+            <!-- Tester Workloads List -->
+            <section class="glass-panel workload-section" aria-labelledby="workload-heading">
+                <div class="workload-header">
+                    <h2 id="workload-heading" class="workload-title">Tester Workloads</h2>
+                    <span class="workload-subtitle" id="workload-testers-count">12 Active Testers</span>
+                </div>
+                <div class="workload-list" id="workload-list-container">
+                    <!-- Dynamic rendering in app.js -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Filters Drawer & Floating Actions -->
+        <section class="glass-panel data-panel" aria-labelledby="data-table-heading">
+            <h2 id="data-table-heading" class="sr-only" style="display:none;">Interactive Database Grid</h2>
+            
+            <div class="filters-drawer">
+                <div class="filter-group">
+                    <span class="filter-label">Testing Person (TP NAME)</span>
+                    <select id="tp-name-filter" class="filter-select" onchange="applyFilters()">
+                        <option value="ALL">All Testers</option>
+                        <!-- Options generated dynamically -->
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label">IS Standard</span>
+                    <select id="is-number-filter" class="filter-select" onchange="applyFilters()">
+                        <option value="ALL">All Standards</option>
+                        <!-- Options generated dynamically -->
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label">Sample Status</span>
+                    <select id="sample-status-filter" class="filter-select" onchange="applyFilters()">
+                        <option value="ALL">All Statuses</option>
+                        <option value="Forwarded For Testing">Forwarded For Testing</option>
+                        <option value="Testing in Progress">Testing in Progress</option>
+                        <option value="Accepted By Sample Cell">Accepted By Sample Cell</option>
+                        <option value="Testing Completed">Testing Completed</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label">Report Status</span>
+                    <select id="report-status-filter" class="filter-select" onchange="applyFilters()">
+                        <option value="ALL">All Reports</option>
+                        <option value="Not Sent">Not Sent</option>
+                        <option value="Partial Report Issued">Partial Report Issued</option>
+                    </select>
+                </div>
+
+                <button class="reset-filters-btn" id="reset-filters-btn" onclick="resetAllFilters()">
+                    <span>🗑️</span> Reset Filters
+                </button>
+            </div>
+
+            <!-- Upload and CSV Export Actions -->
+            <div class="floating-actions">
+                <!-- CSV Export button -->
+                <button class="action-btn primary-btn" id="export-csv-btn" onclick="exportFilteredToCSV()">
+                    <span>📥</span> Export Filtered List (CSV)
+                </button>
+
+                <!-- Drag-and-drop file Zone -->
+                <div id="drop-zone" class="drag-drop-zone">
+                    <span>📁</span> <strong>Drag & Drop</strong> updated excel file here or <span style="text-decoration: underline; color: var(--primary);">click to browse</span>
+                </div>
+                <input type="file" id="file-input" class="hidden-file-input" accept=".xlsx,.xls">
+            </div>
+
+            <!-- Data Table Container -->
+            <div class="table-container">
+                <table id="sample-data-table">
+                    <thead>
+                        <tr>
+                            <th id="th-sNo" onclick="handleSort('sNo')" style="width: 70px;">S.No. <span>⇅</span></th>
+                            <th id="th-encode" onclick="handleSort('encode1')">Sample Encodes <span>⇅</span></th>
+                            <th id="th-isNumber" onclick="handleSort('isNumber')">IS Standard <span>⇅</span></th>
+                            <th id="th-receivedOn" onclick="handleSort('receivedOn')" style="width: 130px;">Received Date <span>⇅</span></th>
+                            <th id="th-sampleStatus" onclick="handleSort('sampleStatus')" style="width: 190px;">Sample Status <span>⇅</span></th>
+                            <th id="th-reportStatus" onclick="handleSort('reportStatus')" style="width: 180px;">Report Status <span>⇅</span></th>
+                            <th id="th-mechRemarks" onclick="handleSort('mechRemarks')">Mech Remarks <span>⇅</span></th>
+                            <th id="th-tpName" onclick="handleSort('tpName')" style="width: 200px;">Testing Person (TP) <span>⇅</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Rows rendered dynamically in app.js -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination and Entry summary -->
+            <div class="pagination-panel">
+                <div id="pagination-summary">Showing 1 to 20 of 413 entries</div>
+                <div class="pagination-controls">
+                    <button class="page-btn" id="prev-page-btn" onclick="changePage(-1)">Previous</button>
+                    <div class="page-indicator">
+                        <span>Page</span>
+                        <strong id="current-page-num">1</strong>
+                        <span>of</span>
+                        <strong id="total-pages-num">21</strong>
+                    </div>
+                    <button class="page-btn" id="next-page-btn" onclick="changePage(1)">Next</button>
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <!-- Live Excel Data -->
+    <script src="data.js"></script>
+    
+    <!-- Application Logic -->
+    <script src="app.js"></script>
+
+</body>
+</html>
