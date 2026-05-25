@@ -1,0 +1,1286 @@
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!-- Viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="description" content="Laboratory Information Management System of Bureau of Indian Standards">
+	<meta name="keywords" content=" LIMS, BIS, Laboratory Information Management System">
+  <meta name="author" content="">
+  <meta name="insight-app-sec-validation" content="0b0ed5b1-42f2-40f0-a785-a9dcb0923cec">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/image/favicon-32x32.png">
+  <title>BIS - LIMS (Laboratory Information Management System) Dashboard</title>
+  <script src="/static/js/jquery-3.2.1.min.js"></script>
+  <script src="/static/js/moment.js"></script>
+  <script src="/static/js/bootstrap-datetimepicker.min.js"></script>
+  <link href="/static/css/bootstrap-datetimepicker.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="/static/css/bootstrap.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="/static/css/ie11.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="/static/css/cropper.css" rel="stylesheet" crossorigin="anonymous">
+
+  <link href="/static/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="/static/css/dashboard.css" rel="stylesheet" crossorigin="anonymous">
+   <link href="/static/css/Roboto-Condensed.css" rel="stylesheet">
+  <link href="/static/css/OpenSans.css" rel="stylesheet">
+  <link href="/static/css/style.css" rel="stylesheet" crossorigin="anonymous">
+  <link rel="stylesheet" href="/static/css/Chart.min.css">
+  <script src="/static/js/jquery.dataTables.js"></script>
+  <script src="/static/js/dataTables.bootstrap4.js"></script>
+  <script src="/static/js/cropper.js"></script>
+  <script src="/static/js/custom-cropper.js"></script>
+  <script src="/static/js/jquery-cropper.js"></script>
+  <script src="/static/js/chart.js/Chart.bundle.min.js" charset="utf-8"></script>
+  <script src="/static/js/chart.js/Chart.min.js" charset="utf-8"></script>
+  <script src="/static/js/reconnecting-websocket.js" charset="utf-8"></script>
+  <script src="/static/js/blockui.js" charset="utf-8"></script>
+  <link href="/static/css/select2.min.css" rel="stylesheet">
+  <script src="/static/js/select2.min.js"></script>
+  <link href="/static/css/lrs.css" rel="stylesheet">
+<style>
+  .hidden{display:none}
+</style>
+</head>
+
+<body id="page-top">
+  <!-- Topbar -->
+  <nav class="navbar navbar-expand navbar-light bg-white topbar static-top" colspan="9">
+
+    <!-- Sidebar Toggle (Topbar) in mobile -->
+    <button id="sidebarToggleTop" class="btn  d-block d-md-none rounded-circle mr-3">
+      <i class="fa fa-bars"></i>
+    </button>
+
+    <div class="logodashboard">
+      <a href="https://lims.bis.gov.in/dashboard/">
+		<div class="d-flex align-items-center">
+			<div class="iconlogomanak"><img src="/static/image/manak.png"></div>
+			<div class="manakNames">
+				<h2>Bureau of Indian Standards</h2>
+				<h3>The National Standards Body of India</h3>
+			</div>
+		</div>
+	  </a>
+    </div>
+	<!-- Sidebar Toggle (Topbar) in Dasktop -->
+    <button id="sidebarToggleTop" class=" d-none d-md-block rounded-circle ml-4 border-0">
+      <i class="fa fa-bars"></i>
+    </button>
+
+    <!-- Topbar Navbar -->
+    <ul class="navbar-nav ml-auto">
+      <!-- Nav Item - Alerts -->
+     
+
+
+      <!-- {&#x27;notifications&#x27;: [], &#x27;unread_count&#x27;: 0} -->
+     <!-- { if request.user.id|get_user_notifications %} -->
+<!-- Temporary Maintenance Notification Code Start -->
+     <!-- <li>
+      <marquee behavior="scroll" direction="left" scrollamount="8" style="width: 610px;font-weight: bold;font-size: 15px;color: #721c24;">
+        LIMS will remain unavailable between 9:45 PM to 10:30 PM on 10th January'22 due to server maintenance activity. All users are kindly advised to manage their work accordingly.
+      </marquee>
+    </li> -->
+<!-- Temporary Code End -->
+     
+
+
+        <li class="nav-item dropdown no-arrow mx-1">
+          <a class="nav-link dropdown-toggle show_notification" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i title="Notification" class="fa fa-bell fa-fw" id="notification_bell"></i>
+          
+            
+                <span class="badge badge-danger badge-counter" id="notification_count" data-value=""></span>
+          </a> 
+      <!-- Dropdown - Alerts -->
+      <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown" id="notification_card">
+            <h6 class="dropdown-header">
+              Alerts Center
+            </h6>
+            
+            <div id="notification_loop">
+            </div>
+
+      <!----- comment by aakash start -->
+      <!-- <a class="dropdown-item d-flex align-items-center" href="#">
+              <div class="mr-3">
+                <div class="icon-circle bg-success">
+                  <i class="fa fa-donate text-white"></i>
+                </div>
+              </div>
+              <div>
+                <div class="small text-gray-500">December 7, 2019</div>
+                $290.29 has been deposited into your account!
+              </div>
+            </a>
+            <a class="dropdown-item d-flex align-items-center" href="#">
+              <div class="mr-3">
+                <div class="icon-circle bg-warning">
+                  <i class="fa fa-exclamation-triangle text-white"></i>
+                </div>
+              </div>
+              <div>
+                <div class="small text-gray-500">December 2, 2019</div>
+                Spending Alert: We've noticed unusually high spending for your account.
+              </div>
+            </a> -->
+      <!----- comment by aakash end -->
+       <a class="dropdown-item text-center small text-gray-500" href="/notifications_listing/">Show All Alerts</a>
+          </div>
+        </li> 
+      <!-- { endif %}  -->
+     
+
+      <!-- Nav Item - User Information -->
+      <li class="nav-item dropdown no-arrow">
+        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <img class="img-profile rounded-circle" src="/media/profile/default_pic.jpg" id="profilepic" title="Profile">
+
+          <span class="mx-2 d-none d-lg-inline userName">Saurabhd@bis.gov.in</span>
+          <i class="fa fa-angle-down"></i>
+
+        </a>
+        <span class="username_tagline">You are logged in as <strong>Lab Officer / Testing Assistant</strong></span>
+
+        <!-- Dropdown - User Information -->
+        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+          <a class="dropdown-item" href="/profile/">
+            <i class="fa fa-user-o fa-sm fa-fw mr-2 text-gray-400"></i>
+            Profile
+          </a>
+          <!-- <a class="dropdown-item" href="#">
+              <i class="fa fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+              Settings
+            </a>
+            <a class="dropdown-item" href="#">
+              <i class="fa fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+              Activity Log
+            </a> -->
+
+          
+
+          
+          <a class="dropdown-item change_group" style="background-color:yellow" href="#" selected_group="LO/TA" user_id="9630">LO/TA</a>
+          
+          
+          <div class="dropdown-divider"></div>
+          <a href="/dashboard_user_manual/" class="dropdown-item">User Manual</a>
+          <div class="dropdown-divider"></div>
+
+          <a href="/change_password/" class="dropdown-item">Change Password</a>
+          <div class="dropdown-divider"></div>
+          <a href="/logout" class="dropdown-item">Logout</a>
+
+        </div>
+      </li>
+
+    </ul>
+
+
+    
+
+  </nav>
+  <!-- End of Topbar -->
+
+  <!--Test Request Modal-->
+  <div class="modal fade stockmodal" id="testRequestModalPopUp" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  </div>
+
+  <script type="text/javascript">
+
+    function add_notifications(d) {
+      var count_value = false
+      var notify_append = $('#notification_loop')
+      if ($('#notification_count').length > 0) {
+        var count_value = parseInt($('#notification_count').attr('data-value'));
+      } else {
+        pre_append_notify = `
+          <a class="dropdown-item d-flex align-items-center" href="${d.instance.link}">
+            <div class="mr-3">
+              <div class="icon-circle bg-primary">
+                <!-- <i class="fa fa-file-alt text-white"></i> -->
+                <img src="${d.instance.user_proflie}">
+              </div>
+            </div>
+            <div>
+              <div class="small text-gray-500">${d.instance.created_at}</div>
+              <span class="font-weight-bold">${d.instance.message}</span>
+            </div>
+          </a>
+          `
+        notify_append.prepend(pre_append_notify);
+
+        $('#alertsDropdown').append(
+          `<span class="badge badge-danger badge-counter" id="notification_count" data-value="1">1+</span>`
+        )
+      }
+
+      if (Boolean(count_value)) {
+        var new_value = ++count_value;
+
+        pre_append_notify = `
+          <a class="dropdown-item d-flex align-items-center" href="${d.instance.link}">
+            <div class="mr-3">
+              <div class="icon-circle bg-primary">
+                <!-- <i class="fa fa-file-alt text-white"></i> -->
+                <img src="${d.instance.user_proflie}">
+              </div>
+            </div>
+            <div>
+              <div class="small text-gray-500">${d.instance.created_at}</div>
+              <span class="font-weight-bold">${d.instance.message}</span>
+            </div>
+          </a>
+          `
+        notify_append.prepend(pre_append_notify);
+        $('#notification_count').attr('data-value', new_value);
+        $('#notification_count').html(`${new_value}+`);
+      }
+    }
+
+    // notification_socket_url = '/ws/notifications/';
+    // var protocol_websocket = "ws://"
+    // if (window.location.protocol == "https:") {
+    //   var protocol_websocket = "wss://"
+    // }
+
+    // let notifications_socket = new ReconnectingWebSocket(`${protocol_websocket}${window.location.host}${notification_socket_url}`)
+    // notifications_socket.onopen = function (e) {
+    //   console.log('connection accepted by the server.');
+    // }
+
+    // Temporarely
+    // notifications_socket.onmessage = function (e) {
+    //   json_data = JSON.parse(e.data);
+    //   add_notifications(json_data);
+    // }
+
+    // notifications_socket.onclose = function (e) {
+    //   console.log('connection close by the server');
+    // }
+
+    // notifications_socket.error = function (e) {
+    //   console.log('connection error by server. please check.')
+    // }
+
+  </script>
+  <script type="text/javascript">
+    $('#notification_bell').on('click', function (e) {
+      e.preventDefault();
+      $('#notification_count').attr('style', 'display: none;');
+      $.ajax({
+        url: `/notification/unread/mark/`,
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          'csrfmiddlewaretoken': `7MHmw4JoXvS31mGtWbeMrpLoe4p1wilkAF2XI3S62wz7Qcj7SfdHzVmsFMDl8ZMN`,
+        },
+        success: function (r) {
+        }
+      })
+    });
+
+    $(document).ready(function () {
+      $.get(`/get_user_profile/?user=9630`, function (data, status) {
+        $('#profilepic').attr('src', `${data.image}`);
+      });
+
+      // This functino is user to save remarks
+      $.fn.updateRemarks = function (data) {
+        console.log(data)
+        console.log(data['toast_message'])
+        console.log(data['lab_id'])
+        $.ajax({
+          type: 'POST',
+          url: '/save_remarks/',
+          headers: { "X-CSRFToken": '7MHmw4JoXvS31mGtWbeMrpLoe4p1wilkAF2XI3S62wz7Qcj7SfdHzVmsFMDl8ZMN' },
+          data: data,
+          dataType: 'json',
+          success: function (response) {
+            let modal_id = `#rejectRecordModal${data['lab_id']}`
+            $(modal_id).modal('hide')
+            toast_function(data['toast_message'])
+            setTimeout(function () {
+              location.reload()
+            },
+              3000);
+          },
+          error: function (response) {
+            console.log(response)
+          }
+        });
+      }
+    });
+  </script>
+
+
+  <script>
+    $('.change_group').on('click', function () {
+      var selected_group = $(this).text()
+      var user_id = $(this).attr('user_id');
+      var url = '/update_group/'
+      $.get(url, { 'selected_group': selected_group, 'user_id': user_id }, function (data) {
+        // location.reload()  
+        toast_function('Role updated to ' + selected_group)
+        setTimeout(function () {
+          location.reload()
+        },
+          1500);
+
+      });
+    })
+    $(document).on('click', '.show_notification', function () {
+      $.ajax({
+				type: "GET",
+				url: "/show_notifications/",
+				dataType: 'json',
+				success: function (response) {
+                    $('#notification_loop').html(response['form'])
+				},
+				error: function (response) {
+					console.log(response)
+				}
+			});
+     })
+  </script>
+
+
+
+
+<link href="/static/css/samplehandle.css" rel="stylesheet">
+<!--  -->
+<!-- Page Wrapper -->
+<div id="wrapper">
+  
+
+<ul class="navbar-nav sidebar sidebar-dark accordion  " id="accordionSidebar">
+
+  <!-- Sidebar -->
+  <!-- Nav Item - Dashboard -->
+  
+  <li class="nav-item ">
+    <a class="nav-link" href="/dashboard/">
+      <i class="fa fa-tachometer"></i>
+      <span>Dashboard</span></a>
+  </li>
+  
+  <script>
+    $(document).on('click', ".compare_lab", function () {
+      var section_compare = $(this).attr('section_compare');
+      console.log('section_compareeeeeeeeeeeee', $(this).text())
+      if ($(this).text() == "Compare") {
+        console.log('this', $(this).text())
+        $(this).text("Requested Updates");
+      } else {
+        $(this).text("Compare");
+      };
+      console.log($(this).closest('.Addmutipleform').find('.prev_section_data'))
+      $(this).closest('.Addmutipleform').find('.prev_section_data').toggleClass('hidden')
+      $(this).closest('.Addmutipleform').find('.temp_section_data').toggleClass('col-md-12').toggleClass('col-md-6')
+    })
+  </script>
+
+  
+
+  
+
+
+  
+
+  
+
+
+  <!-- { if request.user|has_group:"Head" or request.user|has_group:"Dealing Officer" %} -->
+
+  
+
+  
+
+
+  
+
+  
+
+
+
+
+  <!--  -->
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <!-- { if perms.auditor.add_laboratoryaudittable } -->
+  
+
+  
+
+  <!--  -->
+
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+  
+
+  
+
+
+  
+  
+
+
+
+  <!-- Nav Item - Pages Collapse Menu -->
+
+  
+
+
+
+  <!-- Nav Item - Pages Collapse Menu -->
+  
+  <li class="nav-item active">
+    <a class="nav-link collapsed" href="javascript:void(0);" data-toggle="collapse" data-target="#samplehandle" aria-expanded="false" aria-controls="collapseTwo">
+      <i class="fa fa-fw fa-table"></i>
+      <span>Sample Handling</span></a>
+    <div id="samplehandle" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+      <div class="py-2 collapse-inner">
+        
+        
+
+        
+        
+        
+        
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        <!--  -->
+
+        <!--  -->
+
+        
+        <a class="collapse-item" href="/sample/ta_sample_reciept_list">Sample Receipt
+          <span id="ta_receipt"></span></a>
+        <!-- <a class="collapse-item" href="{ url 'ta-sample-modified-reciept-list' %}">Modified Sample Receipt
+            <span id="ta_receipt"></span></a> -->
+        
+
+        
+        <a class="collapse-item active" href="/sample/ta_sample_pending_list">Pending Samples
+          <span id="ta_pending"></span></a>
+        
+
+        
+        <a class="collapse-item" href="/sample/ta_sample_issuedreport_list">Issued Test Report
+          <span id="ta_report"></span></a>
+        
+
+        <!-- 
+        <a class="collapse-item" href="/sample/ta_sample_clarification_list">Sample Clarification
+          <span id="ta_clarification"></span></a>
+         -->
+        
+        
+
+        
+
+        
+        
+        
+        
+        
+        
+
+
+        
+
+        
+
+        
+
+        
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+
+        <!--  -->
+      </div>
+    </div>
+  </li>
+
+  
+
+
+
+  <li class="nav-item">
+    <a class="nav-link collapsed" href="javascript:void(0);" data-toggle="collapse" data-target="#clarifications" aria-expanded="false" aria-controls="collapseTwo">
+      <i class="fa fa-fw fa-table"></i>
+      <span>Sample Clarifications</span></a>
+    <div id="clarifications" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+      <div class="py-2 collapse-inner">
+
+        <a class="collapse-item" href="/sample/received_sample_clarifications/">Clarifications Received
+          <span id="samplecell_receive"></span></a>
+        <a class="collapse-item" href="/sample/raised_sample_clarifications/">Clarifications Raised
+          <span id="samplecell_raised"></span></a>
+          <a class="collapse-item" href="/sample/userwise_sample_clarifications/">All Clarifications
+          <span id="all_clarifications"></span></a>
+                    <a class="collapse-item" href="/sample/userwise_sample_open_clarifications/">Open  Clarifications
+          <span id="all_open_clarifications"></span></a>
+                    <a class="collapse-item" href="/sample/userwise_sample_close_clarifications/">Closed Clarifications
+          <span id="all_close_clarifications"></span></a>
+      </div>
+    </div>
+  </li>
+
+  
+  
+  
+  
+  <!-- { if perms.lrs.adequate_laboratory %}
+  <li class="nav-item ">
+    <a class="nav-link" href="/lab_scope_request/">
+      <i class="fa fa-fw fa-flask"></i>Lab Scope Request<span id=""></span></a>
+  </li>
+  { endif %} -->
+  
+  
+
+  
+
+
+  
+
+  
+
+  
+    
+        
+
+<li class="nav-item">
+    <a class="nav-link collapsed" href="javascript:void(0);" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseTwo" id="store_menu">
+        <i class="fa fa-fw fa-industry"></i>
+        <span>Store</span>
+    </a>
+    <div id="collapseThree" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div class="py-2 collapse-inner">
+            <a class="collapse-item" href="/store/items/">Item List</a>
+            <a class="collapse-item" href="/store/view_stock/">Available Stock</a>
+            
+            
+            
+            <a class="collapse-item" href="/store/items/raised_indent/">Raised Indent Requests <span id="raised_indent_list"></span></a>
+            <a class="collapse-item" href="/store/items/indent/pending_actions/">Actions Required on Indent Requests <span id="indent_action"></span></a>
+            
+            
+            
+            
+            
+            <a class="collapse-item" href="/store/raised_purchase_requests_list/">Raised Purchase Requests <span id="raised_purchase_requests_list"></span></a>
+            <!-- <a class="collapse-item" href="/store/items/purchase/pending_actions/">Actions Required on Purchase Requests <span id="purchase_actions"></span></a> -->
+            
+
+            
+
+            
+            
+            
+            
+            
+
+            
+            
+            
+        </div>
+    </div>
+</li>
+
+
+<script src="/static/js/custom_store.js"></script>
+
+<script>
+    window.onload = function () {
+        var span = document.getElementsByTagName('th').length
+        $('.bg-white').attr('colspan', span)
+        var url = "/sample/ta_sample_pending_list"
+        $(`a[href='${url}']`).closest('li').addClass('active')
+        $(`a[href='${url}']`).closest('.collapse').addClass('show')
+
+        $.get('/store/get_store_count/', function(res, status){
+            Object.keys(res).forEach(function(key) {
+            console.table('Key : ' + key + ', Value : ' + res[key])
+
+            $(`#${key}`).text(`(${res[key]})`)
+            });
+        });
+    }
+
+</script>
+     
+    
+  
+
+   
+    
+    
+
+<li class="nav-item" id="equipmentLi">
+    <a class="nav-link collapsed" href="javascript:void(0);" data-toggle="collapse" data-target="#collapseEquipment" aria-expanded="false" aria-controls="collapseEquipment">
+        <i class="fa fa-fw fa-check"></i>
+        <span>Equipment</span>
+    </a>
+    <div id="collapseEquipment" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div class="py-2 collapse-inner">
+            <a class="collapse-item" href="/equipment/">Equipments</a>
+
+            
+            
+            <a class="collapse-item" href="/equipment/requests/status/">Equipment Requests <span id="er_pending"></span></a>
+            
+            
+            <a class="collapse-item" href="/equipment/purchase_requests/">Purchase Requests <span id="pr_lato"></span></a>
+            
+            
+            
+            
+            
+        </div>
+    </div>
+</li>
+
+<script src="/static/js/custom_equipment.js"></script>
+
+
+    
+  
+
+
+
+  
+
+  
+
+  
+
+      <!--- For OIC and LO/TA -->
+  <li class="nav-item">
+      <a class="nav-link collapsed" href="javascript:void(0);" data-toggle="collapse" data-target="#collapseReport" aria-expanded="false" aria-controls="collapseTwo">
+        <i class="fa fa-fw fa-users"></i>
+        <span>Report</span>
+      </a>
+      <div id="collapseReport" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div class="py-2 collapse-inner">
+          <!--- For OIC -->
+          
+          <a class="collapse-item" href="/oic_report_by_testing_person">Testing Person Report<span id=""></span></a>
+        </div>
+      </div>
+    </li>
+    
+
+    
+    
+  
+
+  
+
+  
+
+  
+
+
+  <li class="nav-item ">
+    <a class="nav-link" href="/dashboard_user_manual/">
+      <i class="fa fa-book fa-fw"></i>
+      <span>User Manual</span></a>
+  </li>
+
+
+
+  <!-- Divider -->
+  <hr class="sidebar-divider d-none">
+  <!-- Sidebar Toggler (Sidebar) -->
+  <div class="text-center d-none">
+    <button class="rounded-circle border-0" id="sidebarToggle"></button>
+  </div>
+  <!-- End of Sidebar -->
+</ul>
+
+
+
+<script>
+  // $(function () {
+  //   $.get('/store/get_store_count/', function (res, status) {
+  //     Object.keys(res).forEach(function (key) {
+  //       if (res[key]) {
+  //         $(`#${key}`).text(`(${res[key]})`)
+  //       }
+  //     });
+  //   });
+
+  // })
+</script>
+
+
+
+<script>
+  // $(function () {
+  //   $.get('/sample/get_sample_count/', function (res, status) {
+  //     Object.keys(res).forEach(function (key) {
+  //       // console.table('Key : ' + key + ', Value : ' + res[key])
+  //       if (res[key]) {
+  //         $(`#${key}`).text(`(${res[key]})`)
+  //       }
+  //     });
+  //   });
+  // })
+</script>
+<script>
+  // $(function () {
+  //   $.get('/get_dashboard_count/', function (res, status) {
+  //     Object.keys(res).forEach(function (key) {
+  //       // console.table('Key : ' + key + ', Value : ' + res[key])
+  //       // if (res[key]) {
+  //         $(`#${key}`).text(`(${res[key]})`)
+  //       // }
+  //     });
+  //   });
+  // })
+</script>
+<script>
+  $(window).on('load', function () {
+    var span = document.getElementsByTagName('th').length
+    $('.bg-white').attr('colspan', span)
+    var url = "/sample/ta_sample_pending_list"
+    $(`a[href='${url}']`).closest('li').addClass('active')
+    $(`a[href='${url}']`).closest('a').addClass('active')
+    $(`a[href='${url}']`).closest('.collapse').addClass('show')
+  })
+</script>
+
+
+  <!-- Content Wrapper -->
+  <div id="content-wrapper" class="d-flex flex-column">
+
+    <!-- Main Content -->
+    <div id="content">
+
+
+
+      <!-- Begin Page Content -->
+      <div class="container-fluid adminpage">
+
+        <!-- Page Heading -->
+        <!-- <h1 class="h3 mb-2 text-gray-800">Lab Details</h1>
+        <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below. For more
+          information about DataTables, please visit the</p> -->
+
+        <!-- DataTales Example -->
+
+        <div class="table-header mb-3">
+          <div class="d-flex justify-content-between">
+            <div class="d-flex align-items-center">
+              <h5 class="m-0 font-weight-bold text-primary">Pending Samples</h5>
+              <button class="btn btn-filter ml-3" data-toggle="collapse" data-target="#Filter" aria-controls="Filter" aria-expanded="false" aria-label="Toggle navigation"><i class="fa fa-filter mr-1" aria-hidden="true"></i> Filter</button>
+              <a class="ResetBtns active" href="/sample/ta_sample_pending_list">Reset</a>
+              <div class="counts ml-3 textcolor"> 7 Results</div>
+
+            </div>
+            <div class="d-flex">
+              
+              <a href="?samplepart__encoded_sample_code__icontains=26MD61F86N&amp;laboratorysample__is_number__is_number__icontains=&amp;laboratorysample__priority=&amp;samplepart__sample_part__sample_status_record_sample__received_on_min=&amp;samplepart__sample_part__sample_status_record_sample__received_on_max=&amp;_export=csv">
+                <img src="/static/image/iconcsv.png">
+
+              </a>
+              
+
+            </div>
+          </div>
+          <div class="collapse filterbox" id="Filter">
+            <form action="" method="get" class="filter-form" novalidate="novalidate">
+              <div class="row">
+                
+                <div class="filter_1 col-lg-3 col-md-3 col-sm-6"><label id="id_label_1" class="control-label">Encoded Sample Code</label> <input type="text" name="samplepart__encoded_sample_code__icontains" value="26MD61F86N" id="id_samplepart__encoded_sample_code__icontains"></div>
+                
+                <div class="filter_2 col-lg-3 col-md-3 col-sm-6"><label id="id_label_2" class="control-label">IS Number</label> <input type="text" name="laboratorysample__is_number__is_number__icontains" id="id_laboratorysample__is_number__is_number__icontains"></div>
+                
+                <div class="filter_3 col-lg-3 col-md-3 col-sm-6"><label id="id_label_3" class="control-label">Priority</label> <select name="laboratorysample__priority" id="id_laboratorysample__priority">
+  <option value="" selected="">---------</option>
+
+  <option value="Priority">Priority</option>
+
+  <option value="Non-Priority">Non-Priority</option>
+
+  <option value="Top-Priority">Top-Priority</option>
+
+</select></div>
+                
+                <div class="filter_4 col-lg-3 col-md-3 col-sm-6"><label id="id_label_4" class="control-label">Sample Received Date</label> <input type="date" name="samplepart__sample_part__sample_status_record_sample__received_on_min" id="id_samplepart__sample_part__sample_status_record_sample__received_on_0">
+
+-<input type="date" name="samplepart__sample_part__sample_status_record_sample__received_on_max" id="id_samplepart__sample_part__sample_status_record_sample__received_on_1"></div>
+                
+                <div class="col-md-3 col-sm-6">
+                  <button class="btn btn-primary filterprimary" type="submit">Filter</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-bordered customTable" id="dataTable" width="100%" cellspacing="0">
+            <thead>
+              <tr>
+                <th scope="col">Encoded Code</th>
+                <th scope="col">IS Number</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Test Before</th>
+                <th scope="col">Jobcard</th>
+                <th scope="col">Clarifications</th>
+                <th scope="col">Logs</th>
+                <th scope="col">Test Report</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              
+              <tr>
+                <td>26MD61F86N</td>
+                <td>IS 4985 (2021)</td>
+                <td>5.0 Nos</td>
+                <td>Non-Priority</td>
+                <td>-</td>
+                <td><a href="javascript:void(0);" class="openTestRequestModal" forwardedsample="1135526"><img src="/static/image/request-icon.png"></a>
+                </td>
+                <td><a class="table-icon" href="/sample/clarifications/1006135/"><i class="fa fa-comments"></i></a></td>
+              <td align="center"><a href="javascript:void(0);" class="table-icon sampleActivityLog" data-id="1006135"><i class="fa fa-history" aria-hidden="true"></i></a></td>
+                <td><a class="btn btn-primary btn-sm mr-2" href="/sample/generate_test_report/1318562/">Generate</a>
+                  <a class="btn btn-primary btn-sm mr-2" href="https://sdms-lims.stagemyapp.com/equipment/equipment-raw-data/121538/26MD61F86N/5afa7c6a9d7ee72488ddced5c822240fd0fc0961" target="__blank">View Raw</a>
+                </td>
+              </tr>
+              
+              
+            </tbody>
+          </table>
+        </div>
+
+        <!-- pagination code  -->
+
+        
+        <!-- pagination code end  -->
+      </div>
+      <!-- /.container-fluid -->
+
+
+    </div>
+    <!-- End of Main Content -->
+
+
+
+  </div>
+  <!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- Model popup for forwarded -->
+<div class="modal fade stockmodal" id="forwardedModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-dialog-scrollable" role="document">
+    <div class="modal-content" id="upcomingHTML">
+
+    </div>
+  </div>
+</div>
+<!-- Model popup for forwarded -->
+
+
+<!-- Clarification model -->
+
+<div class="modal fade recordmodals" id="clarificationmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="background-color: #f0f7fe;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Raise Clarification for <span id="clarification_form_title"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+        
+      </div>
+      <div class="modal-body">
+        <form method="POST" id="clarification_form" novalidate="novalidate">
+          <div class="Boxpopup">
+            <div class="form-group row">
+              <input type="number" name="req_sample_id" hidden="">
+              
+
+
+
+            </div>
+          </div>
+      </form></div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="submitClarification()">Raise</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Clarification model -->
+
+<!-- Returned model -->
+
+<div class="modal fade recordmodals" id="returnmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="background-color: #f0f7fe;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Return <span id="return_form_title"></span></h5>
+        <button type="button" class="close" onclick="closeModal();" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+        
+      </div>
+      <div class="modal-body">
+        <form method="POST" id="return_form" novalidate="novalidate">
+          <div class="Boxpopup">
+            <div class="form-group row">
+              <input type="number" name="req_sample_id" hidden="">
+              
+
+
+
+            </div>
+          </div>
+      </form></div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="submitReturn()">Raise</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Returned model -->
+
+
+<script type="text/javascript">
+  function callActionAjax(req_data, url) {
+    window.submitted = true;
+    $.ajax({
+      type: "POST",
+      url: url,
+      headers: { "X-CSRFToken": '7MHmw4JoXvS31mGtWbeMrpLoe4p1wilkAF2XI3S62wz7Qcj7SfdHzVmsFMDl8ZMN' },
+      data: req_data,
+      dataType: 'json',
+      beforeSend : function () {
+            $.blockUI({ 
+              message: '<h2>Please Wait...</h2>',
+              baseZ: 10000 });
+          },
+      success: function (response) {
+        location.reload();
+      },
+      error: function (response) {
+        console.log(response);
+      }
+    });
+  }
+
+
+
+
+  function openEncodedTestRequestModal(req_id) {
+    $.get(`/sample/view_forwarded_encoded_testrequest?forwarded_sample_id=${req_id}`, function (data, status) {
+      $('#test_request_title').text('BO Encoded Test Request');
+      $('#upcomingHTML').html(data);
+      $('#forwardedModal').modal('show');
+    });
+  }
+</script>
+<script>
+  window.submitted = false;
+  window.hasChanged = false;
+  // function to be put on X and close button
+  function closeModal() {
+    if (window.hasChanged && window.submitted == false) {
+      var message = "You have not saved your changes.Are you sure";
+      var x = confirm(message);
+      if (x == true) {
+        closeAllmodal();
+      }
+      else {
+
+      }
+    }
+    else {
+      $('.modal').modal('hide');
+    }
+  }
+
+  // function to be put on X and close button
+
+  function closeAllmodal() {
+    window.hasChanged = false;
+    $('.modal').modal('hide');
+  }
+
+    // for popup
+</script>
+
+
+
+
+<!----Footer Start Here---->
+
+<div class="messageDiv">
+  <div class="loading">
+  </div>
+</div>
+
+<!--Clarification Modal-->
+<div class="modal fade" id="raiseClarificationModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+</div>
+
+
+<!-- Footer -->
+<div id="footer">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col-md-4">
+      <div class="copy_right">
+		<p> Designed, Developed and Maintained by: </p>
+		<p><a href="https://www.arohatech.com/" target="_blank"><img src="/static/image/logo-atech.png"> <span class="arohatechName">Arohatech IT Services (P) Ltd.</span></a>
+		</p>
+		</div>
+      </div>
+		<div class="col-md-4">
+			<div class="copy_right">
+			<p class="text-md-center">Contact for any query/support :  <a href="mailto:supportlims@bis.gov.in" class="text-white">supportlims@bis.gov.in</a></p>
+			</div> 
+			</div>
+      <div class="col-md-4  text-md-right">
+        <img src="/static/image/footerlogos.png" class="w-150">
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+<!-- End of Footer -->
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top">
+  <i class="fa fa-angle-up"></i>
+</a>
+
+<!--Activity Log Modal-->
+<div class="modal fade" id="activityLogModal" tabindex="-1" role="dialog" aria-labelledby="activitylog" aria-hidden="true">
+
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade " id="ModalDeleteFile" tabindex="-1" role="dialog" aria-labelledby="Confirm" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header py-2 bg-warning">
+        <h5 class="modal-title text-white" id="Confirm">Confirmation</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p class="iconlarge"><i class="fa fa-exclamation-triangle"></i></p>
+        <h5>Do you really want to delete this Record?</h5>
+        <div class="text-center mt-5">
+          <button type="button" value="false" class="btn deleteDocument btn-outline-secondary mr-3 px-4" data-dismiss="modal">No</button>
+          <button type="button" value="true" document_type="" delete_id="" class="btn deleteDocument btn-warning text-white px-4" onclick="toast_function()" data-dismiss="modal">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="snackbar">Record deleted successfully.</div>
+
+<!-- Bootstrap core JavaScript-->
+<!-- Bootstrap core JS -->
+<!-- <script src="/static/js/jquery.js" type="text/javascript"></script> -->
+<!-- <script src="/static/js/jquery-3.2.1.min.js"></script> -->
+<script src="/static/js/bootstrap.bundle.js"></script>
+<script src="/static/js/reconnecting-websocket.min.js"></script>
+<script src="/static/js/toastr.min.js" charset="utf-8"></script>
+
+<script href="/static/js/bootstrap.js" type="text/javascript"></script>
+
+<script src="/static/js/jquery.validate.min.js"></script>
+<!-- Custom scripts for all pages-->
+<script src="/static/js/dashboard_custom.js"></script>
+<script src="/static/js/lab.js"></script>
+
+
+<!-- Page level plugins -->
+<!-- <script src="/static/js/chart.js/Chart.min.js"></script> -->
+
+<!-- Page level custom scripts -->
+<!-- <script src="/static/js/demo/chart-area-demo.js"></script> -->
+<!-- <script src="/static/js/demo/chart-pie-demo.js"></script> -->
+
+<!-- Kit FontAwesome scripts -->
+<!-- <script src="/static/js/kitfontawesome.js"></script> -->
+
+<script src="/static/js/jquery.formset.min.js"></script>
+<script src="/static/js/custom.js"></script>
+<script src="/static/js/formsets.js"></script>
+<script src="/static/js/cropper.js"></script>
+<script src="/static/js/custom-cropper.js"></script>
+<script src="/static/js/jquery-cropper.js"></script>
+<script type="text/javascript">
+  $(function () {
+    $('.datetimepicker4').datetimepicker({
+      format: 'DD/MM/YYYY',
+    })
+    $('.monthYearPicker').datetimepicker({
+      format: 'MM/YYYY'
+    });
+
+    $('#datetimepicker5').datetimepicker({
+      format: 'DD/MM/YYYY'
+    });
+
+    $('.datetimepicker3').datetimepicker({
+      format: 'LT'
+    });
+
+  });
+  function openNav() {
+    document.getElementById("mySidenav").style.width = "250px";
+  }
+
+  function closeNav() {
+    document.getElementById("mySidenav").style.width = "0";
+  }
+</script>
+<script type="text/javascript">
+  $("#customCheck2_").click(function () {
+    $("input[type=checkbox]").prop("checked", $(this).prop("checked"));
+  });
+
+  $("input[type=checkbox]").click(function () {
+    if (!$(this).prop("checked")) {
+      $("#customCheck2_").prop("checked", false);
+    }
+  });
+</script>
+<script>
+  $(function(){
+      $('form').validate();
+
+      $('.nextBtn2').click(function(e){
+          e.preventDefault();
+          if ($('form').valid()){
+              $('form').submit();
+          }
+      });
+  });
+</script>
+<script type="text/javascript">
+  $(document).on('click', ".canceltBtn", function (e) {
+    e.preventDefault();
+    if(confirm("Any unsaved data will be lost")){
+    temp_id = $(this).val();
+    $.ajax({
+          crossDomain: true,
+          url: "/cancel_scope_amendement/"+temp_id+"/",
+          type: "POST",
+          headers: { "X-CSRFToken": '7MHmw4JoXvS31mGtWbeMrpLoe4p1wilkAF2XI3S62wz7Qcj7SfdHzVmsFMDl8ZMN' },
+          dataType: 'json',
+          processData: false,
+          contentType: false,
+          success: function (data) {
+          toast_function('Scope Cancelled Successfully.')
+          window.location.href = "/lab/scope_list/";
+          },
+          error: function (data) {
+            alert(data.responseJSON['message'])
+          console.log(data)
+          }
+        });
+      }
+      else{
+          return false;
+      }
+    
+  });
+
+  function goBack() {
+  window.history.back();
+}
+
+function closeWindow(){
+  window.close();
+}
+</script>
+<script src="/static/js/sorttable.js"></script>
+<script>
+  $(document).on('click', '.openlink', function () {
+      open_url = $(this).attr('openurl');
+        window.open(open_url, '_blank').focus();
+    })
+</script>
+
+<div id="loading" style="display: none;">
+  <div class="loading-container"><img src="/static/image/spinner.gif"> Please Wait...</div>
+</div>
+
+
+
+
+
+
+</body></html>

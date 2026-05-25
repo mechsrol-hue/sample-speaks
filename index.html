@@ -173,6 +173,12 @@
                 <input type="file" id="file-input" class="hidden-file-input" accept=".xlsx,.xls">
             </div>
 
+            <!-- Tabs for Pending / Submitted -->
+            <div class="list-tabs" style="margin-bottom: 1rem; display: flex; gap: 1rem;">
+                <button class="action-btn primary-btn" id="tab-pending" onclick="switchListTab('pending')" style="flex:1; justify-content:center;">Pending Master List</button>
+                <button class="action-btn" id="tab-submitted" onclick="switchListTab('submitted')" style="flex:1; justify-content:center; background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1;">Submitted Samples List</button>
+            </div>
+
             <!-- Data Table Container -->
             <div class="table-container">
                 <table id="sample-data-table">
@@ -186,6 +192,7 @@
                             <th id="th-reportStatus" onclick="handleSort('reportStatus')" style="width: 180px;">Report Status <span>⇅</span></th>
                             <th id="th-mechRemarks" onclick="handleSort('mechRemarks')">Mech Remarks <span>⇅</span></th>
                             <th id="th-tpName" onclick="handleSort('tpName')" style="width: 200px;">Testing Person (TP) <span>⇅</span></th>
+                            <th style="width: 120px; text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
@@ -215,6 +222,7 @@
 
     <!-- Live Excel Data -->
     <script src="data.js"></script>
+    <script src="submitted.js"></script>
     
     <!-- Application Logic -->
     <script src="app.js"></script>

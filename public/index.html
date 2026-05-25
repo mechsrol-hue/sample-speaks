@@ -31,16 +31,19 @@
             <button class="logout-btn" onclick="logout()">Secure Logout</button>
         </header>
 
-        <!-- Admin Only Panel -->
-        <div id="admin-panel" class="admin-panel glass-panel" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3>Upload Engine</h3>
-                <button onclick="viewHistory()" style="background:rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">View Audit Logs</button>
-            </div>
-            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom: 15px;">Upload your 10-column master format. The engine automatically reconciles duplicates via Encoded Code.</p>
-            <input type="file" id="excel-file" accept=".xlsx,.xls">
-            <button onclick="uploadExcel()">Analyze Document</button>
+        <!-- Tabs -->
+        <div id="admin-tabs" class="tabs-container" style="display: none;">
+            <button class="tab-btn active" onclick="switchTab('tab-dashboard')">📊 Dashboard</button>
+            <button id="tab-btn-upload" class="tab-btn" onclick="switchTab('tab-upload')">📤 Upload Center</button>
+            <button id="tab-btn-audit" class="tab-btn" onclick="switchTab('tab-audit')">📜 Audit Logs</button>
+            <button class="tab-btn" onclick="switchTab('tab-lims')">🤖 LIMS Automator</button>
+            <button id="tab-btn-employees" class="tab-btn" onclick="switchTab('tab-employees')">👥 Employee Hub</button>
+            <button id="tab-btn-leaves" class="tab-btn" onclick="switchTab('tab-leaves')">📅 Leave Manager</button>
+            <button id="tab-btn-assigner" class="tab-btn" onclick="switchTab('tab-assigner')">✨ Smart Assigner</button>
         </div>
+
+        <!-- Tab: Dashboard -->
+        <div id="tab-dashboard" class="tab-content active">
 
         <!-- KPI / Overview -->
         <div class="kpi-row">
@@ -60,32 +63,61 @@
                 <h4>In Disposal Cycle</h4>
                 <div id="kpi-submitted" class="kpi-val">0</div>
             </div>
+            <div class="kpi-card glass-panel clickable" id="kpi-card-unassigned" onclick="toggleKpiFilter('Unassigned')" style="border-left: 4px solid var(--primary); display: none;">
+                <h4>📦 Unassigned Pool</h4>
+                <div id="kpi-unassigned" class="kpi-val">0</div>
+            </div>
         </div>
 
         <!-- Filter & Search -->
         <div class="controls-bar">
-            <input type="text" id="search-input" placeholder="Search Encoded Code, IS Number, Assigned To..." oninput="renderTable()" class="glass-panel" style="border-radius: 8px;">
-            <select id="tp-filter" onchange="renderTable()" class="glass-panel" style="border-radius: 8px;">
-                <option value="ALL">All Assigned To</option>
+            <input type="text" id="search-input" placeholder="Search Encoded Code..." oninput="renderTable()" class="glass-panel" style="border-radius: 8px;">
+
+            <select id="is-filter" onchange="renderTable()" class="glass-panel" style="border-radius: 8px;">
+                <option value="ALL">All IS Numbers</option>
             </select>
-            <select id="status-filter" onchange="renderTable()" class="glass-panel" style="border-radius: 8px;">
-                <option value="ALL">All Workflow Statuses</option>
-                <option value="Pending">Pending Testing</option>
-                <option value="Submitted">Submitted (Pass/Fail)</option>
+
+            <select id="priority-filter" onchange="renderTable()" class="glass-panel" style="border-radius: 8px;">
+                <option value="ALL">All Priorities</option>
+                <option value="Priority">Priority</option>
+                <option value="Non-Priority">Non-Priority</option>
+            </select>
+
+            <select id="date-filter" onchange="renderTable()" class="glass-panel" style="border-radius: 8px;">
+                <option value="ALL">All Received Dates</option>
+            </select>
+
+            <select id="assigned-filter" onchange="renderTable()" class="glass-panel" style="border-radius: 8px;">
+                <option value="ALL">All Testing Persons</option>
             </select>
         </div>
 
         <!-- Sample Queue Table -->
+        <!-- Pending Queue Table -->
+        <div class="table-section-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">📋 Pending Sample Queue</h3>
+                <span id="pending-count-badge" style="background:var(--accent); color:white; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:700;">0</span>
+            </div>
+            <!-- Admin Bulk Delete Actions -->
+            <div id="admin-bulk-actions" style="display: none; align-items:center; gap:10px;">
+                <span id="selected-count-label" style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">0 Selected</span>
+                <button id="bulk-delete-btn" onclick="deleteSelectedSamples()" style="background:var(--danger); font-size:0.85rem; padding:6px 12px; border-radius:6px; font-weight:600;" disabled>Delete Selected</button>
+            </div>
+        </div>
         <div class="table-container glass-panel">
             <table>
                 <thead>
                     <tr>
+                        <th id="select-all-header" style="display:none; width:45px; text-align:center; padding: 12px 10px;">
+                            <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAllSamples(this)" style="cursor:pointer; width:16px; height:16px;">
+                        </th>
                         <th>Level</th>
                         <th>Encoded Code</th>
                         <th>IS Number</th>
+                        <th>Forwarded On</th>
                         <th>Quantity</th>
                         <th>Received On</th>
-                        <th>Forwarded On</th>
                         <th>Assigned To</th>
                         <th>Status</th>
                         <th>Action</th>
@@ -96,16 +128,437 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Submitted Samples Section — only shown when "In Disposal Cycle" KPI is active -->
+        <div id="submitted-wrapper" style="display:none; margin-top:30px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">🗂️ In Disposal Cycle</h3>
+                    <span id="submitted-count-badge" style="background:var(--success); color:white; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:700;">0</span>
+                    <span style="color:var(--text-muted); font-size:0.85rem;">— Click "Total Assigned" to return to main queue</span>
+                </div>
+                <!-- Admin Bulk Delete Actions for Disposal Cycle -->
+                <div id="admin-bulk-actions-disposal" style="display: none; align-items:center; gap:10px;">
+                    <span id="selected-count-label-disposal" style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">0 Selected</span>
+                    <button id="bulk-delete-btn-disposal" onclick="deleteSelectedSamplesDisposal()" style="background:var(--danger); font-size:0.85rem; padding:6px 12px; border-radius:6px; font-weight:600;" disabled>Delete Selected</button>
+                </div>
+            </div>
+            <div class="table-container glass-panel">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="select-all-header-disposal" style="display:none; width:45px; text-align:center; padding: 12px 10px;">
+                                <input type="checkbox" id="select-all-checkbox-disposal" onchange="toggleSelectAllSamplesDisposal(this)" style="cursor:pointer; width:16px; height:16px;">
+                            </th>
+                            <th>Encoded Code</th>
+                            <th>IS Number</th>
+                            <th>Assigned To</th>
+                            <th>Forwarded On</th>
+                            <th>Result</th>
+                            <th>Disposal Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submitted-table-body">
+                        <!-- Rendered dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div> <!-- End tab-dashboard -->
+
+        <!-- Tab: Upload Center -->
+        <div id="tab-upload" class="tab-content">
+            <div class="admin-panel glass-panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Upload Engine</h3>
+                    <button onclick="openUserManagement()" style="background: var(--success); color: white; border: none; font-weight: 600; padding: 10px 18px; border-radius: 4px;">Manage Accounts</button>
+                </div>
+                <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom: 15px;">Upload your 10-column master format. The engine automatically reconciles duplicates via Encoded Code.</p>
+                
+                <!-- Drag and Drop Zone -->
+                <div id="drag-drop-zone" class="upload-zone">
+                    <span class="upload-icon">📄</span>
+                    <h4>Drag & Drop Excel File Here</h4>
+                    <p>or click to browse from your computer</p>
+                    <input type="file" id="excel-file" accept=".xlsx,.xls">
+                </div>
+                <div id="file-info" style="display:none;"></div>
+                <button onclick="uploadExcel()" style="width: 100%; margin-top: 10px; font-size: 1.1rem; padding: 12px;">Analyze Document</button>
+            </div>
+
+            <!-- Database Utilities Panel (Admin Only) -->
+            <div class="admin-panel glass-panel" style="margin-top: 25px; border-top: 4px solid var(--danger);">
+                <h3>Database Utilities</h3>
+                <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom: 15px;">Destructive administrative actions. Perform with caution.</p>
+                <div style="background: rgba(217, 48, 37, 0.05); border: 1px solid rgba(217, 48, 37, 0.2); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                    <h4 style="margin: 0 0 5px 0; color: var(--danger); font-weight: 600;">⚠️ Delete All Data (Database Reset)</h4>
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">This action will permanently delete all sample records, upload audit history logs, and all Testing Person (TP) accounts. The primary <strong>Admin</strong> account will be kept so you can remain logged in.</p>
+                </div>
+                <button onclick="resetDatabase()" style="background: var(--danger); width: 100%; font-size: 1.05rem; padding: 12px; font-weight: 600;">Delete All Data & Reset Workspace</button>
+            </div>
+        </div>
+
+        <!-- Tab: Audit Logs -->
+        <div id="tab-audit" class="tab-content">
+            <div class="glass-panel" style="padding: 25px; margin-bottom: 25px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <div>
+                        <h3 style="margin:0;">Audit Trail</h3>
+                        <p style="color:var(--text-muted); margin:4px 0 0; font-size:0.9rem;">Chronological log of master database injections. Click any row to inspect batch details.</p>
+                    </div>
+                </div>
+                <!-- Filter Bar -->
+                <div style="display:flex; gap:12px; margin-bottom:15px; flex-wrap:wrap;">
+                    <input type="text" id="audit-search" placeholder="🔍 Search by file name..." oninput="filterAuditTable()" style="flex:1; min-width:200px;">
+                    <select id="audit-user-filter" onchange="filterAuditTable()" style="min-width:160px;">
+                        <option value="ALL">All Uploaders</option>
+                    </select>
+                </div>
+                <div class="table-container" style="max-height: 500px; border: 1px solid var(--border-light);">
+                    <table id="audit-table">
+                        <thead>
+                            <tr>
+                                <th>Upload Date</th>
+                                <th>File Name</th>
+                                <th>Fresh Records</th>
+                                <th>Duplicates Ignored</th>
+                                <th>Uploaded By</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="audit-no-results" style="display:none; text-align:center; padding:30px; color:var(--text-muted); font-size:0.95rem;">
+                    No matching audit records found.
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: LIMS Automator -->
+        <div id="tab-lims" class="tab-content">
+            <div class="glass-panel admin-panel" style="padding: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.4rem; display: flex; align-items: center; gap: 10px;">
+                            <span>🤖</span> LIMS Automator Engine
+                        </h3>
+                        <p style="color: var(--text-muted); margin: 5px 0 0 0; font-size: 0.9rem;">
+                            Directly execute automated IS 4985 sample uploads to the LIMS portal.
+                        </p>
+                    </div>
+                    <div id="lims-status-badge" class="lims-badge badge-idle">
+                        <span class="status-dot"></span>
+                        <span id="lims-status-text">SYSTEM READY</span>
+                    </div>
+                </div>
+
+                <div class="lims-setup-grid" style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 25px;">
+                    <!-- Credentials Card -->
+                    <div class="setup-card glass-panel" style="padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+                        <h4 style="margin: 0 0 15px 0; color: var(--text-main); font-size: 1.05rem; font-weight: 600;">🔐 1. LIMS Credentials</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">LIMS Username</label>
+                                <input type="text" id="lims-username-input" style="width: 100%; border-radius: 6px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white;" placeholder="e.g. dinesh.c">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">LIMS Password</label>
+                                <input type="password" id="lims-password-input" style="width: 100%; border-radius: 6px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white;" placeholder="Enter password">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metadata Card -->
+                    <div class="setup-card glass-panel" style="padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h4 style="margin: 0; color: var(--text-main); font-size: 1.05rem; font-weight: 600;">📄 2. Sample Metadata</h4>
+                            <button id="btn-preview-pdf" onclick="previewLimsPdf()" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); font-weight: 600; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">
+                                👁️ Preview PDF
+                            </button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">Sample Code</label>
+                                <input type="text" id="lims-sample-code" style="width: 100%; border-radius: 6px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white;" placeholder="e.g. 26MA61481N">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">IS Number</label>
+                                <input type="text" id="lims-is-no" value="IS 4985 (2021)" style="width: 100%; border-radius: 6px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white;" readonly>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">Nominal Size (mm)</label>
+                                <select id="lims-size-select" style="width: 100%; border-radius: 6px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white;" onchange="renderTestParametersTable()">
+                                    <option value="20">20</option><option value="25">25</option><option value="32">32</option><option value="40">40</option><option value="50">50</option>
+                                    <option value="63">63</option><option value="75" selected>75</option><option value="90">90</option><option value="110">110</option><option value="125">125</option>
+                                    <option value="140">140</option><option value="160">160</option><option value="180">180</option><option value="200">200</option><option value="225">225</option>
+                                    <option value="250">250</option><option value="280">280</option><option value="315">315</option><option value="355">355</option><option value="400">400</option>
+                                    <option value="450">450</option><option value="500">500</option><option value="560">560</option><option value="630">630</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">Class</label>
+                                <select id="lims-class-select" style="width: 100%; border-radius: 6px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white;" onchange="renderTestParametersTable()">
+                                    <option value="1">Class 1 (0.25 MPa)</option>
+                                    <option value="2">Class 2 (0.4 MPa)</option>
+                                    <option value="3" selected>Class 3 (0.6 MPa)</option>
+                                    <option value="4">Class 4 (0.8 MPa)</option>
+                                    <option value="5">Class 5 (1.0 MPa)</option>
+                                    <option value="6">Class 6 (1.25 MPa)</option>
+                                    <option value="Not Declared">Not Declared</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">Type</label>
+                                <select id="lims-type-select" style="width: 100%; border-radius: 6px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white;" onchange="renderTestParametersTable()">
+                                    <option value="A">A</option><option value="B">B</option><option value="Not Declared">Not Declared</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">Plumbing Pipe?</label>
+                                <select id="lims-plumbing-select" style="width: 100%; border-radius: 6px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white;" onchange="renderTestParametersTable()">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Data Grid for Test Parameters -->
+                        <div style="margin-bottom: 15px; max-height: 400px; overflow-y: auto; border: 1px solid var(--glass-border); border-radius: 6px; background: rgba(0,0,0,0.15);" class="custom-scrollbar">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; color: #e1e4e8;">
+                                <thead style="background: rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 2;">
+                                    <tr>
+                                        <th style="padding: 10px; border-bottom: 1px solid var(--glass-border);">Clause</th>
+                                        <th style="padding: 10px; border-bottom: 1px solid var(--glass-border);">Test Parameter</th>
+                                        <th style="padding: 10px; border-bottom: 1px solid var(--glass-border);">Specified Value (Calc)</th>
+                                        <th style="padding: 10px; border-bottom: 1px solid var(--glass-border);">Type</th>
+                                        <th style="padding: 10px; border-bottom: 1px solid var(--glass-border); width: 180px;">Observed Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lims-parameters-tbody">
+                                    <!-- Dynamic rows go here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="lims-actions" style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button id="btn-start-lims" onclick="startLimsAutomation()" style="flex: 1; background: var(--accent); color: white; border: none; font-weight: 600; padding: 12px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;">
+                                🚀 Start LIMS Upload Process
+                            </button>
+                            <button id="btn-stop-lims" onclick="stopLimsAutomation()" style="background: var(--danger); color: white; border: none; font-weight: 600; padding: 12px 18px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;" disabled>
+                                Stop
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Guidelines Card -->
+                    <div class="setup-card glass-panel" style="padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+                        <h4 style="margin: 0 0 10px 0; color: var(--accent); font-size: 1.05rem; font-weight: 600;">💡 Automation Notice</h4>
+                        <p style="margin: 0; font-size: 0.85rem; line-height: 1.45; color: var(--text-muted);">
+                            This Native LIMS Automator directly executes uploads bypassing Google Sheets. <br><br>
+                            Ensure all Observed Values glow <strong style="color: #98c379;">Green</strong>. Red values mean they failed the test specifications. The Firefox browser will open automatically so you can solve the login Captcha.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Pulsating Attention Banner -->
+                <div id="lims-action-banner" class="alert-pulsating" style="display: none;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span class="animated-bell">🔔</span>
+                            <div>
+                                <h5 style="margin: 0; color: #ffad33; font-weight: 700; font-size: 0.95rem;">LIMS LOGIN REQUIRED</h5>
+                                <p style="margin: 3px 0 0 0; font-size: 0.85rem; color: rgba(255,255,255,0.8);">
+                                    Firefox has pre-filled your credentials. Please enter the Captcha on screen and hit login!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dark Terminal Console -->
+                <div class="console-wrapper" style="margin-top: 25px;">
+                    <div class="console-header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: #0c0f12; border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom: 1px solid #1a222a;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background: #ff5f56;"></span>
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background: #ffbd2e;"></span>
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background: #27c93f;"></span>
+                            <span style="font-family: monospace; font-size: 0.75rem; color: var(--text-muted); margin-left: 10px; font-weight: 600;">lims_console.log</span>
+                        </div>
+                        <button onclick="clearConsole()" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-family: monospace;">
+                            CLEAR
+                        </button>
+                    </div>
+                    <div id="lims-console" class="terminal-console">
+                        <div class="terminal-line system-line">[SYSTEM] Terminal initialized. Waiting for execution...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Submit Modal -->
+    </div>
+
+    <!-- Tab: Employee Hub -->
+    <div id="tab-employees" class="tab-content">
+        <div class="glass-panel admin-panel" style="padding: 25px;">
+            <h3>👥 Employee Hub</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem;">Manage employee profiles, max daily capacity, and IS competencies.</p>
+            
+            <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+                <!-- Add New Employee Form -->
+                <div class="setup-card glass-panel" style="padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+                    <h4>➕ Add New Employee</h4>
+                    <div style="margin-bottom: 12px;">
+                        <label>Full Name</label>
+                        <input type="text" id="emp-fullname" style="width: 100%; border-radius: 4px; padding: 8px;">
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <label>Designation</label>
+                        <input type="text" id="emp-designation" style="width: 100%; border-radius: 4px; padding: 8px;">
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <label>Max Daily Samples</label>
+                        <input type="number" id="emp-maxcapacity" value="5" style="width: 100%; border-radius: 4px; padding: 8px;">
+                    </div>
+                    <hr style="border:0; border-top:1px solid var(--border-light); margin: 15px 0;">
+                    <div style="margin-bottom: 12px;">
+                        <label>Login Username (TP Name)</label>
+                        <input type="text" id="emp-username" style="width: 100%; border-radius: 4px; padding: 8px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label>Login Password</label>
+                        <input type="password" id="emp-password" style="width: 100%; border-radius: 4px; padding: 8px;">
+                    </div>
+                    <button class="primary" onclick="addEmployee()" style="width: 100%;">Create Employee</button>
+                </div>
+                
+                <!-- Employee List -->
+                <div class="setup-card glass-panel" style="padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+                    <h4>🧑‍🔬 Employee Roster</h4>
+                    <div class="table-container" style="max-height: 400px; border: 1px solid var(--border-light);">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Login (TP)</th>
+                                    <th>Capacity</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employee-tbody">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab: Leave Manager -->
+    <div id="tab-leaves" class="tab-content">
+        <div class="glass-panel admin-panel" style="padding: 25px;">
+            <h3>📅 Leave Manager</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem;">Mark employees as on-leave so they are excluded from auto-assignment.</p>
+            
+            <div style="margin-top: 20px; display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
+                <div>
+                    <label>Employee</label>
+                    <select id="leave-employee-select" style="padding: 8px; border-radius: 4px;"></select>
+                </div>
+                <div>
+                    <label>Leave Date</label>
+                    <input type="date" id="leave-date" style="padding: 8px; border-radius: 4px;">
+                </div>
+                <div>
+                    <label>Leave Type</label>
+                    <select id="leave-type" style="padding: 8px; border-radius: 4px;">
+                        <option value="CL">Casual Leave (CL)</option>
+                        <option value="SL">Sick Leave (SL)</option>
+                        <option value="EL">Earned Leave (EL)</option>
+                    </select>
+                </div>
+                <button class="primary" onclick="addLeave()" style="padding: 9px 15px;">Mark Leave</button>
+            </div>
+            
+            <div class="table-container" style="max-height: 300px; border: 1px solid var(--border-light);">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaves-tbody">
+                        <!-- Rendered dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab: Smart Assigner -->
+    <div id="tab-assigner" class="tab-content">
+        <div class="glass-panel admin-panel" style="padding: 25px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h3 style="margin: 0;">✨ Smart Auto-Assigner</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin-top: 5px;">Automatically matches unassigned samples to employees based on IS competency and available capacity.</p>
+                </div>
+                <button class="primary" onclick="runAutoAssigner()" style="font-size: 1.1rem; padding: 12px 20px;">🤖 Run AI Assigner</button>
+            </div>
+
+            <div class="table-container" style="max-height: 450px; border: 1px solid var(--border-light);">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sample Code</th>
+                            <th>IS Number</th>
+                            <th>Recommended Employee</th>
+                            <th>Reasoning Score</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recommendations-tbody">
+                        <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">No pending recommendations. Click "Run AI Assigner" to generate.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Competency Modal -->
+    <div id="competency-modal" class="modal">
+        <div class="modal-content glass-panel">
+            <h3>Manage Competencies: <span id="comp-emp-name" style="color:var(--accent);"></span></h3>
+            <div style="margin-top: 15px; display: flex; gap: 10px; margin-bottom: 20px;">
+                <input type="text" id="comp-is-number" placeholder="IS Number (e.g. IS 4985)" style="flex:1; padding:8px;">
+                <button class="primary" onclick="addCompetency()">Add IS</button>
+            </div>
+            <div class="table-container" style="max-height: 250px;">
+                <table>
+                    <thead><tr><th>IS Number</th><th>Level</th></tr></thead>
+                    <tbody id="comp-tbody"></tbody>
+                </table>
+            </div>
+            <div class="modal-actions" style="margin-top:20px;">
+                <button onclick="closeCompetencyModal()" style="background: transparent; border: 1px solid var(--glass-border);">Close</button>
+            </div>
+        </div>
+    </div>
+
     <div id="submit-modal" class="modal">
         <div class="modal-content glass-panel">
             <h3>Submit Test Results</h3>
             <p>Declare outcome for <strong id="modal-sno" style="color:var(--accent);"></strong>.</p>
-            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 6px; margin: 15px 0;">
-                <p style="font-size: 0.85rem; color: var(--success); margin:0 0 5px 0;">✓ Passed: Immediate disposal authorized.</p>
-                <p style="font-size: 0.85rem; color: var(--warning); margin:0;">⚠ Failed: Remnant retained for 45 days.</p>
+            <div style="background: rgba(0,0,0,0.03); padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid var(--border-light);">
+                <p style="font-size: 0.85rem; color: var(--success); margin:0 0 5px 0; font-weight: 600;">✓ Passed: Immediate disposal authorized.</p>
+                <p style="font-size: 0.85rem; color: var(--warning); margin:0; font-weight: 600;">Location: Failed: Remnant retained for 45 days.</p>
             </div>
             <select id="pass-fail-select" style="width: 100%;">
                 <option value="Pass">Pass</option>
@@ -118,16 +571,16 @@
         </div>
     </div>
 
-    <!-- Upload Review Modal -->
+    <!-- Upload Review Modal (Supporting Force Override for Re-allotted duplicates) -->
     <div id="review-modal" class="modal">
         <div class="modal-content large-modal glass-panel">
             <h3 style="color: var(--accent);">Reconciliation Engine</h3>
-            <p>Duplicates caught via Encoded Code will be ignored. Review and commit fresh records.</p>
+            <p>Review fresh injects and duplicates. You can select to **Force Commit** duplicate codes re-allotted to different users.</p>
             
             <div class="review-split">
                 <div class="review-section">
                     <h4 style="color: var(--success);">Fresh Inject (<span id="fresh-count">0</span>)</h4>
-                    <div class="table-container small-table" style="border: 1px solid rgba(16, 185, 129, 0.2);">
+                    <div class="table-container small-table" style="border: 1px solid rgba(16, 185, 129, 0.2); max-height: 250px;">
                         <table>
                             <thead><tr><th>Encoded Code</th><th>Assigned To</th><th>Priority</th></tr></thead>
                             <tbody id="fresh-tbody"></tbody>
@@ -135,74 +588,111 @@
                     </div>
                 </div>
                 <div class="review-section">
-                    <h4 style="color: var(--danger);">Duplicates Blocked (<span id="duplicate-count">0</span>)</h4>
-                    <div class="table-container small-table" style="border: 1px solid rgba(239, 68, 68, 0.2);">
+                    <h4 style="color: var(--danger);">Duplicates caught (<span id="duplicate-count">0</span>)</h4>
+                    <div class="table-container small-table" style="border: 1px solid rgba(239, 68, 68, 0.2); max-height: 250px;">
                         <table>
-                            <thead><tr><th>Encoded Code</th><th>Assigned To</th><th>Priority</th></tr></thead>
+                            <thead><tr><th style="width:120px; text-align:center;">Decision</th><th>Encoded Code</th><th>Assigned To</th></tr></thead>
                             <tbody id="duplicate-tbody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <div class="modal-actions">
+            <div class="modal-actions" style="margin-top:20px;">
                 <button onclick="closeReviewModal()" style="background: transparent; border: 1px solid var(--glass-border);">Cancel Upload</button>
                 <button class="primary" onclick="commitUpload()" id="commit-btn">Commit to Master</button>
             </div>
         </div>
     </div>
 
-    <!-- Upload History Modal -->
-    <div id="history-modal" class="modal">
-        <div class="modal-content large-modal glass-panel">
-            <h3>Audit Trail</h3>
-            <p>Chronological log of master database injections.</p>
-            <div class="table-container" style="max-height: 400px; border: 1px solid var(--glass-border);">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Upload Date</th>
-                            <th>File Name</th>
-                            <th>Fresh Records</th>
-                            <th>Duplicates Ignored</th>
-                            <th>Uploaded By</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-tbody">
-                        <!-- Rendered by JS -->
-                    </tbody>
-                </table>
+
+
+    <!-- PDF Preview Modal -->
+    <div id="pdf-preview-modal" class="modal">
+        <div class="modal-content large-modal glass-panel" style="width: 80%; height: 85vh; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="color: var(--accent); margin: 0;">PDF Preview</h3>
+                <div>
+                    <button onclick="closePdfModal()" style="background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); padding: 6px 12px; margin-right: 10px; border-radius: 4px; cursor: pointer;">🔙 Back</button>
+                    <button id="btn-download-pdf" class="primary" style="padding: 6px 12px; border-radius: 4px;">💾 Download PDF</button>
+                </div>
             </div>
-            <div class="modal-actions">
-                <button onclick="closeHistoryModal()" style="background: transparent; border: 1px solid var(--glass-border);">Close Audit Log</button>
-            </div>
+            <iframe id="pdf-iframe" style="flex: 1; width: 100%; border: none; border-radius: 6px; background: white;"></iframe>
         </div>
     </div>
 
-    <!-- Batch Details Modal (Phase 7) -->
+    <!-- Batch Details Modal -->
     <div id="batch-details-modal" class="modal">
-        <div class="modal-content glass-panel">
-            <h3 style="color: var(--accent);">Batch Injection Details</h3>
-            <p>Showing exact samples committed during batch <strong id="batch-id-display"></strong>.</p>
-            <div class="table-container small-table" style="max-height: 300px; border: 1px solid var(--glass-border);">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Encoded Code</th>
-                            <th>Assigned To</th>
-                        </tr>
-                    </thead>
-                    <tbody id="batch-details-tbody">
-                        <!-- Rendered by JS -->
-                    </tbody>
-                </table>
+        <div class="modal-content large-modal glass-panel">
+            <h3 style="color: var(--accent);">Batch History Details</h3>
+            <p>Processed details for batch: <strong id="batch-id-display" style="color: var(--accent);"></strong></p>
+            
+            <div class="review-split">
+                <div class="review-section">
+                    <h4 style="color: var(--success);">Fresh Injected</h4>
+                    <div class="table-container small-table" style="border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <table>
+                            <thead><tr><th>Encoded Code</th><th>Assigned To</th></tr></thead>
+                            <tbody id="batch-fresh-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="review-section">
+                    <h4 style="color: var(--danger);">Duplicates Ignored</h4>
+                    <div class="table-container small-table" style="border: 1px solid rgba(239, 68, 68, 0.2);">
+                        <table>
+                            <thead><tr><th>Encoded Code</th><th>Assigned To</th></tr></thead>
+                            <tbody id="batch-duplicate-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
+            
             <div class="modal-actions">
                 <button onclick="closeBatchDetailsModal()" style="background: transparent; border: 1px solid var(--glass-border);">Back to History</button>
             </div>
         </div>
     </div>
 
+    <!-- User Management Modal -->
+    <div id="user-management-modal" class="modal">
+        <div class="modal-content large-modal glass-panel">
+            <h3 style="color: var(--success);">User Account Directory</h3>
+            <p>View all active system accounts, register new Testing Persons, or delete obsolete profiles.</p>
+            
+            <!-- Provision Form inside Modal -->
+            <div style="background: rgba(0,0,0,0.02); padding: 15px; border-radius: 6px; border: 1px solid var(--border-light); margin-bottom: 20px;">
+                <h4 style="margin: 0 0 8px 0; color: var(--text-main);">Provision New TP Account</h4>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="new-tp-username" placeholder="TP Full Name (e.g. Dinesh C)" style="flex: 2; min-width: 180px;">
+                    <input type="password" id="new-tp-password" placeholder="Password" value="1234" style="flex: 1; min-width: 100px;">
+                    <button onclick="adminCreateTP()" style="background: var(--success); color: white; border: none; padding: 10px 18px; font-weight: 600;">Create TP Account</button>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="table-container small-table" style="max-height: 250px; border: 1px solid var(--glass-border);">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Account Username (Assigned To)</th>
+                            <th>Role</th>
+                            <th style="width: 120px; text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-management-tbody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button onclick="closeUserManagement()" style="background: transparent; border: 1px solid var(--glass-border);">Close Manager</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="specs_db.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

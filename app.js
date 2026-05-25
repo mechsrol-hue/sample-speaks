@@ -14,6 +14,59 @@ let sortDirection = "asc"; // 'asc' or 'desc'
 let currentPage = 1;
 const rowsPerPage = 20;
 
+let activeListTab = 'pending'; // 'pending' or 'submitted'
+
+function switchListTab(tab) {
+    activeListTab = tab;
+    if (tab === 'pending') {
+        document.getElementById('tab-pending').className = 'action-btn primary-btn';
+        document.getElementById('tab-pending').style.background = '';
+        document.getElementById('tab-pending').style.color = '';
+        document.getElementById('tab-pending').style.border = '';
+        
+        document.getElementById('tab-submitted').className = 'action-btn';
+        document.getElementById('tab-submitted').style.background = '#e2e8f0';
+        document.getElementById('tab-submitted').style.color = '#475569';
+        document.getElementById('tab-submitted').style.border = '1px solid #cbd5e1';
+    } else {
+        document.getElementById('tab-submitted').className = 'action-btn primary-btn';
+        document.getElementById('tab-submitted').style.background = '';
+        document.getElementById('tab-submitted').style.color = '';
+        document.getElementById('tab-submitted').style.border = '';
+        
+        document.getElementById('tab-pending').className = 'action-btn';
+        document.getElementById('tab-pending').style.background = '#e2e8f0';
+        document.getElementById('tab-pending').style.color = '#475569';
+        document.getElementById('tab-pending').style.border = '1px solid #cbd5e1';
+    }
+    applyFilters();
+}
+
+function markAsSubmitted(sampleCode) {
+    if(!confirm(`Are you sure you want to mark ${sampleCode} as Submitted?`)) return;
+    let manualSubmitted = [];
+    try { manualSubmitted = JSON.parse(localStorage.getItem('manualSubmittedSamples') || '[]'); } catch(e) {}
+    if (!manualSubmitted.find(s => (s.sampleCode || s.encode1) === sampleCode)) {
+        manualSubmitted.push({ sampleCode: sampleCode, date: new Date().toLocaleDateString('en-GB').replace(/\//g, '-') });
+        localStorage.setItem('manualSubmittedSamples', JSON.stringify(manualSubmitted));
+    }
+    applyFilters();
+}
+
+function unmarkAsSubmitted(sampleCode) {
+    if(!confirm(`Move ${sampleCode} back to Pending?`)) return;
+    let manualSubmitted = [];
+    try { manualSubmitted = JSON.parse(localStorage.getItem('manualSubmittedSamples') || '[]'); } catch(e) {}
+    const initialLen = manualSubmitted.length;
+    manualSubmitted = manualSubmitted.filter(s => (s.sampleCode || s.encode1) !== sampleCode);
+    if (manualSubmitted.length < initialLen) {
+        localStorage.setItem('manualSubmittedSamples', JSON.stringify(manualSubmitted));
+        applyFilters();
+    } else {
+        alert("This sample was automatically submitted by the Python system and cannot be unmarked here.");
+    }
+}
+
 // On Page Load Initialization
 document.addEventListener("DOMContentLoaded", () => {
     populateFilterDropdowns();
@@ -193,8 +246,22 @@ function applyFilters() {
 
     const nlpLower = nlpQueryText.toLowerCase().trim();
 
+    // Read submitted samples from JS and LocalStorage
+    const autoSubmitted = typeof SUBMITTED_SAMPLES !== 'undefined' ? SUBMITTED_SAMPLES : [];
+    let manualSubmitted = [];
+    try { manualSubmitted = JSON.parse(localStorage.getItem('manualSubmittedSamples') || '[]'); } catch(e) {}
+    
+    const allSubmittedSet = new Set();
+    autoSubmitted.forEach(s => allSubmittedSet.add(s.sampleCode || s.encode1));
+    manualSubmitted.forEach(s => allSubmittedSet.add(s.sampleCode || s.encode1));
+
     // Perform filter
     filteredSamples = samples.filter(sample => {
+        // Tab separation logic
+        const isSubmitted = allSubmittedSet.has(sample.encode1);
+        if (activeListTab === 'pending' && isSubmitted) return false;
+        if (activeListTab === 'submitted' && !isSubmitted) return false;
+
         // Dropdown Filters
         if (tpFilter !== "ALL" && sample.tpName !== tpFilter) return false;
         if (isFilter !== "ALL" && sample.isNumber !== isFilter) return false;
@@ -466,6 +533,13 @@ function renderTable() {
         if (s.encode3) encodeHtml += `<span class="encode-pill">${s.encode3}</span>`;
         encodeHtml += `</div>`;
 
+        let actionsHtml = '';
+        if (activeListTab === 'pending') {
+            actionsHtml = `<button onclick="markAsSubmitted('${s.encode1}')" style="background:#10b981; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: all 0.2s;">Submit</button>`;
+        } else {
+            actionsHtml = `<button onclick="unmarkAsSubmitted('${s.encode1}')" style="background:#f59e0b; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: all 0.2s;">Revert</button>`;
+        }
+
         tr.innerHTML = `
             <td style="font-weight: 600;">${s.sNo}</td>
             <td>${encodeHtml}</td>
@@ -475,6 +549,7 @@ function renderTable() {
             <td><span class="badge ${reportClass}">${s.reportStatus}</span></td>
             <td style="font-size: 0.85rem; color: ${hasDeadline ? 'var(--accent-rose)' : 'var(--text-secondary)'}; font-weight: ${hasDeadline ? '500' : '400'};">${s.mechRemarks || '—'}</td>
             <td style="font-weight: ${isSaurabh ? '600' : '400'}; color: ${isSaurabh ? 'var(--primary)' : ''}">${s.tpName || '<span style="color:var(--text-muted);">Unassigned</span>'}</td>
+            <td style="text-align:center;">${actionsHtml}</td>
         `;
 
         tbody.appendChild(tr);

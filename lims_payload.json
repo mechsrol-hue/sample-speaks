@@ -1,0 +1,323 @@
+{
+  "lims_user": "saurabhd@bis.gov.in",
+  "lims_pass": "Guddu@1997",
+  "metadata": {
+    "sampleCode": "26M724863N",
+    "size": "75",
+    "pipeClass": "2",
+    "type": "A",
+    "isPlumbing": "No"
+  },
+  "table_rows": [
+    [
+      "Satisfactory",
+      "10.1",
+      "Colour",
+      "As in Cl 10.1",
+      "Satisfactory",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "Satisfactory",
+      "10.1",
+      "Surface Finish",
+      "As in Cl 10.1",
+      "Satisfactory",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "Socket Inside diameter shall be measured by manufactureres only as per Note 2 of Cl 7.2.1.1",
+      "7.2.1.1 Table 3",
+      "Angle of taper (Note-1)",
+      "Specified : Shall not exceed 0 degree 30minute",
+      "Socket Inside diameter shall be measured by manufactureres only as per Note 2 of Cl 7.2.1.1",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "Class 2 (As declared )",
+      "5",
+      "CLASSIFICATION OF PIPES",
+      "Class 1/2/3/4/5/6",
+      "Class 2 (As declared )",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "A (As declared)",
+      "5.2",
+      "The pipes shall be classified based on their application",
+      "a) Type A — Pipes for water supply; and b) Type B — Pipes for agricultural use.",
+      "A (As declared)",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "75 (As declared )",
+      "7",
+      "DIMENSIONS-PIPE-Nominal Diameter",
+      "Nominal Outside Diameter (Nominal Size)",
+      "75 (As declared )",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "75.1",
+      "7.1.1.1",
+      "DIMENSIONS-PIPE-Mean O.D. (Minimum)",
+      "75 mm,Min",
+      "75.1",
+      "Quantitative",
+      75,
+      ""
+    ],
+    [
+      "75.1",
+      "7.1.1.1",
+      "DIMENSIONS-PIPE-Mean O.D. (Maximum)",
+      "75.3 mm, Max",
+      "75.1",
+      "Quantitative",
+      "",
+      75.3
+    ],
+    [
+      "0.1",
+      "7.1.1.1",
+      "DIMENSIONS-PIPE-Mean O.D. Variation",
+      "0.30 mm, max",
+      "0.1",
+      "Quantitative",
+      "",
+      "0.30"
+    ],
+    [
+      "This requirement has not been checked according to foot note 1 of table 1",
+      "7.1.1.2",
+      "DIMENSIONS-PIPE-O.D. at any Point (Minimum)",
+      "74.0 mm, Min",
+      "This requirement has not been checked according to foot note 1 of table 1",
+      "Qualitative",
+      "74.0",
+      ""
+    ],
+    [
+      "This requirement has not been checked according to foot note 1 of table 1",
+      "7.1.1.2",
+      "DIMENSIONS-PIPE-O.D. at any Point (Maximum)",
+      "76.0 mm, Max",
+      "This requirement has not been checked according to foot note 1 of table 1",
+      "Qualitative",
+      "",
+      "76.0"
+    ],
+    [
+      "0.6",
+      "7.1.1.2",
+      "DIMENSIONS-PIPE-Ovality (Maximum)",
+      1,
+      "0.6",
+      "Quantitative",
+      "",
+      1
+    ],
+    [
+      "1.8",
+      "7.1.2.1",
+      "DIMENSIONS-PIPE-Thickness (Minimum)",
+      "1.8mm",
+      "1.8",
+      "Quantitative",
+      1.8,
+      ""
+    ],
+    [
+      "1.8",
+      "7.1.2.1",
+      "DIMENSIONS-PIPE-Thickness (Maximum)",
+      "2.2mm",
+      "1.8",
+      "Quantitative",
+      "",
+      2.2
+    ],
+    [
+      "1.8",
+      "7.1.2.1",
+      "DIMENSIONS-PIPE-Average Thickness",
+      "2.2mm",
+      "1.8",
+      "Quantitative",
+      "",
+      2.2
+    ],
+    [
+      "Satisfactory",
+      "7.2.1",
+      "DIMENSIONS-Socket",
+      "",
+      "Satisfactory",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "50.5",
+      "7.2.1.1 Table 3",
+      "DIMENSIONS-Socket-Sockets for solvent cement jointing-Minimum Length",
+      "Socket Length (min): 44 mm",
+      "50.5",
+      "Text",
+      44,
+      ""
+    ],
+    [
+      "NA",
+      "7.2.1.2 Table 4",
+      "DIMENSIONS-Sockets for elastomeric sealing ring joints-Socket inner Diameter",
+      "mm",
+      "NA",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "NA",
+      "8",
+      "SEALING RINGS",
+      "Conforms With IS 5382",
+      "NA",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "Full length not provided",
+      "9.1",
+      "PIPE ENDS",
+      "The ends of the pipes meant for solvent cementing (both plain and bell ended) shall be cleanly cut and shall be reasonably square to the axis of the pipe or may be chamfered at the plain end",
+      "Full length not provided",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "Satisfactory",
+      "10.1",
+      "PHYSICAL AND CHEMICAL CHARACTERISTICS-Visual Appearance",
+      "The colour of the pipes shall be light grey. Slight variations in the appearance of the colour are permitted.",
+      "Satisfactory",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "Satisfactory",
+      "10.1.1",
+      "PHYSICAL AND CHEMICAL CHARACTERISTICS-Visual Appearance",
+      "The colour of the pipes shall be light grey. \nThe internal and external surfaces of the pipe shall be smooth, clean and free from grooving and other defects. ",
+      "Satisfactory",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "0.01",
+      "10.2",
+      "PHYSICAL AND CHEMICAL CHARACTERISTICS-Opacity",
+      "The wall of the plain pipe shall not transmit more than 0.2 percent of the visible light falling on it when tested in accordance with IS 12235 (Part 3).",
+      "0.01",
+      "Quantitative",
+      "",
+      "0.2"
+    ],
+    [
+      "1.6",
+      "11.1",
+      "MECHANICAL PROPERTIES-Reversion",
+      "Maximum: 5 %",
+      "1.6",
+      "Quantitative",
+      "",
+      "5"
+    ],
+    [
+      "more than 80 °C",
+      "11.2",
+      "MECHANICAL PROPERTIES-Vicat Softening Temperature",
+      "Min: 80 °C",
+      "more than 80 °C",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "Less than 10% TIR",
+      "11.2",
+      "MECHANICAL PROPERTIES-Resistance to External Blows at 0°C",
+      "Shall have a True Impact Rate of not more than 10.",
+      "Less than 10% TIR",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "1.43",
+      "11.3",
+      "MECHANICAL PROPERTIES-Density",
+      "1.40 and 1.46",
+      "1.43",
+      "Quantitative",
+      "1.40",
+      "1.46"
+    ],
+    [
+      "Pass",
+      "11.1 Table 6",
+      "MECHANICAL PROPERTIES-Hydrostatic Pressure Test (Acceptance Test)",
+      "At Test pressure 4.19 × 0.6 MPa (min.) for 1 h the pipe shall not fail.",
+      "Pass",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "NA",
+      "11.1 Table 7",
+      "MECHANICAL PROPERTIES-Hydrostatic Pressure Test (Acceptance Test)-for Integral Sealing Ring Sockets",
+      "The pipe shall not fail during the prescribed test duration",
+      "NA",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "NA",
+      "11.1.1",
+      "MECHANICAL PROPERTIES-Hydrostatic Pressure Test (Acceptance Test)-for Plumbing pipes",
+      "The pipe shall not fail during the prescribed test duration",
+      "NA",
+      "Qualitative",
+      "",
+      ""
+    ],
+    [
+      "Satisfactory",
+      "13.1.2",
+      "MARKING",
+      "Type A shall additionally bear continuous longitudinal blue colour strip printing. These longitudinal blue colour strip shall be so placed so as to not merge/disturb the information marked on the pipes",
+      "Satisfactory",
+      "Qualitative",
+      "",
+      ""
+    ]
+  ]
+}

@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: sample-speaks
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    disk:
+      name: sqlite-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: PORT
+        value: 10000

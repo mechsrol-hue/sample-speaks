@@ -1,0 +1,1 @@
+const SUBMITTED_SAMPLES = [];

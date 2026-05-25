@@ -4,3 +4,5 @@ node_modules/
 uploads/
 *.sqlite
 *.sqlite-journal
+
+.vercel
