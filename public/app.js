@@ -560,6 +560,17 @@ function populateSampleCodeDatalist() {
     });
 }
 
+function autoFillLimsDetails() {
+    const codeInput = document.getElementById('lims-sample-code').value;
+    if (!codeInput) return;
+    
+    const matchedSample = allSamples.find(s => s.encodedCode === codeInput);
+    if (matchedSample && matchedSample.isNumber) {
+        document.getElementById('lims-is-no').value = `IS ${matchedSample.isNumber}`;
+        // Note: Size is not stored in DB, so user still selects size manually
+    }
+}
+
 function parseDateDDMMYYYY(dateStr) {
     if (!dateStr) return null;
     const parts = dateStr.split('-');
