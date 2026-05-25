@@ -1878,7 +1878,7 @@ async function runAutoAssigner() {
 
 async function approveRecommendation(id) {
     try {
-        const res = await fetch(\`/api/approve-assignment/\${id}\`, { method: 'POST' });
+        const res = await fetch(`/api/approve-assignment/${id}`, { method: 'POST' });
         if (res.ok) {
             showToast('Assignment Approved', 'success');
             loadRecommendations();
@@ -1888,7 +1888,7 @@ async function approveRecommendation(id) {
 
 async function rejectRecommendation(id) {
     try {
-        const res = await fetch(\`/api/reject-assignment/\${id}\`, { method: 'POST' });
+        const res = await fetch(`/api/reject-assignment/${id}`, { method: 'POST' });
         if (res.ok) {
             showToast('Assignment Rejected', 'info');
             loadRecommendations();

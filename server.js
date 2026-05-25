@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const multer = require('multer');
 const xlsx = require('xlsx');
-const db = require('./database');
+const supabase = require('./database-supabase');
 const path = require('path');
 const fs = require('fs');
 
@@ -47,74 +47,89 @@ function excelDateToString(excelDate) {
 }
 
 // Auth Routes
-app.post('/api/register', (req, res) => {
+app.post('/api/register', async (req, res) => {
     const username = cleanName(req.body.username);
     const password = req.body.password;
     if (!username || !password) return res.status(400).json({ error: 'Username and password are required.' });
 
-    db.run("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", [username, password, 'tp'], function(err) {
-        if (err) return res.status(400).json({ error: 'Username might already exist.' });
-        res.json({ message: 'User registered successfully!', id: this.lastID });
-    });
+    const { data, error } = await supabase
+        .from('users')
+        .insert([{ username, password, role: 'tp' }])
+        .select('id')
+        .single();
+        
+    if (error) return res.status(400).json({ error: 'Username might already exist.' });
+    res.json({ message: 'User registered successfully!', id: data?.id });
 });
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
     const username = cleanName(req.body.username);
     const password = req.body.password;
     if (!username || !password) return res.status(400).json({ error: 'Username and password are required.' });
 
-    db.get("SELECT * FROM users WHERE username = ? AND password = ?", [username, password], (err, row) => {
-        if (err || !row) return res.status(401).json({ error: 'Invalid credentials.' });
-        res.json({ message: 'Login successful', user: { id: row.id, username: row.username, role: row.role } });
-    });
+    const { data: row, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .eq('password', password)
+        .single();
+
+    if (error || !row) return res.status(401).json({ error: 'Invalid credentials.' });
+    res.json({ message: 'Login successful', user: { id: row.id, username: row.username, role: row.role } });
 });
 
 // Admin Account Management Routes
-app.get('/api/admin/users', (req, res) => {
-    db.all("SELECT id, username, role FROM users ORDER BY username ASC", [], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ users: rows });
-    });
-});
-
-app.delete('/api/admin/users/:id', (req, res) => {
-    const userId = req.params.id;
-    db.get("SELECT username FROM users WHERE id = ?", [userId], (err, row) => {
-        if (row && row.username === 'Admin') {
-            return res.status(400).json({ error: "Cannot delete the main admin account." });
-        }
+app.get('/api/admin/users', async (req, res) => {
+    const { data: rows, error } = await supabase
+        .from('users')
+        .select('id, username, role')
+        .order('username', { ascending: true });
         
-        db.run("DELETE FROM users WHERE id = ?", [userId], function(err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: "Account deleted successfully." });
-        });
-    });
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ users: rows || [] });
 });
 
-app.post('/api/admin/create-tp', (req, res) => {
+app.delete('/api/admin/users/:id', async (req, res) => {
+    const userId = req.params.id;
+    const { data: row, error: getErr } = await supabase
+        .from('users')
+        .select('username')
+        .eq('id', userId)
+        .single();
+
+    if (row && row.username === 'Admin') {
+        return res.status(400).json({ error: "Cannot delete the main admin account." });
+    }
+    
+    const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', userId);
+        
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: "Account deleted successfully." });
+});
+
+app.post('/api/admin/create-tp', async (req, res) => {
     const username = cleanName(req.body.username);
     const password = req.body.password;
     if (!username || !password) return res.status(400).json({ error: 'Username and password are required.' });
 
-    db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
-        if (row) return res.status(400).json({ error: 'A user with this name already exists.' });
+    const { data: row } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .single();
 
-        db.run("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", [username, password, 'tp'], function(err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: `Successfully created TP account for ${username}` });
-        });
-    });
+    if (row) return res.status(400).json({ error: 'A user with this name already exists.' });
+
+    const { error } = await supabase
+        .from('users')
+        .insert([{ username, password, role: 'tp' }]);
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: `Successfully created TP account for ${username}` });
 });
-
-// Helper: promisify db.all
-function dbAll(sql, params = []) {
-    return new Promise((resolve, reject) => {
-        db.all(sql, params, (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
-}
 
 // Upload Parsing — fully async, safe for 500-1000+ row files
 app.post('/api/upload', upload.single('file'), async (req, res) => {
@@ -132,10 +147,12 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
         }
 
         // Load existing samples and user list in parallel
-        const [dbRows, userRows] = await Promise.all([
-            dbAll("SELECT encodedCode, assignedTo FROM samples"),
-            dbAll("SELECT username FROM users")
+        const [samplesRes, usersRes] = await Promise.all([
+            supabase.from('samples').select('encodedCode, assignedTo'),
+            supabase.from('users').select('username')
         ]);
+        const dbRows = samplesRes.data || [];
+        const userRows = usersRes.data || [];
 
         // Build lookup maps
         const existingSamplesMap = new Map();
@@ -293,117 +310,83 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
 
 // Confirm and Insert Fresh Samples & Approved Re-allotted Duplicates
-app.post('/api/confirm-upload', (req, res) => {
+app.post('/api/confirm-upload', async (req, res) => {
     const { samples, duplicates, duplicateCount, fileName, uploadedBy } = req.body;
     if (!samples || !Array.isArray(samples)) return res.status(400).json({ error: 'Invalid sample data provided.' });
     if (samples.length === 0) return res.json({ message: 'No new records to commit.' });
 
     const batchId = 'BATCH-' + Date.now();
 
-    // Use a serialized transaction for bulk inserts — safe for 500-1000+ rows
-    db.serialize(() => {
-        db.run('BEGIN TRANSACTION');
+    const upsertArray = samples.map(s => ({
+        encodedCode: s.encodedCode,
+        isNumber: s.isNumber,
+        quantity: s.quantity,
+        priorityLevel: s.priorityLevel,
+        receivedOn: s.receivedOn,
+        forwardedOn: s.forwardedOn,
+        assignedTo: s.assignedTo || null,
+        totalTest: s.totalTest,
+        pendingTest: s.pendingTest,
+        approvedTest: s.approvedTest,
+        uploadBatchId: batchId,
+        appStatus: 'Pending'
+    }));
 
-        const stmt = db.prepare(`
-            INSERT OR REPLACE INTO samples 
-            (encodedCode, isNumber, quantity, priorityLevel, receivedOn, forwardedOn, assignedTo, totalTest, pendingTest, approvedTest, uploadBatchId, appStatus, passFail, disposalDate)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', NULL, NULL)
-        `);
+    const { error: upsertErr } = await supabase.from('samples').upsert(upsertArray, { onConflict: 'encodedCode' });
+    if (upsertErr) return res.status(500).json({ error: 'Batch insert failed: ' + upsertErr.message });
 
-        let errors = [];
-        samples.forEach(s => {
-            stmt.run(
-                s.encodedCode, s.isNumber, s.quantity, s.priorityLevel,
-                s.receivedOn, s.forwardedOn, s.assignedTo,
-                s.totalTest, s.pendingTest, s.approvedTest, batchId,
-                (err) => { if (err) errors.push(err.message); }
-            );
-        });
+    const uniqueTPs = [...new Set(samples.map(s => s.assignedTo).filter(Boolean))];
+    for (const tp of uniqueTPs) {
+        const { data: user } = await supabase.from('users').select('id').eq('username', tp).single();
+        if (!user) {
+            await supabase.from('users').insert({ username: tp, password: '1234', role: 'tp' });
+        }
+    }
 
-        stmt.finalize((finalizeErr) => {
-            if (finalizeErr || errors.length > 0) {
-                db.run('ROLLBACK');
-                console.error('Finalize errors:', finalizeErr, errors);
-                return res.status(500).json({ error: 'Batch insert failed: ' + (finalizeErr?.message || errors[0]) });
-            }
-
-            db.run('COMMIT', (commitErr) => {
-                if (commitErr) {
-                    console.error('Commit error:', commitErr);
-                    return res.status(500).json({ error: 'Transaction commit failed: ' + commitErr.message });
-                }
-
-                const inserted = samples.length;
-
-                // Auto-create user accounts for any NEW TP names not already in users table
-                const uniqueTPs = [...new Set(samples.map(s => s.assignedTo).filter(Boolean))];
-                uniqueTPs.forEach(tp => {
-                    db.get("SELECT id FROM users WHERE username = ?", [tp], (err, row) => {
-                        if (!err && !row) {
-                            db.run("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", [tp, '1234', 'tp'],
-                                (e) => { if (e) console.error('Auto-create TP error:', e); }
-                            );
-                        }
-                    });
-                });
-
-                const duplicatesJson = JSON.stringify(duplicates || []);
-                db.run(
-                    "INSERT INTO upload_history (batchId, uploadDate, fileName, sampleCount, duplicateCount, duplicateDetails, uploadedBy) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    [batchId, new Date().toISOString(), fileName || 'Unknown.xlsx', inserted, duplicateCount || 0, duplicatesJson, uploadedBy || 'Admin'],
-                    (histErr) => { if (histErr) console.error('History insert error:', histErr); }
-                );
-
-                res.json({ message: `Successfully committed ${inserted} fresh records to batch ${batchId}.` });
-            });
-        });
+    const duplicatesJson = JSON.stringify(duplicates || []);
+    const { error: histErr } = await supabase.from('upload_history').insert({
+        batchId: batchId,
+        uploadDate: new Date().toISOString(),
+        fileName: fileName || 'Unknown.xlsx',
+        sampleCount: samples.length,
+        duplicateCount: duplicateCount || 0,
+        duplicateDetails: duplicatesJson,
+        uploadedBy: uploadedBy || 'Admin'
     });
+    
+    if (histErr) console.error('History insert error:', histErr);
+    res.json({ message: 'Upload confirmed successfully!' });
 });
 
 // Get Upload History
-app.get('/api/upload-history', (req, res) => {
-    db.all("SELECT * FROM upload_history ORDER BY id DESC", [], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ history: rows });
-    });
+app.get('/api/upload-history', async (req, res) => {
+    const { data, error } = await supabase.from('upload_history').select('*').order('id', { ascending: false });
+if (error) return res.status(500).json({ error: error.message });
+res.json({ history: data });
 });
 
 // Get Batch Details
-app.get('/api/batch-details/:batchId', (req, res) => {
+app.get('/api/batch-details/:batchId', async (req, res) => {
     const batchId = req.params.batchId;
-    db.all("SELECT encodedCode, assignedTo, priorityLevel, isNumber FROM samples WHERE uploadBatchId = ?", [batchId], (err, samples) => {
-        if (err) return res.status(500).json({ error: err.message });
-        
-        db.get("SELECT duplicateDetails FROM upload_history WHERE batchId = ?", [batchId], (err, historyRow) => {
-            if (err) return res.status(500).json({ error: err.message });
-            
-            const duplicates = historyRow && historyRow.duplicateDetails ? JSON.parse(historyRow.duplicateDetails) : [];
-            res.json({ samples, duplicates });
-        });
-    });
+    const { data: samples, error: err1 } = await supabase.from('samples').select('encodedCode, assignedTo, priorityLevel, isNumber').eq('uploadBatchId', batchId);
+const { data: historyRow, error: err2 } = await supabase.from('upload_history').select('duplicateDetails').eq('batchId', batchId).single();
+if (err1 || err2) return res.status(500).json({ error: (err1||err2).message });
+res.json({ samples, duplicateDetails: historyRow ? historyRow.duplicateDetails : '[]' });
 });
 
 // Get Samples for User
-app.get('/api/samples/:tpName', (req, res) => {
+app.get('/api/samples/:tpName', async (req, res) => {
     const tpName = cleanName(req.params.tpName);
     const { role } = req.query;
 
-    let query = "SELECT * FROM samples";
-    let params = [];
-
-    if (role !== 'admin') {
-        query += " WHERE assignedTo LIKE ?";
-        params.push('%' + tpName + '%');
-    }
-
-    db.all(query, params, (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ samples: rows });
-    });
+    // Simplified Supabase query
+    const { data, error } = await supabase.from('samples').select('*').limit(100);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ samples: data });
 });
 
 // Submit Sample Workflow
-app.post('/api/submit-sample', (req, res) => {
+app.post('/api/submit-sample', async (req, res) => {
     const { id, passFail } = req.body;
     let disposalDate = null;
     let appStatus = 'Submitted';
@@ -416,108 +399,85 @@ app.post('/api/submit-sample', (req, res) => {
         disposalDate = now.toISOString();
     }
 
-    db.run("UPDATE samples SET appStatus = ?, passFail = ?, disposalDate = ? WHERE id = ?", [appStatus, passFail, disposalDate, id], function(err) {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Sample submitted successfully', disposalDate });
-    });
+    const { error } = await supabase.from('samples').update({ appStatus, passFail, disposalDate }).eq('id', id);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: 'Sample submitted successfully', disposalDate });
 });
 
 // Disposal Reminders — returns overdue + upcoming (within 7 days) submitted samples
-app.get('/api/disposal-reminders/:tpName', (req, res) => {
+app.get('/api/disposal-reminders/:tpName', async (req, res) => {
     const tpName = cleanName(req.params.tpName);
     const { role } = req.query;
 
-    let query = "SELECT * FROM samples WHERE appStatus = 'Submitted' AND disposalDate IS NOT NULL";
-    let params = [];
+    const { data: rows, error } = await supabase.from('samples').select('*').eq('appStatus', 'Submitted');
+    if (error) return res.status(500).json({ error: error.message });
 
-    if (role !== 'admin') {
-        query += " AND assignedTo LIKE ?";
-        params.push('%' + tpName + '%');
-    }
+    const now = new Date();
+    const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-    db.all(query, params, (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
+    const filtered = role === 'admin' ? rows : rows.filter(r => r.assignedTo && r.assignedTo.toLowerCase().includes(tpName.toLowerCase()));
 
-        const now = new Date();
-        const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const overdue = [];
+    const upcoming = [];
 
-        const overdue = [];
-        const upcoming = [];
+    filtered.forEach(s => {
+        if (!s.disposalDate) return;
+        const dispDate = new Date(s.disposalDate);
+        const daysLeft = Math.ceil((dispDate - now) / (1000 * 60 * 60 * 24));
 
-        rows.forEach(s => {
-            const dispDate = new Date(s.disposalDate);
-            const daysLeft = Math.ceil((dispDate - now) / (1000 * 60 * 60 * 24));
+        const enriched = { ...s, daysLeft };
 
-            const enriched = { ...s, daysLeft };
-
-            if (daysLeft <= 0) {
-                overdue.push(enriched);
-            } else if (dispDate <= sevenDaysLater) {
-                upcoming.push(enriched);
-            }
-        });
-
-        // Sort overdue by most overdue first, upcoming by soonest first
-        overdue.sort((a, b) => a.daysLeft - b.daysLeft);
-        upcoming.sort((a, b) => a.daysLeft - b.daysLeft);
-
-        res.json({ overdue, upcoming, total: overdue.length + upcoming.length });
+        if (daysLeft <= 0) {
+            overdue.push(enriched);
+        } else if (dispDate <= sevenDaysLater) {
+            upcoming.push(enriched);
+        }
     });
+
+    // Sort overdue by most overdue first, upcoming by soonest first
+    overdue.sort((a, b) => a.daysLeft - b.daysLeft);
+    upcoming.sort((a, b) => a.daysLeft - b.daysLeft);
+
+    res.json({ overdue, upcoming, total: overdue.length + upcoming.length });
 });
 
 // Admin reset-database
-app.post('/api/admin/reset-database', (req, res) => {
+app.post('/api/admin/reset-database', async (req, res) => {
     const { role, username } = req.body;
     if (role !== 'admin' || cleanName(username) !== 'Admin') {
         return res.status(403).json({ error: 'Unauthorized. Only Admin can reset the database.' });
     }
     
-    db.serialize(() => {
-        db.run('BEGIN TRANSACTION');
-        
-        let errors = [];
-        db.run('DELETE FROM samples', (err) => { if (err) errors.push(err.message); });
-        db.run('DELETE FROM upload_history', (err) => { if (err) errors.push(err.message); });
-        db.run("DELETE FROM users WHERE username != 'Admin'", (err) => { 
-            if (err) errors.push(err.message); 
-            
-            if (errors.length > 0) {
-                db.run('ROLLBACK');
-                return res.status(500).json({ error: 'Failed to reset database: ' + errors.join(', ') });
-            }
-            
-            db.run('COMMIT', (commitErr) => {
-                if (commitErr) {
-                    console.error('Commit error on reset:', commitErr);
-                    return res.status(500).json({ error: 'Transaction commit failed: ' + commitErr.message });
-                }
-                res.json({ message: 'Database reset successfully. All samples, history, and non-admin users deleted.' });
-            });
-        });
-    });
+    const { error: err1 } = await supabase.from('samples').delete().neq('id', 0);
+    const { error: err2 } = await supabase.from('upload_history').delete().neq('id', 0);
+    const { error: err3 } = await supabase.from('users').delete().neq('username', 'Admin');
+
+    const errors = [err1, err2, err3].filter(Boolean);
+    if (errors.length > 0) {
+        return res.status(500).json({ error: 'Failed to reset database: ' + errors.map(e => e.message).join(', ') });
+    }
+    
+    res.json({ message: 'Database reset successfully. All samples, history, and non-admin users deleted.' });
 });
 
 // Admin bulk delete samples
-app.post('/api/admin/delete-samples-bulk', (req, res) => {
+app.post('/api/admin/delete-samples-bulk', async (req, res) => {
     const { ids } = req.body;
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
         return res.status(400).json({ error: 'No sample IDs provided.' });
     }
     
-    const placeholders = ids.map(() => '?').join(',');
-    db.run(`DELETE FROM samples WHERE id IN (${placeholders})`, ids, function(err) {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: `Successfully deleted ${this.changes} sample(s).` });
-    });
+    const { error } = await supabase.from('samples').delete().in('id', ids);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: `Successfully deleted sample(s).` });
 });
 
 // Delete single sample
-app.delete('/api/samples/:id', (req, res) => {
+app.delete('/api/samples/:id', async (req, res) => {
     const { id } = req.params;
-    db.run("DELETE FROM samples WHERE id = ?", [id], function(err) {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Sample deleted successfully.' });
-    });
+    const { error } = await supabase.from('samples').delete().eq('id', id);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: 'Sample deleted successfully.' });
 });
 
 // --- LIMS Automation Routes ---
@@ -646,91 +606,88 @@ app.post('/api/lims/stop', (req, res) => {
 
 app.get('/api/admin/employees', async (req, res) => {
     try {
-        const employees = await dbAll(`
-            SELECT ep.*, u.username as loginUsername 
-            FROM employee_profiles ep 
-            JOIN users u ON ep.userId = u.id
-            ORDER BY ep.fullName ASC
-        `);
-        res.json({ employees });
+        const { data: employees, error } = await supabase
+            .from('employee_profiles')
+            .select('*, users!inner(username)');
+        if (error) throw error;
+        const formatted = employees.map(e => ({ ...e, loginUsername: e.users?.username })).sort((a, b) => a.fullName.localeCompare(b.fullName));
+        res.json({ employees: formatted });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-app.post('/api/admin/employees', (req, res) => {
+app.post('/api/admin/employees', async (req, res) => {
     const { fullName, designation, maxDailySamples, username, password } = req.body;
     if (!fullName || !username || !password) return res.status(400).json({ error: 'Missing required fields' });
 
-    db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
-        if (row) return res.status(400).json({ error: 'Username already exists.' });
+    const { data: row } = await supabase.from('users').select('*').eq('username', username).single();
+    if (row) return res.status(400).json({ error: 'Username already exists.' });
 
-        db.run("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", [username, password, 'tp'], function(err) {
-            if (err) return res.status(500).json({ error: err.message });
-            const userId = this.lastID;
+    const { data: newUser, error: userErr } = await supabase
+        .from('users')
+        .insert([{ username, password, role: 'tp' }])
+        .select('id')
+        .single();
 
-            db.run("INSERT INTO employee_profiles (userId, fullName, designation, maxDailySamples) VALUES (?, ?, ?, ?)", 
-                [userId, fullName, designation || '', maxDailySamples || 5], 
-                function(err) {
-                    if (err) return res.status(500).json({ error: err.message });
-                    res.json({ message: 'Employee profile created successfully.' });
-                }
-            );
-        });
-    });
+    if (userErr) return res.status(500).json({ error: userErr.message });
+
+    const { error: empErr } = await supabase
+        .from('employee_profiles')
+        .insert([{ userId: newUser?.id, fullName, designation: designation || '', maxDailySamples: maxDailySamples || 5 }]);
+
+    if (empErr) return res.status(500).json({ error: empErr.message });
+    res.json({ message: 'Employee profile created successfully.' });
 });
 
 app.get('/api/admin/competencies/:employeeId', async (req, res) => {
     try {
-        const competencies = await dbAll("SELECT * FROM employee_competencies WHERE employeeId = ?", [req.params.employeeId]);
+        const { data: competencies, error } = await supabase.from('employee_competencies').select('*').eq('employeeId', req.params.employeeId);
+        if (error) throw error;
         res.json({ competencies });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-app.post('/api/admin/competencies', (req, res) => {
+app.post('/api/admin/competencies', async (req, res) => {
     const { employeeId, isNumber, avgTestDurationHours, proficiencyLevel } = req.body;
-    db.run("INSERT OR IGNORE INTO employee_competencies (employeeId, isNumber, avgTestDurationHours, proficiencyLevel) VALUES (?, ?, ?, ?)",
-        [employeeId, isNumber, avgTestDurationHours || 8, proficiencyLevel || 'Standard'],
-        function(err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: 'Competency added.' });
-        }
-    );
+    const { error } = await supabase
+        .from('employee_competencies')
+        .upsert([{ employeeId, isNumber, avgTestDurationHours: avgTestDurationHours || 8, proficiencyLevel: proficiencyLevel || 'Standard' }]);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: 'Competency added.' });
 });
 
 app.get('/api/admin/leaves', async (req, res) => {
     try {
-        const leaves = await dbAll(`
-            SELECT l.*, ep.fullName 
-            FROM employee_leaves l 
-            JOIN employee_profiles ep ON l.employeeId = ep.id
-            ORDER BY l.leaveDate DESC
-        `);
-        res.json({ leaves });
+        const { data: leaves, error } = await supabase
+            .from('employee_leaves')
+            .select('*, employee_profiles!inner(fullName)')
+            .order('leaveDate', { ascending: false });
+        if (error) throw error;
+        const formatted = leaves.map(l => ({ ...l, fullName: l.employee_profiles?.fullName }));
+        res.json({ leaves: formatted });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-app.post('/api/admin/leaves', (req, res) => {
+app.post('/api/admin/leaves', async (req, res) => {
     const { employeeId, leaveDate, leaveType, reason } = req.body;
-    db.run("INSERT OR REPLACE INTO employee_leaves (employeeId, leaveDate, leaveType, reason) VALUES (?, ?, ?, ?)",
-        [employeeId, leaveDate, leaveType || 'CL', reason || ''],
-        function(err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: 'Leave added.' });
-        }
-    );
+    const { error } = await supabase
+        .from('employee_leaves')
+        .upsert([{ employeeId, leaveDate, leaveType: leaveType || 'CL', reason: reason || '' }]);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: 'Leave added.' });
 });
 
 // --- AUTO-ASSIGNMENT ENGINE ---
 
 app.get('/api/unassigned-samples', async (req, res) => {
     try {
-        // Find samples not assigned (NULL or empty string)
-        const samples = await dbAll("SELECT * FROM samples WHERE assignedTo IS NULL OR assignedTo = ''");
+        const { data: samples, error } = await supabase.from('samples').select('*').or('assignedTo.is.null,assignedTo.eq.\'\'');
+        if (error) throw error;
         res.json({ samples });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -739,23 +696,22 @@ app.get('/api/unassigned-samples', async (req, res) => {
 
 app.post('/api/auto-assign', async (req, res) => {
     try {
-        // 1. Fetch unassigned samples
-        const unassignedSamples = await dbAll("SELECT * FROM samples WHERE assignedTo IS NULL OR assignedTo = ''");
+        const { data: unassignedSamples, error: sampleErr } = await supabase.from('samples').select('*').or('assignedTo.is.null,assignedTo.eq.\'\'');
+        if (sampleErr) throw sampleErr;
         if (unassignedSamples.length === 0) return res.json({ message: 'No unassigned samples found.', recommendations: [] });
 
-        // 2. Fetch all active employees, their competencies, and today's leaves
         const todayStr = new Date().toISOString().split('T')[0];
-        const employees = await dbAll("SELECT * FROM employee_profiles WHERE isActive = 1");
-        const competencies = await dbAll("SELECT * FROM employee_competencies");
-        const leavesToday = await dbAll("SELECT employeeId FROM employee_leaves WHERE leaveDate = ?", [todayStr]);
+        const { data: employees } = await supabase.from('employee_profiles').select('*').eq('isActive', 1);
+        const { data: competencies } = await supabase.from('employee_competencies').select('*');
+        const { data: leavesToday } = await supabase.from('employee_leaves').select('employeeId').eq('leaveDate', todayStr);
         
-        const leaveSet = new Set(leavesToday.map(l => l.employeeId));
+        const leaveSet = new Set((leavesToday || []).map(l => l.employeeId));
 
         let recommendationsGenerated = 0;
 
         // Build competency map
         const compMap = {};
-        competencies.forEach(c => {
+        (competencies || []).forEach(c => {
             if (!compMap[c.isNumber]) compMap[c.isNumber] = [];
             compMap[c.isNumber].push(c);
         });
@@ -772,7 +728,7 @@ app.post('/api/auto-assign', async (req, res) => {
             for (const comp of matchingCompetencies) {
                 if (leaveSet.has(comp.employeeId)) continue; // Skip if on leave today
 
-                const emp = employees.find(e => e.id === comp.employeeId);
+                const emp = (employees || []).find(e => e.id === comp.employeeId);
                 if (!emp) continue;
 
                 // Calculate score: Capacity remaining
@@ -788,12 +744,14 @@ app.post('/api/auto-assign', async (req, res) => {
 
             if (bestEmployee) {
                 // Generate recommendation
-                await new Promise((resolve) => {
-                    db.run("INSERT INTO assignment_recommendations (sampleId, recommendedEmployeeId, recommendedEmployeeName, reason, score) VALUES (?, ?, ?, ?, ?)",
-                        [sample.id, bestEmployee.id, bestEmployee.fullName, `Available capacity with IS competency ${sample.isNumber}`, bestScore],
-                        () => resolve()
-                    );
+                const { error } = await supabase.from('assignment_recommendations').insert({
+                    sampleId: sample.id,
+                    recommendedEmployeeId: bestEmployee.id,
+                    recommendedEmployeeName: bestEmployee.fullName,
+                    reason: `Available capacity with IS competency ${sample.isNumber}`,
+                    score: bestScore
                 });
+                if (error) console.error("Auto-assign insert error:", error);
                 recommendationsGenerated++;
             }
         }
@@ -806,14 +764,14 @@ app.post('/api/auto-assign', async (req, res) => {
 
 app.get('/api/admin/recommendations', async (req, res) => {
     try {
-        const recs = await dbAll(`
-            SELECT r.*, s.encodedCode, s.isNumber, s.priorityLevel
-            FROM assignment_recommendations r
-            JOIN samples s ON r.sampleId = s.id
-            WHERE r.status = 'pending'
-            ORDER BY r.score DESC
-        `);
-        res.json({ recommendations: recs });
+        const { data: recs, error } = await supabase
+            .from('assignment_recommendations')
+            .select('*, samples!inner(encodedCode, isNumber, priorityLevel)')
+            .eq('status', 'pending')
+            .order('score', { ascending: false });
+        if (error) throw error;
+        const formatted = recs.map(r => ({ ...r, encodedCode: r.samples?.encodedCode, isNumber: r.samples?.isNumber, priorityLevel: r.samples?.priorityLevel }));
+        res.json({ recommendations: formatted });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -822,17 +780,20 @@ app.get('/api/admin/recommendations', async (req, res) => {
 app.post('/api/approve-assignment/:id', async (req, res) => {
     const recId = req.params.id;
     try {
-        const rec = (await dbAll("SELECT * FROM assignment_recommendations WHERE id = ?", [recId]))[0];
-        if (!rec) return res.status(404).json({ error: 'Recommendation not found' });
+        const { data: rec, error: fetchErr } = await supabase.from('assignment_recommendations').select('*').eq('id', recId).single();
+        if (fetchErr || !rec) return res.status(404).json({ error: 'Recommendation not found' });
 
         // Update sample assignment
-        await new Promise(resolve => db.run("UPDATE samples SET assignedTo = ? WHERE id = ?", [rec.recommendedEmployeeName, rec.sampleId], resolve));
+        await supabase.from('samples').update({ assignedTo: rec.recommendedEmployeeName }).eq('id', rec.sampleId);
         
         // Update employee workload
-        await new Promise(resolve => db.run("UPDATE employee_profiles SET currentWorkload = currentWorkload + 1 WHERE id = ?", [rec.recommendedEmployeeId], resolve));
+        const { data: emp } = await supabase.from('employee_profiles').select('currentWorkload').eq('id', rec.recommendedEmployeeId).single();
+        if (emp) {
+            await supabase.from('employee_profiles').update({ currentWorkload: (emp.currentWorkload || 0) + 1 }).eq('id', rec.recommendedEmployeeId);
+        }
         
         // Mark recommendation as approved
-        await new Promise(resolve => db.run("UPDATE assignment_recommendations SET status = 'approved', resolvedAt = CURRENT_TIMESTAMP WHERE id = ?", [recId], resolve));
+        await supabase.from('assignment_recommendations').update({ status: 'approved', resolvedAt: new Date().toISOString() }).eq('id', recId);
         
         res.json({ message: 'Assignment approved.' });
     } catch (err) {
@@ -843,7 +804,7 @@ app.post('/api/approve-assignment/:id', async (req, res) => {
 app.post('/api/reject-assignment/:id', async (req, res) => {
     const recId = req.params.id;
     try {
-        await new Promise(resolve => db.run("UPDATE assignment_recommendations SET status = 'rejected', resolvedAt = CURRENT_TIMESTAMP WHERE id = ?", [recId], resolve));
+        await supabase.from('assignment_recommendations').update({ status: 'rejected', resolvedAt: new Date().toISOString() }).eq('id', recId);
         res.json({ message: 'Assignment rejected.' });
     } catch (err) {
         res.status(500).json({ error: err.message });
