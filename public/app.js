@@ -543,8 +543,21 @@ async function fetchSamples() {
             allSamples = data.samples;
             populateFilterDropdowns();
             renderTable();
+            populateSampleCodeDatalist();
         }
     } catch (e) { console.error(e); }
+}
+
+function populateSampleCodeDatalist() {
+    const datalist = document.getElementById('sample-codes-list');
+    if (!datalist) return;
+    datalist.innerHTML = '';
+    const uniqueCodes = [...new Set(allSamples.map(s => s.encodedCode).filter(Boolean))].sort();
+    uniqueCodes.forEach(code => {
+        const option = document.createElement('option');
+        option.value = code;
+        datalist.appendChild(option);
+    });
 }
 
 function parseDateDDMMYYYY(dateStr) {
