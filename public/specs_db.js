@@ -35,9 +35,9 @@ const IS_4985_SPECS = {
         let t_min = "", t_max = "", t_avg = "", min_od = "", max_od = "", ovality = "", socket = "";
         
         if (data) {
-            min_od = data.min_od;
-            max_od = data.max_od;
-            ovality = data.ovality;
+            min_od = data.min_od.toFixed(1);
+            max_od = data.max_od.toFixed(1);
+            ovality = data.ovality.toFixed(1);
             socket = data.socket;
             if (data.thickness && data.thickness[pipeClass]) {
                 let thick = data.thickness[pipeClass]; // [Avg, Min, Max]
