@@ -5,6 +5,7 @@ const cors = require('cors');
 const multer = require('multer');
 const xlsx = require('xlsx');
 const supabase = require('./database-supabase');
+const db = require('./database');
 const path = require('path');
 const fs = require('fs');
 
@@ -809,6 +810,214 @@ app.post('/api/reject-assignment/:id', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});
+
+// --- SAMPLE CELL SECURE API ---
+
+app.post('/api/sample-cell/upload', upload.single('file'), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
+
+    try {
+        const workbook = xlsx.read(req.file.buffer, { type: 'buffer', cellDates: false });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = xlsx.utils.sheet_to_json(sheet, { defval: '' });
+
+        if (!rows || rows.length === 0) {
+            return res.status(400).json({ error: 'File appears empty.' });
+        }
+
+        db.serialize(() => {
+            db.all('SELECT barcode FROM sample_cell_data', [], (err, existingRows) => {
+                if (err) return res.status(500).json({ error: 'Database error: ' + err.message });
+                
+                const existingBarcodes = new Set(existingRows.map(r => String(r.barcode).toLowerCase().trim()));
+                const fresh = [];
+                const duplicates = [];
+
+                const firstRowKeys = Object.keys(rows[0]);
+                const findKey = (searchStrings) => firstRowKeys.find(k => searchStrings.some(s => k.toLowerCase().includes(s.toLowerCase())));
+
+                const sNoKey = findKey(['s.no', 'sno', 's no', 'sl no']);
+                const barcodeKey = findKey(['barcode', 'bar code', 'bar-code']);
+                const sampleCodeKey = findKey(['sample code', 'samplecode', 'sample id']);
+                const isNumberKey = findKey(['is number', 'isnumber', 'is_number', 'is-number']);
+                const testingTypeKey = findKey(['testing type', 'testing_type']);
+                const labNameKey = findKey(['lab name', 'labname', 'lab']);
+                const receivedKey = findKey(['sample received on', 'received', 'receipt']);
+                const lagKey = findKey(['time lag', 'lag']);
+                const issuedKey = findKey(['report issued on', 'issued']);
+                const sampleStatusKey = findKey(['sample status', 'samplestatus']);
+                const reportStatusKey = findKey(['report status', 'reportstatus']);
+                const sourceKey = findKey(['source']);
+
+                if (!barcodeKey) {
+                    return res.status(400).json({ error: 'Could not find a Barcode column in the uploaded file.' });
+                }
+
+                rows.forEach(row => {
+                    const barcodeVal = row[barcodeKey];
+                    if (!barcodeVal) return;
+                    
+                    const barcode = String(barcodeVal).trim();
+
+                    const record = {
+                        sNo: sNoKey ? String(row[sNoKey]).trim() : '',
+                        barcode: barcode,
+                        sampleCode: sampleCodeKey ? String(row[sampleCodeKey]).trim() : '',
+                        isNumber: isNumberKey ? String(row[isNumberKey]).trim() : '',
+                        testingType: testingTypeKey ? String(row[testingTypeKey]).trim() : '',
+                        labName: labNameKey ? String(row[labNameKey]).trim() : '',
+                        sampleReceivedOn: receivedKey ? excelDateToString(row[receivedKey]) : '',
+                        timeLagDays: lagKey ? String(row[lagKey]).trim() : '',
+                        reportIssuedOn: issuedKey ? excelDateToString(row[issuedKey]) : '',
+                        sampleStatus: sampleStatusKey ? String(row[sampleStatusKey]).trim() : '',
+                        reportStatus: reportStatusKey ? String(row[reportStatusKey]).trim() : '',
+                        source: sourceKey ? String(row[sourceKey]).trim() : ''
+                    };
+
+                    if (existingBarcodes.has(barcode.toLowerCase())) {
+                        duplicates.push(record);
+                    } else {
+                        fresh.push(record);
+                    }
+                });
+
+                res.json({
+                    fresh: fresh,
+                    duplicates: duplicates,
+                    fileName: req.file.originalname
+                });
+            });
+        });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to process file: ' + err.message });
+    }
+});
+
+app.post('/api/sample-cell/commit', (req, res) => {
+    const { fresh, duplicates, fileName, uploadedBy } = req.body;
+    if (!fresh || !duplicates) return res.status(400).json({ error: 'Invalid payload.' });
+
+    const allRecords = [...fresh, ...duplicates];
+    if (allRecords.length === 0) return res.status(400).json({ error: 'No records to commit.' });
+
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+
+        const stmt = db.prepare(`
+            INSERT INTO sample_cell_data (
+                sNo, barcode, sampleCode, isNumber, testingType, labName, 
+                sampleReceivedOn, timeLagDays, reportIssuedOn, sampleStatus, reportStatus, source
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(barcode) DO UPDATE SET
+                sampleCode=excluded.sampleCode,
+                isNumber=excluded.isNumber,
+                testingType=excluded.testingType,
+                labName=excluded.labName,
+                sampleReceivedOn=excluded.sampleReceivedOn,
+                timeLagDays=excluded.timeLagDays,
+                reportIssuedOn=excluded.reportIssuedOn,
+                sampleStatus=excluded.sampleStatus,
+                reportStatus=excluded.reportStatus,
+                source=excluded.source
+        `);
+
+        allRecords.forEach(r => {
+            stmt.run(r.sNo, r.barcode, r.sampleCode, r.isNumber, r.testingType, r.labName, r.sampleReceivedOn, r.timeLagDays, r.reportIssuedOn, r.sampleStatus, r.reportStatus, r.source);
+        });
+        stmt.finalize();
+
+        const batchId = 'SC-BATCH-' + Date.now();
+        db.run(`
+            INSERT INTO sample_cell_history (batchId, uploadDate, fileName, sampleCount, duplicateCount, uploadedBy)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `, [batchId, new Date().toISOString(), fileName, fresh.length, duplicates.length, uploadedBy], function(err) {
+            if (err) {
+                db.run('ROLLBACK');
+                return res.status(500).json({ error: 'Audit log failed: ' + err.message });
+            }
+            db.run('COMMIT', (err) => {
+                if (err) return res.status(500).json({ error: 'Transaction failed: ' + err.message });
+                res.json({ message: `Successfully committed ${allRecords.length} records. Batch: ${batchId}` });
+            });
+        });
+    });
+});
+
+app.get('/api/sample-cell/history', (req, res) => {
+    db.all('SELECT * FROM sample_cell_history ORDER BY id DESC', [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ history: rows || [] });
+    });
+});
+
+app.get('/api/sample-cell/data', (req, res) => {
+    db.all('SELECT * FROM sample_cell_data ORDER BY id DESC', [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        let over15 = 0;
+        let over30 = 0;
+        let over45 = 0;
+        let over60 = 0;
+        let over90 = 0;
+        let totalPending = 0;
+
+        const now = new Date();
+
+        const dataWithAge = rows.map(r => {
+            let ageDays = 0;
+            if (r.sampleReceivedOn) {
+                // Normalize separators to hyphens
+                const cleanDate = r.sampleReceivedOn.replace(/[\/\.]/g, '-').trim();
+                const parts = cleanDate.split('-');
+                let receivedDate = null;
+                
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) {
+                        // yyyy-mm-dd
+                        receivedDate = new Date(`${parts[0]}-${parts[1]}-${parts[2]}T00:00:00`);
+                    } else if (parts[2].length === 4) {
+                        // dd-mm-yyyy
+                        receivedDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`);
+                    }
+                } 
+                
+                if (!receivedDate || isNaN(receivedDate.getTime())) {
+                    // Fallback to native parsing
+                    receivedDate = new Date(r.sampleReceivedOn);
+                }
+
+                if (receivedDate && !isNaN(receivedDate.getTime())) {
+                    ageDays = Math.floor((now - receivedDate) / (1000 * 60 * 60 * 24));
+                    // Ensure age is never negative
+                    if (ageDays < 0) ageDays = 0;
+                }
+            }
+
+            if (r.reportStatus !== 'Report Issued') {
+                totalPending++;
+                if (ageDays > 90) over90++;
+                else if (ageDays > 60) over60++;
+                else if (ageDays > 45) over45++;
+                else if (ageDays > 30) over30++;
+                else if (ageDays > 15) over15++;
+            }
+
+            return { ...r, ageDays };
+        });
+
+        res.json({
+            data: dataWithAge,
+            analytics: { over15, over30, over45, over60, over90, totalPending }
+        });
+    });
+});
+
+app.delete('/api/sample-cell/data', (req, res) => {
+    db.run('DELETE FROM sample_cell_data', function(err) {
+        if (err) return res.status(500).json({ error: 'Failed to delete confidential data: ' + err.message });
+        res.json({ message: 'All confidential data successfully wiped from the local vault.' });
+    });
 });
 
 // Export for Vercel serverless + listen locally

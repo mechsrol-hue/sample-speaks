@@ -140,6 +140,37 @@ function initializeTables() {
                 FOREIGN KEY(recommendedEmployeeId) REFERENCES employee_profiles(id)
             )
         `);
+
+        // --- SAMPLE CELL CONFIDENTIAL DATA ---
+        db.run(`
+            CREATE TABLE IF NOT EXISTS sample_cell_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                sNo TEXT,
+                barcode TEXT UNIQUE,
+                sampleCode TEXT,
+                isNumber TEXT,
+                testingType TEXT,
+                labName TEXT,
+                sampleReceivedOn TEXT,
+                timeLagDays TEXT,
+                reportIssuedOn TEXT,
+                sampleStatus TEXT,
+                reportStatus TEXT,
+                source TEXT
+            )
+        `);
+
+        db.run(`
+            CREATE TABLE IF NOT EXISTS sample_cell_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                batchId TEXT UNIQUE,
+                uploadDate TEXT,
+                fileName TEXT,
+                sampleCount INTEGER,
+                duplicateCount INTEGER,
+                uploadedBy TEXT
+            )
+        `);
     });
 }
 

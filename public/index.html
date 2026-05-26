@@ -603,8 +603,42 @@
                 <button class="primary" onclick="commitUpload()" id="commit-btn">Commit to Master</button>
             </div>
         </div>
+        </div>
     </div>
 
+    <!-- Sample Cell Confidential Review Modal -->
+    <div id="sc-review-modal" class="modal">
+        <div class="modal-content large-modal glass-panel">
+            <h3 style="color: var(--accent);">🔄 Sample Cell Reconciliation Engine</h3>
+            <p style="font-size:0.9rem; color:var(--text-muted);">Review fresh injects and duplicates before committing to the local vault. Duplicates will be safely updated.</p>
+            
+            <div class="review-split">
+                <div class="review-section">
+                    <h4 style="color: var(--success);">✅ Fresh Inject (<span id="sc-fresh-count">0</span>)</h4>
+                    <div class="table-container small-table" style="border: 1px solid rgba(16, 185, 129, 0.2); max-height: 280px;">
+                        <table>
+                            <thead><tr><th>Barcode</th><th>Sample Code</th><th>IS Number</th><th>Testing Type</th><th>Lab</th><th>Received On</th><th>Status</th></tr></thead>
+                            <tbody id="sc-fresh-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="review-section">
+                    <h4 style="color: var(--danger);">⚠️ Duplicates to Update (<span id="sc-duplicate-count">0</span>)</h4>
+                    <div class="table-container small-table" style="border: 1px solid rgba(239, 68, 68, 0.2); max-height: 280px;">
+                        <table>
+                            <thead><tr><th>Barcode</th><th>Sample Code</th><th>IS Number</th><th>Testing Type</th><th>Lab</th><th>Received On</th><th>Status</th></tr></thead>
+                            <tbody id="sc-duplicate-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top:20px;">
+                <button onclick="closeScReviewModal()" style="background: transparent; border: 1px solid var(--border-light);">Cancel Upload</button>
+                <button class="primary" onclick="commitSampleCellUpload()" id="sc-commit-btn">💾 Commit to Local Vault</button>
+            </div>
+        </div>
+    </div>
 
 
     <!-- PDF Preview Modal -->
@@ -692,6 +726,112 @@
         </div>
     </div>
 
+    <!-- Sample Cell Dashboard Container -->
+    <div id="sample-cell-dashboard" class="container" style="display:none;">
+        <header>
+            <div class="brand">
+                <h1>Sample Cell Secure Analytics</h1>
+                <p>Welcome, Sample Cell Admin</p>
+            </div>
+            <button class="logout-btn" onclick="logout()">Secure Logout</button>
+        </header>
+
+        <!-- KPI / Overview -->
+        <div class="kpi-row">
+            <div class="kpi-card glass-panel danger-kpi clickable" onclick="filterSampleCellData(15, 30)">
+                <h4>15 - 30 Days Pending</h4>
+                <div id="sc-kpi-15" class="kpi-val">0</div>
+            </div>
+            <div class="kpi-card glass-panel danger-kpi clickable" onclick="filterSampleCellData(30, 45)">
+                <div style="color:var(--warning); font-size:0.8rem; font-weight:600; text-transform:uppercase; margin-bottom:5px;">30 - 45 Days Pending</div>
+                <div id="sc-kpi-30" class="kpi-val">0</div>
+            </div>
+            <div class="kpi-card glass-panel danger-kpi clickable" onclick="filterSampleCellData(45, 60)">
+                <div style="color:var(--danger); font-size:0.8rem; font-weight:600; text-transform:uppercase; margin-bottom:5px;">45 - 60 Days Pending</div>
+                <div id="sc-kpi-45" class="kpi-val">0</div>
+            </div>
+            <div class="kpi-card glass-panel danger-kpi clickable" onclick="filterSampleCellData(60, 90)">
+                <div style="color:var(--danger); font-size:0.8rem; font-weight:600; text-transform:uppercase; margin-bottom:5px;">60 - 90 Days Pending</div>
+                <div id="sc-kpi-60" class="kpi-val">0</div>
+            </div>
+            <div class="kpi-card glass-panel danger-kpi clickable" onclick="filterSampleCellData(90, Infinity)" style="border-left: 4px solid var(--danger);">
+                <div style="color:var(--danger); font-size:0.8rem; font-weight:bold; text-transform:uppercase; margin-bottom:5px;">> 90 Days Pending</div>
+                <div id="sc-kpi-90" class="kpi-val">0</div>
+            </div>
+            <div class="kpi-card glass-panel clickable" onclick="filterSampleCellData(0, Infinity)" style="border-left: 4px solid var(--primary);">
+                <h4>All Pending</h4>
+                <div id="sc-kpi-all" class="kpi-val">0</div>
+            </div>
+        </div>
+
+        <div class="admin-panel glass-panel" style="margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>Upload Engine</h3>
+            </div>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom: 15px;">Upload the Sample Cell master format. Duplicate Barcodes will be automatically updated.</p>
+            
+            <div id="sc-drag-drop-zone" class="upload-zone" onclick="document.getElementById('sc-excel-file').click()">
+                <span class="upload-icon">🔒</span>
+                <h4>Drag & Drop Sample Cell Excel Here</h4>
+                <p>or click to browse</p>
+                <input type="file" id="sc-excel-file" accept=".xlsx,.xls" style="display: none;" onchange="handleScFileSelect(event)">
+            </div>
+            <div id="sc-file-info" style="display:none; text-align: center; margin-top: 10px; color: var(--success); font-weight: bold;"></div>
+            <button id="sc-analyze-btn" onclick="analyzeSampleCellExcel()" style="width: 100%; margin-top: 15px; font-size: 1.1rem; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer;">🔍 Analyze Document</button>
+        </div>
+
+        <div class="table-section-header" style="display:flex; align-items:center; justify-content:space-between; margin-top:30px; margin-bottom:10px;">
+            <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">📋 Confidential Sample Data</h3>
+            <div style="display:flex; gap: 10px;">
+                <button onclick="toggleScAuditLogs()" style="background:var(--accent); color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:600; cursor:pointer;">📜 View Audit Logs</button>
+                <button onclick="wipeSampleCellData()" style="background:var(--danger); color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:600; cursor:pointer;">🗑️ Delete All Database</button>
+            </div>
+        </div>
+        <div class="table-container glass-panel">
+            <table>
+                <thead>
+                    <tr>
+                        <th>S.No.</th>
+                        <th>Barcode</th>
+                        <th>Sample Code</th>
+                        <th>IS Number</th>
+                        <th>Testing Type</th>
+                        <th>Lab Name</th>
+                        <th>Received On</th>
+                        <th>Age (Days)</th>
+                        <th>Report Issued On</th>
+                        <th>Sample Status</th>
+                    </tr>
+                </thead>
+                <tbody id="sample-cell-tbody">
+                    <!-- Rows rendered dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="sc-audit-logs-container" style="display: none; margin-top: 30px;">
+            <div class="table-section-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">📜 Audit Logs (Local Vault)</h3>
+            </div>
+            <div class="table-container glass-panel">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Batch ID</th>
+                            <th>Upload Date</th>
+                            <th>File Name</th>
+                            <th>Samples</th>
+                            <th>Duplicates Updated</th>
+                            <th>Uploaded By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sc-audit-log-body">
+                        <tr><td colspan="6" style="text-align:center;">No history found in local vault.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     <script src="specs_db.js"></script>
     <script src="app.js"></script>
 </body>

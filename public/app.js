@@ -65,15 +65,33 @@ async function login() {
         if (res.ok) {
             currentUser = data.user;
             document.getElementById('auth-container').classList.remove('active');
-            document.getElementById('dashboard-container').classList.add('active');
-            document.getElementById('user-welcome').textContent = `Welcome, ${currentUser.username} (Role: ${currentUser.role})`;
             
-            document.getElementById('admin-tabs').style.display = 'flex';
-            toggleAdminViews();
-            switchTab('tab-dashboard');
+            if (currentUser.role === 'admin_sample_cell') {
+                const sidebarNav = document.getElementById('sidebar-nav');
+                if (sidebarNav) sidebarNav.style.display = 'none';
+                
+                const mainHeader = document.getElementById('main-header');
+                if (mainHeader) mainHeader.style.display = 'none';
+                
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                
+                const scDashboard = document.getElementById('sample-cell-dashboard');
+                if (scDashboard) scDashboard.style.display = 'block';
+                
+                loadSampleCellData();
+                fetchScAuditLog();
+                return;
+            } else {
+                document.getElementById('dashboard-container').classList.add('active');
+                document.getElementById('user-welcome').textContent = `Welcome, ${currentUser.username} (Role: ${currentUser.role})`;
+                
+                document.getElementById('admin-tabs').style.display = 'flex';
+                toggleAdminViews();
+                switchTab('tab-dashboard');
+                fetchSamples();
+            }
             
             showToast(`Welcome back, ${currentUser.username}!`, 'success');
-            fetchSamples();
         } else {
             showToast(data.error, 'error');
         }
@@ -84,6 +102,7 @@ function logout() {
     currentUser = null;
     toggleAdminViews();
     document.getElementById('dashboard-container').classList.remove('active');
+    document.getElementById('sample-cell-dashboard').style.display = 'none';
     document.getElementById('auth-container').classList.add('active');
     document.getElementById('admin-tabs').style.display = 'none';
     document.getElementById('username').value = '';
@@ -1896,3 +1915,289 @@ async function rejectRecommendation(id) {
     } catch (err) { console.error(err); }
 }
 
+// ==========================================
+// SAMPLE CELL CONFIDENTIAL // State for Confidential Sample Cell
+let currentScData = [];
+let scSelectedFile = null;
+let scFreshData = [];
+let scDuplicateData = [];
+let scFileName = '';
+let currentScFilterMin = 0;
+let currentScFilterMax = Infinity;
+
+function handleScFileSelect(event) {
+    scSelectedFile = event.target.files[0];
+    if (scSelectedFile) {
+        const info = document.getElementById('sc-file-info');
+        info.textContent = `Selected: ${scSelectedFile.name}`;
+        info.style.display = 'block';
+    }
+}
+
+function setupScDragAndDrop() {
+    const dropZone = document.getElementById('sc-drag-drop-zone');
+    if (!dropZone) return;
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        document.getElementById('sc-excel-file').files = files;
+        handleScFileSelect({ target: { files: files } });
+    }, false);
+}
+setupScDragAndDrop();
+
+async function analyzeSampleCellExcel() {
+    if (!scSelectedFile) return showToast('Please select an Excel file first.', 'error');
+    
+    const formData = new FormData();
+    formData.append('file', scSelectedFile);
+
+    // Safely find the button regardless of which attribute it uses
+    const btn = document.getElementById('sc-analyze-btn');
+    if (btn) { btn.textContent = 'Analyzing...'; btn.disabled = true; }
+
+    try {
+        const res = await fetch('/api/sample-cell/upload', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+            scFreshData = data.fresh;
+            scDuplicateData = data.duplicates;
+            scFileName = data.fileName;
+            
+            document.getElementById('sc-fresh-count').textContent = scFreshData.length;
+            document.getElementById('sc-duplicate-count').textContent = scDuplicateData.length;
+            
+            const freshTbody = document.getElementById('sc-fresh-tbody');
+            freshTbody.innerHTML = '';
+            if (scFreshData.length === 0) {
+                freshTbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No new records</td></tr>';
+            } else {
+                scFreshData.forEach(r => {
+                    freshTbody.innerHTML += `<tr>
+                        <td><strong>${r.barcode || '-'}</strong></td>
+                        <td>${r.sampleCode || '-'}</td>
+                        <td>${r.isNumber || '-'}</td>
+                        <td>${r.testingType || '-'}</td>
+                        <td>${r.labName || '-'}</td>
+                        <td>${r.sampleReceivedOn || '-'}</td>
+                        <td><span style="color:var(--success); font-weight:600;">${r.sampleStatus || '-'}</span></td>
+                    </tr>`;
+                });
+            }
+
+            const dupTbody = document.getElementById('sc-duplicate-tbody');
+            dupTbody.innerHTML = '';
+            if (scDuplicateData.length === 0) {
+                dupTbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No duplicates</td></tr>';
+            } else {
+                scDuplicateData.forEach(r => {
+                    dupTbody.innerHTML += `<tr style="background:rgba(239,68,68,0.04);">
+                        <td><strong>${r.barcode || '-'}</strong></td>
+                        <td>${r.sampleCode || '-'}</td>
+                        <td>${r.isNumber || '-'}</td>
+                        <td>${r.testingType || '-'}</td>
+                        <td>${r.labName || '-'}</td>
+                        <td>${r.sampleReceivedOn || '-'}</td>
+                        <td><span style="color:var(--warning); font-weight:600;">${r.sampleStatus || '-'}</span></td>
+                    </tr>`;
+                });
+            }
+            
+            // Use classList to properly show modal with overlay
+            document.getElementById('sc-review-modal').classList.add('active');
+        } else {
+            showToast(data.error || 'Analysis failed. Check file format.', 'error');
+        }
+    } catch (e) {
+        console.error(e);
+        showToast('Analysis failed. Please try again.', 'error');
+    } finally {
+        if (btn) { btn.textContent = 'Analyze Document'; btn.disabled = false; }
+    }
+}
+
+function closeScReviewModal() {
+    document.getElementById('sc-review-modal').classList.remove('active');
+}
+
+async function commitSampleCellUpload() {
+    const btn = document.getElementById('sc-commit-btn');
+    btn.textContent = 'Committing...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch('/api/sample-cell/commit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fresh: scFreshData,
+                duplicates: scDuplicateData,
+                fileName: scFileName,
+                uploadedBy: currentUser ? currentUser.username : 'Unknown'
+            })
+        });
+        
+        const data = await res.json();
+        if (res.ok) {
+            showToast(data.message, 'success');
+            closeScReviewModal();
+            scSelectedFile = null;
+            document.getElementById('sc-file-info').style.display = 'none';
+            document.getElementById('sc-excel-file').value = '';
+            loadSampleCellData();
+            fetchScAuditLog();
+        } else {
+            showToast(data.error, 'error');
+        }
+    } catch (e) {
+        console.error(e);
+        showToast('Commit failed.', 'error');
+    } finally {
+        btn.textContent = 'Commit to Local Vault';
+        btn.disabled = false;
+    }
+}
+
+async function fetchScAuditLog() {
+    try {
+        const res = await fetch('/api/sample-cell/history');
+        const data = await res.json();
+        if (res.ok) {
+            const tbody = document.getElementById('sc-audit-log-body');
+            if (data.history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No history found in local vault.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            data.history.forEach(log => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; font-family:monospace;">${log.batchId}</span></td>
+                        <td>${new Date(log.uploadDate).toLocaleString()}</td>
+                        <td>${log.fileName}</td>
+                        <td><span style="color:var(--success); font-weight:bold;">+${log.sampleCount}</span></td>
+                        <td><span style="color:var(--danger); font-weight:bold;">${log.duplicateCount}</span></td>
+                        <td>${log.uploadedBy}</td>
+                    </tr>
+                `;
+            });
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function loadSampleCellData() {
+    try {
+        const res = await fetch('/api/sample-cell/data');
+        const data = await res.json();
+        if (res.ok) {
+            currentScData = data.data;
+            document.getElementById('sc-kpi-15').textContent = data.analytics.over15;
+            document.getElementById('sc-kpi-30').textContent = data.analytics.over30;
+            document.getElementById('sc-kpi-45').textContent = data.analytics.over45;
+            document.getElementById('sc-kpi-60').textContent = data.analytics.over60;
+            document.getElementById('sc-kpi-90').textContent = data.analytics.over90;
+            document.getElementById('sc-kpi-all').textContent = data.analytics.totalPending;
+            renderSampleCellTable();
+        }
+    } catch (e) { console.error(e); }
+}
+
+function filterSampleCellData(minDays, maxDays) {
+    currentScFilterMin = minDays;
+    currentScFilterMax = maxDays;
+    renderSampleCellTable();
+}
+
+function renderSampleCellTable() {
+    const tbody = document.getElementById('sample-cell-tbody');
+    tbody.innerHTML = '';
+
+    const filtered = currentScData.filter(r => {
+        // Always filter out fully completed reports FIRST
+        if (r.reportStatus === 'Report Issued') return false;
+        
+        // If "All Pending" is clicked, show everything that wasn't filtered above
+        if (currentScFilterMin === 0 && currentScFilterMax === Infinity) return true;
+        
+        // Otherwise, filter by age band
+        return r.ageDays > currentScFilterMin && r.ageDays <= currentScFilterMax;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">No records found.</td></tr>';
+        return;
+    }
+
+    filtered.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${row.sNo || '-'}</td>
+            <td><strong>${row.barcode || '-'}</strong></td>
+            <td>${row.sampleCode || '-'}</td>
+            <td>${row.isNumber || '-'}</td>
+            <td>${row.testingType || '-'}</td>
+            <td>${row.labName || '-'}</td>
+            <td>${row.sampleReceivedOn || '-'}</td>
+            <td><span style="color:${row.ageDays > 90 ? 'var(--danger)' : row.ageDays > 60 ? 'var(--warning)' : row.ageDays > 30 ? 'var(--accent)' : 'inherit' }">${row.ageDays}</span></td>
+            <td>${row.reportIssuedOn || '-'}</td>
+            <td>${row.sampleStatus || '-'}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+async function wipeSampleCellData() {
+    if (!confirm('WARNING: Are you sure you want to permanently delete ALL confidential sample records? This cannot be undone.')) return;
+    try {
+        const res = await fetch('/api/sample-cell/data', { method: 'DELETE' });
+        const data = await res.json();
+        if (res.ok) {
+            showToast(data.message, 'success');
+            loadSampleCellData();
+            fetchScAuditLog();
+        } else {
+            showToast(data.error, 'error');
+        }
+    } catch (e) {
+        console.error(e);
+        showToast('Failed to wipe data.', 'error');
+    }
+}
+
+function toggleScAuditLogs() {
+    const container = document.getElementById('sc-audit-logs-container');
+    const btn = document.querySelector('button[onclick="toggleScAuditLogs()"]');
+    if (!container) return;
+
+    const isHidden = container.style.display === 'none' || container.style.display === '';
+    if (isHidden) {
+        container.style.display = 'block';
+        if (btn) btn.textContent = '📜 Hide Audit Logs';
+        // Always fetch fresh data when opening
+        fetchScAuditLog();
+        // Smooth scroll to the logs
+        setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    } else {
+        container.style.display = 'none';
+        if (btn) btn.textContent = '📜 View Audit Logs';
+    }
+}
