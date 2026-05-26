@@ -132,6 +132,20 @@ app.post('/api/admin/create-tp', async (req, res) => {
     res.json({ message: `Successfully created TP account for ${username}` });
 });
 
+// --- SYSTEM_FIELDS: Two-Layer Column Matching ---
+const SYSTEM_FIELDS = {
+    encodedCode: { synonyms: ['encoded code', 'encoded sample', 'encodedcode', 'encode', 'sample code', 'samplecode', 'sample no', 'sample number'], contentTest: (vals) => vals.some(v => /^[0-9]{2}[A-Z]{1,2}[0-9]+[A-Z]?$/i.test(v)) },
+    isNumber: { synonyms: ['is number', 'isnumber', 'is_number', 'is no', 'indian standard', 'standard'], contentTest: (vals) => vals.some(v => /^(IS\s*)?\d{3,5}/.test(v)) },
+    quantity: { synonyms: ['quantity', 'qty'] },
+    priorityLevel: { synonyms: ['priority', 'priority level'] },
+    receivedOn: { synonyms: ['received on', 'receivedon', 'sample received on', 'received_on', 'received date', 'date received', 'recv dt'], contentTest: (vals) => vals.some(v => !isNaN(v) || /\d{2}[-\/]\d{2}[-\/]\d{2,4}/.test(v)) },
+    forwardedOn: { synonyms: ['forwarded on', 'forwardedon', 'sample forwarded on', 'forwarded_on', 'forwarded date'], contentTest: (vals) => vals.some(v => !isNaN(v) || /\d{2}[-\/]\d{2}[-\/]\d{2,4}/.test(v)) },
+    assignedTo: { synonyms: ['assigned to', 'tp name', 'assignedto', 'tpname', 'testing person name', 'testing person', 'tester', 'tester name', 'officer', 'allocated to', 'allocatedto', 'tp', 'tp_name', 'testing_person', 'tp name standard'], contentTest: null },
+    totalTest: { synonyms: ['total test', 'totaltest', 'total tests'] },
+    pendingTest: { synonyms: ['pending test', 'pendingtest', 'pending tests'] },
+    approvedTest: { synonyms: ['approved test', 'approvedtest', 'approved tests'] }
+};
+
 // Upload Parsing — fully async, safe for 500-1000+ row files
 app.post('/api/upload', upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
@@ -165,80 +179,102 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
         const knownTPs = new Set(userRows.map(u => u.username.toLowerCase().trim()));
 
-        // Column header finder — flexible match
-        const findKey = (row, searchStrings) => {
-            const keys = Object.keys(row);
-            return keys.find(k =>
-                searchStrings.some(s =>
-                    k.toLowerCase() === s.toLowerCase() ||
-                    k.toLowerCase().includes(s.toLowerCase())
-                )
-            );
-        };
+        // --- Layer 1: Header Synonym Matching ---
+        const allHeaders = Object.keys(rows[0]);
+        const columnMap = {};           // { systemField: excelColumnName }
+        const matchedHeaders = new Set(); // track which Excel headers are already matched
+        const recognizedMappings = [];  // [{originalName, mappedTo, confidence}]
 
-        const freshSamples = [];
-        const duplicateSamples = [];
+        for (const [field, config] of Object.entries(SYSTEM_FIELDS)) {
+            for (const header of allHeaders) {
+                if (matchedHeaders.has(header)) continue;
+                const hLower = header.toLowerCase().trim();
+                const matched = config.synonyms.some(s => hLower === s.toLowerCase() || hLower.includes(s.toLowerCase()));
+                if (matched) {
+                    columnMap[field] = header;
+                    matchedHeaders.add(header);
+                    recognizedMappings.push({ originalName: header, mappedTo: field, confidence: 'synonym' });
+                    break;
+                }
+            }
+        }
 
-        // 1. Identify all keys once before the loop to optimize performance and introduce robust matching logic
-        const tpSearchHeaders = [
-            'assigned to', 'tp name', 'assignedto', 'tpname', 
-            'testing person name', 'testing person', 'tester', 
-            'tester name', 'chemist', 'chemist name', 'analyst', 
-            'analyst name', 'officer', 'allocated to', 'allocatedto', 
-            'tp', 'tp_name', 'testing_person', 'tp name standard'
-        ];
-
-        let assignedToKey = findKey(rows[0], tpSearchHeaders);
-
-        // Fallback value-matching heuristic: check if any column's content matches existing TP names in the database
-        if (!assignedToKey && knownTPs.size > 0 && rows.length > 0) {
-            const keys = Object.keys(rows[0]);
+        // Fallback for assignedTo: value-matching heuristic against known TP names
+        if (!columnMap.assignedTo && knownTPs.size > 0 && rows.length > 0) {
             let bestKey = null;
             let maxMatches = 0;
-            
-            keys.forEach(key => {
+            for (const key of allHeaders) {
+                if (matchedHeaders.has(key)) continue;
                 let matchCount = 0;
                 let nonEmptyCount = 0;
-                
                 const sampleLimit = Math.min(rows.length, 100);
                 for (let i = 0; i < sampleLimit; i++) {
                     if (!rows[i] || typeof rows[i] !== 'object') continue;
                     const val = String(rows[i][key] || '').trim().toLowerCase();
                     if (val) {
                         nonEmptyCount++;
-                        if (knownTPs.has(val)) {
-                            matchCount++;
-                        }
+                        if (knownTPs.has(val)) matchCount++;
                     }
                 }
-                
-                // Match criteria: must have highest match count and represent >= 20% of non-empty sampled entries
                 if (nonEmptyCount > 0 && matchCount > maxMatches && (matchCount / nonEmptyCount) >= 0.20) {
                     maxMatches = matchCount;
                     bestKey = key;
                 }
-            });
-            
+            }
             if (bestKey) {
-                assignedToKey = bestKey;
-                console.log(`Smart Fallback: Dynamically identified TP column by cell contents -> "${assignedToKey}"`);
+                columnMap.assignedTo = bestKey;
+                matchedHeaders.add(bestKey);
+                recognizedMappings.push({ originalName: bestKey, mappedTo: 'assignedTo', confidence: 'value-heuristic' });
+                console.log(`Smart Fallback: Dynamically identified TP column by cell contents -> "${bestKey}"`);
             }
         }
 
-        if (!assignedToKey) {
+        if (!columnMap.assignedTo) {
             console.log("No Assigned To column found. All samples will be placed in the Unassigned Pool.");
         }
 
-        // Map other headers once before entering the row-by-row parsing loop
-        const encodedCodeKey = findKey(rows[0], ['encoded code', 'encoded sample', 'encodedcode', 'encode', 'sample code', 'samplecode']);
-        const isNumberKey    = findKey(rows[0], ['is number', 'isnumber', 'is_number']);
-        const quantityKey    = findKey(rows[0], ['quantity', 'qty']);
-        const priorityKey    = findKey(rows[0], ['priority']);
-        const receivedOnKey  = findKey(rows[0], ['received on', 'receivedon', 'sample received on', 'received_on', 'received date']);
-        const forwardedOnKey = findKey(rows[0], ['forwarded on', 'forwardedon', 'sample forwarded on', 'forwarded_on', 'forwarded date']);
-        const totalTestKey   = findKey(rows[0], ['total test', 'totaltest']);
-        const pendingTestKey = findKey(rows[0], ['pending test', 'pendingtest']);
-        const approvedTestKey= findKey(rows[0], ['approved test', 'approvedtest']);
+        // --- Layer 2: Content Profiling for Unmatched Columns ---
+        const ambiguousMappings = []; // [{originalName, sampleValues, suggestions}]
+        const unmatchedHeaders = allHeaders.filter(h => !matchedHeaders.has(h));
+
+        for (const header of unmatchedHeaders) {
+            // Sample first 50 non-empty values
+            const sampleVals = [];
+            for (let i = 0; i < rows.length && sampleVals.length < 50; i++) {
+                const val = String(rows[i][header] || '').trim();
+                if (val) sampleVals.push(val);
+            }
+            if (sampleVals.length === 0) continue; // skip fully empty columns
+
+            const suggestions = [];
+            for (const [field, config] of Object.entries(SYSTEM_FIELDS)) {
+                if (columnMap[field]) continue; // already matched
+                if (config.contentTest && config.contentTest(sampleVals)) {
+                    suggestions.push(field);
+                }
+            }
+
+            if (suggestions.length > 0) {
+                ambiguousMappings.push({ originalName: header, sampleValues: sampleVals.slice(0, 5), suggestions });
+            } else {
+                ambiguousMappings.push({ originalName: header, sampleValues: sampleVals.slice(0, 5), suggestions: [] });
+            }
+        }
+
+        // --- Parse samples using recognized columns ---
+        const freshSamples = [];
+        const duplicateSamples = [];
+
+        const encodedCodeKey = columnMap.encodedCode;
+        const isNumberKey    = columnMap.isNumber;
+        const quantityKey    = columnMap.quantity;
+        const priorityKey    = columnMap.priorityLevel;
+        const receivedOnKey  = columnMap.receivedOn;
+        const forwardedOnKey = columnMap.forwardedOn;
+        const assignedToKey  = columnMap.assignedTo;
+        const totalTestKey   = columnMap.totalTest;
+        const pendingTestKey = columnMap.pendingTest;
+        const approvedTestKey= columnMap.approvedTest;
 
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
@@ -254,12 +290,6 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
             const rawAssigned = assignedToKey ? String(row[assignedToKey] || '').trim() : '';
             const cleanAssigned = cleanName(rawAssigned);
-            
-            // Allow upload if "Assigned To" is blank or missing for this sample
-            // They will go to the Unassigned Pool.
-            if (!cleanAssigned) {
-                // Not throwing error anymore
-            }
 
             const receivedOn = receivedOnKey ? excelDateToString(row[receivedOnKey]) : '';
             const forwardedOn = forwardedOnKey ? excelDateToString(row[forwardedOnKey]) : receivedOn;
@@ -295,12 +325,20 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
         )];
         const newTPs = tpNamesInFile.filter(name => !knownTPs.has(name.toLowerCase().trim()));
 
+        // Detect TA names with no user account (missingAccounts)
+        const missingAccounts = newTPs.slice(); // same as newTPs for now
+
         res.json({
             freshSamples,
             duplicateSamples,
             newTPs,
             fileName: req.file.originalname,
-            message: `Parsed ${freshSamples.length} fresh + ${duplicateSamples.length} duplicate records.`
+            message: `Parsed ${freshSamples.length} fresh + ${duplicateSamples.length} duplicate records.`,
+            columnMapping: {
+                recognized: recognizedMappings,
+                ambiguous: ambiguousMappings
+            },
+            missingAccounts
         });
 
     } catch (err) {
@@ -312,40 +350,54 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
 // Confirm and Insert Fresh Samples & Approved Re-allotted Duplicates
 app.post('/api/confirm-upload', async (req, res) => {
-    const { samples, duplicates, duplicateCount, fileName, uploadedBy } = req.body;
+    const { samples, duplicates, duplicateCount, fileName, uploadedBy, columnMappingLog } = req.body;
     if (!samples || !Array.isArray(samples)) return res.status(400).json({ error: 'Invalid sample data provided.' });
     if (samples.length === 0) return res.json({ message: 'No new records to commit.' });
 
     const batchId = 'BATCH-' + Date.now();
 
-    const upsertArray = samples.map(s => ({
-        encodedCode: s.encodedCode,
-        isNumber: s.isNumber,
-        quantity: s.quantity,
-        priorityLevel: s.priorityLevel,
-        receivedOn: s.receivedOn,
-        forwardedOn: s.forwardedOn,
-        assignedTo: s.assignedTo || null,
-        totalTest: s.totalTest,
-        pendingTest: s.pendingTest,
-        approvedTest: s.approvedTest,
-        uploadBatchId: batchId,
-        appStatus: 'Pending'
-    }));
+    // Check which TPs have user accounts
+    const uniqueTPs = [...new Set(samples.map(s => s.assignedTo).filter(Boolean))];
+    const tpAccountStatus = {};
+    for (const tp of uniqueTPs) {
+        const { data: user } = await supabase.from('users').select('id').eq('username', tp).single();
+        tpAccountStatus[tp] = !!user;
+    }
+
+    const upsertArray = samples.map(s => {
+        let appStatus = 'Pending';
+        if (s.assignedTo && !tpAccountStatus[s.assignedTo]) {
+            appStatus = 'PendingAccount';
+        }
+        return {
+            encodedCode: s.encodedCode,
+            isNumber: s.isNumber,
+            quantity: s.quantity,
+            priorityLevel: s.priorityLevel,
+            receivedOn: s.receivedOn,
+            forwardedOn: s.forwardedOn,
+            assignedTo: s.assignedTo || null,
+            totalTest: s.totalTest,
+            pendingTest: s.pendingTest,
+            approvedTest: s.approvedTest,
+            uploadBatchId: batchId,
+            appStatus
+        };
+    });
 
     const { error: upsertErr } = await supabase.from('samples').upsert(upsertArray, { onConflict: 'encodedCode' });
     if (upsertErr) return res.status(500).json({ error: 'Batch insert failed: ' + upsertErr.message });
 
-    const uniqueTPs = [...new Set(samples.map(s => s.assignedTo).filter(Boolean))];
+    // Create accounts for TPs that don't exist
     for (const tp of uniqueTPs) {
-        const { data: user } = await supabase.from('users').select('id').eq('username', tp).single();
-        if (!user) {
+        if (!tpAccountStatus[tp]) {
             await supabase.from('users').insert({ username: tp, password: '1234', role: 'tp' });
         }
     }
 
+    // Store full duplicate objects (not just encodedCode)
     const duplicatesJson = JSON.stringify(duplicates || []);
-    const { error: histErr } = await supabase.from('upload_history').insert({
+    const historyRecord = {
         batchId: batchId,
         uploadDate: new Date().toISOString(),
         fileName: fileName || 'Unknown.xlsx',
@@ -353,7 +405,14 @@ app.post('/api/confirm-upload', async (req, res) => {
         duplicateCount: duplicateCount || 0,
         duplicateDetails: duplicatesJson,
         uploadedBy: uploadedBy || 'Admin'
-    });
+    };
+
+    // Save columnMappingLog if provided
+    if (columnMappingLog) {
+        historyRecord.columnMappingLog = typeof columnMappingLog === 'string' ? columnMappingLog : JSON.stringify(columnMappingLog);
+    }
+
+    const { error: histErr } = await supabase.from('upload_history').insert(historyRecord);
     
     if (histErr) console.error('History insert error:', histErr);
     res.json({ message: 'Upload confirmed successfully!' });
@@ -369,10 +428,26 @@ res.json({ history: data });
 // Get Batch Details
 app.get('/api/batch-details/:batchId', async (req, res) => {
     const batchId = req.params.batchId;
-    const { data: samples, error: err1 } = await supabase.from('samples').select('encodedCode, assignedTo, priorityLevel, isNumber').eq('uploadBatchId', batchId);
-const { data: historyRow, error: err2 } = await supabase.from('upload_history').select('duplicateDetails').eq('batchId', batchId).single();
-if (err1 || err2) return res.status(500).json({ error: (err1||err2).message });
-res.json({ samples, duplicateDetails: historyRow ? historyRow.duplicateDetails : '[]' });
+    const { data: samples, error: err1 } = await supabase
+        .from('samples')
+        .select('*')
+        .eq('uploadBatchId', batchId);
+    const { data: historyRow, error: err2 } = await supabase
+        .from('upload_history')
+        .select('*')
+        .eq('batchId', batchId)
+        .single();
+    if (err1 || err2) return res.status(500).json({ error: (err1||err2).message });
+    
+    let duplicates = [];
+    try { duplicates = JSON.parse(historyRow?.duplicateDetails || '[]'); } catch(e) {}
+    
+    res.json({ 
+        samples: samples || [], 
+        duplicates,
+        batchInfo: historyRow || {},
+        columnMappingLog: historyRow?.columnMappingLog || null
+    });
 });
 
 // Get Samples for User
@@ -611,7 +686,19 @@ app.get('/api/admin/employees', async (req, res) => {
             .from('employee_profiles')
             .select('*, users!inner(username)');
         if (error) throw error;
-        const formatted = employees.map(e => ({ ...e, loginUsername: e.users?.username })).sort((a, b) => a.fullName.localeCompare(b.fullName));
+
+        // Compute currentWorkload dynamically from pending samples
+        const { data: pendingSamples } = await supabase.from('samples').select('assignedTo').in('appStatus', ['Pending']);
+        const loadMap = {};
+        (pendingSamples || []).forEach(s => {
+            if (s.assignedTo) loadMap[s.assignedTo] = (loadMap[s.assignedTo] || 0) + 1;
+        });
+
+        const formatted = employees.map(e => ({
+            ...e,
+            loginUsername: e.users?.username,
+            currentWorkload: loadMap[e.fullName] || 0
+        })).sort((a, b) => a.fullName.localeCompare(b.fullName));
         res.json({ employees: formatted });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -635,7 +722,7 @@ app.post('/api/admin/employees', async (req, res) => {
 
     const { error: empErr } = await supabase
         .from('employee_profiles')
-        .insert([{ userId: newUser?.id, fullName, designation: designation || '', maxDailySamples: maxDailySamples || 5 }]);
+        .insert([{ userId: newUser?.id, fullName, designation: designation || '' }]);
 
     if (empErr) return res.status(500).json({ error: empErr.message });
     res.json({ message: 'Employee profile created successfully.' });
@@ -675,12 +762,18 @@ app.get('/api/admin/leaves', async (req, res) => {
 });
 
 app.post('/api/admin/leaves', async (req, res) => {
-    const { employeeId, leaveDate, leaveType, reason } = req.body;
+    const { employeeId, leaveDate, reason } = req.body;
     const { error } = await supabase
         .from('employee_leaves')
-        .upsert([{ employeeId, leaveDate, leaveType: leaveType || 'CL', reason: reason || '' }]);
+        .upsert([{ employeeId, leaveDate, reason: reason || '' }]);
     if (error) return res.status(500).json({ error: error.message });
     res.json({ message: 'Leave added.' });
+});
+
+app.delete('/api/admin/leaves/:id', async (req, res) => {
+    const { error } = await supabase.from('employee_leaves').delete().eq('id', req.params.id);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: 'Leave removed.' });
 });
 
 // --- AUTO-ASSIGNMENT ENGINE ---
@@ -692,75 +785,150 @@ app.get('/api/unassigned-samples', async (req, res) => {
         res.json({ samples });
     } catch (err) {
         res.status(500).json({ error: err.message });
-    }
-});
-
-app.post('/api/auto-assign', async (req, res) => {
+   app.post('/api/auto-assign', async (req, res) => {
     try {
-        const { data: unassignedSamples, error: sampleErr } = await supabase.from('samples').select('*').or('assignedTo.is.null,assignedTo.eq.\'\'');
+        // 1. Get unassigned samples
+        const { data: unassignedSamples, error: sampleErr } = await supabase.from('samples').select('*').or('assignedTo.is.null,assignedTo.eq.');
         if (sampleErr) throw sampleErr;
-        if (unassignedSamples.length === 0) return res.json({ message: 'No unassigned samples found.', recommendations: [] });
+        if (!unassignedSamples || unassignedSamples.length === 0) return res.json({ message: 'No unassigned samples found.', recommendations: [], forcedCount: 0 });
 
-        const todayStr = new Date().toISOString().split('T')[0];
-        const { data: employees } = await supabase.from('employee_profiles').select('*').eq('isActive', 1);
+        // 2. Load preferences
+        let priorityWeight = 5, nonPriorityWeight = 5, leaveWindowDays = 30;
+        try {
+            const { data: prefRows } = await supabase.from('system_preferences').select('*');
+            (prefRows || []).forEach(p => {
+                if (p.key === 'priorityWeight') priorityWeight = parseInt(p.value) || 5;
+                if (p.key === 'nonPriorityWeight') nonPriorityWeight = parseInt(p.value) || 5;
+                if (p.key === 'leaveWindowDays') leaveWindowDays = parseInt(p.value) || 30;
+            });
+        } catch(e) { /* use defaults */ }
+
+        // 3. Load employees, competencies, leaves
+        const { data: employees } = await supabase.from('employee_profiles').select('*');
         const { data: competencies } = await supabase.from('employee_competencies').select('*');
-        const { data: leavesToday } = await supabase.from('employee_leaves').select('employeeId').eq('leaveDate', todayStr);
         
-        const leaveSet = new Set((leavesToday || []).map(l => l.employeeId));
+        // Get leaves within window
+        const today = new Date();
+        const windowEnd = new Date(today.getTime() + leaveWindowDays * 24 * 60 * 60 * 1000);
+        const { data: leavesInWindow } = await supabase.from('employee_leaves').select('employeeId, leaveDate').gte('leaveDate', today.toISOString().split('T')[0]).lte('leaveDate', windowEnd.toISOString().split('T')[0]);
+        
+        // Count leaves per employee
+        const leaveCountMap = {};
+        (leavesInWindow || []).forEach(l => {
+            leaveCountMap[l.employeeId] = (leaveCountMap[l.employeeId] || 0) + 1;
+        });
 
-        let recommendationsGenerated = 0;
-
-        // Build competency map
+        // Build competency map: { isNumber: [{ employeeId, proficiencyLevel }] }
         const compMap = {};
         (competencies || []).forEach(c => {
             if (!compMap[c.isNumber]) compMap[c.isNumber] = [];
             compMap[c.isNumber].push(c);
         });
 
-        // 3. Generate recommendations
+        // Count current pending samples per TA
+        const { data: allPending } = await supabase.from('samples').select('assignedTo').in('appStatus', ['Pending']);
+        const loadMap = {};
+        (allPending || []).forEach(s => {
+            if (s.assignedTo) loadMap[s.assignedTo] = (loadMap[s.assignedTo] || 0) + 1;
+        });
+
+        let recommendationsGenerated = 0;
+        let forcedCount = 0;
+
+        // Clear old pending recommendations
+        await supabase.from('assignment_recommendations').delete().eq('status', 'pending');
+
         for (const sample of unassignedSamples) {
-            if (!sample.isNumber) continue;
-            
-            // Look for matching IS
-            const matchingCompetencies = compMap[sample.isNumber] || [];
+            const matchingComps = compMap[sample.isNumber] || [];
             let bestEmployee = null;
-            let bestScore = -1;
+            let bestScore = -Infinity;
+            let isForced = false;
+            let bestReason = '';
 
-            for (const comp of matchingCompetencies) {
-                if (leaveSet.has(comp.employeeId)) continue; // Skip if on leave today
+            // Calculate sample age (FIFO boost)
+            let sampleAge = 0;
+            if (sample.receivedOn) {
+                const parts = sample.receivedOn.split('-');
+                if (parts.length === 3) {
+                    const recDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                    sampleAge = Math.floor((today - recDate) / (1000 * 60 * 60 * 24));
+                }
+            }
 
+            // Priority boost
+            const isPriority = (sample.priorityLevel || '').toLowerCase() === 'priority' || (sample.encodedCode || '').toLowerCase().endsWith('p');
+            const priorityBoost = isPriority ? priorityWeight : nonPriorityWeight;
+
+            // Try competency-matched employees first
+            for (const comp of matchingComps) {
                 const emp = (employees || []).find(e => e.id === comp.employeeId);
                 if (!emp) continue;
 
-                // Calculate score: Capacity remaining
-                const remainingCapacity = emp.maxDailySamples - emp.currentWorkload;
-                if (remainingCapacity > 0) {
-                    const score = remainingCapacity * (comp.proficiencyLevel === 'Expert' ? 1.5 : 1.0);
+                // Proficiency multiplier
+                let profMult = 1.0;
+                if (comp.proficiencyLevel === 'Expert') profMult = 1.5;
+                else if (comp.proficiencyLevel === 'Trainee') profMult = 0.6;
+
+                // Availability factor
+                const leaveDays = leaveCountMap[emp.id] || 0;
+                const workingDays = leaveWindowDays - leaveDays;
+                const availFactor = Math.max(0.1, workingDays / leaveWindowDays);
+
+                // Load factor (lower load = higher score)
+                const currentLoad = loadMap[emp.fullName] || 0;
+                const loadFactor = Math.max(0.1, 1 / (1 + currentLoad * 0.2));
+
+                // FIFO boost (1 point per day old, max 30)
+                const fifoBoost = Math.min(sampleAge, 30);
+
+                const score = (10 * profMult * availFactor * loadFactor) + priorityBoost + fifoBoost;
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestEmployee = emp;
+                    bestReason = `IS ${sample.isNumber} competency (${comp.proficiencyLevel}), Load: ${currentLoad}, Avail: ${workingDays}/${leaveWindowDays} days`;
+                }
+            }
+
+            // If no competency match, find best available as forced recommendation
+            if (!bestEmployee && employees && employees.length > 0) {
+                isForced = true;
+                for (const emp of employees) {
+                    const leaveDays = leaveCountMap[emp.id] || 0;
+                    const workingDays = leaveWindowDays - leaveDays;
+                    const availFactor = Math.max(0.1, workingDays / leaveWindowDays);
+                    const currentLoad = loadMap[emp.fullName] || 0;
+                    const loadFactor = Math.max(0.1, 1 / (1 + currentLoad * 0.2));
+                    const score = (5 * availFactor * loadFactor) + priorityBoost;
+
                     if (score > bestScore) {
                         bestScore = score;
                         bestEmployee = emp;
+                        bestReason = `⚠️ No IS competency match. Best available by load (${currentLoad}) and availability (${workingDays}/${leaveWindowDays} days)`;
                     }
                 }
             }
 
             if (bestEmployee) {
-                // Generate recommendation
                 const { error } = await supabase.from('assignment_recommendations').insert({
                     sampleId: sample.id,
                     recommendedEmployeeId: bestEmployee.id,
                     recommendedEmployeeName: bestEmployee.fullName,
-                    reason: `Available capacity with IS competency ${sample.isNumber}`,
-                    score: bestScore
+                    reason: bestReason,
+                    score: Math.round(bestScore * 100) / 100,
+                    status: isForced ? 'forced' : 'pending'
                 });
-                if (error) console.error("Auto-assign insert error:", error);
+                if (error) console.error('Auto-assign insert error:', error);
                 recommendationsGenerated++;
+                if (isForced) forcedCount++;
             }
         }
 
-        res.json({ message: `Generated ${recommendationsGenerated} recommendations.` });
+        res.json({ message: `Generated ${recommendationsGenerated} recommendations.`, forcedCount });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});   }
 });
 
 app.get('/api/admin/recommendations', async (req, res) => {
@@ -768,7 +936,7 @@ app.get('/api/admin/recommendations', async (req, res) => {
         const { data: recs, error } = await supabase
             .from('assignment_recommendations')
             .select('*, samples!inner(encodedCode, isNumber, priorityLevel)')
-            .eq('status', 'pending')
+            .in('status', ['pending', 'forced'])
             .order('score', { ascending: false });
         if (error) throw error;
         const formatted = recs.map(r => ({ ...r, encodedCode: r.samples?.encodedCode, isNumber: r.samples?.isNumber, priorityLevel: r.samples?.priorityLevel }));
@@ -1018,6 +1186,133 @@ app.delete('/api/sample-cell/data', (req, res) => {
         if (err) return res.status(500).json({ error: 'Failed to delete confidential data: ' + err.message });
         res.json({ message: 'All confidential data successfully wiped from the local vault.' });
     });
+});
+
+// --- EMPLOYEE CAPACITY ---
+app.get('/api/admin/employees/:id/capacity', async (req, res) => {
+    try {
+        const empId = req.params.id;
+        const { data: emp } = await supabase.from('employee_profiles').select('*').eq('id', empId).single();
+        if (!emp) return res.status(404).json({ error: 'Employee not found' });
+        
+        // Count live pending samples
+        const { data: samples } = await supabase.from('samples').select('id').eq('assignedTo', emp.fullName).in('appStatus', ['Pending']);
+        const currentLoad = samples ? samples.length : 0;
+        
+        // Get competencies
+        const { data: competencies } = await supabase.from('employee_competencies').select('*').eq('employeeId', empId);
+        
+        res.json({ currentLoad, competencies: competencies || [], fullName: emp.fullName });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- PREFERENCES API ---
+app.get('/api/preferences', async (req, res) => {
+    try {
+        const { data, error } = await supabase.from('system_preferences').select('*');
+        if (error) {
+            // Table might not exist yet, return defaults
+            return res.json({ preferences: {
+                priorityWeight: '5',
+                nonPriorityWeight: '5',
+                leaveWindowDays: '30',
+                autoRunAssigner: 'false'
+            }});
+        }
+        const prefs = {};
+        (data || []).forEach(row => { prefs[row.key] = row.value; });
+        // Fill defaults
+        if (!prefs.priorityWeight) prefs.priorityWeight = '5';
+        if (!prefs.nonPriorityWeight) prefs.nonPriorityWeight = '5';
+        if (!prefs.leaveWindowDays) prefs.leaveWindowDays = '30';
+        if (!prefs.autoRunAssigner) prefs.autoRunAssigner = 'false';
+        res.json({ preferences: prefs });
+    } catch (err) {
+        res.json({ preferences: { priorityWeight: '5', nonPriorityWeight: '5', leaveWindowDays: '30', autoRunAssigner: 'false' } });
+    }
+});
+
+app.post('/api/preferences', async (req, res) => {
+    try {
+        const prefs = req.body;
+        const entries = Object.entries(prefs);
+        for (const [key, value] of entries) {
+            await supabase.from('system_preferences').upsert({ key, value: String(value), updatedAt: new Date().toISOString() }, { onConflict: 'key' });
+        }
+        res.json({ message: 'Preferences saved.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- DIRECT ASSIGN ---
+app.post('/api/admin/direct-assign', async (req, res) => {
+    const { sampleId, assignedTo } = req.body;
+    if (!sampleId || !assignedTo) return res.status(400).json({ error: 'Sample ID and assignee required.' });
+    
+    const { error } = await supabase.from('samples').update({ assignedTo, appStatus: 'Pending' }).eq('id', sampleId);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: `Sample assigned to ${assignedTo}.` });
+});
+
+// --- ACTIVATE PENDING ACCOUNT ---
+app.post('/api/admin/activate-pending-account', async (req, res) => {
+    const { tpName } = req.body;
+    if (!tpName) return res.status(400).json({ error: 'TP name required.' });
+    
+    const { data, error } = await supabase.from('samples').update({ appStatus: 'Pending' }).eq('assignedTo', tpName).eq('appStatus', 'PendingAccount');
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: `Activated samples for ${tpName}.` });
+});
+
+// --- APPROVE ALL RECOMMENDATIONS ---
+app.post('/api/admin/approve-all-recommendations', async (req, res) => {
+    try {
+        const { data: recs, error: fetchErr } = await supabase.from('assignment_recommendations').select('*').in('status', ['pending', 'forced']);
+        if (fetchErr) throw fetchErr;
+        if (!recs || recs.length === 0) return res.json({ message: 'No pending recommendations to approve.' });
+
+        let approved = 0;
+        for (const rec of recs) {
+            await supabase.from('samples').update({ assignedTo: rec.recommendedEmployeeName }).eq('id', rec.sampleId);
+            await supabase.from('assignment_recommendations').update({ status: 'approved', resolvedAt: new Date().toISOString() }).eq('id', rec.id);
+            approved++;
+        }
+        res.json({ message: `Approved ${approved} assignments.` });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- MOCK GENERATOR ---
+app.post('/api/admin/generate-mocks', async (req, res) => {
+    try {
+        const mockSamples = [];
+        const isNumbers = ['IS 4985', 'IS 13592', 'IS 15778', 'IS 14735', 'IS 15328'];
+        const priorities = ['Standard', 'Priority'];
+        
+        for (let i = 0; i < 50; i++) {
+            mockSamples.push({
+                encodedCode: `MOCK-${Date.now().toString().slice(-6)}-${i}`,
+                isNumber: isNumbers[Math.floor(Math.random() * isNumbers.length)],
+                priorityLevel: Math.random() > 0.8 ? 'Priority' : 'Standard',
+                receivedOn: new Date().toLocaleDateString('en-GB').replace(/\//g, '-'),
+                forwardedOn: new Date(Date.now() - Math.floor(Math.random() * 20) * 86400000).toLocaleDateString('en-GB').replace(/\//g, '-'),
+                quantity: '1',
+                appStatus: 'Pending',
+                assignedTo: null
+            });
+        }
+        
+        const { error } = await supabase.from('samples').insert(mockSamples);
+        if (error) throw error;
+        
+        res.json({ message: '50 Mock samples successfully injected into unassigned pool!' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Export for Vercel serverless + listen locally

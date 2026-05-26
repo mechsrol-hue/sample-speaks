@@ -2,11 +2,10 @@
   "lims_user": "saurabhd@bis.gov.in",
   "lims_pass": "Guddu@1997",
   "metadata": {
-    "sampleCode": "23456",
-    "isNo": "IS 4985 (2021)",
+    "sampleCode": "26MD61F86N",
     "size": "75",
-    "pipeClass": "3",
-    "type": "A",
+    "pipeClass": "2",
+    "type": "Not Declared",
     "isPlumbing": "No"
   },
   "table_rows": [
@@ -41,21 +40,21 @@
       ""
     ],
     [
-      "Class 3 (As declared )",
+      "Class 2 (As declared )",
       "5",
       "CLASSIFICATION OF PIPES",
       "Class 1/2/3/4/5/6",
-      "Class 3 (As declared )",
+      "Class 2 (As declared )",
       "Qualitative",
       "",
       ""
     ],
     [
-      "A (As declared)",
+      "Not Declared (As declared)",
       "5.2",
       "The pipes shall be classified based on their application",
       "a) Type A — Pipes for water supply; and b) Type B — Pipes for agricultural use.",
-      "A (As declared)",
+      "Not Declared (As declared)",
       "Qualitative",
       "",
       ""
@@ -71,31 +70,31 @@
       ""
     ],
     [
-      "",
+      "75.2",
       "7.1.1.1",
       "DIMENSIONS-PIPE-Mean O.D. (Minimum)",
       "75 mm,Min",
-      "",
+      "75.2",
       "Quantitative",
       75,
       ""
     ],
     [
-      "",
+      "75.2",
       "7.1.1.1",
       "DIMENSIONS-PIPE-Mean O.D. (Maximum)",
       "75.3 mm, Max",
-      "",
+      "75.2",
       "Quantitative",
       "",
       75.3
     ],
     [
-      "",
+      "0.2",
       "7.1.1.1",
       "DIMENSIONS-PIPE-Mean O.D. Variation",
       "0.30 mm, max",
-      "",
+      "0.2",
       "Quantitative",
       "",
       "0.30"
@@ -121,44 +120,44 @@
       "76.0"
     ],
     [
-      "",
+      "0.4",
       "7.1.1.2",
       "DIMENSIONS-PIPE-Ovality (Maximum)",
       1,
-      "",
+      "0.4",
       "Quantitative",
       "",
       1
     ],
     [
-      "",
+      "1.8",
       "7.1.2.1",
       "DIMENSIONS-PIPE-Thickness (Minimum)",
-      "2.6mm",
-      "",
+      "1.8mm",
+      "1.8",
       "Quantitative",
-      2.6,
+      1.8,
       ""
     ],
     [
-      "",
+      "1.9",
       "7.1.2.1",
       "DIMENSIONS-PIPE-Thickness (Maximum)",
-      "3.1mm",
-      "",
+      "2.2mm",
+      "1.9",
       "Quantitative",
       "",
-      3.1
+      2.2
     ],
     [
-      "",
+      "1.8",
       "7.1.2.1",
       "DIMENSIONS-PIPE-Average Thickness",
-      "3.1mm",
-      "",
+      "2.2mm",
+      "1.8",
       "Quantitative",
       "",
-      3.1
+      2.2
     ],
     [
       "Satisfactory",
@@ -171,11 +170,11 @@
       ""
     ],
     [
-      "",
+      "62.0",
       "7.2.1.1 Table 3",
       "DIMENSIONS-Socket-Sockets for solvent cement jointing-Minimum Length",
       "Socket Length (min): 44 mm",
-      "",
+      "62.0",
       "Text",
       44,
       ""
@@ -231,21 +230,21 @@
       ""
     ],
     [
-      "",
+      "0.12",
       "10.2",
       "PHYSICAL AND CHEMICAL CHARACTERISTICS-Opacity",
       "The wall of the plain pipe shall not transmit more than 0.2 percent of the visible light falling on it when tested in accordance with IS 12235 (Part 3).",
-      "",
+      "0.12",
       "Quantitative",
       "",
       "0.2"
     ],
     [
-      "",
+      "3.2",
       "11.1",
       "MECHANICAL PROPERTIES-Reversion",
       "Maximum: 5 %",
-      "",
+      "3.2",
       "Quantitative",
       "",
       "5"
@@ -271,11 +270,11 @@
       ""
     ],
     [
-      "",
+      "1.44",
       "11.3",
       "MECHANICAL PROPERTIES-Density",
       "1.40 and 1.46",
-      "",
+      "1.44",
       "Quantitative",
       "1.40",
       "1.46"

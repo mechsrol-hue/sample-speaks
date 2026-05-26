@@ -8,6 +8,10 @@ let currentFileName = "";
 let currentDuplicateCount = 0;
 let kpiFilter = "ALL";
 let selectedUploadFile = null; // tracks file from both drop and browse
+let currentPrefs = { priorityWeight: 5, nonPriorityWeight: 5, leaveWindowDays: 30, autoRunAssigner: false };
+let pendingColumnMappings = {}; // resolved column mappings from admin
+let uploadMissingAccounts = []; // TA names with no account
+let allTPUsers = []; // cached list of all TP users for direct assign dropdown
 
 // --- Toast Notification System ---
 function showToast(message, type = 'info') {
@@ -92,6 +96,9 @@ async function login() {
             }
             
             showToast(`Welcome back, ${currentUser.username}!`, 'success');
+            fetchSamples();
+            loadPreferences();
+            fetchTPUsers();
         } else {
             showToast(data.error, 'error');
         }
@@ -129,8 +136,70 @@ function switchTab(tabId) {
         loadLeaves();
         populateLeaveEmployeeDropdown();
     } else if (tabId === 'tab-assigner') {
+        loadUnassignedPool();
         loadRecommendations();
+    } else if (tabId === 'tab-preferences') {
+        loadPreferencesUI();
     }
+}
+
+// --- PREFERENCES ---
+async function loadPreferences() {
+    try {
+        const res = await fetch('/api/preferences');
+        const data = await res.json();
+        if (res.ok && data.preferences) {
+            currentPrefs = {
+                priorityWeight: parseInt(data.preferences.priorityWeight) || 5,
+                nonPriorityWeight: parseInt(data.preferences.nonPriorityWeight) || 5,
+                leaveWindowDays: parseInt(data.preferences.leaveWindowDays) || 30,
+                autoRunAssigner: data.preferences.autoRunAssigner === 'true'
+            };
+        }
+    } catch (err) { console.error('Failed to load preferences:', err); }
+}
+
+function loadPreferencesUI() {
+    const pw = document.getElementById('pref-priority-weight');
+    const npw = document.getElementById('pref-nonpriority-weight');
+    const lw = document.getElementById('pref-leave-window');
+    const ar = document.getElementById('pref-auto-run');
+    if (pw) { pw.value = currentPrefs.priorityWeight; document.getElementById('pref-priority-val').textContent = currentPrefs.priorityWeight; }
+    if (npw) { npw.value = currentPrefs.nonPriorityWeight; document.getElementById('pref-nonpriority-val').textContent = currentPrefs.nonPriorityWeight; }
+    if (lw) lw.value = currentPrefs.leaveWindowDays;
+    if (ar) ar.checked = currentPrefs.autoRunAssigner;
+}
+
+async function savePreferences() {
+    const prefs = {
+        priorityWeight: document.getElementById('pref-priority-weight').value,
+        nonPriorityWeight: document.getElementById('pref-nonpriority-weight').value,
+        leaveWindowDays: document.getElementById('pref-leave-window').value,
+        autoRunAssigner: document.getElementById('pref-auto-run').checked ? 'true' : 'false'
+    };
+    try {
+        const res = await fetch('/api/preferences', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(prefs)
+        });
+        if (res.ok) {
+            showToast('Preferences saved.', 'success');
+            loadPreferences();
+        } else {
+            showToast('Failed to save preferences.', 'error');
+        }
+    } catch (err) { showToast('Network error saving preferences.', 'error'); }
+}
+
+async function fetchTPUsers() {
+    try {
+        const res = await fetch('/api/admin/users');
+        const data = await res.json();
+        if (res.ok) {
+            allTPUsers = (data.users || []).filter(u => u.role === 'tp');
+        }
+    } catch (err) { console.error(err); }
 }
 
 // User Management Modal Functions
@@ -262,11 +331,63 @@ async function uploadExcel() {
         const data = await res.json();
         if (res.ok) {
             currentFileName = data.fileName || "Unknown.xlsx";
+            uploadMissingAccounts = data.missingAccounts || [];
+            pendingColumnMappings = {};
+            
+            // Handle column mapping
+            if (data.columnMapping && data.columnMapping.ambiguous && data.columnMapping.ambiguous.length > 0) {
+                showColumnMappingUI(data.columnMapping);
+            }
+            
             showReviewModal(data.freshSamples, data.duplicateSamples, data.newTPs || []);
         } else {
             showToast(data.error, 'error');
         }
     } catch (e) { console.error(e); }
+}
+
+function showColumnMappingUI(columnMapping) {
+    const section = document.getElementById('column-mapping-section');
+    const rowsDiv = document.getElementById('column-mapping-rows');
+    if (!section || !rowsDiv) return;
+    
+    if (columnMapping.ambiguous.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+    
+    section.style.display = 'block';
+    rowsDiv.innerHTML = '';
+    
+    columnMapping.ambiguous.forEach(col => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex; align-items:center; gap:12px; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.03); border-radius:6px;';
+        
+        let suggestionsHtml = '<option value="skip">Skip this column</option>';
+        suggestionsHtml += '<option value="assignedTo">Testing Person / TA Name</option>';
+        suggestionsHtml += '<option value="isNumber">IS Number</option>';
+        suggestionsHtml += '<option value="receivedOn">Received Date</option>';
+        suggestionsHtml += '<option value="forwardedOn">Forwarded Date</option>';
+        suggestionsHtml += '<option value="quantity">Quantity</option>';
+        suggestionsHtml += '<option value="totalTest">Total Tests</option>';
+        suggestionsHtml += '<option value="pendingTest">Pending Tests</option>';
+        suggestionsHtml += '<option value="approvedTest">Approved Tests</option>';
+        
+        const sampleVals = (col.sampleValues || []).slice(0, 3).join(', ');
+        
+        row.innerHTML = `
+            <div style="flex:1;">
+                <strong style="color:var(--accent);">${col.originalName}</strong>
+                <br><span style="font-size:0.8rem; color:var(--text-muted);">Sample values: ${sampleVals || 'N/A'}</span>
+            </div>
+            <div style="flex:1;">
+                <select onchange="pendingColumnMappings['${col.originalName}']=this.value" style="width:100%; padding:8px; border-radius:4px;">
+                    ${suggestionsHtml}
+                </select>
+            </div>
+        `;
+        rowsDiv.appendChild(row);
+    });
 }
 
 function toggleReallotOverride(encodedCode) {
@@ -292,30 +413,27 @@ function showReviewModal(fresh, duplicates, newTPs = []) {
     document.getElementById('duplicate-count').textContent = duplicates.length;
     document.getElementById('commit-btn').disabled = (fresh.length === 0);
 
-    // --- New TP Warning Banner ---
-    const existingBanner = document.getElementById('new-tp-banner');
-    if (existingBanner) existingBanner.remove();
-
-    if (newTPs.length > 0) {
-        const banner = document.createElement('div');
-        banner.id = 'new-tp-banner';
-        banner.style.cssText = `
-            background: #fff8e1; border: 1px solid #f59e0b; border-left: 4px solid #f59e0b;
-            border-radius: 6px; padding: 12px 16px; margin-bottom: 16px;
-            font-size: 0.9rem; color: #92400e;
-        `;
-        banner.innerHTML = `
-            <strong>⚠️ ${newTPs.length} New Testing Person(s) Detected</strong>
-            <p style="margin: 6px 0 0;">The following TP names were found in this file but have no existing user account.
-            Accounts will be <strong>auto-created with default password <code>1234</code></strong> upon commit.
-            You may update passwords via Manage Accounts.</p>
-            <ul style="margin: 8px 0 0; padding-left: 20px; display:flex; flex-wrap:wrap; gap:4px; list-style:none; padding:0;">
-                ${newTPs.map(name => `<span style="background:#fef3c7; border:1px solid #fbbf24; border-radius:4px; padding:2px 8px; font-weight:600; font-size:0.85rem;">${name}</span>`).join(' ')}
-            </ul>
-        `;
-        // Insert banner at top of modal content, before the split table
-        const reviewSplit = document.querySelector('#review-modal .review-split');
-        if (reviewSplit) reviewSplit.parentNode.insertBefore(banner, reviewSplit);
+    // --- Missing Accounts Banner ---
+    const existingMissingBanner = document.getElementById('missing-accounts-banner');
+    if (existingMissingBanner) {
+        if (uploadMissingAccounts.length > 0) {
+            existingMissingBanner.style.display = 'block';
+            existingMissingBanner.style.cssText = `
+                background: #fff8e1; border: 1px solid #f59e0b; border-left: 4px solid #f59e0b;
+                border-radius: 6px; padding: 12px 16px; margin-bottom: 16px;
+                font-size: 0.9rem; color: #92400e;
+            `;
+            existingMissingBanner.innerHTML = `
+                <strong>⚠️ ${uploadMissingAccounts.length} Missing Testing Person Account(s) Detected</strong>
+                <p style="margin: 6px 0 0;">The following TP names are in the Excel sheet but have no user account. 
+                Samples will be imported but marked as <strong>PendingAccount</strong> until their account is created.</p>
+                <ul style="margin: 8px 0 0; padding-left: 20px; display:flex; flex-wrap:wrap; gap:4px; list-style:none; padding:0;">
+                    ${uploadMissingAccounts.map(name => `<span style="background:#fef3c7; border:1px solid #fbbf24; border-radius:4px; padding:2px 8px; font-weight:600; font-size:0.85rem;">${name}</span>`).join(' ')}
+                </ul>
+            `;
+        } else {
+            existingMissingBanner.style.display = 'none';
+        }
     }
 
     const freshTbody = document.getElementById('fresh-tbody');
@@ -392,7 +510,8 @@ async function commitUpload() {
             duplicates: pendingDuplicateSamples.filter(s => !forceCommittedCodes.has(s.encodedCode)),
             duplicateCount: currentDuplicateCount - overridesToCommit.length,
             fileName: currentFileName,
-            uploadedBy: currentUser ? currentUser.username : 'Unknown Admin'
+            uploadedBy: currentUser ? currentUser.username : 'Unknown Admin',
+            columnMappingLog: Object.keys(pendingColumnMappings).length > 0 ? JSON.stringify(pendingColumnMappings) : null
         };
 
         const res = await fetch('/api/confirm-upload', {
@@ -405,6 +524,11 @@ async function commitUpload() {
         
         closeReviewModal();
         document.getElementById('excel-file').value = "";
+        
+        if (currentPrefs.autoRunAssigner) {
+            showToast('Auto-running Smart Assigner...', 'info');
+            await forceRunAssigner();
+        }
         
         fetchSamples();
         
@@ -505,46 +629,86 @@ async function viewBatchDetails(batchId) {
     const freshTbody = document.getElementById('batch-fresh-tbody');
     const dupTbody = document.getElementById('batch-duplicate-tbody');
     
-    freshTbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Loading fresh records...</td></tr>';
-    dupTbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Loading duplicates...</td></tr>';
+    freshTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading records...</td></tr>';
+    dupTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading duplicates...</td></tr>';
     
     try {
         const res = await fetch(`/api/batch-details/${batchId}`);
         const data = await res.json();
         if (res.ok) {
+            // Populate summary
+            if (data.batchInfo) {
+                const dateObj = new Date(data.batchInfo.uploadDate);
+                document.getElementById('batch-date-display').textContent = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString();
+                document.getElementById('batch-uploader-display').textContent = data.batchInfo.uploadedBy || 'Unknown';
+                document.getElementById('batch-filename-display').textContent = data.batchInfo.fileName || 'Unknown.xlsx';
+                document.getElementById('batch-fresh-count').textContent = data.batchInfo.sampleCount || 0;
+                document.getElementById('batch-dup-count').textContent = data.batchInfo.duplicateCount || 0;
+                
+                const mapSection = document.getElementById('batch-mapping-section');
+                const mapContent = document.getElementById('batch-mapping-content');
+                if (data.columnMappingLog) {
+                    try {
+                        const mapping = JSON.parse(data.columnMappingLog);
+                        let html = '';
+                        for (const [colName, mappedField] of Object.entries(mapping)) {
+                            html += `<div style="display:inline-block; margin-right:15px; margin-bottom:5px;"><strong>${colName}</strong> → <span style="color:var(--accent);">${mappedField}</span></div>`;
+                        }
+                        if (html) {
+                            mapContent.innerHTML = html;
+                            mapSection.style.display = 'block';
+                        } else {
+                            mapSection.style.display = 'none';
+                        }
+                    } catch(e) { mapSection.style.display = 'none'; }
+                } else {
+                    mapSection.style.display = 'none';
+                }
+            }
+
             freshTbody.innerHTML = '';
             if (data.samples.length === 0) {
-                freshTbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-muted);">No fresh records committed in this batch.</td></tr>';
+                freshTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No fresh records in this batch.</td></tr>';
             } else {
                 data.samples.forEach(s => {
                     const tr = document.createElement('tr');
-                    tr.classList.add('row-success-green');
+                    let statusHtml = '';
+                    if (s.appStatus === 'Pending') statusHtml = `<span class="status-badge" style="background:#e0e7ff; color:var(--primary);">Pending</span>`;
+                    else if (s.appStatus === 'PendingAccount') statusHtml = `<span class="status-badge" style="background:#fef3c7; color:#d97706;">Pending Account</span>`;
+                    else if (s.appStatus === 'Pass') statusHtml = `<span class="status-badge" style="background:#d1fae5; color:var(--success);">Pass</span>`;
+                    else if (s.appStatus === 'Fail') statusHtml = `<span class="status-badge" style="background:#fee2e2; color:var(--danger);">Fail</span>`;
+                    
                     tr.innerHTML = `
                         <td style="color: var(--success); font-weight:600;">${s.encodedCode}</td>
-                        <td>${s.assignedTo}</td>
+                        <td>${s.isNumber || '-'}</td>
+                        <td>${s.assignedTo || '-'}</td>
+                        <td><strong>${s.priorityLevel || '-'}</strong></td>
+                        <td>${s.receivedOn || '-'}</td>
+                        <td>${statusHtml}</td>
                     `;
                     freshTbody.appendChild(tr);
                 });
             }
 
             dupTbody.innerHTML = '';
-            if (data.duplicates.length === 0) {
-                dupTbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-muted);">No duplicates were blocked in this batch.</td></tr>';
+            if (!data.duplicates || data.duplicates.length === 0) {
+                dupTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">No duplicates were blocked.</td></tr>';
             } else {
                 data.duplicates.forEach(s => {
                     const tr = document.createElement('tr');
-                    tr.classList.add('row-danger-red');
                     tr.innerHTML = `
                         <td style="color: var(--danger); font-weight:600;">${s.encodedCode}</td>
-                        <td>${s.assignedTo}</td>
+                        <td>${s.assignedTo || '-'}</td>
+                        <td>${s.isReallotted ? '✅ Yes' : '❌ No'}</td>
+                        <td>${s.previousTP || '-'}</td>
                     `;
                     dupTbody.appendChild(tr);
                 });
             }
         }
     } catch(e) {
-        freshTbody.innerHTML = '<tr><td colspan="2" style="color:var(--danger);">Error loading details.</td></tr>';
-        dupTbody.innerHTML = '<tr><td colspan="2" style="color:var(--danger);">Error loading details.</td></tr>';
+        freshTbody.innerHTML = '<tr><td colspan="6" style="color:var(--danger);">Error loading details.</td></tr>';
+        dupTbody.innerHTML = '<tr><td colspan="4" style="color:var(--danger);">Error loading details.</td></tr>';
     }
 }
 
@@ -562,8 +726,147 @@ async function fetchSamples() {
             allSamples = data.samples;
             populateFilterDropdowns();
             renderTable();
+            populateSampleCodeDatalist();
+            if (typeof renderAnalytics === 'function') renderAnalytics();
         }
     } catch (e) { console.error(e); }
+}
+
+let workloadChartInstance = null;
+let slaChartInstance = null;
+let isVolumeChartInstance = null;
+
+function renderAnalytics() {
+    if (typeof Chart === 'undefined') return; // Wait until Chart.js loads
+
+    // Extract pending/active samples
+    const pendingSamples = allSamples.filter(s => s.appStatus === 'Pending' || s.appStatus === 'PendingAccount');
+
+    // 1. Workload Distribution (Samples per TP)
+    const tpCounts = {};
+    pendingSamples.forEach(s => {
+        const tp = s.assignedTo || 'Unassigned';
+        tpCounts[tp] = (tpCounts[tp] || 0) + 1;
+    });
+    const tpLabels = Object.keys(tpCounts);
+    const tpData = Object.values(tpCounts);
+
+    const workloadCtx = document.getElementById('workloadChart');
+    if (workloadCtx) {
+        if (workloadChartInstance) workloadChartInstance.destroy();
+        workloadChartInstance = new Chart(workloadCtx, {
+            type: 'bar',
+            data: {
+                labels: tpLabels,
+                datasets: [{
+                    label: 'Pending Samples',
+                    data: tpData,
+                    backgroundColor: 'rgba(56, 189, 248, 0.6)',
+                    borderColor: 'rgba(56, 189, 248, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, ticks: { color: '#ccc' }, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { ticks: { color: '#ccc' }, grid: { display: false } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // 2. SLA Compliance (Days Pending)
+    let fresh = 0, warning = 0, critical = 0;
+    pendingSamples.forEach(s => {
+        const daysOld = calculateDaysOld(s.forwardedOn || s.receivedOn);
+        if (daysOld <= 7) fresh++;
+        else if (daysOld <= 15) warning++;
+        else critical++;
+    });
+
+    const slaCtx = document.getElementById('slaChart');
+    if (slaCtx) {
+        if (slaChartInstance) slaChartInstance.destroy();
+        slaChartInstance = new Chart(slaCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['< 7 Days', '8-15 Days', '> 15 Days (Critical)'],
+                datasets: [{
+                    data: [fresh, warning, critical],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: '#ccc' } } }
+            }
+        });
+    }
+
+    // 3. IS Volume Breakdown
+    const isCounts = {};
+    pendingSamples.forEach(s => {
+        if (s.isNumber) {
+            isCounts[s.isNumber] = (isCounts[s.isNumber] || 0) + 1;
+        }
+    });
+    
+    // Sort by volume descending
+    const sortedIS = Object.keys(isCounts).sort((a,b) => isCounts[b] - isCounts[a]);
+    const topIS = sortedIS.slice(0, 10); // Show top 10
+    const topISData = topIS.map(is => isCounts[is]);
+
+    const isCtx = document.getElementById('isVolumeChart');
+    if (isCtx) {
+        if (isVolumeChartInstance) isVolumeChartInstance.destroy();
+        isVolumeChartInstance = new Chart(isCtx, {
+            type: 'bar',
+            data: {
+                labels: topIS,
+                datasets: [{
+                    label: 'Sample Count',
+                    data: topISData,
+                    backgroundColor: 'rgba(167, 139, 250, 0.6)',
+                    borderColor: 'rgba(167, 139, 250, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y', // horizontal bar chart
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { x: { beginAtZero: true, ticks: { color: '#ccc' }, grid: { color: 'rgba(255,255,255,0.1)' } }, y: { ticks: { color: '#ccc' }, grid: { display: false } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+}
+
+function populateSampleCodeDatalist() {
+    const datalist = document.getElementById('sample-codes-list');
+    if (!datalist) return;
+    datalist.innerHTML = '';
+    const uniqueCodes = [...new Set(allSamples.map(s => s.encodedCode).filter(Boolean))].sort();
+    uniqueCodes.forEach(code => {
+        const option = document.createElement('option');
+        option.value = code;
+        datalist.appendChild(option);
+    });
+}
+
+function autoFillLimsDetails() {
+    const codeInput = document.getElementById('lims-sample-code').value;
+    if (!codeInput) return;
+    
+    const matchedSample = allSamples.find(s => s.encodedCode === codeInput);
+    if (matchedSample && matchedSample.isNumber) {
+        document.getElementById('lims-is-no').value = `IS ${matchedSample.isNumber}`;
+        // Note: Size is not stored in DB, so user still selects size manually
+    }
 }
 
 function parseDateDDMMYYYY(dateStr) {
@@ -579,13 +882,19 @@ function populateFilterDropdowns() {
     // 1. IS Number Filter
     const isFilter = document.getElementById('is-filter');
     if (isFilter) {
-        const uniqueIS = [...new Set(allSamples.map(s => s.isNumber).filter(Boolean))].sort();
+        const isCounts = {};
+        allSamples.forEach(s => {
+            if (s.isNumber && s.appStatus === 'Pending') {
+                isCounts[s.isNumber] = (isCounts[s.isNumber] || 0) + 1;
+            }
+        });
+        const uniqueIS = Object.keys(isCounts).sort();
         const currentVal = isFilter.value;
         isFilter.innerHTML = '<option value="ALL">All IS Numbers</option>';
         uniqueIS.forEach(isNum => {
             const opt = document.createElement('option');
             opt.value = isNum;
-            opt.textContent = isNum;
+            opt.textContent = `${isNum} (${isCounts[isNum]})`;
             isFilter.appendChild(opt);
         });
         if (uniqueIS.includes(currentVal)) isFilter.value = currentVal;
@@ -615,14 +924,19 @@ function populateFilterDropdowns() {
     // 3. Assigned To Filter (Pending samples only — submitted have their own section)
     const assignedFilter = document.getElementById('assigned-filter');
     if (assignedFilter) {
-        const pendingOnly = allSamples.filter(s => s.appStatus === 'Pending');
-        const uniqueAssigned = [...new Set(pendingOnly.map(s => s.assignedTo).filter(Boolean))].sort();
+        const assignedCounts = {};
+        allSamples.forEach(s => {
+            if (s.assignedTo && s.appStatus === 'Pending') {
+                assignedCounts[s.assignedTo] = (assignedCounts[s.assignedTo] || 0) + 1;
+            }
+        });
+        const uniqueAssigned = Object.keys(assignedCounts).sort();
         const currentVal = assignedFilter.value;
         assignedFilter.innerHTML = '<option value="ALL">All Testing Persons</option>';
         uniqueAssigned.forEach(tp => {
             const opt = document.createElement('option');
             opt.value = tp;
-            opt.textContent = tp;
+            opt.textContent = `${tp} (${assignedCounts[tp]})`;
             assignedFilter.appendChild(opt);
         });
         if (uniqueAssigned.includes(currentVal)) assignedFilter.value = currentVal;
@@ -695,7 +1009,7 @@ function renderTable() {
     }));
 
     // --- Update KPI counters ---
-    const pendingAll = enhanced.filter(s => s.appStatus === 'Pending' && s.assignedTo);
+    const pendingAll = enhanced.filter(s => (s.appStatus === 'Pending' || s.appStatus === 'PendingAccount') && s.assignedTo);
     const unassignedAll = enhanced.filter(s => s.appStatus === 'Pending' && !s.assignedTo);
     const submittedAll = enhanced.filter(s => s.appStatus === 'Submitted');
     
@@ -776,6 +1090,11 @@ function renderTable() {
             const checkboxTd = isAdmin ? `<td style="text-align:center;"><input type="checkbox" class="sample-row-checkbox" value="${s.id}" onchange="updateSelectedCount()" style="cursor:pointer; width:16px; height:16px;"></td>` : '';
             const deleteBtn = isAdmin ? `<button onclick="deleteSingleSample(${s.id}, '${s.encodedCode}')" style="background:var(--danger); margin-left:5px; padding:6px 12px; font-size:0.85rem;">Delete</button>` : '';
 
+            let statusBadge = '<span class="status-badge status-pending">In Queue</span>';
+            if (s.appStatus === 'PendingAccount') {
+                statusBadge = '<span class="status-badge" style="background:#fef3c7; color:#d97706; border:1px solid #fbbf24;">Pending Account</span>';
+            }
+
             tr.innerHTML = `
                 ${checkboxTd}
                 <td>${flagsHtml}</td>
@@ -785,7 +1104,7 @@ function renderTable() {
                 <td>${s.quantity || '—'}</td>
                 <td>${s.receivedOn || '—'}</td>
                 <td><strong>${s.assignedTo || '—'}</strong></td>
-                <td><span class="status-badge status-pending">In Queue</span></td>
+                <td>${statusBadge}</td>
                 <td>
                     <button onclick="openSubmitModal(${s.id}, '${s.encodedCode}')">Submit</button>
                     ${deleteBtn}
@@ -1704,7 +2023,6 @@ async function loadEmployees() {
 async function addEmployee() {
     const fullName = document.getElementById('emp-fullname').value;
     const designation = document.getElementById('emp-designation').value;
-    const maxDailySamples = document.getElementById('emp-maxcapacity').value;
     const username = document.getElementById('emp-username').value;
     const password = document.getElementById('emp-password').value;
 
@@ -1714,7 +2032,7 @@ async function addEmployee() {
         const res = await fetch('/api/admin/employees', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fullName, designation, maxDailySamples, username, password })
+            body: JSON.stringify({ fullName, designation, username, password })
         });
         const data = await res.json();
         if (res.ok) {
@@ -1768,13 +2086,14 @@ async function loadCompetencies(empId) {
 
 async function addCompetency() {
     const isNumber = document.getElementById('comp-is-number').value.trim();
+    const proficiencyLevel = document.getElementById('comp-proficiency').value || 'Standard';
     if (!isNumber || !currentCompEmpId) return showToast('Please enter an IS number.', 'warning');
 
     try {
         const res = await fetch('/api/admin/competencies', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ employeeId: currentCompEmpId, isNumber, proficiencyLevel: 'Standard' })
+            body: JSON.stringify({ employeeId: currentCompEmpId, isNumber, proficiencyLevel })
         });
         if (res.ok) {
             document.getElementById('comp-is-number').value = '';
@@ -1821,8 +2140,8 @@ async function loadLeaves() {
                 tr.innerHTML = `
                     <td><strong>${l.fullName}</strong></td>
                     <td>${l.leaveDate}</td>
-                    <td><span class="status-badge" style="background:var(--bg-glass);">${l.leaveType}</span></td>
-                    <td></td>
+                    <td>${l.reason || '-'}</td>
+                    <td><button onclick="deleteLeave(${l.id})" style="background:var(--danger); padding:4px 8px; font-size:0.8rem; border:none; border-radius:4px; color:white; cursor:pointer;">Remove</button></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1833,7 +2152,7 @@ async function loadLeaves() {
 async function addLeave() {
     const employeeId = document.getElementById('leave-employee-select').value;
     const leaveDate = document.getElementById('leave-date').value;
-    const leaveType = document.getElementById('leave-type').value;
+    const reason = document.getElementById('leave-reason') ? document.getElementById('leave-reason').value : '';
 
     if (!employeeId || !leaveDate) return showToast('Select employee and date.', 'warning');
 
@@ -1841,10 +2160,21 @@ async function addLeave() {
         const res = await fetch('/api/admin/leaves', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ employeeId, leaveDate, leaveType })
+            body: JSON.stringify({ employeeId, leaveDate, reason })
         });
         if (res.ok) {
             showToast('Leave recorded.', 'success');
+            loadLeaves();
+        }
+    } catch (err) { console.error(err); }
+}
+
+async function deleteLeave(id) {
+    if (!confirm('Remove this leave?')) return;
+    try {
+        const res = await fetch(`/api/admin/leaves/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            showToast('Leave removed.', 'success');
             loadLeaves();
         }
     } catch (err) { console.error(err); }
@@ -1881,6 +2211,89 @@ async function loadRecommendations() {
     } catch (err) { console.error(err); }
 }
 
+async function loadUnassignedPool() {
+    const tbody = document.getElementById('unassigned-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>';
+    try {
+        const res = await fetch('/api/unassigned-samples');
+        const data = await res.json();
+        if (res.ok) {
+            tbody.innerHTML = '';
+            if (data.samples.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-muted);">All samples are assigned.</td></tr>';
+            } else {
+                let tpOptions = '<option value="">-- Direct Assign --</option>';
+                allTPUsers.forEach(u => {
+                    tpOptions += `<option value="${u.username}">${u.username}</option>`;
+                });
+                
+                data.samples.forEach(s => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="color:var(--accent); font-weight:600;">${s.encodedCode}</td>
+                        <td>${s.isNumber || '-'}</td>
+                        <td><strong>${s.priorityLevel || '-'}</strong></td>
+                        <td>
+                            <select onchange="directAssignSample(${s.id}, this.value)" style="padding:4px 8px; border-radius:4px;">
+                                ${tpOptions}
+                            </select>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+    } catch (err) { console.error(err); }
+}
+
+async function directAssignSample(sampleId, tpName) {
+    if (!tpName) return;
+    try {
+        const res = await fetch('/api/admin/direct-assign', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sampleId, assignedTo: tpName })
+        });
+        if (res.ok) {
+            showToast(`Assigned to ${tpName}`, 'success');
+            loadUnassignedPool();
+        } else {
+            const data = await res.json();
+            showToast(data.error || 'Failed to assign.', 'error');
+        }
+    } catch (err) { showToast('Network error.', 'error'); }
+}
+
+async function approveAllRecommendations() {
+    try {
+        const res = await fetch('/api/admin/approve-all-recommendations', { method: 'POST' });
+        const data = await res.json();
+        if (res.ok) {
+            showToast(data.message, 'success');
+            loadRecommendations();
+            loadUnassignedPool();
+        } else {
+            showToast(data.error, 'error');
+        }
+    } catch (err) { console.error(err); }
+}
+
+async function generateMockData() {
+    if (!confirm('This will inject 50 mock samples into the unassigned pool. Are you sure?')) return;
+    try {
+        const res = await fetch('/api/admin/generate-mocks', { method: 'POST' });
+        const data = await res.json();
+        if (res.ok) {
+            showToast(data.message, 'success');
+            fetchSamples(); // Refresh data
+            loadUnassignedPool(); // Refresh pool view
+        } else {
+            showToast(data.error, 'error');
+        }
+    } catch(e) { showToast(e.message, 'error'); }
+}
+
 async function runAutoAssigner() {
     showToast('Running Smart Assigner...', 'info');
     try {
@@ -1889,10 +2302,15 @@ async function runAutoAssigner() {
         if (res.ok) {
             showToast(data.message, 'success');
             loadRecommendations();
+            loadUnassignedPool();
         } else {
             showToast(data.error, 'error');
         }
     } catch (err) { console.error(err); }
+}
+
+async function forceRunAssigner() {
+    await runAutoAssigner();
 }
 
 async function approveRecommendation(id) {
@@ -1901,6 +2319,7 @@ async function approveRecommendation(id) {
         if (res.ok) {
             showToast('Assignment Approved', 'success');
             loadRecommendations();
+            loadUnassignedPool();
         }
     } catch (err) { console.error(err); }
 }
