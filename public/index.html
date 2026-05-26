@@ -40,6 +40,7 @@
             <button id="tab-btn-employees" class="tab-btn" onclick="switchTab('tab-employees')">👥 Employee Hub</button>
             <button id="tab-btn-leaves" class="tab-btn" onclick="switchTab('tab-leaves')">📅 Leave Manager</button>
             <button id="tab-btn-assigner" class="tab-btn" onclick="switchTab('tab-assigner')">✨ Smart Assigner</button>
+            <button id="tab-btn-preferences" class="tab-btn" onclick="switchTab('tab-preferences')">⚙️ Preferences</button>
         </div>
 
         <!-- Tab: Dashboard -->
@@ -420,10 +421,6 @@
                         <label>Designation</label>
                         <input type="text" id="emp-designation" style="width: 100%; border-radius: 4px; padding: 8px;">
                     </div>
-                    <div style="margin-bottom: 12px;">
-                        <label>Max Daily Samples</label>
-                        <input type="number" id="emp-maxcapacity" value="5" style="width: 100%; border-radius: 4px; padding: 8px;">
-                    </div>
                     <hr style="border:0; border-top:1px solid var(--border-light); margin: 15px 0;">
                     <div style="margin-bottom: 12px;">
                         <label>Login Username (TP Name)</label>
@@ -445,7 +442,7 @@
                                 <tr>
                                     <th>Name</th>
                                     <th>Login (TP)</th>
-                                    <th>Capacity</th>
+                                    <th>Current Workload</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -474,14 +471,6 @@
                     <label>Leave Date</label>
                     <input type="date" id="leave-date" style="padding: 8px; border-radius: 4px;">
                 </div>
-                <div>
-                    <label>Leave Type</label>
-                    <select id="leave-type" style="padding: 8px; border-radius: 4px;">
-                        <option value="CL">Casual Leave (CL)</option>
-                        <option value="SL">Sick Leave (SL)</option>
-                        <option value="EL">Earned Leave (EL)</option>
-                    </select>
-                </div>
                 <button class="primary" onclick="addLeave()" style="padding: 9px 15px;">Mark Leave</button>
             </div>
             
@@ -491,7 +480,6 @@
                         <tr>
                             <th>Employee</th>
                             <th>Date</th>
-                            <th>Type</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -509,19 +497,45 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <div>
                     <h3 style="margin: 0;">✨ Smart Auto-Assigner</h3>
-                    <p style="color:var(--text-muted); font-size:0.9rem; margin-top: 5px;">Automatically matches unassigned samples to employees based on IS competency and available capacity.</p>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin-top: 5px;">Automatically matches unassigned samples to employees based on IS competency, workload, availability, and priority.</p>
                 </div>
-                <button class="primary" onclick="runAutoAssigner()" style="font-size: 1.1rem; padding: 12px 20px;">🤖 Run AI Assigner</button>
+                <div style="display:flex; gap:10px;">
+                    <button class="primary" onclick="runAutoAssigner()" style="font-size: 1.05rem; padding: 10px 18px;">🤖 Run AI Assigner</button>
+                    <button onclick="approveAllRecommendations()" style="background:var(--success); color:white; border:none; font-size:0.95rem; padding:10px 18px; border-radius:6px; font-weight:600; cursor:pointer;">✅ Approve All</button>
+                </div>
             </div>
 
-            <div class="table-container" style="max-height: 450px; border: 1px solid var(--border-light);">
+            <!-- Unassigned Pool Preview -->
+            <div style="margin-bottom: 20px;">
+                <h4 style="margin: 0 0 10px 0; color:var(--text-muted);">📦 Unassigned Pool (<span id="unassigned-pool-count">0</span> samples)</h4>
+                <div class="table-container" style="max-height: 200px; border: 1px solid var(--border-light);">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Encoded Code</th>
+                                <th>IS Number</th>
+                                <th>Priority</th>
+                                <th>Received On</th>
+                                <th>Direct Assign</th>
+                            </tr>
+                        </thead>
+                        <tbody id="unassigned-pool-tbody">
+                            <tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <h4 style="margin: 0 0 10px 0; color:var(--text-muted);">📋 AI Recommendations</h4>
+            <div class="table-container" style="max-height: 350px; border: 1px solid var(--border-light);">
                 <table>
                     <thead>
                         <tr>
                             <th>Sample Code</th>
                             <th>IS Number</th>
-                            <th>Recommended Employee</th>
-                            <th>Reasoning Score</th>
+                            <th>Recommended TA</th>
+                            <th>Score & Reasoning</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -533,17 +547,79 @@
         </div>
     </div>
 
+    <!-- Tab: Preferences -->
+    <div id="tab-preferences" class="tab-content">
+        <div class="glass-panel admin-panel" style="padding: 25px;">
+            <h3>⚙️ Preferences & Settings</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem;">Configure system-wide assignment settings and behavior.</p>
+            
+            <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Assignment Weights -->
+                <div class="setup-card glass-panel" style="padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+                    <h4 style="margin: 0 0 15px 0;">⚖️ Assignment Priority Weights</h4>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Control how Priority vs Non-Priority samples are ranked in Smart Assigner. When equal, no automatic ranking. When Priority is higher, priority samples are assigned first.</p>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:8px; font-weight:600;">Priority Sample Weight: <span id="pref-priority-val">5</span></label>
+                        <input type="range" id="pref-priority-weight" min="1" max="10" value="5" oninput="document.getElementById('pref-priority-val').textContent=this.value" style="width:100%;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:8px; font-weight:600;">Non-Priority Sample Weight: <span id="pref-nonpriority-val">5</span></label>
+                        <input type="range" id="pref-nonpriority-weight" min="1" max="10" value="5" oninput="document.getElementById('pref-nonpriority-val').textContent=this.value" style="width:100%;">
+                    </div>
+                </div>
+
+                <!-- Leave Window -->
+                <div class="setup-card glass-panel" style="padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+                    <h4 style="margin: 0 0 15px 0;">📅 Leave Window for Capacity</h4>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">When calculating TA availability, how many days ahead should the system check for leaves?</p>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:8px; font-weight:600;">Look-ahead Days</label>
+                        <input type="number" id="pref-leave-window" value="30" min="7" max="90" style="width:100%; padding:10px; border-radius:6px;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Smart Assigner Defaults -->
+                <div class="setup-card glass-panel" style="padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+                    <h4 style="margin: 0 0 15px 0;">🤖 Smart Assigner Defaults</h4>
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:0.9rem;">
+                        <input type="checkbox" id="pref-auto-run" style="width:18px; height:18px;">
+                        Auto-run Smart Assigner after every upload
+                    </label>
+                </div>
+
+                <!-- IS Parameter Database Placeholder -->
+                <div class="setup-card glass-panel" style="padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+                    <h4 style="margin: 0 0 15px 0;">📊 IS Parameter Database</h4>
+                    <p style="font-size:0.85rem; color:var(--text-muted);">IS parameters and test durations not yet loaded. Share IS data to activate capacity-based scoring.</p>
+                    <div id="is-params-placeholder" style="text-align:center; padding:20px; color:var(--text-muted);">
+                        <span style="font-size:2rem;">📦</span>
+                        <p style="margin-top:10px;">Coming Soon</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="savePreferences()" class="primary" style="margin-top:20px; width:100%; font-size:1.1rem; padding:12px;">💾 Save Preferences</button>
+        </div>
+    </div>
+
     <!-- Employee Competency Modal -->
     <div id="competency-modal" class="modal">
         <div class="modal-content glass-panel">
             <h3>Manage Competencies: <span id="comp-emp-name" style="color:var(--accent);"></span></h3>
-            <div style="margin-top: 15px; display: flex; gap: 10px; margin-bottom: 20px;">
-                <input type="text" id="comp-is-number" placeholder="IS Number (e.g. IS 4985)" style="flex:1; padding:8px;">
+            <div style="margin-top: 15px; display: flex; gap: 10px; margin-bottom: 20px; flex-wrap:wrap;">
+                <input type="text" id="comp-is-number" placeholder="IS Number (e.g. IS 4985)" style="flex:2; padding:8px; min-width:150px;">
+                <select id="comp-proficiency" style="flex:1; padding:8px; min-width:120px;">
+                    <option value="Standard">Standard</option>
+                    <option value="Expert">Expert</option>
+                    <option value="Trainee">Trainee</option>
+                </select>
                 <button class="primary" onclick="addCompetency()">Add IS</button>
             </div>
             <div class="table-container" style="max-height: 250px;">
                 <table>
-                    <thead><tr><th>IS Number</th><th>Level</th></tr></thead>
+                    <thead><tr><th>IS Number</th><th>Proficiency</th></tr></thead>
                     <tbody id="comp-tbody"></tbody>
                 </table>
             </div>
@@ -572,18 +648,30 @@
         </div>
     </div>
 
-    <!-- Upload Review Modal (Supporting Force Override for Re-allotted duplicates) -->
+    <!-- Upload Review Modal -->
     <div id="review-modal" class="modal">
         <div class="modal-content large-modal glass-panel">
             <h3 style="color: var(--accent);">Reconciliation Engine</h3>
-            <p>Review fresh injects and duplicates. You can select to **Force Commit** duplicate codes re-allotted to different users.</p>
+            <p>Review column mappings, fresh injects, and duplicates.</p>
+            
+            <!-- Column Mapping Section (shown if ambiguous columns exist) -->
+            <div id="column-mapping-section" style="display:none; margin-bottom:20px;">
+                <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); border-left: 4px solid var(--primary); border-radius: 6px; padding: 15px; margin-bottom: 15px;">
+                    <h4 style="margin:0 0 10px 0; color:var(--primary);">🗂️ Column Mapping Required</h4>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">Some columns could not be auto-identified. Please confirm what each column maps to:</p>
+                    <div id="column-mapping-rows"></div>
+                </div>
+            </div>
+
+            <!-- Missing Accounts Banner -->
+            <div id="missing-accounts-banner" style="display:none;"></div>
             
             <div class="review-split">
                 <div class="review-section">
                     <h4 style="color: var(--success);">Fresh Inject (<span id="fresh-count">0</span>)</h4>
                     <div class="table-container small-table" style="border: 1px solid rgba(16, 185, 129, 0.2); max-height: 250px;">
                         <table>
-                            <thead><tr><th>Encoded Code</th><th>Assigned To</th><th>Priority</th></tr></thead>
+                            <thead><tr><th>Encoded Code</th><th>Assigned To</th><th>Priority</th><th>Status</th></tr></thead>
                             <tbody id="fresh-tbody"></tbody>
                         </table>
                     </div>
@@ -624,25 +712,40 @@
 
     <!-- Batch Details Modal -->
     <div id="batch-details-modal" class="modal">
-        <div class="modal-content large-modal glass-panel">
+        <div class="modal-content large-modal glass-panel" style="max-width:900px;">
             <h3 style="color: var(--accent);">Batch History Details</h3>
-            <p>Processed details for batch: <strong id="batch-id-display" style="color: var(--accent);"></strong></p>
+            
+            <!-- Batch Summary -->
+            <div id="batch-summary" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:20px; background:rgba(0,0,0,0.05); padding:15px; border-radius:8px; border:1px solid var(--border-light);">
+                <div><span style="font-size:0.8rem; color:var(--text-muted);">Batch ID</span><br><strong id="batch-id-display"></strong></div>
+                <div><span style="font-size:0.8rem; color:var(--text-muted);">Upload Date</span><br><strong id="batch-date-display"></strong></div>
+                <div><span style="font-size:0.8rem; color:var(--text-muted);">Uploaded By</span><br><strong id="batch-uploader-display"></strong></div>
+                <div><span style="font-size:0.8rem; color:var(--text-muted);">File Name</span><br><strong id="batch-filename-display"></strong></div>
+                <div><span style="font-size:0.8rem; color:var(--text-muted);">Fresh Records</span><br><strong id="batch-fresh-count" style="color:var(--success);"></strong></div>
+                <div><span style="font-size:0.8rem; color:var(--text-muted);">Duplicates Blocked</span><br><strong id="batch-dup-count" style="color:var(--danger);"></strong></div>
+            </div>
+
+            <!-- Column Mapping Used -->
+            <div id="batch-mapping-section" style="display:none; margin-bottom:15px;">
+                <h4 style="color:var(--text-muted); margin:0 0 8px 0;">🗂️ Column Mapping Used</h4>
+                <div id="batch-mapping-content" style="background:rgba(0,0,0,0.05); padding:10px; border-radius:6px; font-size:0.85rem; border:1px solid var(--border-light);"></div>
+            </div>
             
             <div class="review-split">
                 <div class="review-section">
                     <h4 style="color: var(--success);">Fresh Injected</h4>
-                    <div class="table-container small-table" style="border: 1px solid rgba(16, 185, 129, 0.2);">
+                    <div class="table-container small-table" style="border: 1px solid rgba(16, 185, 129, 0.2); max-height:250px;">
                         <table>
-                            <thead><tr><th>Encoded Code</th><th>Assigned To</th></tr></thead>
+                            <thead><tr><th>Code</th><th>IS</th><th>Assigned To</th><th>Priority</th><th>Received</th><th>Status</th></tr></thead>
                             <tbody id="batch-fresh-tbody"></tbody>
                         </table>
                     </div>
                 </div>
                 <div class="review-section">
-                    <h4 style="color: var(--danger);">Duplicates Ignored</h4>
-                    <div class="table-container small-table" style="border: 1px solid rgba(239, 68, 68, 0.2);">
+                    <h4 style="color: var(--danger);">Duplicates Blocked</h4>
+                    <div class="table-container small-table" style="border: 1px solid rgba(239, 68, 68, 0.2); max-height:250px;">
                         <table>
-                            <thead><tr><th>Encoded Code</th><th>Assigned To</th></tr></thead>
+                            <thead><tr><th>Code</th><th>Assigned To</th><th>Re-allotted?</th><th>Previous TP</th></tr></thead>
                             <tbody id="batch-duplicate-tbody"></tbody>
                         </table>
                     </div>
