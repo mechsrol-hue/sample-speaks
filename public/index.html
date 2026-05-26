@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sample Speaks Workspace</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <!-- Toast Notification Container -->
@@ -40,7 +41,26 @@
             <button id="tab-btn-employees" class="tab-btn" onclick="switchTab('tab-employees')">👥 Employee Hub</button>
             <button id="tab-btn-leaves" class="tab-btn" onclick="switchTab('tab-leaves')">📅 Leave Manager</button>
             <button id="tab-btn-assigner" class="tab-btn" onclick="switchTab('tab-assigner')">✨ Smart Assigner</button>
+            <button id="tab-btn-analytics" class="tab-btn" onclick="switchTab('tab-analytics')">📈 Analytics</button>
             <button id="tab-btn-preferences" class="tab-btn" onclick="switchTab('tab-preferences')">⚙️ Preferences</button>
+        </div>
+
+        <!-- Tab: Analytics -->
+        <div id="tab-analytics" class="tab-content" style="display: none;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; padding: 20px;">
+                <div class="glass-panel" style="padding:20px;">
+                    <h3 style="text-align:center; color:var(--text-main); margin-bottom:15px;">Workload Distribution</h3>
+                    <canvas id="workloadChart" style="max-height: 300px; width:100%;"></canvas>
+                </div>
+                <div class="glass-panel" style="padding:20px;">
+                    <h3 style="text-align:center; color:var(--text-main); margin-bottom:15px;">SLA Compliance</h3>
+                    <canvas id="slaChart" style="max-height: 300px; width:100%;"></canvas>
+                </div>
+                <div class="glass-panel" style="padding:20px; grid-column: 1 / -1;">
+                    <h3 style="text-align:center; color:var(--text-main); margin-bottom:15px;">IS Volume Breakdown</h3>
+                    <canvas id="isVolumeChart" style="max-height: 350px; width:100%;"></canvas>
+                </div>
+            </div>
         </div>
 
         <!-- Tab: Dashboard -->

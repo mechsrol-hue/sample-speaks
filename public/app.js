@@ -707,8 +707,123 @@ async function fetchSamples() {
             populateFilterDropdowns();
             renderTable();
             populateSampleCodeDatalist();
+            if (typeof renderAnalytics === 'function') renderAnalytics();
         }
     } catch (e) { console.error(e); }
+}
+
+let workloadChartInstance = null;
+let slaChartInstance = null;
+let isVolumeChartInstance = null;
+
+function renderAnalytics() {
+    if (typeof Chart === 'undefined') return; // Wait until Chart.js loads
+
+    // Extract pending/active samples
+    const pendingSamples = allSamples.filter(s => s.appStatus === 'Pending' || s.appStatus === 'PendingAccount');
+
+    // 1. Workload Distribution (Samples per TP)
+    const tpCounts = {};
+    pendingSamples.forEach(s => {
+        const tp = s.assignedTo || 'Unassigned';
+        tpCounts[tp] = (tpCounts[tp] || 0) + 1;
+    });
+    const tpLabels = Object.keys(tpCounts);
+    const tpData = Object.values(tpCounts);
+
+    const workloadCtx = document.getElementById('workloadChart');
+    if (workloadCtx) {
+        if (workloadChartInstance) workloadChartInstance.destroy();
+        workloadChartInstance = new Chart(workloadCtx, {
+            type: 'bar',
+            data: {
+                labels: tpLabels,
+                datasets: [{
+                    label: 'Pending Samples',
+                    data: tpData,
+                    backgroundColor: 'rgba(56, 189, 248, 0.6)',
+                    borderColor: 'rgba(56, 189, 248, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, ticks: { color: '#ccc' }, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { ticks: { color: '#ccc' }, grid: { display: false } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // 2. SLA Compliance (Days Pending)
+    let fresh = 0, warning = 0, critical = 0;
+    pendingSamples.forEach(s => {
+        const daysOld = calculateDaysOld(s.forwardedOn || s.receivedOn);
+        if (daysOld <= 7) fresh++;
+        else if (daysOld <= 15) warning++;
+        else critical++;
+    });
+
+    const slaCtx = document.getElementById('slaChart');
+    if (slaCtx) {
+        if (slaChartInstance) slaChartInstance.destroy();
+        slaChartInstance = new Chart(slaCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['< 7 Days', '8-15 Days', '> 15 Days (Critical)'],
+                datasets: [{
+                    data: [fresh, warning, critical],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: '#ccc' } } }
+            }
+        });
+    }
+
+    // 3. IS Volume Breakdown
+    const isCounts = {};
+    pendingSamples.forEach(s => {
+        if (s.isNumber) {
+            isCounts[s.isNumber] = (isCounts[s.isNumber] || 0) + 1;
+        }
+    });
+    
+    // Sort by volume descending
+    const sortedIS = Object.keys(isCounts).sort((a,b) => isCounts[b] - isCounts[a]);
+    const topIS = sortedIS.slice(0, 10); // Show top 10
+    const topISData = topIS.map(is => isCounts[is]);
+
+    const isCtx = document.getElementById('isVolumeChart');
+    if (isCtx) {
+        if (isVolumeChartInstance) isVolumeChartInstance.destroy();
+        isVolumeChartInstance = new Chart(isCtx, {
+            type: 'bar',
+            data: {
+                labels: topIS,
+                datasets: [{
+                    label: 'Sample Count',
+                    data: topISData,
+                    backgroundColor: 'rgba(167, 139, 250, 0.6)',
+                    borderColor: 'rgba(167, 139, 250, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y', // horizontal bar chart
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { x: { beginAtZero: true, ticks: { color: '#ccc' }, grid: { color: 'rgba(255,255,255,0.1)' } }, y: { ticks: { color: '#ccc' }, grid: { display: false } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
 }
 
 function populateSampleCodeDatalist() {
