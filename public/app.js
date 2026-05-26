@@ -2259,6 +2259,21 @@ async function approveAllRecommendations() {
     } catch (err) { console.error(err); }
 }
 
+async function generateMockData() {
+    if (!confirm('This will inject 50 mock samples into the unassigned pool. Are you sure?')) return;
+    try {
+        const res = await fetch('/api/admin/generate-mocks', { method: 'POST' });
+        const data = await res.json();
+        if (res.ok) {
+            showToast(data.message, 'success');
+            fetchSamples(); // Refresh data
+            loadUnassignedPool(); // Refresh pool view
+        } else {
+            showToast(data.error, 'error');
+        }
+    } catch(e) { showToast(e.message, 'error'); }
+}
+
 async function runAutoAssigner() {
     showToast('Running Smart Assigner...', 'info');
     try {

@@ -1077,6 +1077,35 @@ app.post('/api/admin/approve-all-recommendations', async (req, res) => {
     }
 });
 
+// --- MOCK GENERATOR ---
+app.post('/api/admin/generate-mocks', async (req, res) => {
+    try {
+        const mockSamples = [];
+        const isNumbers = ['IS 4985', 'IS 13592', 'IS 15778', 'IS 14735', 'IS 15328'];
+        const priorities = ['Standard', 'Priority'];
+        
+        for (let i = 0; i < 50; i++) {
+            mockSamples.push({
+                encodedCode: `MOCK-${Date.now().toString().slice(-6)}-${i}`,
+                isNumber: isNumbers[Math.floor(Math.random() * isNumbers.length)],
+                priorityLevel: Math.random() > 0.8 ? 'Priority' : 'Standard',
+                receivedOn: new Date().toLocaleDateString('en-GB').replace(/\//g, '-'),
+                forwardedOn: new Date(Date.now() - Math.floor(Math.random() * 20) * 86400000).toLocaleDateString('en-GB').replace(/\//g, '-'),
+                quantity: '1',
+                appStatus: 'Pending',
+                assignedTo: null
+            });
+        }
+        
+        const { error } = await supabase.from('samples').insert(mockSamples);
+        if (error) throw error;
+        
+        res.json({ message: '50 Mock samples successfully injected into unassigned pool!' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Export for Vercel serverless + listen locally
 const PORT = process.env.PORT || 3000;
 if (!process.env.VERCEL) {
