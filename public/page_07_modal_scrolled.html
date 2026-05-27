@@ -1,0 +1,3303 @@
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!-- Viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="description" content="Laboratory Information Management System of Bureau of Indian Standards">
+	<meta name="keywords" content=" LIMS, BIS, Laboratory Information Management System">
+  <meta name="author" content="">
+  <meta name="insight-app-sec-validation" content="0b0ed5b1-42f2-40f0-a785-a9dcb0923cec">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/image/favicon-32x32.png">
+  <title>BIS - LIMS (Laboratory Information Management System) Dashboard</title>
+  <script src="/static/js/jquery-3.2.1.min.js"></script>
+  <script src="/static/js/moment.js"></script>
+  <script src="/static/js/bootstrap-datetimepicker.min.js"></script>
+  <link href="/static/css/bootstrap-datetimepicker.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="/static/css/bootstrap.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="/static/css/ie11.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="/static/css/cropper.css" rel="stylesheet" crossorigin="anonymous">
+
+  <link href="/static/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="/static/css/dashboard.css" rel="stylesheet" crossorigin="anonymous">
+   <link href="/static/css/Roboto-Condensed.css" rel="stylesheet">
+  <link href="/static/css/OpenSans.css" rel="stylesheet">
+  <link href="/static/css/style.css" rel="stylesheet" crossorigin="anonymous">
+  <link rel="stylesheet" href="/static/css/Chart.min.css">
+  <script src="/static/js/jquery.dataTables.js"></script>
+  <script src="/static/js/dataTables.bootstrap4.js"></script>
+  <script src="/static/js/cropper.js"></script>
+  <script src="/static/js/custom-cropper.js"></script>
+  <script src="/static/js/jquery-cropper.js"></script>
+  <script src="/static/js/chart.js/Chart.bundle.min.js" charset="utf-8"></script>
+  <script src="/static/js/chart.js/Chart.min.js" charset="utf-8"></script>
+  <script src="/static/js/reconnecting-websocket.js" charset="utf-8"></script>
+  <script src="/static/js/blockui.js" charset="utf-8"></script>
+  <link href="/static/css/select2.min.css" rel="stylesheet">
+  <script src="/static/js/select2.min.js"></script>
+  <link href="/static/css/lrs.css" rel="stylesheet">
+<style>
+  .hidden{display:none}
+</style>
+</head>
+
+<body id="page-top" class="modal-open" style="padding-right: 15px;">
+  <!-- Topbar -->
+  <nav class="navbar navbar-expand navbar-light bg-white topbar static-top" colspan="9">
+
+    <!-- Sidebar Toggle (Topbar) in mobile -->
+    <button id="sidebarToggleTop" class="btn  d-block d-md-none rounded-circle mr-3">
+      <i class="fa fa-bars"></i>
+    </button>
+
+    <div class="logodashboard">
+      <a href="https://lims.bis.gov.in/dashboard/">
+		<div class="d-flex align-items-center">
+			<div class="iconlogomanak"><img src="/static/image/manak.png"></div>
+			<div class="manakNames">
+				<h2>Bureau of Indian Standards</h2>
+				<h3>The National Standards Body of India</h3>
+			</div>
+		</div>
+	  </a>
+    </div>
+	<!-- Sidebar Toggle (Topbar) in Dasktop -->
+    <button id="sidebarToggleTop" class=" d-none d-md-block rounded-circle ml-4 border-0">
+      <i class="fa fa-bars"></i>
+    </button>
+
+    <!-- Topbar Navbar -->
+    <ul class="navbar-nav ml-auto">
+      <!-- Nav Item - Alerts -->
+     
+
+
+      <!-- {&#x27;notifications&#x27;: [], &#x27;unread_count&#x27;: 0} -->
+     <!-- { if request.user.id|get_user_notifications %} -->
+<!-- Temporary Maintenance Notification Code Start -->
+     <!-- <li>
+      <marquee behavior="scroll" direction="left" scrollamount="8" style="width: 610px;font-weight: bold;font-size: 15px;color: #721c24;">
+        LIMS will remain unavailable between 9:45 PM to 10:30 PM on 10th January'22 due to server maintenance activity. All users are kindly advised to manage their work accordingly.
+      </marquee>
+    </li> -->
+<!-- Temporary Code End -->
+     
+
+
+        <li class="nav-item dropdown no-arrow mx-1">
+          <a class="nav-link dropdown-toggle show_notification" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i title="Notification" class="fa fa-bell fa-fw" id="notification_bell"></i>
+          
+            
+                <span class="badge badge-danger badge-counter" id="notification_count" data-value=""></span>
+          </a> 
+      <!-- Dropdown - Alerts -->
+      <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown" id="notification_card">
+            <h6 class="dropdown-header">
+              Alerts Center
+            </h6>
+            
+            <div id="notification_loop">
+            </div>
+
+      <!----- comment by aakash start -->
+      <!-- <a class="dropdown-item d-flex align-items-center" href="#">
+              <div class="mr-3">
+                <div class="icon-circle bg-success">
+                  <i class="fa fa-donate text-white"></i>
+                </div>
+              </div>
+              <div>
+                <div class="small text-gray-500">December 7, 2019</div>
+                $290.29 has been deposited into your account!
+              </div>
+            </a>
+            <a class="dropdown-item d-flex align-items-center" href="#">
+              <div class="mr-3">
+                <div class="icon-circle bg-warning">
+                  <i class="fa fa-exclamation-triangle text-white"></i>
+                </div>
+              </div>
+              <div>
+                <div class="small text-gray-500">December 2, 2019</div>
+                Spending Alert: We've noticed unusually high spending for your account.
+              </div>
+            </a> -->
+      <!----- comment by aakash end -->
+       <a class="dropdown-item text-center small text-gray-500" href="/notifications_listing/">Show All Alerts</a>
+          </div>
+        </li> 
+      <!-- { endif %}  -->
+     
+
+      <!-- Nav Item - User Information -->
+      <li class="nav-item dropdown no-arrow">
+        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <img class="img-profile rounded-circle" src="/media/profile/default_pic.jpg" id="profilepic" title="Profile">
+
+          <span class="mx-2 d-none d-lg-inline userName">Saurabhd@bis.gov.in</span>
+          <i class="fa fa-angle-down"></i>
+
+        </a>
+        <span class="username_tagline">You are logged in as <strong>Lab Officer / Testing Assistant</strong></span>
+
+        <!-- Dropdown - User Information -->
+        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+          <a class="dropdown-item" href="/profile/">
+            <i class="fa fa-user-o fa-sm fa-fw mr-2 text-gray-400"></i>
+            Profile
+          </a>
+          <!-- <a class="dropdown-item" href="#">
+              <i class="fa fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+              Settings
+            </a>
+            <a class="dropdown-item" href="#">
+              <i class="fa fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+              Activity Log
+            </a> -->
+
+          
+
+          
+          <a class="dropdown-item change_group" style="background-color:yellow" href="#" selected_group="LO/TA" user_id="9630">LO/TA</a>
+          
+          
+          <div class="dropdown-divider"></div>
+          <a href="/dashboard_user_manual/" class="dropdown-item">User Manual</a>
+          <div class="dropdown-divider"></div>
+
+          <a href="/change_password/" class="dropdown-item">Change Password</a>
+          <div class="dropdown-divider"></div>
+          <a href="/logout" class="dropdown-item">Logout</a>
+
+        </div>
+      </li>
+
+    </ul>
+
+
+    
+
+  </nav>
+  <!-- End of Topbar -->
+
+  <!--Test Request Modal-->
+  <div class="modal fade stockmodal" id="testRequestModalPopUp" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  </div>
+
+  <script type="text/javascript">
+
+    function add_notifications(d) {
+      var count_value = false
+      var notify_append = $('#notification_loop')
+      if ($('#notification_count').length > 0) {
+        var count_value = parseInt($('#notification_count').attr('data-value'));
+      } else {
+        pre_append_notify = `
+          <a class="dropdown-item d-flex align-items-center" href="${d.instance.link}">
+            <div class="mr-3">
+              <div class="icon-circle bg-primary">
+                <!-- <i class="fa fa-file-alt text-white"></i> -->
+                <img src="${d.instance.user_proflie}">
+              </div>
+            </div>
+            <div>
+              <div class="small text-gray-500">${d.instance.created_at}</div>
+              <span class="font-weight-bold">${d.instance.message}</span>
+            </div>
+          </a>
+          `
+        notify_append.prepend(pre_append_notify);
+
+        $('#alertsDropdown').append(
+          `<span class="badge badge-danger badge-counter" id="notification_count" data-value="1">1+</span>`
+        )
+      }
+
+      if (Boolean(count_value)) {
+        var new_value = ++count_value;
+
+        pre_append_notify = `
+          <a class="dropdown-item d-flex align-items-center" href="${d.instance.link}">
+            <div class="mr-3">
+              <div class="icon-circle bg-primary">
+                <!-- <i class="fa fa-file-alt text-white"></i> -->
+                <img src="${d.instance.user_proflie}">
+              </div>
+            </div>
+            <div>
+              <div class="small text-gray-500">${d.instance.created_at}</div>
+              <span class="font-weight-bold">${d.instance.message}</span>
+            </div>
+          </a>
+          `
+        notify_append.prepend(pre_append_notify);
+        $('#notification_count').attr('data-value', new_value);
+        $('#notification_count').html(`${new_value}+`);
+      }
+    }
+
+    // notification_socket_url = '/ws/notifications/';
+    // var protocol_websocket = "ws://"
+    // if (window.location.protocol == "https:") {
+    //   var protocol_websocket = "wss://"
+    // }
+
+    // let notifications_socket = new ReconnectingWebSocket(`${protocol_websocket}${window.location.host}${notification_socket_url}`)
+    // notifications_socket.onopen = function (e) {
+    //   console.log('connection accepted by the server.');
+    // }
+
+    // Temporarely
+    // notifications_socket.onmessage = function (e) {
+    //   json_data = JSON.parse(e.data);
+    //   add_notifications(json_data);
+    // }
+
+    // notifications_socket.onclose = function (e) {
+    //   console.log('connection close by the server');
+    // }
+
+    // notifications_socket.error = function (e) {
+    //   console.log('connection error by server. please check.')
+    // }
+
+  </script>
+  <script type="text/javascript">
+    $('#notification_bell').on('click', function (e) {
+      e.preventDefault();
+      $('#notification_count').attr('style', 'display: none;');
+      $.ajax({
+        url: `/notification/unread/mark/`,
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          'csrfmiddlewaretoken': `dIGbt44hqOvuVd0Vc3iuKs4uYi73NiIuGB1MF3dZvPcyK3Dz87hpSYFyp0lnpZ9X`,
+        },
+        success: function (r) {
+        }
+      })
+    });
+
+    $(document).ready(function () {
+      $.get(`/get_user_profile/?user=9630`, function (data, status) {
+        $('#profilepic').attr('src', `${data.image}`);
+      });
+
+      // This functino is user to save remarks
+      $.fn.updateRemarks = function (data) {
+        console.log(data)
+        console.log(data['toast_message'])
+        console.log(data['lab_id'])
+        $.ajax({
+          type: 'POST',
+          url: '/save_remarks/',
+          headers: { "X-CSRFToken": 'dIGbt44hqOvuVd0Vc3iuKs4uYi73NiIuGB1MF3dZvPcyK3Dz87hpSYFyp0lnpZ9X' },
+          data: data,
+          dataType: 'json',
+          success: function (response) {
+            let modal_id = `#rejectRecordModal${data['lab_id']}`
+            $(modal_id).modal('hide')
+            toast_function(data['toast_message'])
+            setTimeout(function () {
+              location.reload()
+            },
+              3000);
+          },
+          error: function (response) {
+            console.log(response)
+          }
+        });
+      }
+    });
+  </script>
+
+
+  <script>
+    $('.change_group').on('click', function () {
+      var selected_group = $(this).text()
+      var user_id = $(this).attr('user_id');
+      var url = '/update_group/'
+      $.get(url, { 'selected_group': selected_group, 'user_id': user_id }, function (data) {
+        // location.reload()  
+        toast_function('Role updated to ' + selected_group)
+        setTimeout(function () {
+          location.reload()
+        },
+          1500);
+
+      });
+    })
+    $(document).on('click', '.show_notification', function () {
+      $.ajax({
+				type: "GET",
+				url: "/show_notifications/",
+				dataType: 'json',
+				success: function (response) {
+                    $('#notification_loop').html(response['form'])
+				},
+				error: function (response) {
+					console.log(response)
+				}
+			});
+     })
+  </script>
+
+
+
+
+
+
+<!--  -->
+
+<!-- Page Wrapper -->
+<div id="wrapper">
+  
+
+<ul class="navbar-nav sidebar sidebar-dark accordion  " id="accordionSidebar">
+
+  <!-- Sidebar -->
+  <!-- Nav Item - Dashboard -->
+  
+  <li class="nav-item ">
+    <a class="nav-link" href="/dashboard/">
+      <i class="fa fa-tachometer"></i>
+      <span>Dashboard</span></a>
+  </li>
+  
+  <script>
+    $(document).on('click', ".compare_lab", function () {
+      var section_compare = $(this).attr('section_compare');
+      console.log('section_compareeeeeeeeeeeee', $(this).text())
+      if ($(this).text() == "Compare") {
+        console.log('this', $(this).text())
+        $(this).text("Requested Updates");
+      } else {
+        $(this).text("Compare");
+      };
+      console.log($(this).closest('.Addmutipleform').find('.prev_section_data'))
+      $(this).closest('.Addmutipleform').find('.prev_section_data').toggleClass('hidden')
+      $(this).closest('.Addmutipleform').find('.temp_section_data').toggleClass('col-md-12').toggleClass('col-md-6')
+    })
+  </script>
+
+  
+
+  
+
+
+  
+
+  
+
+
+  <!-- { if request.user|has_group:"Head" or request.user|has_group:"Dealing Officer" %} -->
+
+  
+
+  
+
+
+  
+
+  
+
+
+
+
+  <!--  -->
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <!-- { if perms.auditor.add_laboratoryaudittable } -->
+  
+
+  
+
+  <!--  -->
+
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+  
+
+  
+
+
+  
+  
+
+
+
+  <!-- Nav Item - Pages Collapse Menu -->
+
+  
+
+
+
+  <!-- Nav Item - Pages Collapse Menu -->
+  
+  <li class="nav-item ">
+    <a class="nav-link collapsed" href="javascript:void(0);" data-toggle="collapse" data-target="#samplehandle" aria-expanded="false" aria-controls="collapseTwo">
+      <i class="fa fa-fw fa-table"></i>
+      <span>Sample Handling</span></a>
+    <div id="samplehandle" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+      <div class="py-2 collapse-inner">
+        
+        
+
+        
+        
+        
+        
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        <!--  -->
+
+        <!--  -->
+
+        
+        <a class="collapse-item" href="/sample/ta_sample_reciept_list">Sample Receipt
+          <span id="ta_receipt"></span></a>
+        <!-- <a class="collapse-item" href="{ url 'ta-sample-modified-reciept-list' %}">Modified Sample Receipt
+            <span id="ta_receipt"></span></a> -->
+        
+
+        
+        <a class="collapse-item" href="/sample/ta_sample_pending_list">Pending Samples
+          <span id="ta_pending"></span></a>
+        
+
+        
+        <a class="collapse-item" href="/sample/ta_sample_issuedreport_list">Issued Test Report
+          <span id="ta_report"></span></a>
+        
+
+        <!-- 
+        <a class="collapse-item" href="/sample/ta_sample_clarification_list">Sample Clarification
+          <span id="ta_clarification"></span></a>
+         -->
+        
+        
+
+        
+
+        
+        
+        
+        
+        
+        
+
+
+        
+
+        
+
+        
+
+        
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+
+        <!--  -->
+      </div>
+    </div>
+  </li>
+
+  
+
+
+
+  <li class="nav-item">
+    <a class="nav-link collapsed" href="javascript:void(0);" data-toggle="collapse" data-target="#clarifications" aria-expanded="false" aria-controls="collapseTwo">
+      <i class="fa fa-fw fa-table"></i>
+      <span>Sample Clarifications</span></a>
+    <div id="clarifications" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+      <div class="py-2 collapse-inner">
+
+        <a class="collapse-item" href="/sample/received_sample_clarifications/">Clarifications Received
+          <span id="samplecell_receive"></span></a>
+        <a class="collapse-item" href="/sample/raised_sample_clarifications/">Clarifications Raised
+          <span id="samplecell_raised"></span></a>
+          <a class="collapse-item" href="/sample/userwise_sample_clarifications/">All Clarifications
+          <span id="all_clarifications"></span></a>
+                    <a class="collapse-item" href="/sample/userwise_sample_open_clarifications/">Open  Clarifications
+          <span id="all_open_clarifications"></span></a>
+                    <a class="collapse-item" href="/sample/userwise_sample_close_clarifications/">Closed Clarifications
+          <span id="all_close_clarifications"></span></a>
+      </div>
+    </div>
+  </li>
+
+  
+  
+  
+  
+  <!-- { if perms.lrs.adequate_laboratory %}
+  <li class="nav-item ">
+    <a class="nav-link" href="/lab_scope_request/">
+      <i class="fa fa-fw fa-flask"></i>Lab Scope Request<span id=""></span></a>
+  </li>
+  { endif %} -->
+  
+  
+
+  
+
+
+  
+
+  
+
+  
+    
+        
+
+<li class="nav-item">
+    <a class="nav-link collapsed" href="javascript:void(0);" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseTwo" id="store_menu">
+        <i class="fa fa-fw fa-industry"></i>
+        <span>Store</span>
+    </a>
+    <div id="collapseThree" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div class="py-2 collapse-inner">
+            <a class="collapse-item" href="/store/items/">Item List</a>
+            <a class="collapse-item" href="/store/view_stock/">Available Stock</a>
+            
+            
+            
+            <a class="collapse-item" href="/store/items/raised_indent/">Raised Indent Requests <span id="raised_indent_list"></span></a>
+            <a class="collapse-item" href="/store/items/indent/pending_actions/">Actions Required on Indent Requests <span id="indent_action"></span></a>
+            
+            
+            
+            
+            
+            <a class="collapse-item" href="/store/raised_purchase_requests_list/">Raised Purchase Requests <span id="raised_purchase_requests_list"></span></a>
+            <!-- <a class="collapse-item" href="/store/items/purchase/pending_actions/">Actions Required on Purchase Requests <span id="purchase_actions"></span></a> -->
+            
+
+            
+
+            
+            
+            
+            
+            
+
+            
+            
+            
+        </div>
+    </div>
+</li>
+
+
+<script src="/static/js/custom_store.js"></script>
+
+<script>
+    window.onload = function () {
+        var span = document.getElementsByTagName('th').length
+        $('.bg-white').attr('colspan', span)
+        var url = "/sample/generate_test_report/1318562/"
+        $(`a[href='${url}']`).closest('li').addClass('active')
+        $(`a[href='${url}']`).closest('.collapse').addClass('show')
+
+        $.get('/store/get_store_count/', function(res, status){
+            Object.keys(res).forEach(function(key) {
+            console.table('Key : ' + key + ', Value : ' + res[key])
+
+            $(`#${key}`).text(`(${res[key]})`)
+            });
+        });
+    }
+
+</script>
+     
+    
+  
+
+   
+    
+    
+
+<li class="nav-item" id="equipmentLi">
+    <a class="nav-link collapsed" href="javascript:void(0);" data-toggle="collapse" data-target="#collapseEquipment" aria-expanded="false" aria-controls="collapseEquipment">
+        <i class="fa fa-fw fa-check"></i>
+        <span>Equipment</span>
+    </a>
+    <div id="collapseEquipment" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div class="py-2 collapse-inner">
+            <a class="collapse-item" href="/equipment/">Equipments</a>
+
+            
+            
+            <a class="collapse-item" href="/equipment/requests/status/">Equipment Requests <span id="er_pending"></span></a>
+            
+            
+            <a class="collapse-item" href="/equipment/purchase_requests/">Purchase Requests <span id="pr_lato"></span></a>
+            
+            
+            
+            
+            
+        </div>
+    </div>
+</li>
+
+<script src="/static/js/custom_equipment.js"></script>
+
+
+    
+  
+
+
+
+  
+
+  
+
+  
+
+      <!--- For OIC and LO/TA -->
+  <li class="nav-item">
+      <a class="nav-link collapsed" href="javascript:void(0);" data-toggle="collapse" data-target="#collapseReport" aria-expanded="false" aria-controls="collapseTwo">
+        <i class="fa fa-fw fa-users"></i>
+        <span>Report</span>
+      </a>
+      <div id="collapseReport" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div class="py-2 collapse-inner">
+          <!--- For OIC -->
+          
+          <a class="collapse-item" href="/oic_report_by_testing_person">Testing Person Report<span id=""></span></a>
+        </div>
+      </div>
+    </li>
+    
+
+    
+    
+  
+
+  
+
+  
+
+  
+
+
+  <li class="nav-item ">
+    <a class="nav-link" href="/dashboard_user_manual/">
+      <i class="fa fa-book fa-fw"></i>
+      <span>User Manual</span></a>
+  </li>
+
+
+
+  <!-- Divider -->
+  <hr class="sidebar-divider d-none">
+  <!-- Sidebar Toggler (Sidebar) -->
+  <div class="text-center d-none">
+    <button class="rounded-circle border-0" id="sidebarToggle"></button>
+  </div>
+  <!-- End of Sidebar -->
+</ul>
+
+
+
+<script>
+  // $(function () {
+  //   $.get('/store/get_store_count/', function (res, status) {
+  //     Object.keys(res).forEach(function (key) {
+  //       if (res[key]) {
+  //         $(`#${key}`).text(`(${res[key]})`)
+  //       }
+  //     });
+  //   });
+
+  // })
+</script>
+
+
+
+<script>
+  // $(function () {
+  //   $.get('/sample/get_sample_count/', function (res, status) {
+  //     Object.keys(res).forEach(function (key) {
+  //       // console.table('Key : ' + key + ', Value : ' + res[key])
+  //       if (res[key]) {
+  //         $(`#${key}`).text(`(${res[key]})`)
+  //       }
+  //     });
+  //   });
+  // })
+</script>
+<script>
+  // $(function () {
+  //   $.get('/get_dashboard_count/', function (res, status) {
+  //     Object.keys(res).forEach(function (key) {
+  //       // console.table('Key : ' + key + ', Value : ' + res[key])
+  //       // if (res[key]) {
+  //         $(`#${key}`).text(`(${res[key]})`)
+  //       // }
+  //     });
+  //   });
+  // })
+</script>
+<script>
+  $(window).on('load', function () {
+    var span = document.getElementsByTagName('th').length
+    $('.bg-white').attr('colspan', span)
+    var url = "/sample/generate_test_report/1318562/"
+    $(`a[href='${url}']`).closest('li').addClass('active')
+    $(`a[href='${url}']`).closest('a').addClass('active')
+    $(`a[href='${url}']`).closest('.collapse').addClass('show')
+  })
+</script>
+
+  <link href="/static/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+  <style type="text/css">
+    .unselectable {
+      background-color: #ddd;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .badge-danger {
+      color: #fff;
+      background-color: #dc3545;
+    }
+
+      a:hover {
+        cursor:pointer;
+      }
+  </style>
+
+  <!-- Content Wrapper -->
+  <div id="content-wrapper" class="d-flex flex-column">
+
+    <!-- Main Content -->
+    <div id="content">
+
+
+      <!-- Begin Page Content -->
+      <div class="container-fluid">
+        <div class="container-fluid RegisterForm ">
+          <div class="panel-body px-3">
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb border-bottom pb-2">
+                <li class="breadcrumb-item"><a href="/sample/ta_sample_pending_list">Pending Sample list</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Generate Test Request</li>
+              </ol>
+            </nav>
+            <div class="labtyDetails border-bottom pb-3 row no-gutters">
+              <div class="d-flex align-items-center col-md-6 col-lg-7">
+                <!-- <div class="iconsboxs"><img src="/static/image/lab.png" style="width:45px; margin-right:5px;" />
+                </div> -->
+                <div class="ml-2">
+                  <h4 class="mb-1"><span class="labeltype">Sample Encoded Code</span>
+                    26MD61F86N</h4>
+                  <h3 class="mb-1">-</h3>
+                  <h5 class="mb-1">Non-Priority</h5>
+
+                </div>
+              </div>
+              <div class="datecalender  border-left px-5 border-right text-center col-md-3 col-lg-3">
+                <i class="fa fa-calendar d-none"></i>
+                <div class="">
+                  <h5 class="mb-1">May 22, 2026</h5>
+                  <h5 class="labeltype">Received On </h5>
+                </div>
+                <div>
+                  <h5 class="mb-1">-</h5>
+                  <h5 class="labeltype">Test Before</h5>
+                </div>
+
+              </div>
+              <div class="datecalender text-center col-md-3 col-lg-2">
+                <i class="fa fa-calendar d-none"></i>
+
+                <div>
+                  <h5 class="mb-1">IS 4985 (2021)</h5>
+                  <h5 class="labeltype">IS Number</h5>
+                </div>
+              </div>
+            </div>
+            <div class="collapse OICRemark border-bottom " id="OICRemark">
+              <div class="d-flex align-items-center">
+                <div class="iconsboxs"><img src="/static/image/chat.png" style="width:45px;"></div>
+                <div class="w-100">
+                  <h4 class="mb-0">Sample Cell Instruction</h4>
+                  <div class="commentbox">
+                    <p></p>
+
+                  </div>
+
+                </div>
+              </div>
+              <div class="d-flex align-items-center">
+                <div class="iconsboxs"><img src="/static/image/chat.png" style="width:45px;"></div>
+                <div class="w-100">
+                  <h4 class="mb-0">Testing Section Instruction</h4>
+                  <div class="commentbox">
+                    <p>None</p>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+            <div class="oicmark mb-3">
+              <button class="btn btn-filter btn-sm border border-top-0" data-toggle="collapse" data-target="#OICRemark" aria-controls="OICRemark" aria-expanded="false" aria-label="Toggle navigation"><i class="fa fa-angle-down mr-1" aria-hidden="true"></i>Instructions</button>
+            </div>
+
+            <div class="addscopehide setup-content mt-3" style="margin-bottom:30px;">
+              <div class="form-group d-flex justify-content-between align-items-center">
+                <h1 class="panel-title mb-0">Alloted Clauses</h1>
+
+              </div>
+
+              <div class="d-flex justify-content-between mb-2">
+                <span></span>
+                <input type="hidden" id="bulk_ifremnant_id" name="bulk_ifremnant" value="">
+                <button data-toggle="modal" id="IdNotAppModel" ifremnant="False" data-target="#NotAppModel" class="btn btn-primary ">Mark Not Applicable</button>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-bordered customTable" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th scope="col" width="40">
+                        <div class="custom-control custom-checkbox normal-checkbox">
+                          <input type="checkbox" class="custom-control-input" id="customCheck2_">
+                          <label class="custom-control-label" for="customCheck2_">&nbsp;</label>
+                        </div>
+                      </th>
+                      <th scope="col">Clause number</th>
+                      <!-- <th scope="col">Title</th> -->
+                      <th scope="col">Parameter</th>
+                      <th scope="col">Description</th>
+                      <th scope="col">Tentative Start Date</th>
+                      <th scope="col">Tentative End Date</th>
+                      <th scope="col">Actual Start Date</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_1" value="139364">
+                        <label class="custom-control-label" for="customCheck_1">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">1</span></td>
+                      
+                      <td><a title="139364">10.1</a></td>
+                      <!-- <td>UPVC pipes for potable water supplies</td> -->
+                      <td>Colour</td>
+                      <td>As in Cl 10.1</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>22 May, 2026</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              
+                                <button class="btn btn-primary btn-sm mr-2" onclick="submitTR(139364,1318562)">Submit</button>
+                                <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139364" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                              
+                                  <!-- <button class="btn btn-primary btn-sm mr-2 duplicateTR" onclick="duplicateTR(139364,1318562)">+ Add More</button> -->
+                                  <button class="btn btn-primary btn-sm mr-2 duplicateTR" req_clause="139364" req_sample="1318562">+ Add More</button>
+                                  <a class="btn btn-primary btn-sm mr-2" href="/sample/parameter_results_list/139364/1318562/" target="__blank">View / Update (<span class="res_count">0</span>)</a>
+                          
+
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_2" value="139365">
+                        <label class="custom-control-label" for="customCheck_2">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">2</span></td>
+                      
+                      <td><a title="139365">10.1</a></td>
+                      <!-- <td>UPVC pipes for potable water supplies</td> -->
+                      <td>Surface Finish</td>
+                      <td>As in Cl 10.1</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139365,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139365" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_3" value="139366">
+                        <label class="custom-control-label" for="customCheck_3">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">3</span></td>
+                      
+                      <td><a title="139366">7.2.1.1 Table3</a></td>
+                      <!-- <td>UPVC pipes for potable water supplies</td> -->
+                      <td>Angle of taper (Note-1)</td>
+                      <td>Specified : Shall not exceed 0 degree 30minute</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139366,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139366" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_4" value="139368">
+                        <label class="custom-control-label" for="customCheck_4">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">4</span></td>
+                      
+                      <td><a title="139368">5</a></td>
+                      <!-- <td>Unplasticized pvc pipes for potable water supplies</td> -->
+                      <td>CLASSIFICATION OF PIPES</td>
+                      <td>Class 1/2/3/4/5/6</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139368,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139368" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_5" value="139369">
+                        <label class="custom-control-label" for="customCheck_5">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">5</span></td>
+                      
+                      <td><a title="139369">Cl-7.1</a></td>
+                      <!-- <td>Unplasticized pvc pipes for potable water supplies</td> -->
+                      <td>Mean out side Diameter (For less than or equal to 40 mm- Average of 8 , For higher diameters up to 110 mm average of 6)</td>
+                      <td>mm</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139369,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139369" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_6" value="139370">
+                        <label class="custom-control-label" for="customCheck_6">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">6</span></td>
+                      
+                      <td><a title="139370">7.1.1.1</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>DIMENSIONS-PIPE-Mean O.D. (Minimum)</td>
+                      <td>90.0 mm,Min</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139370,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139370" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_7" value="139371">
+                        <label class="custom-control-label" for="customCheck_7">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">7</span></td>
+                      
+                      <td><a title="139371">7.1.1.1</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>DIMENSIONS-PIPE-Mean O.D. (Mamimum)</td>
+                      <td>90.3 mm,Max</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139371,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139371" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_8" value="139372">
+                        <label class="custom-control-label" for="customCheck_8">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">8</span></td>
+                      
+                      <td><a title="139372">7.1.1.1</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>DIMENSIONS-PIPE-Mean O.D. Variation</td>
+                      <td>Mean O.D. Variation</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139372,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139372" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_9" value="139373">
+                        <label class="custom-control-label" for="customCheck_9">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">9</span></td>
+                      
+                      <td><a title="139373">7.1.1.2</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>DIMENSIONS-PIPE-O.D. at any Point (Minimum)</td>
+                      <td>88.9 mm,Min</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139373,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139373" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_10" value="139374">
+                        <label class="custom-control-label" for="customCheck_10">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">10</span></td>
+                      
+                      <td><a title="139374">7.1.1.2</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>DIMENSIONS-PIPE-O.D. at any Point (Maximum)</td>
+                      <td>91.1 mm,Max</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139374,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139374" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_11" value="139375">
+                        <label class="custom-control-label" for="customCheck_11">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">11</span></td>
+                      
+                      <td><a title="139375">7.1.1.2</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>DIMENSIONS-PIPE-Ovality (Maximum)</td>
+                      <td>Outside dia at any point Min: 74.1 mm Max: 75.9 mm</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139375,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139375" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_12" value="139376">
+                        <label class="custom-control-label" for="customCheck_12">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">12</span></td>
+                      
+                      <td><a title="139376">7.1.2.1</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>DIMENSIONS-PIPE-Thickness(Minimum)</td>
+                      <td>3.1 mm,Min</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139376,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139376" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_13" value="139377">
+                        <label class="custom-control-label" for="customCheck_13">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">13</span></td>
+                      
+                      <td><a title="139377">7.1.2.1</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>DIMENSIONS-PIPE-Thickness(Maximum)</td>
+                      <td>3.7 mm,Max</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139377,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139377" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_14" value="139378">
+                        <label class="custom-control-label" for="customCheck_14">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">14</span></td>
+                      
+                      <td><a title="139378">7.1.2.1</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>DIMENSIONS-PIPE-Average Thickness</td>
+                      <td>3.7 mm,Max</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139378,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139378" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_15" value="139379">
+                        <label class="custom-control-label" for="customCheck_15">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">15</span></td>
+                      
+                      <td><a title="139379">Cl- 7.2</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>Socket length (Take 4 reading &amp; minimum will be reported)</td>
+                      <td>mm</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139379,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139379" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_16" value="139381">
+                        <label class="custom-control-label" for="customCheck_16">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">16</span></td>
+                      
+                      <td><a title="139381">7.2.1.1-Table 3</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>DIMENSIONS-Socket-Sockets for solvent cement jointing-Minimum Length</td>
+                      <td>Angle of taper (Note 1): Shall not exceed by 0 deg. 30 minutes</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139381,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139381" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_17" value="139383">
+                        <label class="custom-control-label" for="customCheck_17">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">17</span></td>
+                      
+                      <td><a title="139383">7.2.1.1-Table 3</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>DIMENSIONS-Socket-Sockets for solvent cement jointing-Diameter at mid point of the socket length (Maximum)</td>
+                      <td>Socket Length (min): 43.5mm</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139383,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139383" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_18" value="139385">
+                        <label class="custom-control-label" for="customCheck_18">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">18</span></td>
+                      
+                      <td><a title="139385">7.2.1.2-Table 4</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>DIMENSIONS-Sockets for elastomeric sealing ring joints-Socket inner Diameter</td>
+                      <td>mm</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139385,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139385" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_19" value="139386">
+                        <label class="custom-control-label" for="customCheck_19">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">19</span></td>
+                      
+                      <td><a title="139386">8</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>SEALING RINGS</td>
+                      <td>Conforms With IS 5382</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139386,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139386" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_20" value="139387">
+                        <label class="custom-control-label" for="customCheck_20">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">20</span></td>
+                      
+                      <td><a title="139387">9.1</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>PIPE ENDS</td>
+                      <td>The ends of the pipes meant for solvent cementing (both plain and bell ended) shall be cleanly cut and shall be reasonably square to the axis of the pipe or may be chamfered at the plain end</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139387,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139387" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_21" value="139388">
+                        <label class="custom-control-label" for="customCheck_21">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">21</span></td>
+                      
+                      <td><a title="139388">10.1</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>PHYSICAL AND CHEMICAL CHARACTERISTICS-Visual Appearance</td>
+                      <td>The colour of the pipes shall be light grey. Slight variations in the appearance of the colour are permitted.</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139388,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139388" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_22" value="139389">
+                        <label class="custom-control-label" for="customCheck_22">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">22</span></td>
+                      
+                      <td><a title="139389">10.1.1</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>PHYSICAL AND CHEMICAL CHARACTERISTICS-Visual Appearance</td>
+                      <td>10.1 Visual Appearance The colour of the pipes shall be light grey. Slight variations in the appearance of the colour are permitted. 10.1.1 The internal and external surfaces of the pipe shall be smooth, clean and free from grooving and other defects. Slight shallow longitudinal grooves or irregularities in the pipe shall be permissible provided the wall thickness remains within the permissible limits.</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139389,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139389" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_23" value="139390">
+                        <label class="custom-control-label" for="customCheck_23">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">23</span></td>
+                      
+                      <td><a title="139390">10.2</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>PHYSICAL AND CHEMICAL CHARACTERISTICS-Opacity</td>
+                      <td>The wall of the plain pipe shall not transmit more than 0.2 percent of the visible light falling on it when tested in accordance with IS 12235 (Part 3).</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139390,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139390" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_24" value="139391">
+                        <label class="custom-control-label" for="customCheck_24">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">24</span></td>
+                      
+                      <td><a title="139391">10.4</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>PHYSICAL AND CHEMICAL CHARACTERISTICS- Reversion Test</td>
+                      <td>a length of pipe 200 ± 20 mm long shall not alter in length by more than 5 percent</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139391,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139391" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_25" value="139392">
+                        <label class="custom-control-label" for="customCheck_25">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">25</span></td>
+                      
+                      <td><a title="139392">10.5</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>PHYSICAL AND CHEMICAL CHARACTERISTICS- Vicat Softening Temperature</td>
+                      <td>Shall not Less than 80 o C</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139392,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139392" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_26" value="139393">
+                        <label class="custom-control-label" for="customCheck_26">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">26</span></td>
+                      
+                      <td><a title="139393">10.6</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>PHYSICAL AND CHEMICAL CHARACTERISTICS- Density</td>
+                      <td>1.40 -1.46 gms/cm3</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139393,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139393" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_27" value="139395">
+                        <label class="custom-control-label" for="customCheck_27">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">27</span></td>
+                      
+                      <td><a title="139395">11.1-Table 6</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>MECHANICAL PROPERTIES-Hydrostatic Pressure Test (Acceptance Test)</td>
+                      <td>at Test pressure 4.19x0.6 Mpa (min.) for 1 h the pipe shall not fail.</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139395,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139395" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_28" value="139397">
+                        <label class="custom-control-label" for="customCheck_28">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">28</span></td>
+                      
+                      <td><a title="139397">11.1-Table 7</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>MECHANICAL PROPERTIES-Hydrostatic Pressure Test (Acceptance Test)-for Integral Sealing Ring Sockets</td>
+                      <td>the pipe shall not fail during the prescribed test duration</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139397,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139397" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_29" value="139398">
+                        <label class="custom-control-label" for="customCheck_29">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">29</span></td>
+                      
+                      <td><a title="139398">11.1.1</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>MECHANICAL PROPERTIES-Hydrostatic Pressure Test (Acceptance Test)-for Plumbing pipes</td>
+                      <td>the pipe shall not fail during the prescribed test duration</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139398,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139398" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_30" value="139399">
+                        <label class="custom-control-label" for="customCheck_30">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">30</span></td>
+                      
+                      <td><a title="139399">11.2</a></td>
+                      <!-- <td>Unplasticized PVC Pipes for Potable Water Supplies</td> -->
+                      <td>Resistance to External Blows at 0°C</td>
+                      <td>Shall have a True Impact Rate of not more than 10.</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(139399,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="139399" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        
+                         <div class="custom-control custom-checkbox normal-checkbox">
+                        <input type="checkbox" name="check_not_applicable_name" class="custom-control-input" id="customCheck_31" value="143876">
+                        <label class="custom-control-label" for="customCheck_31">&nbsp;</label>
+                      </div> 
+                      <span class="d-none">31</span></td>
+                      
+                      <td><a title="143876">7.1.4</a></td>
+                      <!-- <td>Unplasticized pvc pipes for potable water supplies - Specification</td> -->
+                      <td>Length</td>
+                      <td>7.1.4.1 Effective length (Le
+)
+If the length of a pipe is specified, the effective length
+shall not be less than that specified. The preferred
+effective length of pipes shall be 4, 5, or 6 m. The pipes
+may be supplied in other lengths where so agreed upon
+between the manufacturer and the purchaser.
+ a) Plain ended pipe — For plain ended pipes, the
+overall length measured shall be the effective
+length as shown in Fig. 2A.
+ b) Socketed pipe for elastomeric sealing ring
+jointing — The effective length of such pipes shall
+be determined by subtracting from the overall
+length the insertion length as shown in Fig. 2B.
+ c) Socketed pipe for solvent cement jointing — The
+effective length of such pipes shall be determined
+by subtracting from the overall length the socket
+length as shown in Fig. 2C.</td>
+                      <td>22 May, 2026</td>
+                      <td>26 May, 2026</td>
+                      <td>None</td>
+                      <!-- <td>-</td> -->
+                      <td style="width: 190px;">-</td>
+                      <td>
+                      
+                          
+                              <button class="btn btn-primary btn-sm m-1" onclick="startTest(143876,1318562)">Start</button>
+                              <button class="btn btn-primary btn-sm m-2 notApplicableBtn" clause_id="143876" sample_id="1318562" ifremnant="False">Not Applicable</button>
+                          
+                      
+                        
+                    </td>
+                    </tr>
+                    
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+      <!-- /.container-fluid -->
+
+
+    </div>
+    <!-- End of Main Content -->
+
+
+
+  </div>
+  <!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+<!-- Model -->
+
+<div class="modal fade popuptables stockmodal show" id="Viewselection" tabindex="-1" role="dialog" aria-labelledby="TestReportGenerateLabel" aria-modal="true" style="padding-right: 15px; display: block;">
+  <div class="modal-dialog modal-lg" role="document" id="test_report_generate_container">
+
+    <div class="modal-content" id="personsData">
+
+<input type="hidden" name="csrfmiddlewaretoken" value="hedEtHzVkoFodjvnsxCApzdHnfJr8ErBK7yfFGIDppms2981oBBvx5OLOXXLKlS4">
+
+
+<div class="modal-header">
+  <h5 class="modal-title">Submit Test Result</h5>
+  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+    <span aria-hidden="true">×</span>
+  </button>
+  
+</div>
+
+<div class="modal-body">
+  <form id="TestReportForm" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="csrfmiddlewaretoken" value="hedEtHzVkoFodjvnsxCApzdHnfJr8ErBK7yfFGIDppms2981oBBvx5OLOXXLKlS4">
+    <input type="number" name="manpowersampleclause" value="1318562" hidden="">
+    <input type="text" name="req_clause" value="139364" hidden="">
+    <input type="hidden" name="is_replica" value="">
+    <!-- <input type="text" name="req_facility" value="" hidden /> -->
+    <div class="hidden">
+      
+
+
+
+
+
+
+<label for="id_result_type" class="control-label">Result type
+    
+</label>
+<select name="result_type" class="form-control custom-select" id="id_result_type">
+  <option value="">---------</option>
+
+  <option value="Qualitative" selected="">Qualitative</option>
+
+  <option value="Quantitative">Quantitative</option>
+
+</select>
+
+
+
+
+
+    
+    
+
+    
+
+
+
+
+
+    </div>
+    <div class="form-group row">
+      <div class="col-md-12 col-sm-12">
+        <label for="id_title" class="control-label">Title : </label>
+        UPVC pipes for potable water supplies
+      </div>&nbsp;
+
+      <div class="col-md-12 col-sm-12">
+        <label for="id_parameter" class="control-label">Parameter : </label>
+        Colour
+      </div>&nbsp;
+
+      <div class="col-md-12 col-sm-12">
+      <!-- { if req_clause.testing_description %} -->
+      <label for="id_testing_description" class="control-label">Test Description : </label>
+     
+      <br>      
+        As in Cl 10.1
+        <!-- <textarea name="testing_description">As in Cl 10.1</textarea> -->
+      
+        <!-- { include 'partials/form_field.html' with field=clauseform.testing_description %} -->
+        <!-- { else %}
+        { include 'partials/form_field.html' with field=clauseform.testing_description %}
+        { endif %} -->
+      </div>&nbsp;      
+    </div>
+    
+    
+    <div class="form-group row">
+      <div class="col-md-3 col-sm-6">        
+        <!-- <input type="number" name="man_hour_rate" step="any" class="form-control" id="id_man_hour_rate" value=""> -->
+
+        
+
+
+
+
+
+
+<label for="id_man_hour_rate" class="control-label">Man Hour Rate
+    
+</label>
+<input type="number" name="man_hour_rate" value="300.0" step="any" readonly="" style="pointer-events: none;" class="form-control" id="id_man_hour_rate">
+
+
+
+
+    
+    
+
+    
+
+
+
+
+
+      </div>
+      <div class="col-md-3 col-sm-6">
+        
+
+
+
+
+
+
+<label for="id_man_hours" class="control-label">Man Hours
+    
+</label>
+<input type="number" name="man_hours" min="0" step="0.0001" class="form-control" id="id_man_hours">
+
+
+
+
+    
+    
+
+    
+
+
+
+
+
+      </div>
+      <div class="col-md-3 col-sm-6">
+        
+
+
+
+
+
+
+<label for="id_electricity_cost" class="control-label">Electricity Cost
+    
+</label>
+<input type="number" name="electricity_cost" min="0" step="0.0001" class="form-control" id="id_electricity_cost">
+
+
+
+
+    
+    
+
+    
+
+
+
+
+
+      </div>
+      <div class="col-md-3 col-sm-6">
+        
+
+
+
+
+
+
+<label for="id_consumables_cost" class="control-label">Consumables cost
+    
+</label>
+<input type="number" name="consumables_cost" min="0" step="0.0001" class="form-control" id="id_consumables_cost">
+
+
+
+
+    
+    
+
+    
+
+
+
+
+
+      </div>
+    </div>
+    
+    <div class="form-group row">
+      <div class="col d-flex">
+        
+        
+        
+        
+        <div class="custom-control-inline custom-control custom-radio cls_result_type">
+          <input id="Qualitative" name="result_type" value="Qualitative" type="radio" class="custom-control-input" required="" checked="">
+          <label class="custom-control-label" for="Qualitative">Qualitative</label>
+        </div>
+        
+        
+        
+        <div class="custom-control-inline custom-control custom-radio cls_result_type">
+          <input id="Quantitative" name="result_type" value="Quantitative" type="radio" class="custom-control-input" required="">
+          <label class="custom-control-label" for="Quantitative">Quantitative</label>
+        </div>
+        
+        
+      </div>
+    </div>
+
+    <div class="form-group row minMaxRange hidden">
+      <div class="col d-flex">
+        <div class="custom-control-inline custom-control custom-radio">
+          <input id="value_min" name="value_type" value="min" type="radio" class="custom-control-input value_type" required="">
+          <label class="custom-control-label" for="value_min">Minimum</label>
+        </div>
+        <div class="custom-control-inline custom-control custom-radio">
+          <input id="value_max" name="value_type" value="max" type="radio" class="custom-control-input value_type" required="">
+          <label class="custom-control-label" for="value_max">Maximum</label>
+        </div>
+        <div class="custom-control-inline custom-control custom-radio">
+          <input id="value_range" name="value_type" value="range" type="radio" class="custom-control-input value_type" required="">
+          <label class="custom-control-label" for="value_range">Range</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group row mt-2 minMaxRangeValues">
+      <div class="col-md-3 col-sm-3 minDiv hidden">
+        
+
+
+
+
+
+
+<label for="id_range_minimum" class="control-label">Range minimum
+    
+</label>
+<input type="number" name="range_minimum" step="0.0001" class="form-control" id="id_range_minimum" aria-required="false">
+
+
+
+
+    
+    
+
+    
+
+
+
+
+
+      </div>
+      <div class="col-md-3 col-sm-3 maxDiv hidden">
+        
+
+
+
+
+
+
+<label for="id_range_maximum" class="control-label">Range maximum
+    
+</label>
+<input type="number" name="range_maximum" step="0.0001" class="form-control" id="id_range_maximum" aria-required="false">
+
+
+
+
+    
+    
+
+    
+
+
+
+
+
+      </div>
+      <div class="col-md-3 col-sm-3 unitDiv hidden">
+        
+
+
+
+
+
+
+<label for="id_range_unit" class="control-label">Range unit
+    
+</label>
+<input type="text" name="range_unit" maxlength="255" class="form-control" id="id_range_unit" aria-required="false">
+
+
+
+
+    
+    
+
+    
+
+
+
+
+
+      </div>
+    </div>
+    <div class="form-group row mt-2">
+      <div class="col-md-6 col-sm-6 resultDiv">
+          
+
+
+
+
+
+
+<label for="id_result" class="control-label">Result <span class="required" aria-required="true"> * </span></label>
+<textarea name="result" cols="40" rows="10" class="form-control" id="id_result" required="required" aria-required="true"></textarea>
+
+
+
+
+    
+    
+
+    
+
+
+
+
+
+        </div>
+    </div>
+      <div class="form-group row resultRangeDiv hidden">
+        <div class="col-md-3 col-sm-6">
+          
+
+
+
+
+
+
+<label for="id_resultrange" class="control-label">Result <span class="required" aria-required="true"> * </span></label>
+<input type="number" name="resultrange" step="any" class="form-control" id="id_resultrange" aria-required="false">
+
+
+
+
+    
+    
+
+    
+
+
+
+
+          
+        </div>
+        <div class="col-md-6 col-sm-6">
+          
+
+
+
+
+
+
+<label for="id_resultrange_description" class="control-label">Result Description
+    
+</label>
+<input type="text" name="resultrange_description" maxlength="255" class="form-control" id="id_resultrange_description" aria-required="false">
+
+
+
+
+    
+    
+
+    
+
+
+
+
+          
+        </div>
+      </div>
+      
+    <div class="form-group row">
+      <div class="col-md-6">
+        <div class="custom-control custom-control-inline mt-3 custom-radio cls_confirms_or_notconfirms">
+          <input id="id_confirms" required="" name="confirms_or_notconfirms" value="confirms" type="radio" class="custom-control-input">
+          <label class="custom-control-label" for="id_confirms">Conforms</label>
+        </div>
+        <div class="custom-control custom-control-inline mt-3 custom-radio cls_confirms_or_notconfirms">
+          <input id="id_not_confirms" required="" name="confirms_or_notconfirms" value="not_confirms" type="radio" class="custom-control-input">
+          <label class="custom-control-label" for="id_not_confirms">Not Conforms</label>
+        </div>
+        <div class="custom-control custom-control-inline mt-3 custom-radio cls_confirms_or_notconfirms">
+          <input id="id_not_applicable" required="" name="confirms_or_notconfirms" value="not_applicable" type="radio" class="custom-control-input">
+          <label class="custom-control-label" for="id_not_applicable">Not Applicable</label>
+        </div>
+      </div>
+      
+      <div class="col-md-6 col-sm-6">
+        <label for="id_subtotal" class="control-label">Sub Total (₹)</label>
+        
+
+
+
+
+
+
+<input type="number" name="subtotal" step="any" readonly="" style="pointer-events: none;" class="form-control" id="id_subtotal">
+
+
+<!-- Widget block end -->
+
+<!--  -->
+<!--  -->
+
+
+
+    
+
+
+
+      </div>
+      
+      <div class="col-md-6 col-sm-6 hidden">
+        
+
+
+
+
+
+
+<label for="id_quantity" class="control-label">Quantity
+    
+</label>
+<input type="number" name="quantity" value="5.0" readonly="" class="form-control" id="id_quantity">
+
+
+
+
+    
+    
+
+    
+
+
+
+
+
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-md-12 col-sm-12">
+        
+
+
+
+
+
+
+<label for="id_notes" class="control-label">Notes
+    
+</label>
+<textarea name="notes" cols="10" rows="2" class="form-control" id="id_notes"></textarea>
+
+
+
+
+    
+    
+
+    
+
+
+
+
+          
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <div class="Lightbg3 ml-3 mr-3">
+        <ul style="list-style:auto; margin-bottom:0px;">
+          <li>Only PDF files are allowed (Max. Size 5MB). Do not upload Password Protected or Digitally Signed PDFs. </li>
+          <li>Do not directly upload Scanned PDFs or PDFs exported from 3rd party softwares (for e.g. Tally). Kindly Open such PDF file, then go to Files Menu &gt; Select Print &gt; Print as PDF &gt; Save File. Then upload this saved PDF file to avoid any compatibility issues in test reports.</li>
+        </ul>
+        
+      </div>
+      <div class="col-md-6 col-sm-6 attachmentsfield">
+        
+
+
+
+
+
+
+<label for="id_attachments" class="control-label">Attachments
+    
+</label>
+<input type="file" name="attachments" class="form-control" id="id_attachments">
+
+
+
+
+    
+    
+
+    
+
+
+
+
+
+      </div>
+      <div class="col-md-6 col-sm-6" id="remnantleftdiv">
+        
+
+
+
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-md-12 col-sm-12">
+        
+
+
+
+      </div>
+    </div>
+    <div class="form-group row hidden">
+      <div class="col-md-12 col-sm-12">
+        <input type="hidden" name="marked_for_retesting" class="custom-control-input" id="id_marked_for_retesting">
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="modal-footer justify-content-between">
+  <div class="d-flex align-items-center">
+
+  </div>
+  <div style="justify-content: flex-end;">
+    <button type="button" class="btn btn-secondary " onclick="closeModal();">Close</button>
+    <button type="button" class="btn btn-primary retestingRecommend" style="display: none;">Request Witness Testing</button>
+    <button type="button" onclick="testreportSubmit();" class="btn btn-primary">Submit</button>
+  </div>
+</div>
+
+<script>
+  
+  $(function () {    
+    var confirms_or_notconfirms = $('.cls_confirms_or_notconfirms').find('input:checked').val()
+    if (confirms_or_notconfirms=='not_confirms'){
+      $('.retestingRecommend').show()
+    } else {
+      $('.retestingRecommend').hide()
+      $('#id_mark_for_retesting').val(false)
+    }
+  })
+
+  $(document).on('click', 'input[name=confirms_or_notconfirms]', function(){
+    var confirm_data = $(this).val()
+    if (confirm_data=='not_confirms'){
+      $('.retestingRecommend').show()
+    } else {
+      $('.retestingRecommend').hide()
+      $('#id_mark_for_retesting').val(false)
+    }
+  });
+
+  $(document).on('click', '.retestingRecommend', function(){
+    $('#id_marked_for_retesting').val(true)
+    testreportSubmit();
+  });
+
+  $(function () {
+    
+    // var result_type = $('.custom-radio').find('input:checked').val()
+    var result_type = $('.cls_result_type').find('input:checked').val()
+
+    if (result_type == 'Quantitative') {
+      console.log("Quantitative selected-----------")
+      $('.minMaxRange').removeClass('hidden')
+      $('.unitDiv').removeClass('hidden')
+
+      $('.requirementDiv').addClass('hidden')
+
+      $('.resultDiv').addClass('hidden')
+      $('.resultDiv').find('textarea').removeAttr('required');
+      $('.resultDiv').find('textarea').attr('aria-required',false);
+
+      $('.resultRangeDiv').removeClass('hidden')
+      $('.resultRangeDiv').find('input').filter(':visible:first').attr('required','required');
+      $('.resultRangeDiv').find('input').filter(':visible:first').attr('aria-required',true);   
+      $('.minDiv').removeClass('hidden')
+      // $('.minDiv').find('input').attr('required','required');
+      // $('.minDiv').find('input').attr('aria-required',true);   
+      $('.maxDiv').removeClass('hidden')
+      // $('.maxDiv').find('input').attr('required','required');
+      // $('.maxDiv').find('input').attr('aria-required',true);     
+
+    } 
+    else 
+    {
+      console.log("Qualitative selected-----------")
+      $('.minMaxRange').addClass('hidden')
+      $('.minDiv').addClass('hidden')
+      $('.minDiv').find('input').val('')
+      $('.minDiv').find('input').removeAttr('required');
+      $('.minDiv').find('input').attr('aria-required',false); 
+      
+      $('.maxDiv').addClass('hidden')
+      $('.maxDiv').find('input').val('')
+      $('.maxDiv').find('input').removeAttr('required');
+      $('.maxDiv').find('input').attr('aria-required',false); 
+
+      $('.unitDiv').addClass('hidden')
+      $('.unitDiv').find('input').val('')
+      $('.unitDiv').find('input').removeAttr('required');
+      $('.unitDiv').find('input').attr('aria-required',false); 
+
+      $('.requirementDiv').removeClass('hidden')
+
+      $('.resultDiv').removeClass('hidden')
+      $('.resultDiv').find('textarea').attr('required','required');
+      $('.resultDiv').find('textarea').attr('aria-required',true);     
+
+      $('.resultRangeDiv').addClass('hidden')
+      $('.resultRangeDiv').find('input').removeAttr('required');
+      $('.resultRangeDiv').find('input').attr('aria-required',false); 
+
+    }
+    var value_type = $('.minMaxRange').find('input:checked').val()
+    if (value_type == 'min'){
+      $('.minDiv').removeClass('hidden')
+      $('.maxDiv').addClass('hidden')
+      // $('#value_max').prop('disabled', true)
+      // $('#value_range').prop('disabled', true)
+    } else if (value_type == 'max'){
+      $('.maxDiv').removeClass('hidden')
+      $('.minDiv').addClass('hidden')
+      // $('#value_min').prop('disabled', true)
+      // $('#value_range').prop('disabled', true)
+    } else if (value_type == 'range'){
+      // $('#value_max').prop('disabled', true)
+      // $('#value_min').prop('disabled', true)
+      $('.minDiv').removeClass('hidden')
+      $('.maxDiv').removeClass('hidden')
+      // $('.minDiv,.maxDiv,.unitDiv').find('input').attr('required','required');
+      // $('.minDiv,.maxDiv,.unitDiv').find('input').attr('aria-required',true); 
+      // $('.minDiv,.maxDiv,.unitDiv').find('label').append(`<span class="required" aria-required="true"> * </span>`);
+    }
+    else{          
+          $('.minDiv').addClass('hidden')
+          $('.maxDiv').addClass('hidden')
+        }
+    console.log('value_type',value_type)
+  })
+
+  $(document).on('click', 'input[name=result_type]', function(){
+    if ($(this).val() == 'Quantitative') {
+      $('.minMaxRange').removeClass('hidden')
+      $('.unitDiv').removeClass('hidden')
+      $('.requirementDiv').addClass('hidden')
+
+      $('.resultDiv').addClass('hidden');
+      $('.resultDiv').find('textarea').val('');
+      $('.resultDiv').find('textarea').removeAttr('required');
+      $('.resultDiv').find('textarea').attr('aria-required',false);
+      $('.resultRangeDiv').removeClass('hidden');      
+      $('.resultRangeDiv').find('input').filter(':visible:first').attr('required','required');
+      $('.resultRangeDiv').find('input').filter(':visible:first').attr('aria-required',true);    
+
+      var value_type = $('.minMaxRange').find('input:checked').val()
+    
+        if (value_type == 'min'){
+          $('.minDiv').removeClass('hidden')
+          $('.maxDiv').addClass('hidden')
+        }
+        else if (value_type == 'max'){
+          $('.maxDiv').removeClass('hidden')
+          $('.minDiv').addClass('hidden')
+        }
+        else if (value_type == 'range'){
+          $('.minDiv').removeClass('hidden')
+          $('.maxDiv').removeClass('hidden')
+        } 
+    } 
+    else {
+      $('.minMaxRange').addClass('hidden')
+      $('.minDiv').addClass('hidden')
+      $('.minDiv').find('input').val('')
+
+      $('.maxDiv').addClass('hidden')
+      $('.maxDiv').find('input').val('')
+
+      $('.unitDiv').addClass('hidden')
+      $('.unitDiv').find('input').val('')
+
+      $('.requirementDiv').removeClass('hidden')
+      $('.resultDiv').removeClass('hidden')
+      $('.resultDiv').find('textarea').attr('required','required');
+      $('.resultDiv').find('textarea').attr('aria-required',true);
+
+      $('.resultRangeDiv').addClass('hidden')
+      $('.resultRangeDiv').find('input').val('');
+      $('.resultRangeDiv').find('input').removeAttr('required');
+      $('.resultRangeDiv').find('input').attr('aria-required',false);
+
+
+    }
+
+  });
+
+  $(document).on('click', '.value_type', function(){
+    var value =  $(this).val()
+    if (value == 'min') {
+      $('.minDiv').removeClass('hidden')
+      $('.maxDiv').addClass('hidden')
+      $('.maxDiv').find('input').val('')
+    } else if (value == 'max') {
+      $('.maxDiv').removeClass('hidden')
+      $('.minDiv').addClass('hidden')
+      $('.minDiv').find('input').val('')
+    } else if (value == 'range'){
+      $('.minDiv').removeClass('hidden')
+      $('.maxDiv').removeClass('hidden')
+      // $('.minDiv,.maxDiv,.unitDiv').find('input').attr('required','required');
+      // $('.minDiv,.maxDiv,.unitDiv').find('input').attr('aria-required',true); 
+      // $('.minDiv,.maxDiv,.unitDiv').find('label').append(`<span class="required" aria-required="true"> * </span>`);
+    };
+  });
+
+
+</script>
+
+<script>
+  var is_rangediv = $('.isrange');
+  if (is_rangediv.css('display') == 'block') {
+    $('.requirementdiv').prop('hidden', false);
+    $('#resultrangediv').prop('hidden', true);
+    $('#resultdiv').prop('hidden', false);
+  }
+  $(document).on('click', "input[name='isrange']", function () {
+    if ($(this).prop("checked")) {
+      $('.rangediv').prop('hidden', false);
+      $('.requirementdiv').prop('hidden', true);
+      $('#resultrangediv').prop('hidden', false);
+      $('#resultdiv').prop('hidden', true);
+    }
+    else {
+      $('.rangediv').prop('hidden', true);
+      $('.requirementdiv').prop('hidden', false);
+      $('#resultrangediv').prop('hidden', true);
+      $('#resultdiv').prop('hidden', false);
+    }
+  });
+
+  // $(document).on('click', "input[name='consumedcompletely']", function () {
+  //   if ($(this).prop("checked")) {
+  //     $('#remnantleftdiv').prop('hidden', true);
+  //   }
+  //   else {
+  //     $('#remnantleftdiv').prop('hidden', false);
+  //   }
+  // });
+
+  function calculatetotal() {
+    var man_hours = $('#id_man_hours').val();
+    var electricity_cost = $('#id_electricity_cost').val();
+    var consumables_cost = $('#id_consumables_cost').val();
+    // var man_hour_rate = $('#id_man_hour_rate').find(":selected").text();
+    var man_hour_rate = $('#id_man_hour_rate').val();
+    
+    man_hours = (man_hours.length == 0) ? 0 : parseFloat(man_hours);
+    electricity_cost = (electricity_cost.length == 0) ? 0 : parseFloat(electricity_cost);
+    consumables_cost = (consumables_cost.length == 0) ? 0 : parseFloat(consumables_cost);
+    var total = parseFloat(man_hour_rate) * man_hours + electricity_cost + consumables_cost;
+    // total = roundedNumber = Math.round(total,4);
+    total = total.toFixed(2)
+
+    return total
+  }
+
+  var subtotal = $('#id_subtotal');
+  $(document).on('keyup', '#id_man_hours', function () {
+    $(subtotal).val(calculatetotal());
+  });
+  $(document).on('keyup', '#id_electricity_cost', function () {
+    $(subtotal).val(calculatetotal());
+  });
+  $(document).on('keyup', '#id_consumables_cost', function () {
+    $(subtotal).val(calculatetotal());
+  });
+
+  if ($('#id_man_hours').prop("readonly") && $('#id_electricity_cost').prop("readonly") && $('#id_consumables_cost').prop("readonly")) {
+    $('#id_subtotal').val(calculatetotal());
+  }
+  else{
+    var man_hours = $('#id_man_hours').val();
+    var electricity_cost = $('#id_electricity_cost').val();
+    var consumables_cost = $('#id_consumables_cost').val();
+    if (man_hours && electricity_cost && consumables_cost){
+    $('#id_subtotal').val(calculatetotal());
+    }
+  }
+
+  // if($("input[name='consumedcompletely']").prop("checked")){
+  //   $('#remnantleftdiv').prop('hidden',true);
+  // }
+  // else{
+  //   $('#consumedcompletelydiv').prop('hidden',true);
+  // }
+
+  $("[for=id_result]").html(`Result <span class="required" aria-required="true"> * </span>`);
+  $("[for=id_resultrange]").html(`Result <span class="required" aria-required="true"> * </span>`);
+  // $("[for=id_remnantleft]").html(`Remnant Left <span class="required" aria-required="true"> * </span>`);
+
+</script></div>
+  </div>
+</div>
+<!-- End Model -->
+
+
+<div class="modal fade " id="notApplicableModal" role="dialog" aria-labelledby="Confirm" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header py-2 bg-warning">
+        <h5 class="modal-title text-white" id="Confirm">Confirmation</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p class="iconlarge"><i class="fa fa-exclamation-triangle"></i></p>
+        <h5>Are you sure that this test is Not Applicable? <br>
+          <span class="RemnantDiv hidden"> 
+            If yes, then please also provide remnant information below
+          </span>
+        </h5>
+        <form method="POST" id="notApplicableForm" novalidate="novalidate">
+          <input type="hidden" name="csrfmiddlewaretoken" value="dIGbt44hqOvuVd0Vc3iuKs4uYi73NiIuGB1MF3dZvPcyK3Dz87hpSYFyp0lnpZ9X">
+          <input type="hidden" name="sample_id" id="sample_id_confirm">
+          <input type="hidden" name="clause_id" id="clause_id_confirm">
+          <input type="hidden" name="ifremnant" id="ifremnant_confirm">
+          
+
+          <div class="form-group row text-left RemnantDiv hidden">
+            <div class="col-md-12 col-sm-12">
+              
+
+
+
+            </div>
+         
+            <div class="col-md-12 col-sm-12">
+              
+
+
+
+            </div>
+          </div>
+        </form>
+        <div class="text-center mt-5">
+          <button type="button" class="btn btn-outline-secondary mr-3 px-4" data-dismiss="modal">No</button>
+          <button type="button" class="btn btn-warning text-white px-4 notApplicableConfirmBtn">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Model popup for Not Applicable Bulk -->
+<div class="modal fade " id="NotAppModel" role="dialog" aria-labelledby="Confirm" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header py-2 bg-warning">
+        <h5 class="modal-title text-white" id="Confirm">Confirmation</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p class="iconlarge"><i class="fa fa-exclamation-triangle"></i></p>
+        <h5>Do you really want to mark as Not Applicable? <br>
+          <span class="bulkRemnantDiv hidden"> 
+            If yes, then please also provide remnant information below
+          </span>
+        </h5>
+        <form method="POST" id="notApplicableForm" novalidate="novalidate">
+          <input type="hidden" name="csrfmiddlewaretoken" value="dIGbt44hqOvuVd0Vc3iuKs4uYi73NiIuGB1MF3dZvPcyK3Dz87hpSYFyp0lnpZ9X">
+
+          <div class="form-group row text-left bulkRemnantDiv hidden">
+            <div class="col-md-12 col-sm-12">
+              <label for="id_bulk_remnantleft" class="control-label">Remnant Left <span class="required">*</span>
+              </label>
+              <input type="number" name="bulk_remnantleft" min="0" step="0.001" class="form-control" id="id_bulk_remnantleft">
+            </div>
+         
+            <div class="col-md-12 col-sm-12">
+
+              <label for="id_bulk_remnantremark" class="control-label">Remnant Remark <span class="required">*</span>
+                  
+              </label>
+              <textarea name="bulk_remnantremark" cols="40" rows="10" class="form-control" id="id_bulk_remnantremark"></textarea>
+              
+                          </div>
+          </div>
+        </form>
+        <div class="text-center mt-5">
+          <button type="button" class="btn btn-outline-secondary mr-3 px-4" data-dismiss="modal">No</button>
+          <button type="button" class="btn btn-warning text-white px-4 bulknotApplicableConfirmBtn">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--  -->
+<script>
+  $.fn.serializeObject = function () {
+    jQuery.ajaxSettings.traditional = true;
+    var obj = {};
+    $.each(this.serializeArray(), function (i, o) {
+      var n = o.name,
+        v = o.value;
+      obj[n] = obj[n] === undefined ? v
+        : $.isArray(obj[n]) ? obj[n].concat(v)
+          : [obj[n], v];
+    });
+    return obj;
+  };
+
+  function submitTR(req_clause, req_sample) {
+    $.get(`/sample/generate_clause_test_report?clause_number=${req_clause}&req_sample=${req_sample}`, function (data) {
+      $('#personsData').html(data);
+      $('#Viewselection').modal('show');
+    });
+  }
+
+  // function editTR(clause_report) {
+  //   $.get(`/sample/edit_clause_test_report?clause_report=${clause_report}`, function (data) {
+  //     $('#personsData').html(data);
+  //     $('#Viewselection').modal('show');
+  //   });
+  // }
+
+  $('.duplicateTR').on('click',function(){
+    var req_sample = $(this).attr('req_sample')
+    var req_clause = $(this).attr('req_clause')
+    var res_count = $(this).parent('td').find('.res_count').text();
+    var current = $(this);    
+    $.get(`/sample/duplicate_clause_test_report?clause_number=${req_clause}&req_sample=${req_sample}`, function (data) {
+    console.log('res',data['success'])
+      if(data['success']==true){
+      res_count ++ ;
+      console.log('res_count',res_count)
+      
+      toast_function('New Record added');
+      setTimeout(function () {   
+        current.parent('td').find('.res_count').text(res_count);  
+      }, 300);
+      
+    }
+    else{
+      alert('Some error occurs')
+      console.log("Error is",data['error'])
+    }
+      
+
+      
+    });
+
+
+  })
+
+  // function addMoreTR(req_clause, req_sample) {
+  //   $.get(`/sample/add_more_clause_test_report?clause_number=${req_clause}&req_sample=${req_sample}`, function (data) {
+  //     $('#personsData').html(data);
+  //     $('#Viewselection').modal('show');
+  //   });
+  // }
+
+  function viewTR(req_clause, req_sample) {
+    $.get(`/sample/view_clause_test_report?clause_number=${req_clause}&req_sample=${req_sample}`, function (data) {
+      $('#personsData').html(data);
+      $('#Viewselection').modal('show');
+    });
+  }
+
+  function startTest(req_clause, req_sample) {
+    $.get(`/sample/start_test?clause_number=${req_clause}&req_sample=${req_sample}`, function (data) {
+      location.reload()
+    });
+  }
+
+  function callActionAjax(req_data, url, msg) {
+    window.submitted = true;
+    $.ajax({
+      type: "POST",
+      url: url,
+      headers: { "X-CSRFToken": 'dIGbt44hqOvuVd0Vc3iuKs4uYi73NiIuGB1MF3dZvPcyK3Dz87hpSYFyp0lnpZ9X' },
+      data: req_data,
+      dataType: 'json',
+      beforeSend : function () {
+            $.blockUI({ 
+              message: '<h2>Please Wait...</h2>',
+              baseZ: 10000 });
+          },
+      // complete:$.unblockUI(),
+      success: function (response) {
+        $.unblockUI(),
+        $('#Viewselection').modal('hide');
+
+        toast_function(msg);
+        setTimeout(function () {
+          location.reload();
+        }, 2000);
+      },
+      error: function (response) {
+        console.log(response);
+      }
+    });
+  }
+
+  function testreportSubmit() {
+    
+
+    
+
+    var form = $('#TestReportForm')[0]
+    $('#TestReportForm').validate();
+    
+    // File Formate Validation
+    // var fileInput_value = $("#id_attachments").val();
+    // if (fileInput_value!=""){
+    //     var file_extension = fileInput_value.substr( (fileInput_value.lastIndexOf('.') +1) );;
+    //     if (file_extension!='pdf') {
+    //         alert('Only PDF files are allowed');        
+    //         return false;
+    //     } 
+    // }
+    var is_replica = $("input[name='is_replica']").val();
+    if(is_replica == 'True'){
+      url = "/sample/add_more_clause_test_report"      
+    }
+    else{
+      url = "/sample/generate_clause_test_report"
+    }
+              
+    if ($('#TestReportForm').valid()) {
+      $.ajax({
+        type: "POST",
+        url: url,
+        data: new FormData(form),
+        dataType: 'json',
+        contentType: false,
+        processData: false,
+        beforeSend : function () {
+            $.blockUI({ 
+              message: '<h2>Please Wait...</h2>',
+              baseZ: 10000 });
+          },
+        success: function (response) {
+          if (response['status']==1){
+            $('#Viewselection').modal('hide');
+            toast_function(response['toast'])
+            setTimeout(function () {
+              location.reload()
+            }, 3000);
+          }
+          else if (response['status']==0){
+            alert(response['toast'])
+            $.unblockUI()
+          }
+          else{
+            alert('Some error Occurs !')
+            $.unblockUI()
+          }
+
+        },
+        error: function (response) {
+          console.log(response);
+        }
+      });
+    };
+  };
+
+</script>
+<script>
+  window.submitted = false;
+  window.hasChanged = false;
+  // function to be put on X and close button
+  function closeModal() {
+    if (window.hasChanged && window.submitted == false) {
+      var message = "You have not saved your changes.Are you sure";
+      var x = confirm(message);
+      if (x == true) {
+        closeAllmodal();
+      }
+      else {
+
+      }
+    }
+    else {
+      $('.modal').modal('hide');
+    }
+  }
+
+  // function to be put on X and close button
+
+  function closeAllmodal() {
+    window.hasChanged = false;
+    $('.modal').modal('hide');
+  }
+
+    // for popup
+
+
+$(document).on("click", ".bulknotApplicableConfirmBtn", function(){
+
+      var labArray = []
+      $("input:checkbox[name=check_not_applicable_name]:checked").each(function(){
+        labArray.push($(this).val());
+          });
+        if (labArray.length == 0) {
+            alert("Please Select clauses for Not Applicable.")
+              return false;
+              }
+        $.ajax({
+          crossDomain: true,
+          url: "/sample/bulk_test_not_applicable/",
+          type: "POST",
+          data: {
+            lab_Array: labArray,
+            sample_id:1318562,
+            ifremnant:  $("#bulk_ifremnant_id").val(),
+            remnantleft:  $("#id_bulk_remnantleft").val(),
+            remnantremark:  $("#id_bulk_remnantremark").val(),
+
+            'csrfmiddlewaretoken': 'dIGbt44hqOvuVd0Vc3iuKs4uYi73NiIuGB1MF3dZvPcyK3Dz87hpSYFyp0lnpZ9X'
+          },
+          beforeSend : function () {
+            $.blockUI({ 
+              message: '<h2>Please Wait...</h2>',
+              baseZ: 10000 });
+          },
+              success: function (data) {
+              $('#bulknotApplicableConfirmBtn').modal('hide');
+              toast_function('Bulk clauses has been submitted Successfully.')
+              setTimeout(function () {
+              location.reload()
+            }, 2000);              },
+        error: function (data) {
+          alert(data.responseJSON['message'])
+          $.unblockUI()
+
+        console.log(data)
+        }
+      });
+
+
+    });
+
+
+$(document).on("click", "#IdNotAppModel", function () {
+    var inputElems = document.getElementsByName("check_not_applicable_name")
+    let checks_not_applicable_count = inputElems.length
+    var checkLabArray = []
+    $("input:checkbox[name=check_not_applicable_name]:checked").each(function(){
+      checkLabArray.push($(this).val());
+          });
+
+    if (checkLabArray.length == 0) {
+        alert("Please Select clauses for Not Applicable.")
+          setTimeout(function () {
+            $('#NotAppModel').modal('hide');
+            }, 500);  
+          return false;
+          }
+          
+          
+    let checked_not_applicable_count = checkLabArray.length
+    console.log("length",checks_not_applicable_count,checked_not_applicable_count)
+
+    if (checks_not_applicable_count==checked_not_applicable_count){
+        $('.bulkRemnantDiv').show()
+        $("#bulk_ifremnant_id").val("True")
+      }
+    else{
+        $('.bulkRemnantDiv').hide()
+        $("#bulk_ifremnant_id").val("")
+      }
+    });
+</script>
+
+
+
+
+
+<!----Footer Start Here---->
+
+<div class="messageDiv">
+  <div class="loading">
+  </div>
+</div>
+
+<!--Clarification Modal-->
+<div class="modal fade" id="raiseClarificationModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+</div>
+
+
+<!-- Footer -->
+<div id="footer">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col-md-4">
+      <div class="copy_right">
+		<p> Designed, Developed and Maintained by: </p>
+		<p><a href="https://www.arohatech.com/" target="_blank"><img src="/static/image/logo-atech.png"> <span class="arohatechName">Arohatech IT Services (P) Ltd.</span></a>
+		</p>
+		</div>
+      </div>
+		<div class="col-md-4">
+			<div class="copy_right">
+			<p class="text-md-center">Contact for any query/support :  <a href="mailto:supportlims@bis.gov.in" class="text-white">supportlims@bis.gov.in</a></p>
+			</div> 
+			</div>
+      <div class="col-md-4  text-md-right">
+        <img src="/static/image/footerlogos.png" class="w-150">
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+<!-- End of Footer -->
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top" style="display: inline;">
+  <i class="fa fa-angle-up"></i>
+</a>
+
+<!--Activity Log Modal-->
+<div class="modal fade" id="activityLogModal" tabindex="-1" role="dialog" aria-labelledby="activitylog" aria-hidden="true">
+
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade " id="ModalDeleteFile" tabindex="-1" role="dialog" aria-labelledby="Confirm" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header py-2 bg-warning">
+        <h5 class="modal-title text-white" id="Confirm">Confirmation</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p class="iconlarge"><i class="fa fa-exclamation-triangle"></i></p>
+        <h5>Do you really want to delete this Record?</h5>
+        <div class="text-center mt-5">
+          <button type="button" value="false" class="btn deleteDocument btn-outline-secondary mr-3 px-4" data-dismiss="modal">No</button>
+          <button type="button" value="true" document_type="" delete_id="" class="btn deleteDocument btn-warning text-white px-4" onclick="toast_function()" data-dismiss="modal">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="snackbar">Record deleted successfully.</div>
+
+<!-- Bootstrap core JavaScript-->
+<!-- Bootstrap core JS -->
+<!-- <script src="/static/js/jquery.js" type="text/javascript"></script> -->
+<!-- <script src="/static/js/jquery-3.2.1.min.js"></script> -->
+<script src="/static/js/bootstrap.bundle.js"></script>
+<script src="/static/js/reconnecting-websocket.min.js"></script>
+<script src="/static/js/toastr.min.js" charset="utf-8"></script>
+
+<script href="/static/js/bootstrap.js" type="text/javascript"></script>
+
+<script src="/static/js/jquery.validate.min.js"></script>
+<!-- Custom scripts for all pages-->
+<script src="/static/js/dashboard_custom.js"></script>
+<script src="/static/js/lab.js"></script>
+
+
+<!-- Page level plugins -->
+<!-- <script src="/static/js/chart.js/Chart.min.js"></script> -->
+
+<!-- Page level custom scripts -->
+<!-- <script src="/static/js/demo/chart-area-demo.js"></script> -->
+<!-- <script src="/static/js/demo/chart-pie-demo.js"></script> -->
+
+<!-- Kit FontAwesome scripts -->
+<!-- <script src="/static/js/kitfontawesome.js"></script> -->
+
+<script src="/static/js/jquery.formset.min.js"></script>
+<script src="/static/js/custom.js"></script>
+<script src="/static/js/formsets.js"></script>
+<script src="/static/js/cropper.js"></script>
+<script src="/static/js/custom-cropper.js"></script>
+<script src="/static/js/jquery-cropper.js"></script>
+<script type="text/javascript">
+  $(function () {
+    $('.datetimepicker4').datetimepicker({
+      format: 'DD/MM/YYYY',
+    })
+    $('.monthYearPicker').datetimepicker({
+      format: 'MM/YYYY'
+    });
+
+    $('#datetimepicker5').datetimepicker({
+      format: 'DD/MM/YYYY'
+    });
+
+    $('.datetimepicker3').datetimepicker({
+      format: 'LT'
+    });
+
+  });
+  function openNav() {
+    document.getElementById("mySidenav").style.width = "250px";
+  }
+
+  function closeNav() {
+    document.getElementById("mySidenav").style.width = "0";
+  }
+</script>
+<script type="text/javascript">
+  $("#customCheck2_").click(function () {
+    $("input[type=checkbox]").prop("checked", $(this).prop("checked"));
+  });
+
+  $("input[type=checkbox]").click(function () {
+    if (!$(this).prop("checked")) {
+      $("#customCheck2_").prop("checked", false);
+    }
+  });
+</script>
+<script>
+  $(function(){
+      $('form').validate();
+
+      $('.nextBtn2').click(function(e){
+          e.preventDefault();
+          if ($('form').valid()){
+              $('form').submit();
+          }
+      });
+  });
+</script>
+<script type="text/javascript">
+  $(document).on('click', ".canceltBtn", function (e) {
+    e.preventDefault();
+    if(confirm("Any unsaved data will be lost")){
+    temp_id = $(this).val();
+    $.ajax({
+          crossDomain: true,
+          url: "/cancel_scope_amendement/"+temp_id+"/",
+          type: "POST",
+          headers: { "X-CSRFToken": 'dIGbt44hqOvuVd0Vc3iuKs4uYi73NiIuGB1MF3dZvPcyK3Dz87hpSYFyp0lnpZ9X' },
+          dataType: 'json',
+          processData: false,
+          contentType: false,
+          success: function (data) {
+          toast_function('Scope Cancelled Successfully.')
+          window.location.href = "/lab/scope_list/";
+          },
+          error: function (data) {
+            alert(data.responseJSON['message'])
+          console.log(data)
+          }
+        });
+      }
+      else{
+          return false;
+      }
+    
+  });
+
+  function goBack() {
+  window.history.back();
+}
+
+function closeWindow(){
+  window.close();
+}
+</script>
+<script src="/static/js/sorttable.js"></script>
+<script>
+  $(document).on('click', '.openlink', function () {
+      open_url = $(this).attr('openurl');
+        window.open(open_url, '_blank').focus();
+    })
+</script>
+
+<div id="loading" style="display: none;">
+  <div class="loading-container"><img src="/static/image/spinner.gif"> Please Wait...</div>
+</div>
+
+
+
+
+
+
+<div class="modal-backdrop fade show"></div></body></html>

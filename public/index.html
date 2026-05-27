@@ -38,11 +38,13 @@
             <button id="tab-btn-upload" class="tab-btn" onclick="switchTab('tab-upload')">📤 Upload Center</button>
             <button id="tab-btn-audit" class="tab-btn" onclick="switchTab('tab-audit')">📜 Audit Logs</button>
             <button class="tab-btn" onclick="switchTab('tab-lims')">🤖 LIMS Automator</button>
+            <button id="tab-btn-is-intelligence" class="tab-btn" onclick="switchTab('tab-is-intelligence')">📚 IS Intelligence</button>
             <button id="tab-btn-employees" class="tab-btn" onclick="switchTab('tab-employees')">👥 Employee Hub</button>
             <button id="tab-btn-leaves" class="tab-btn" onclick="switchTab('tab-leaves')">📅 Leave Manager</button>
             <button id="tab-btn-assigner" class="tab-btn" onclick="switchTab('tab-assigner')">✨ Smart Assigner</button>
             <button id="tab-btn-analytics" class="tab-btn" onclick="switchTab('tab-analytics')">📈 Analytics</button>
             <button id="tab-btn-preferences" class="tab-btn" onclick="switchTab('tab-preferences')">⚙️ Preferences</button>
+            <button id="tab-btn-super-admin" class="tab-btn" onclick="switchTab('tab-super-admin')" style="display: none;">🔐 Super Admin Analytics</button>
         </div>
 
         <!-- Tab: Analytics -->
@@ -186,6 +188,158 @@
             </div>
         </div>
         </div> <!-- End tab-dashboard -->
+
+        <!-- Tab: IS Intelligence -->
+        <div id="tab-is-intelligence" class="tab-content">
+            <div class="is-safety-banner" style="margin-bottom:15px;">
+                <span class="lock-icon">🔒</span>
+                <span><strong>Strict Grounding Enforced:</strong> The AI will only provide answers derived from the active document. It cannot use external web data.</span>
+            </div>
+            
+            <div class="is-intel-layout">
+                <!-- Document Vault Sidebar -->
+                <div class="is-vault-sidebar">
+                    <div class="is-vault-header">
+                        <h4>Document Vault</h4>
+                        <span class="is-vault-count" id="is-vault-count">0</span>
+                    </div>
+                    
+                    <div class="is-upload-zone" onclick="document.getElementById('is-pdf-input').click()">
+                        <span class="upload-icon">📄</span>
+                        <h5>Upload IS Standard (PDF)</h5>
+                        <p>Auto-parses clauses &amp; tables</p>
+                        <input type="file" id="is-pdf-input" accept=".pdf" onchange="uploadISStandard()">
+                    </div>
+                    
+                    <div class="is-vault-list" id="is-vault-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Analysis & RAG Workspace -->
+                <div class="is-analysis-panel">
+                    
+                    <!-- Top Status Bar -->
+                    <div class="is-parse-status" id="is-parse-status-bar" style="display:none;">
+                        <!-- Updated by JS -->
+                    </div>
+
+                    <!-- Inner Tabs -->
+                    <div class="is-inner-tabs">
+                        <button class="is-inner-tab active" data-tab="chat" onclick="switchISInnerTab('chat')">💬 RAG Chat &amp; SOP</button>
+                        <button class="is-inner-tab" data-tab="clauses" onclick="switchISInnerTab('clauses')">📑 Document Clauses</button>
+                        <button class="is-inner-tab" data-tab="tolerance" onclick="switchISInnerTab('tolerance')">📐 Tolerance Lookup</button>
+                    </div>
+
+                    <!-- 1. RAG Chat Console -->
+                    <div id="is-inner-chat" class="is-inner-content">
+                        <div class="is-rag-console">
+                            <div class="is-rag-header">
+                                <h4>Intelligence Console</h4>
+                                <span class="is-rag-scope">Active: <span id="is-rag-scope-text">None</span></span>
+                            </div>
+                            
+                            <div class="is-quick-actions">
+                                <button class="is-quick-btn" onclick="isQuickSOP()">📋 Generate SOP</button>
+                                <button class="is-quick-btn" onclick="isQuickReport()">📊 Test Report Template</button>
+                                <button class="is-quick-btn" onclick="isQuickTolerance()">📐 Ask Tolerances</button>
+                                <button class="is-quick-btn" onclick="isQuickSummarize()">📝 Summarize</button>
+                            </div>
+
+                            <div class="is-rag-messages custom-scrollbar" id="is-rag-messages">
+                                <div class="is-empty-state" style="padding:40px 20px;">
+                                    <span class="is-empty-icon">🤖</span>
+                                    <h5>Select a standard to begin</h5>
+                                    <p>The AI is waiting to analyze the document.</p>
+                                </div>
+                            </div>
+
+                            <div class="is-rag-input-bar">
+                                <input type="text" id="is-rag-input" placeholder="Ask a question about the active document...">
+                                <button class="is-rag-send-btn" onclick="sendISQuery()">➤</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Clauses & Uncertainties -->
+                    <div id="is-inner-clauses" class="is-inner-content" style="display:none;">
+                        
+                        <!-- Uncertainty Flags -->
+                        <div class="is-uncertainty-panel" id="is-uncertainty-container" style="display:none; margin-bottom:20px;">
+                            <div class="is-uncertainty-header">
+                                <h4>⚠️ Needs Human Clarification</h4>
+                                <span class="is-badge is-badge-medium" id="is-uncertainty-count">0</span>
+                            </div>
+                            <div class="is-uncertainty-list" id="is-uncertainty-list">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Parsed Clauses -->
+                        <div class="is-clauses-panel">
+                            <div class="is-clauses-header">
+                                <h4>✅ Parsed Clauses</h4>
+                            </div>
+                            <div id="is-clauses-list">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Tolerance Lookup -->
+                    <div id="is-inner-tolerance" class="is-inner-content" style="display:none;">
+                        <div class="is-tolerance-widget">
+                            <div class="is-tolerance-header">
+                                <h4>📐 Auto-Extracted Tolerances</h4>
+                                <span class="is-badge is-badge-high">Synched with LIMS</span>
+                            </div>
+                            <div class="is-tolerance-controls">
+                                <div class="is-tolerance-field">
+                                    <label>Standard</label>
+                                    <select disabled><option>IS 4985:2021</option></select>
+                                </div>
+                                <div class="is-tolerance-field">
+                                    <label>Nominal Size (mm)</label>
+                                    <select id="is-tol-size" onchange="lookupISTolerance()">
+                                        <option value="20">20</option>
+                                        <option value="75" selected>75</option>
+                                        <option value="110">110</option>
+                                        <option value="280">280</option>
+                                    </select>
+                                </div>
+                                <div class="is-tolerance-field">
+                                    <label>Pipe Class</label>
+                                    <select id="is-tol-class" onchange="lookupISTolerance()">
+                                        <option value="1">Class 1</option>
+                                        <option value="2">Class 2</option>
+                                        <option value="3" selected>Class 3</option>
+                                        <option value="6">Class 6</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="is-tolerance-results">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Test Parameter</th>
+                                            <th>Value</th>
+                                            <th>Citation Source</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="is-tolerance-results-body">
+                                        <!-- Populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="is-tolerance-action-bar">
+                                <button class="primary" onclick="showToast('Tolerance loaded to LIMS Automator', 'success')" style="font-size:0.85rem; padding:8px 14px;">Import to LIMS Queue</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
 
         <!-- Tab: Upload Center -->
         <div id="tab-upload" class="tab-content">
@@ -578,14 +732,17 @@
                 <!-- Assignment Weights -->
                 <div class="setup-card glass-panel" style="padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
                     <h4 style="margin: 0 0 15px 0;">⚖️ Assignment Priority Weights</h4>
-                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Control how Priority vs Non-Priority samples are ranked in Smart Assigner. When equal, no automatic ranking. When Priority is higher, priority samples are assigned first.</p>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Choose whether Priority samples should always be assigned first, or if all samples should be treated equally and assigned on a first-come first-served (FIFO) basis by date.</p>
                     <div style="margin-bottom: 15px;">
-                        <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:8px; font-weight:600;">Priority Sample Weight: <span id="pref-priority-val">5</span></label>
-                        <input type="range" id="pref-priority-weight" min="1" max="10" value="5" oninput="document.getElementById('pref-priority-val').textContent=this.value" style="width:100%;">
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:8px; font-weight:600;">Non-Priority Sample Weight: <span id="pref-nonpriority-val">5</span></label>
-                        <input type="range" id="pref-nonpriority-weight" min="1" max="10" value="5" oninput="document.getElementById('pref-nonpriority-val').textContent=this.value" style="width:100%;">
+                        <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:12px; font-weight:600;">Sample Ranking Priority Mode</label>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" id="btn-rank-prioritize" class="toggle-btn active" style="flex: 1; padding: 10px; border-radius: 6px; font-size: 0.85rem;" onclick="setRankingMode('prioritize')">
+                                🔥 Prioritize Priority
+                            </button>
+                            <button type="button" id="btn-rank-equal" class="toggle-btn" style="flex: 1; padding: 10px; border-radius: 6px; font-size: 0.85rem;" onclick="setRankingMode('equal')">
+                                📅 Equal Priority (FIFO)
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -623,7 +780,155 @@
 
             <button onclick="savePreferences()" class="primary" style="margin-top:20px; width:100%; font-size:1.1rem; padding:12px;">💾 Save Preferences</button>
         </div>
-    </div>
+
+        <!-- Tab: Super Admin Analytics -->
+        <div id="tab-super-admin" class="tab-content" style="display: none;">
+
+            <!-- ── Summary KPI Strip ─────────────────────────────────── -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:14px; margin-bottom:24px;">
+                <div class="glass-panel" style="padding:18px 16px; border-left:4px solid var(--primary); text-align:center;">
+                    <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:1px; margin-bottom:6px;">Total in Vault</div>
+                    <div id="sa-kpi-total" style="font-size:2rem; font-weight:800; color:var(--primary);">—</div>
+                </div>
+                <div class="glass-panel" style="padding:18px 16px; border-left:4px solid var(--danger); text-align:center;">
+                    <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:1px; margin-bottom:6px;">Still Pending</div>
+                    <div id="sa-kpi-pending" style="font-size:2rem; font-weight:800; color:var(--danger);">—</div>
+                </div>
+                <div class="glass-panel" style="padding:18px 16px; border-left:4px solid #ef4444; text-align:center;">
+                    <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:1px; margin-bottom:6px;">Critical (&gt;90d)</div>
+                    <div id="sa-kpi-critical" style="font-size:2rem; font-weight:800; color:#ef4444;">—</div>
+                </div>
+                <div class="glass-panel" style="padding:18px 16px; border-left:4px solid var(--success); text-align:center;">
+                    <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:1px; margin-bottom:6px;">Report Issued</div>
+                    <div id="sa-kpi-issued" style="font-size:2rem; font-weight:800; color:var(--success);">—</div>
+                </div>
+                <div class="glass-panel" style="padding:18px 16px; border-left:4px solid var(--accent); text-align:center;">
+                    <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:1px; margin-bottom:6px;">Upload Batches</div>
+                    <div id="sa-kpi-batches" style="font-size:2rem; font-weight:800; color:var(--accent);">—</div>
+                </div>
+            </div>
+
+            <!-- ── Charts Row ────────────────────────────────────────── -->
+            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:16px; margin-bottom:20px;">
+                <!-- Age Band Bar Chart -->
+                <div class="glass-panel" style="padding:20px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">📅 Pending Samples by Age Band</h4>
+                    <canvas id="sa-age-chart" style="max-height:240px;"></canvas>
+                </div>
+                <!-- Status Donut -->
+                <div class="glass-panel" style="padding:20px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">🔵 Sample Status</h4>
+                    <canvas id="sa-status-chart" style="max-height:240px;"></canvas>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:20px;">
+                <!-- Testing Type Bar -->
+                <div class="glass-panel" style="padding:20px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">🧪 Volume by Testing Type</h4>
+                    <canvas id="sa-type-chart" style="max-height:220px;"></canvas>
+                </div>
+                <!-- Lab Distribution -->
+                <div class="glass-panel" style="padding:20px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">🏛️ Samples per Lab</h4>
+                    <canvas id="sa-lab-chart" style="max-height:220px;"></canvas>
+                </div>
+            </div>
+
+            <!-- ── Upload Engine (Collapsible) ───────────────────────── -->
+            <div class="glass-panel" style="margin-bottom:20px; overflow:hidden;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; cursor:pointer;" onclick="toggleSaUpload()">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:1.1rem;">🔒</span>
+                        <span style="font-weight:700; font-size:0.95rem;">Upload Engine — Add / Update Confidential Records</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <button onclick="event.stopPropagation(); wipeSampleCellData()" style="background:rgba(239,68,68,0.15); color:var(--danger); border:1px solid rgba(239,68,68,0.3); padding:5px 12px; border-radius:6px; font-size:0.8rem; font-weight:700; cursor:pointer;">🗑️ Wipe All</button>
+                        <span id="sa-upload-toggle-icon" style="color:var(--text-muted); font-size:0.85rem;">▼ Expand</span>
+                    </div>
+                </div>
+                <div id="sa-upload-body" style="display:none; padding:0 20px 20px 20px; border-top:1px solid var(--glass-border);">
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin:14px 0 12px;">Upload the Super Admin master Excel. Duplicate Barcodes will be automatically updated in the vault.</p>
+                    <div id="sc-drag-drop-zone" class="upload-zone" onclick="document.getElementById('sc-excel-file').click()" style="padding:20px;">
+                        <span class="upload-icon" style="font-size:1.8rem;">🔒</span>
+                        <h4 style="margin:8px 0 4px;">Drag &amp; Drop Super Admin Excel Here</h4>
+                        <p style="font-size:0.85rem; color:var(--text-muted);">or click to browse</p>
+                        <input type="file" id="sc-excel-file" accept=".xlsx,.xls" style="display: none;" onchange="handleScFileSelect(event)">
+                    </div>
+                    <div id="sc-file-info" style="display:none; text-align: center; margin-top: 10px; color: var(--success); font-weight: bold;"></div>
+                    <button id="sc-analyze-btn" onclick="analyzeSampleCellExcel()" style="width: 100%; margin-top: 12px; font-size: 1rem; padding: 11px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight:700;">🔍 Analyze &amp; Preview</button>
+                </div>
+            </div>
+
+            <!-- ── Confidential Data Table ───────────────────────────── -->
+            <div class="glass-panel" style="padding:0; overflow:hidden;">
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--glass-border);">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <h3 style="margin:0; font-size:0.95rem; color:var(--text-main);">📋 Confidential Sample Vault</h3>
+                        <span id="sa-table-count" style="background:rgba(99,102,241,0.2); color:var(--primary); padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:700;">0 records</span>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <!-- Age filter chips -->
+                        <div id="sa-age-chips" style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button class="sa-chip active" onclick="filterScTable('all')" data-filter="all" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--primary); background:rgba(99,102,241,0.2); color:var(--primary);">All</button>
+                            <button class="sa-chip" onclick="filterScTable('0-15')" data-filter="0-15" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--glass-border); background:transparent; color:var(--text-muted);">0-15d</button>
+                            <button class="sa-chip" onclick="filterScTable('15-30')" data-filter="15-30" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--glass-border); background:transparent; color:var(--text-muted);">15-30d</button>
+                            <button class="sa-chip" onclick="filterScTable('30-60')" data-filter="30-60" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--glass-border); background:transparent; color:var(--text-muted);">30-60d</button>
+                            <button class="sa-chip" onclick="filterScTable('60-90')" data-filter="60-90" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--warning); background:rgba(245,158,11,0.1); color:var(--warning);">60-90d</button>
+                            <button class="sa-chip" onclick="filterScTable('90+')" data-filter="90+" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--danger); background:rgba(239,68,68,0.1); color:var(--danger);">90d+</button>
+                        </div>
+                        <input id="sa-table-search" type="text" placeholder="Search barcode / IS..." oninput="renderScTableFiltered()" style="padding:6px 10px; border-radius:6px; font-size:0.8rem; min-width:170px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:var(--text-main);">
+                    </div>
+                </div>
+                <div class="table-container" style="max-height:380px; overflow-y:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Barcode</th>
+                                <th>Sample Code</th>
+                                <th>IS Number</th>
+                                <th>Testing Type</th>
+                                <th>Lab</th>
+                                <th>Received On</th>
+                                <th>Age</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sample-cell-tbody">
+                            <!-- Rows rendered dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ── Upload Audit Log (always visible, compact) ─────────── -->
+            <div class="glass-panel" style="margin-top:16px; padding:0; overflow:hidden;">
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--glass-border);">
+                    <h4 style="margin:0; font-size:0.9rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">📜 Upload Audit Log</h4>
+                    <span id="sa-batch-count-badge" style="background:rgba(99,102,241,0.15); color:var(--primary); padding:2px 10px; border-radius:20px; font-size:0.78rem; font-weight:700;">0 batches</span>
+                </div>
+                <div class="table-container" style="max-height:220px; overflow-y:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Batch ID</th>
+                                <th>Upload Date</th>
+                                <th>File</th>
+                                <th>Samples</th>
+                                <th>Duplicates Updated</th>
+                                <th>Uploaded By</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sc-audit-log-body">
+                            <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No upload history found.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
 
     <!-- Employee Competency Modal -->
     <div id="competency-modal" class="modal">
@@ -716,10 +1021,10 @@
         </div>
     </div>
 
-    <!-- Sample Cell Confidential Review Modal -->
+    <!-- Super Admin Confidential Review Modal -->
     <div id="sc-review-modal" class="modal">
         <div class="modal-content large-modal glass-panel">
-            <h3 style="color: var(--accent);">🔄 Sample Cell Reconciliation Engine</h3>
+            <h3 style="color: var(--accent);">🔄 Super Admin Reconciliation Engine</h3>
             <p style="font-size:0.9rem; color:var(--text-muted);">Review fresh injects and duplicates before committing to the local vault. Duplicates will be safely updated.</p>
             
             <div class="review-split">
@@ -851,112 +1156,6 @@
         </div>
     </div>
 
-    <!-- Sample Cell Dashboard Container -->
-    <div id="sample-cell-dashboard" class="container" style="display:none;">
-        <header>
-            <div class="brand">
-                <h1>Sample Cell Secure Analytics</h1>
-                <p>Welcome, Sample Cell Admin</p>
-            </div>
-            <button class="logout-btn" onclick="logout()">Secure Logout</button>
-        </header>
-
-        <!-- KPI / Overview -->
-        <div class="kpi-row">
-            <div class="kpi-card glass-panel danger-kpi clickable" onclick="filterSampleCellData(15, 30)">
-                <h4>15 - 30 Days Pending</h4>
-                <div id="sc-kpi-15" class="kpi-val">0</div>
-            </div>
-            <div class="kpi-card glass-panel danger-kpi clickable" onclick="filterSampleCellData(30, 45)">
-                <div style="color:var(--warning); font-size:0.8rem; font-weight:600; text-transform:uppercase; margin-bottom:5px;">30 - 45 Days Pending</div>
-                <div id="sc-kpi-30" class="kpi-val">0</div>
-            </div>
-            <div class="kpi-card glass-panel danger-kpi clickable" onclick="filterSampleCellData(45, 60)">
-                <div style="color:var(--danger); font-size:0.8rem; font-weight:600; text-transform:uppercase; margin-bottom:5px;">45 - 60 Days Pending</div>
-                <div id="sc-kpi-45" class="kpi-val">0</div>
-            </div>
-            <div class="kpi-card glass-panel danger-kpi clickable" onclick="filterSampleCellData(60, 90)">
-                <div style="color:var(--danger); font-size:0.8rem; font-weight:600; text-transform:uppercase; margin-bottom:5px;">60 - 90 Days Pending</div>
-                <div id="sc-kpi-60" class="kpi-val">0</div>
-            </div>
-            <div class="kpi-card glass-panel danger-kpi clickable" onclick="filterSampleCellData(90, Infinity)" style="border-left: 4px solid var(--danger);">
-                <div style="color:var(--danger); font-size:0.8rem; font-weight:bold; text-transform:uppercase; margin-bottom:5px;">> 90 Days Pending</div>
-                <div id="sc-kpi-90" class="kpi-val">0</div>
-            </div>
-            <div class="kpi-card glass-panel clickable" onclick="filterSampleCellData(0, Infinity)" style="border-left: 4px solid var(--primary);">
-                <h4>All Pending</h4>
-                <div id="sc-kpi-all" class="kpi-val">0</div>
-            </div>
-        </div>
-
-        <div class="admin-panel glass-panel" style="margin-top: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3>Upload Engine</h3>
-            </div>
-            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom: 15px;">Upload the Sample Cell master format. Duplicate Barcodes will be automatically updated.</p>
-            
-            <div id="sc-drag-drop-zone" class="upload-zone" onclick="document.getElementById('sc-excel-file').click()">
-                <span class="upload-icon">🔒</span>
-                <h4>Drag & Drop Sample Cell Excel Here</h4>
-                <p>or click to browse</p>
-                <input type="file" id="sc-excel-file" accept=".xlsx,.xls" style="display: none;" onchange="handleScFileSelect(event)">
-            </div>
-            <div id="sc-file-info" style="display:none; text-align: center; margin-top: 10px; color: var(--success); font-weight: bold;"></div>
-            <button id="sc-analyze-btn" onclick="analyzeSampleCellExcel()" style="width: 100%; margin-top: 15px; font-size: 1.1rem; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer;">🔍 Analyze Document</button>
-        </div>
-
-        <div class="table-section-header" style="display:flex; align-items:center; justify-content:space-between; margin-top:30px; margin-bottom:10px;">
-            <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">📋 Confidential Sample Data</h3>
-            <div style="display:flex; gap: 10px;">
-                <button onclick="toggleScAuditLogs()" style="background:var(--accent); color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:600; cursor:pointer;">📜 View Audit Logs</button>
-                <button onclick="wipeSampleCellData()" style="background:var(--danger); color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:600; cursor:pointer;">🗑️ Delete All Database</button>
-            </div>
-        </div>
-        <div class="table-container glass-panel">
-            <table>
-                <thead>
-                    <tr>
-                        <th>S.No.</th>
-                        <th>Barcode</th>
-                        <th>Sample Code</th>
-                        <th>IS Number</th>
-                        <th>Testing Type</th>
-                        <th>Lab Name</th>
-                        <th>Received On</th>
-                        <th>Age (Days)</th>
-                        <th>Report Issued On</th>
-                        <th>Sample Status</th>
-                    </tr>
-                </thead>
-                <tbody id="sample-cell-tbody">
-                    <!-- Rows rendered dynamically -->
-                </tbody>
-            </table>
-        </div>
-
-        <div id="sc-audit-logs-container" style="display: none; margin-top: 30px;">
-            <div class="table-section-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-                <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">📜 Audit Logs (Local Vault)</h3>
-            </div>
-            <div class="table-container glass-panel">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Batch ID</th>
-                            <th>Upload Date</th>
-                            <th>File Name</th>
-                            <th>Samples</th>
-                            <th>Duplicates Updated</th>
-                            <th>Uploaded By</th>
-                        </tr>
-                    </thead>
-                    <tbody id="sc-audit-log-body">
-                        <tr><td colspan="6" style="text-align:center;">No history found in local vault.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
     <script src="specs_db.js"></script>
     <script src="app.js"></script>
 </body>

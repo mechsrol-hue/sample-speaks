@@ -1,4 +1,7 @@
 let currentUser = null;
+
+function isSuperAdmin() { return currentUser && currentUser.role === 'admin_sample_cell'; }
+function isAdminOrSuperAdmin() { return currentUser && (currentUser.role === 'admin' || currentUser.role === 'admin_sample_cell'); }
 let allSamples = [];
 let currentSubmitId = null;
 let pendingFreshSamples = [];
@@ -8,7 +11,7 @@ let currentFileName = "";
 let currentDuplicateCount = 0;
 let kpiFilter = "ALL";
 let selectedUploadFile = null; // tracks file from both drop and browse
-let currentPrefs = { priorityWeight: 5, nonPriorityWeight: 5, leaveWindowDays: 30, autoRunAssigner: false };
+let currentPrefs = { priorityRankingMode: 'prioritize', leaveWindowDays: 30, autoRunAssigner: false };
 let pendingColumnMappings = {}; // resolved column mappings from admin
 let uploadMissingAccounts = []; // TA names with no account
 let allTPUsers = []; // cached list of all TP users for direct assign dropdown
@@ -69,30 +72,17 @@ async function login() {
         if (res.ok) {
             currentUser = data.user;
             document.getElementById('auth-container').classList.remove('active');
+            document.getElementById('dashboard-container').classList.add('active');
+            const displayRole = currentUser.role === 'admin_sample_cell' ? 'Super Admin' : currentUser.role === 'admin' ? 'Admin' : 'TP';
+            document.getElementById('user-welcome').textContent = `Welcome, ${currentUser.username} (${displayRole})`;
             
-            if (currentUser.role === 'admin_sample_cell') {
-                const sidebarNav = document.getElementById('sidebar-nav');
-                if (sidebarNav) sidebarNav.style.display = 'none';
-                
-                const mainHeader = document.getElementById('main-header');
-                if (mainHeader) mainHeader.style.display = 'none';
-                
-                document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-                
-                const scDashboard = document.getElementById('sample-cell-dashboard');
-                if (scDashboard) scDashboard.style.display = 'block';
-                
+            document.getElementById('admin-tabs').style.display = 'flex';
+            toggleAdminViews();
+            switchTab('tab-dashboard');
+            
+            if (isSuperAdmin()) {
                 loadSampleCellData();
                 fetchScAuditLog();
-                return;
-            } else {
-                document.getElementById('dashboard-container').classList.add('active');
-                document.getElementById('user-welcome').textContent = `Welcome, ${currentUser.username} (Role: ${currentUser.role})`;
-                
-                document.getElementById('admin-tabs').style.display = 'flex';
-                toggleAdminViews();
-                switchTab('tab-dashboard');
-                fetchSamples();
             }
             
             showToast(`Welcome back, ${currentUser.username}!`, 'success');
@@ -109,7 +99,6 @@ function logout() {
     currentUser = null;
     toggleAdminViews();
     document.getElementById('dashboard-container').classList.remove('active');
-    document.getElementById('sample-cell-dashboard').style.display = 'none';
     document.getElementById('auth-container').classList.add('active');
     document.getElementById('admin-tabs').style.display = 'none';
     document.getElementById('username').value = '';
@@ -140,18 +129,32 @@ function switchTab(tabId) {
         loadRecommendations();
     } else if (tabId === 'tab-preferences') {
         loadPreferencesUI();
+    } else if (tabId === 'tab-super-admin') {
+        loadSampleCellData();
+        fetchScAuditLog();
     }
 }
 
 // --- PREFERENCES ---
+let selectedRankingMode = 'prioritize';
+
+function setRankingMode(mode) {
+    selectedRankingMode = mode;
+    const btnPrioritize = document.getElementById('btn-rank-prioritize');
+    const btnEqual = document.getElementById('btn-rank-equal');
+    if (btnPrioritize && btnEqual) {
+        btnPrioritize.classList.toggle('active', mode === 'prioritize');
+        btnEqual.classList.toggle('active', mode === 'equal');
+    }
+}
+
 async function loadPreferences() {
     try {
         const res = await fetch('/api/preferences');
         const data = await res.json();
         if (res.ok && data.preferences) {
             currentPrefs = {
-                priorityWeight: parseInt(data.preferences.priorityWeight) || 5,
-                nonPriorityWeight: parseInt(data.preferences.nonPriorityWeight) || 5,
+                priorityRankingMode: data.preferences.priorityRankingMode || 'prioritize',
                 leaveWindowDays: parseInt(data.preferences.leaveWindowDays) || 30,
                 autoRunAssigner: data.preferences.autoRunAssigner === 'true'
             };
@@ -160,20 +163,17 @@ async function loadPreferences() {
 }
 
 function loadPreferencesUI() {
-    const pw = document.getElementById('pref-priority-weight');
-    const npw = document.getElementById('pref-nonpriority-weight');
     const lw = document.getElementById('pref-leave-window');
     const ar = document.getElementById('pref-auto-run');
-    if (pw) { pw.value = currentPrefs.priorityWeight; document.getElementById('pref-priority-val').textContent = currentPrefs.priorityWeight; }
-    if (npw) { npw.value = currentPrefs.nonPriorityWeight; document.getElementById('pref-nonpriority-val').textContent = currentPrefs.nonPriorityWeight; }
     if (lw) lw.value = currentPrefs.leaveWindowDays;
     if (ar) ar.checked = currentPrefs.autoRunAssigner;
+    
+    setRankingMode(currentPrefs.priorityRankingMode || 'prioritize');
 }
 
 async function savePreferences() {
     const prefs = {
-        priorityWeight: document.getElementById('pref-priority-weight').value,
-        nonPriorityWeight: document.getElementById('pref-nonpriority-weight').value,
+        priorityRankingMode: selectedRankingMode,
         leaveWindowDays: document.getElementById('pref-leave-window').value,
         autoRunAssigner: document.getElementById('pref-auto-run').checked ? 'true' : 'false'
     };
@@ -184,7 +184,7 @@ async function savePreferences() {
             body: JSON.stringify(prefs)
         });
         if (res.ok) {
-            showToast('Preferences saved.', 'success');
+            showToast('Preferences saved successfully.', 'success');
             loadPreferences();
         } else {
             showToast('Failed to save preferences.', 'error');
@@ -879,12 +879,34 @@ function parseDateDDMMYYYY(dateStr) {
 }
 
 function populateFilterDropdowns() {
+    // Enhance all samples with computed fields
+    const enhanced = allSamples.map(s => ({
+        ...s,
+        _daysOld: calculateDaysOld(s.forwardedOn),
+        _isTopPriority: isTopPriority(s)
+    }));
+
+    // Get the active pending samples (assigned pending/PendingAccount)
+    const pendingAll = enhanced.filter(s => (s.appStatus === 'Pending' || s.appStatus === 'PendingAccount') && s.assignedTo);
+
+    // Apply KPI filter to find the active set for dropdown counts
+    let activeSamples = pendingAll;
+    if (kpiFilter === 'Priority') {
+        activeSamples = pendingAll.filter(s => s._isTopPriority);
+    } else if (kpiFilter === 'Urgent') {
+        activeSamples = pendingAll.filter(s => !s._isTopPriority && s._daysOld > 15);
+    } else if (kpiFilter === 'Submitted') {
+        activeSamples = [];
+    } else if (kpiFilter === 'Unassigned') {
+        activeSamples = enhanced.filter(s => s.appStatus === 'Pending' && !s.assignedTo);
+    }
+
     // 1. IS Number Filter
     const isFilter = document.getElementById('is-filter');
     if (isFilter) {
         const isCounts = {};
-        allSamples.forEach(s => {
-            if (s.isNumber && s.appStatus === 'Pending') {
+        activeSamples.forEach(s => {
+            if (s.isNumber) {
                 isCounts[s.isNumber] = (isCounts[s.isNumber] || 0) + 1;
             }
         });
@@ -897,13 +919,48 @@ function populateFilterDropdowns() {
             opt.textContent = `${isNum} (${isCounts[isNum]})`;
             isFilter.appendChild(opt);
         });
-        if (uniqueIS.includes(currentVal)) isFilter.value = currentVal;
+        if (uniqueIS.includes(currentVal)) {
+            isFilter.value = currentVal;
+        } else {
+            isFilter.value = 'ALL';
+        }
     }
 
-    // 2. Received Date Filter
+    // 2. Priority Filter
+    const priorityFilter = document.getElementById('priority-filter');
+    if (priorityFilter) {
+        const priorityCounts = { 'Priority': 0, 'Non-Priority': 0 };
+        activeSamples.forEach(s => {
+            const isPri = s._isTopPriority;
+            if (isPri) {
+                priorityCounts['Priority']++;
+            } else {
+                priorityCounts['Non-Priority']++;
+            }
+        });
+        const currentVal = priorityFilter.value;
+        priorityFilter.innerHTML = `
+            <option value="ALL">All Priorities</option>
+            <option value="Priority">Priority (${priorityCounts['Priority']})</option>
+            <option value="Non-Priority">Non-Priority (${priorityCounts['Non-Priority']})</option>
+        `;
+        if (currentVal === 'Priority' || currentVal === 'Non-Priority') {
+            priorityFilter.value = currentVal;
+        } else {
+            priorityFilter.value = 'ALL';
+        }
+    }
+
+    // 3. Received Date Filter
     const dateFilter = document.getElementById('date-filter');
     if (dateFilter) {
-        const uniqueDates = [...new Set(allSamples.map(s => s.receivedOn).filter(Boolean))].sort((a,b) => {
+        const dateCounts = {};
+        activeSamples.forEach(s => {
+            if (s.receivedOn) {
+                dateCounts[s.receivedOn] = (dateCounts[s.receivedOn] || 0) + 1;
+            }
+        });
+        const uniqueDates = Object.keys(dateCounts).sort((a,b) => {
             const dateA = parseDateDDMMYYYY(a);
             const dateB = parseDateDDMMYYYY(b);
             if (!dateA) return 1;
@@ -915,18 +972,22 @@ function populateFilterDropdowns() {
         uniqueDates.forEach(d => {
             const opt = document.createElement('option');
             opt.value = d;
-            opt.textContent = d;
+            opt.textContent = `${d} (${dateCounts[d]})`;
             dateFilter.appendChild(opt);
         });
-        if (uniqueDates.includes(currentVal)) dateFilter.value = currentVal;
+        if (uniqueDates.includes(currentVal)) {
+            dateFilter.value = currentVal;
+        } else {
+            dateFilter.value = 'ALL';
+        }
     }
 
-    // 3. Assigned To Filter (Pending samples only — submitted have their own section)
+    // 4. Assigned To Filter (Pending samples only)
     const assignedFilter = document.getElementById('assigned-filter');
     if (assignedFilter) {
         const assignedCounts = {};
-        allSamples.forEach(s => {
-            if (s.assignedTo && s.appStatus === 'Pending') {
+        activeSamples.forEach(s => {
+            if (s.assignedTo) {
                 assignedCounts[s.assignedTo] = (assignedCounts[s.assignedTo] || 0) + 1;
             }
         });
@@ -939,7 +1000,94 @@ function populateFilterDropdowns() {
             opt.textContent = `${tp} (${assignedCounts[tp]})`;
             assignedFilter.appendChild(opt);
         });
-        if (uniqueAssigned.includes(currentVal)) assignedFilter.value = currentVal;
+        if (uniqueAssigned.includes(currentVal)) {
+            assignedFilter.value = currentVal;
+        } else {
+            assignedFilter.value = 'ALL';
+        }
+    }
+
+    // Initialize/Update custom styling on the dropdown UI
+    setupCustomDropdowns();
+}
+
+function setupCustomDropdowns() {
+    const selects = ['is-filter', 'priority-filter', 'date-filter', 'assigned-filter'];
+    selects.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        
+        let wrapper = select.parentElement;
+        if (!wrapper.classList.contains('custom-select-wrapper')) {
+            wrapper = document.createElement('div');
+            wrapper.className = 'custom-select-wrapper';
+            select.parentNode.insertBefore(wrapper, select);
+            wrapper.appendChild(select);
+            select.style.display = 'none';
+            
+            const trigger = document.createElement('div');
+            trigger.className = 'custom-select-trigger';
+            trigger.innerHTML = `<span class="selected-text"></span><span class="arrow">▼</span>`;
+            wrapper.appendChild(trigger);
+            
+            const dropdown = document.createElement('div');
+            dropdown.className = 'custom-select-dropdown custom-scrollbar';
+            wrapper.appendChild(dropdown);
+            
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.custom-select-wrapper').forEach(w => {
+                    if (w !== wrapper) w.classList.remove('open');
+                });
+                wrapper.classList.toggle('open');
+            });
+        }
+        
+        const trigger = wrapper.querySelector('.custom-select-trigger');
+        const dropdown = wrapper.querySelector('.custom-select-dropdown');
+        const selectedText = trigger.querySelector('.selected-text');
+        
+        dropdown.innerHTML = '';
+        
+        Array.from(select.options).forEach(option => {
+            const item = document.createElement('div');
+            item.className = 'custom-select-option';
+            
+            if (option.selected) {
+                item.classList.add('selected');
+                const cleanText = option.text.replace(/\s*\(\d+\)$/, '').trim();
+                selectedText.textContent = cleanText;
+            }
+            
+            const match = option.text.match(/(.+)\s+\((\d+)\)$/);
+            if (match) {
+                const mainText = match[1].trim();
+                const countVal = match[2];
+                item.innerHTML = `<span>${mainText}</span><span class="count-badge">${countVal}</span>`;
+            } else {
+                item.innerHTML = `<span>${option.text}</span>`;
+            }
+            
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                select.value = option.value;
+                
+                const event = new Event('change', { bubbles: true });
+                select.dispatchEvent(event);
+                
+                wrapper.classList.remove('open');
+                setupCustomDropdowns();
+            });
+            
+            dropdown.appendChild(item);
+        });
+    });
+
+    if (!window.hasDropdownOutsideClickListener) {
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.custom-select-wrapper').forEach(w => w.classList.remove('open'));
+        });
+        window.hasDropdownOutsideClickListener = true;
     }
 }
 
@@ -963,6 +1111,7 @@ function toggleKpiFilter(filterName) {
     } else {
         kpiFilter = filterName;
     }
+    populateFilterDropdowns();
     renderTable();
 }
 
@@ -1077,7 +1226,7 @@ function renderTable() {
     } else if (kpiFilter === 'Submitted') {
         tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:var(--text-muted);">Viewing Disposal Cycle — submitted samples are shown below.</td></tr>`;
     } else {
-        const isAdmin = currentUser && currentUser.role === 'admin';
+        const isAdmin = isAdminOrSuperAdmin();
         pending.forEach(s => {
             const tr = document.createElement('tr');
             if (s._daysOld > 15) tr.classList.add('row-danger-red');
@@ -1133,7 +1282,7 @@ function renderTable() {
         return;
     }
 
-    const isAdmin = currentUser && currentUser.role === 'admin';
+    const isAdmin = isAdminOrSuperAdmin();
     submittedAll.forEach(s => {
         const tr = document.createElement('tr');
         const passFailClass = s.passFail === 'Pass' ? 'status-submitted' : 'status-retained';
@@ -1250,12 +1399,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeDragAndDrop();
     toggleAdminViews();
     checkActiveLimsOnLoad();
+    setupCustomDropdowns();
 });
 
 // --- Admin Utilities & Bulk Actions ---
 
 function toggleAdminViews() {
-    const isAdmin = currentUser && currentUser.role === 'admin';
+    const isAdmin = isAdminOrSuperAdmin();
     
     // Toggle Select All columns in headers
     const selectAllHeader = document.getElementById('select-all-header');
@@ -1277,6 +1427,24 @@ function toggleAdminViews() {
 
     const auditBtn = document.getElementById('tab-btn-audit');
     if (auditBtn) auditBtn.style.display = isAdmin ? 'inline-block' : 'none';
+    
+    const employeesBtn = document.getElementById('tab-btn-employees');
+    if (employeesBtn) employeesBtn.style.display = isAdmin ? 'inline-block' : 'none';
+
+    const leavesBtn = document.getElementById('tab-btn-leaves');
+    if (leavesBtn) leavesBtn.style.display = isAdmin ? 'inline-block' : 'none';
+
+    const assignerBtn = document.getElementById('tab-btn-assigner');
+    if (assignerBtn) assignerBtn.style.display = isAdmin ? 'inline-block' : 'none';
+
+    const analyticsBtn = document.getElementById('tab-btn-analytics');
+    if (analyticsBtn) analyticsBtn.style.display = isAdmin ? 'inline-block' : 'none';
+
+    const preferencesBtn = document.getElementById('tab-btn-preferences');
+    if (preferencesBtn) preferencesBtn.style.display = isAdmin ? 'inline-block' : 'none';
+
+    const superAdminBtn = document.getElementById('tab-btn-super-admin');
+    if (superAdminBtn) superAdminBtn.style.display = isSuperAdmin() ? 'inline-block' : 'none';
 }
 
 function toggleSelectAllSamples(masterCheckbox) {
@@ -2494,34 +2662,156 @@ async function commitSampleCellUpload() {
     }
 }
 
+// ─── Super Admin Charts (Chart.js instances) ─────────────────────────────
+let saAgeChartInst = null;
+let saStatusChartInst = null;
+let saTypeChartInst = null;
+let saLabChartInst = null;
+
+function destroySaChart(inst) { if (inst) { try { inst.destroy(); } catch(e){} } }
+
+function renderSaCharts(data) {
+    const analytics = data.analytics;
+    const allRows   = data.data;
+
+    // ── 1. Age Band bar chart ──────────────────────────────────────────────
+    const ageCtx = document.getElementById('sa-age-chart');
+    destroySaChart(saAgeChartInst);
+    if (ageCtx) {
+        saAgeChartInst = new Chart(ageCtx, {
+            type: 'bar',
+            data: {
+                labels: ['0-15d', '15-30d', '30-45d', '45-60d', '60-90d', '>90d'],
+                datasets: [{
+                    label: 'Pending Samples',
+                    data: [
+                        analytics.totalPending - analytics.over15 - analytics.over30 - analytics.over45 - analytics.over60 - analytics.over90,
+                        analytics.over15 - analytics.over30 - analytics.over45 - analytics.over60 - analytics.over90,
+                        analytics.over30 - analytics.over45 - analytics.over60 - analytics.over90,
+                        analytics.over45 - analytics.over60 - analytics.over90,
+                        analytics.over60 - analytics.over90,
+                        analytics.over90
+                    ],
+                    backgroundColor: [
+                        'rgba(16,185,129,0.7)','rgba(99,102,241,0.7)','rgba(251,191,36,0.7)',
+                        'rgba(245,158,11,0.7)','rgba(239,68,68,0.6)','rgba(220,38,38,0.85)'
+                    ],
+                    borderRadius: 6, borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { ticks: { color: 'rgba(255,255,255,0.5)', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { ticks: { color: 'rgba(255,255,255,0.6)' }, grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // ── 2. Status donut ─────────────────────────────────────────────────────
+    const statusCounts = {};
+    allRows.forEach(r => {
+        const s = r.reportStatus || r.sampleStatus || 'Unknown';
+        statusCounts[s] = (statusCounts[s] || 0) + 1;
+    });
+    const statusCtx = document.getElementById('sa-status-chart');
+    destroySaChart(saStatusChartInst);
+    if (statusCtx) {
+        const colors = ['rgba(99,102,241,0.8)','rgba(16,185,129,0.8)','rgba(239,68,68,0.8)','rgba(245,158,11,0.8)','rgba(168,85,247,0.8)'];
+        saStatusChartInst = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(statusCounts),
+                datasets: [{ data: Object.values(statusCounts), backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.7)', boxWidth: 12, padding: 14, font: { size: 11 } } } }
+            }
+        });
+    }
+
+    // ── 3. Testing Type bar ─────────────────────────────────────────────────
+    const typeCounts = {};
+    allRows.forEach(r => { if (r.testingType) typeCounts[r.testingType] = (typeCounts[r.testingType] || 0) + 1; });
+    const typeCtx = document.getElementById('sa-type-chart');
+    destroySaChart(saTypeChartInst);
+    if (typeCtx) {
+        saTypeChartInst = new Chart(typeCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(typeCounts),
+                datasets: [{ label: 'Samples', data: Object.values(typeCounts), backgroundColor: 'rgba(99,102,241,0.7)', borderRadius: 5 }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: 'rgba(255,255,255,0.5)', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { ticks: { color: 'rgba(255,255,255,0.6)' }, grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // ── 4. Lab distribution bar ─────────────────────────────────────────────
+    const labCounts = {};
+    allRows.forEach(r => { if (r.labName) labCounts[r.labName] = (labCounts[r.labName] || 0) + 1; });
+    const labCtx = document.getElementById('sa-lab-chart');
+    destroySaChart(saLabChartInst);
+    if (labCtx) {
+        saLabChartInst = new Chart(labCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(labCounts),
+                datasets: [{ label: 'Samples', data: Object.values(labCounts), backgroundColor: 'rgba(16,185,129,0.7)', borderRadius: 5 }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: 'rgba(255,255,255,0.5)', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { ticks: { color: 'rgba(255,255,255,0.6)' }, grid: { display: false } }
+                }
+            }
+        });
+    }
+}
+
 async function fetchScAuditLog() {
     try {
         const res = await fetch('/api/sample-cell/history');
         const data = await res.json();
         if (res.ok) {
             const tbody = document.getElementById('sc-audit-log-body');
+            const badge = document.getElementById('sa-batch-count-badge');
+            if (badge) badge.textContent = `${data.history.length} batch${data.history.length !== 1 ? 'es' : ''}`;
+            const kpiBatches = document.getElementById('sa-kpi-batches');
+            if (kpiBatches) kpiBatches.textContent = data.history.length;
             if (data.history.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No history found in local vault.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No upload history found.</td></tr>';
                 return;
             }
             tbody.innerHTML = '';
             data.history.forEach(log => {
                 tbody.innerHTML += `
                     <tr>
-                        <td><span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; font-family:monospace;">${log.batchId}</span></td>
+                        <td><span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; font-family:monospace; font-size:0.8rem;">${log.batchId}</span></td>
                         <td>${new Date(log.uploadDate).toLocaleString()}</td>
-                        <td>${log.fileName}</td>
+                        <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${log.fileName}</td>
                         <td><span style="color:var(--success); font-weight:bold;">+${log.sampleCount}</span></td>
-                        <td><span style="color:var(--danger); font-weight:bold;">${log.duplicateCount}</span></td>
+                        <td><span style="color:var(--warning); font-weight:bold;">${log.duplicateCount}</span></td>
                         <td>${log.uploadedBy}</td>
                     </tr>
                 `;
             });
         }
-    } catch (e) {
-        console.error(e);
-    }
+    } catch (e) { console.error(e); }
 }
+
+let scActiveFilter = 'all';
 
 async function loadSampleCellData() {
     try {
@@ -2529,59 +2819,128 @@ async function loadSampleCellData() {
         const data = await res.json();
         if (res.ok) {
             currentScData = data.data;
-            document.getElementById('sc-kpi-15').textContent = data.analytics.over15;
-            document.getElementById('sc-kpi-30').textContent = data.analytics.over30;
-            document.getElementById('sc-kpi-45').textContent = data.analytics.over45;
-            document.getElementById('sc-kpi-60').textContent = data.analytics.over60;
-            document.getElementById('sc-kpi-90').textContent = data.analytics.over90;
-            document.getElementById('sc-kpi-all').textContent = data.analytics.totalPending;
-            renderSampleCellTable();
+
+            // ── KPI Strip ──────────────────────────────────────────────────
+            const total = currentScData.length;
+            const issued = currentScData.filter(r => r.reportStatus === 'Report Issued').length;
+            const pending = data.analytics.totalPending;
+            const critical = data.analytics.over90;
+
+            const el = id => document.getElementById(id);
+            if (el('sa-kpi-total'))   el('sa-kpi-total').textContent   = total;
+            if (el('sa-kpi-pending')) el('sa-kpi-pending').textContent = pending;
+            if (el('sa-kpi-critical'))el('sa-kpi-critical').textContent = critical;
+            if (el('sa-kpi-issued'))  el('sa-kpi-issued').textContent  = issued;
+
+            // Batch count updated by fetchScAuditLog — render it right after
+            fetchScAuditLog().then(() => {
+                // Also set batch count KPI if audit returns count
+            });
+
+            // ── Render charts ──────────────────────────────────────────────
+            renderSaCharts(data);
+
+            // ── Render table ───────────────────────────────────────────────
+            scActiveFilter = 'all';
+            setScChipActive('all');
+            renderScTableFiltered();
         }
     } catch (e) { console.error(e); }
+}
+
+function filterScTable(band) {
+    scActiveFilter = band;
+    setScChipActive(band);
+    renderScTableFiltered();
+}
+
+function setScChipActive(band) {
+    document.querySelectorAll('.sa-chip').forEach(btn => {
+        const isActive = btn.dataset.filter === band;
+        btn.classList.toggle('active', isActive);
+        btn.style.background = isActive ? 'rgba(99,102,241,0.25)' : 'transparent';
+        btn.style.color = isActive ? 'var(--primary)' : '';
+        btn.style.borderColor = isActive ? 'var(--primary)' : '';
+        // Restore danger/warning color for non-active chips
+        if (!isActive) {
+            if (band !== '60-90' && btn.dataset.filter === '60-90') {
+                btn.style.color = 'var(--warning)'; btn.style.borderColor = 'var(--warning)';
+            }
+            if (band !== '90+' && btn.dataset.filter === '90+') {
+                btn.style.color = 'var(--danger)'; btn.style.borderColor = 'var(--danger)';
+            }
+        }
+    });
+    // Fix colors for non-active special chips
+    document.querySelectorAll('.sa-chip').forEach(btn => {
+        if (btn.dataset.filter !== band) {
+            if (btn.dataset.filter === '60-90') { btn.style.color = 'var(--warning)'; btn.style.borderColor = 'var(--warning)'; btn.style.background = 'rgba(245,158,11,0.1)'; }
+            if (btn.dataset.filter === '90+')   { btn.style.color = 'var(--danger)';  btn.style.borderColor = 'var(--danger)';  btn.style.background = 'rgba(239,68,68,0.1)'; }
+            if (btn.dataset.filter === 'all' || btn.dataset.filter === '0-15' || btn.dataset.filter === '15-30' || btn.dataset.filter === '30-60') {
+                btn.style.color = 'var(--text-muted)'; btn.style.borderColor = 'var(--glass-border)'; btn.style.background = 'transparent';
+            }
+        }
+    });
+}
+
+function renderScTableFiltered() {
+    if (!currentScData) return;
+    const tbody = document.getElementById('sample-cell-tbody');
+    const search = (document.getElementById('sa-table-search')?.value || '').toLowerCase();
+    const countEl = document.getElementById('sa-table-count');
+
+    let filtered = currentScData.filter(r => {
+        const age = r.ageDays || 0;
+        let passFilter = true;
+        if (scActiveFilter === '0-15')  passFilter = age <= 15;
+        else if (scActiveFilter === '15-30') passFilter = age > 15 && age <= 30;
+        else if (scActiveFilter === '30-60') passFilter = age > 30 && age <= 60;
+        else if (scActiveFilter === '60-90') passFilter = age > 60 && age <= 90;
+        else if (scActiveFilter === '90+')   passFilter = age > 90;
+        if (!passFilter) return false;
+        if (search) {
+            const haystack = `${r.barcode} ${r.sampleCode} ${r.isNumber} ${r.labName} ${r.testingType} ${r.sampleStatus}`.toLowerCase();
+            if (!haystack.includes(search)) return false;
+        }
+        return true;
+    });
+
+    if (countEl) countEl.textContent = `${filtered.length} record${filtered.length !== 1 ? 's' : ''}`;
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:24px; color:var(--text-muted);">No records match the current filter.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = '';
+    filtered.forEach((row, idx) => {
+        const ageDays = row.ageDays || 0;
+        const ageColor = ageDays > 90 ? 'var(--danger)' : ageDays > 60 ? 'var(--warning)' : ageDays > 30 ? 'var(--accent)' : 'var(--success)';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="color:var(--text-muted); font-size:0.8rem;">${idx + 1}</td>
+            <td><strong style="font-family:monospace; font-size:0.85rem;">${row.barcode || '—'}</strong></td>
+            <td>${row.sampleCode || '—'}</td>
+            <td>${row.isNumber || '—'}</td>
+            <td>${row.testingType || '—'}</td>
+            <td>${row.labName || '—'}</td>
+            <td>${row.sampleReceivedOn || '—'}</td>
+            <td><span style="font-weight:700; color:${ageColor};">${ageDays}d</span></td>
+            <td><span style="background:${ageDays > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)'}; color:${ageDays > 0 ? 'var(--danger)' : 'var(--success)'}; padding:2px 8px; border-radius:20px; font-size:0.75rem; font-weight:600;">${row.sampleStatus || row.reportStatus || '—'}</span></td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
 function filterSampleCellData(minDays, maxDays) {
     currentScFilterMin = minDays;
     currentScFilterMax = maxDays;
-    renderSampleCellTable();
+    renderScTableFiltered();
 }
 
 function renderSampleCellTable() {
-    const tbody = document.getElementById('sample-cell-tbody');
-    tbody.innerHTML = '';
-
-    const filtered = currentScData.filter(r => {
-        // Always filter out fully completed reports FIRST
-        if (r.reportStatus === 'Report Issued') return false;
-        
-        // If "All Pending" is clicked, show everything that wasn't filtered above
-        if (currentScFilterMin === 0 && currentScFilterMax === Infinity) return true;
-        
-        // Otherwise, filter by age band
-        return r.ageDays > currentScFilterMin && r.ageDays <= currentScFilterMax;
-    });
-
-    if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">No records found.</td></tr>';
-        return;
-    }
-
-    filtered.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${row.sNo || '-'}</td>
-            <td><strong>${row.barcode || '-'}</strong></td>
-            <td>${row.sampleCode || '-'}</td>
-            <td>${row.isNumber || '-'}</td>
-            <td>${row.testingType || '-'}</td>
-            <td>${row.labName || '-'}</td>
-            <td>${row.sampleReceivedOn || '-'}</td>
-            <td><span style="color:${row.ageDays > 90 ? 'var(--danger)' : row.ageDays > 60 ? 'var(--warning)' : row.ageDays > 30 ? 'var(--accent)' : 'inherit' }">${row.ageDays}</span></td>
-            <td>${row.reportIssuedOn || '-'}</td>
-            <td>${row.sampleStatus || '-'}</td>
-        `;
-        tbody.appendChild(tr);
-    });
+    // Legacy — just call new renderer
+    renderScTableFiltered();
 }
 
 async function wipeSampleCellData() {
@@ -2602,21 +2961,677 @@ async function wipeSampleCellData() {
     }
 }
 
-function toggleScAuditLogs() {
-    const container = document.getElementById('sc-audit-logs-container');
-    const btn = document.querySelector('button[onclick="toggleScAuditLogs()"]');
+function toggleSaUpload() {
+    const body = document.getElementById('sa-upload-body');
+    const icon = document.getElementById('sa-upload-toggle-icon');
+    if (!body) return;
+    const isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : 'block';
+    if (icon) icon.textContent = isOpen ? '▼ Expand' : '▲ Collapse';
+}
+
+function toggleScAuditLogs() { /* legacy no-op — audit log is always visible now */ }
+
+// ============================================================
+// IS INTELLIGENCE MODULE — Frontend Logic (Phase 1: Mock Data)
+// ============================================================
+
+let isVaultData = [];
+let isActiveDocument = null;
+let isChatHistory = [];
+let isUncertainItems = [];
+let isParsedClauses = [];
+
+// Mock Vault Data
+const IS_MOCK_VAULT = [
+    {
+        id: 1,
+        isNumber: 'IS 4985 (2021)',
+        title: 'Unplasticized PVC Pipes for Potable Water Supplies',
+        pdfFileName: 'IS_4985_2021.pdf',
+        uploadedAt: '2026-05-20T10:30:00',
+        confidenceScore: 0.94,
+        status: 'parsed',
+        clauseCount: 14,
+        tableCount: 8
+    },
+    {
+        id: 2,
+        isNumber: 'IS 14756 (2024)',
+        title: 'Polyethylene Pipes for Water Supply',
+        pdfFileName: 'IS_14756_2024.pdf',
+        uploadedAt: '2026-05-22T14:15:00',
+        confidenceScore: 0.87,
+        status: 'has_uncertainties',
+        clauseCount: 18,
+        tableCount: 12
+    },
+    {
+        id: 3,
+        isNumber: 'IS 13592 (2020)',
+        title: 'uPVC Pipes for Soil and Waste Discharge',
+        pdfFileName: 'IS_13592_2020.pdf',
+        uploadedAt: '2026-05-25T09:00:00',
+        confidenceScore: 0.91,
+        status: 'parsed',
+        clauseCount: 11,
+        tableCount: 6
+    }
+];
+
+// Mock Parsed Clauses for IS 4985
+const IS_MOCK_CLAUSES = [
+    {
+        clauseNumber: '5',
+        title: 'Classification of Pipes',
+        page: 3,
+        content: 'Pipes shall be classified by their maximum working pressure into Class 1 (0.25 MPa), Class 2 (0.4 MPa), Class 3 (0.6 MPa), Class 4 (0.8 MPa), Class 5 (1.0 MPa), and Class 6 (1.25 MPa).',
+        hasTable: false
+    },
+    {
+        clauseNumber: '5.2',
+        title: 'Application Type Classification',
+        page: 3,
+        content: 'The pipes shall be classified based on their application:\na) Type A — Pipes for water supply; and\nb) Type B — Pipes for agricultural use.',
+        hasTable: false
+    },
+    {
+        clauseNumber: '7.1.1.1',
+        title: 'Mean Outside Diameter',
+        page: 5,
+        content: 'The mean outside diameter and tolerances of pipes shall be as given in Table 1. The mean outside diameter shall be calculated from measurements taken at the same cross-section.',
+        hasTable: true,
+        tablePreview: 'Table 1 — Nominal OD, Min OD, Max OD, Ovality'
+    },
+    {
+        clauseNumber: '7.1.2.1',
+        title: 'Wall Thickness',
+        page: 8,
+        content: 'The minimum wall thickness of pipes for various nominal sizes and classes shall be as given in Table 2. The wall thickness at any point shall not be less than the minimum specified value.',
+        hasTable: true,
+        tablePreview: 'Table 2 — Wall Thickness by Size and Class'
+    },
+    {
+        clauseNumber: '7.2.1.1',
+        title: 'Socket Dimensions for Solvent Cement Jointing',
+        page: 10,
+        content: 'The socket dimensions for solvent cement jointing shall be as given in Table 3. The angle of taper at the bottom of the socket shall not exceed 0°30\' (Note 1).',
+        hasTable: true,
+        tablePreview: 'Table 3 — Socket Length, Taper Angle'
+    },
+    {
+        clauseNumber: '10.1',
+        title: 'Visual Appearance',
+        page: 14,
+        content: 'The colour of the pipes shall be light grey. Slight variations in the appearance of the colour are permitted. The internal and external surfaces shall be smooth, clean and free from grooving and other defects.',
+        hasTable: false
+    },
+    {
+        clauseNumber: '10.2',
+        title: 'Opacity',
+        page: 14,
+        content: 'The wall of the plain pipe shall not transmit more than 0.2 percent of the visible light falling on it when tested in accordance with IS 12235 (Part 3).',
+        hasTable: false
+    },
+    {
+        clauseNumber: '11.1',
+        title: 'Reversion',
+        page: 16,
+        content: 'The longitudinal reversion of a pipe specimen when heated to 150°C for 15 min shall not exceed 5 percent.',
+        hasTable: false
+    },
+    {
+        clauseNumber: '11.2',
+        title: 'Vicat Softening Temperature',
+        page: 16,
+        content: 'The Vicat softening temperature determined in accordance with IS 6307 shall not be less than 80°C.',
+        hasTable: false
+    },
+    {
+        clauseNumber: '11.3',
+        title: 'Density',
+        page: 17,
+        content: 'The density of the material of the pipe shall be between 1.40 g/cm³ and 1.46 g/cm³ when determined in accordance with method A of IS 7328.',
+        hasTable: false
+    },
+    {
+        clauseNumber: '11.1 Table 6',
+        title: 'Hydrostatic Pressure Test',
+        page: 18,
+        content: 'The pipe specimen shall withstand the specified internal hydrostatic pressure without failure (bursting, leaking, or ballooning) when tested at the test duration and temperature given in Table 6.',
+        hasTable: true,
+        tablePreview: 'Table 6 — Test Pressure by Class (4.19 × MWP for 1h)'
+    },
+    {
+        clauseNumber: '13.1.2',
+        title: 'Marking Requirements',
+        page: 22,
+        content: 'Type A pipes shall additionally bear continuous longitudinal blue colour strip printing. These longitudinal blue colour strips shall be placed so as not to merge/disturb the information marked on the pipes.',
+        hasTable: false
+    }
+];
+
+// Mock Uncertainty Items
+const IS_MOCK_UNCERTAINTIES = [
+    {
+        id: 'u1',
+        page: 8,
+        clauseNumber: '7.1.2.1',
+        rawText: 'The minimum wall thickness for 280mm Class 1 pipe shall be ... mm (value partially obscured in scan)',
+        highlightedText: 'The minimum wall thickness for 280mm Class 1 pipe shall be <mark>???</mark> mm (value partially obscured in scan)',
+        reason: 'Scanned text is partially illegible — numeric value appears blurred in the original document',
+        confidence: 0.35,
+        resolved: false,
+        userValue: ''
+    },
+    {
+        id: 'u2',
+        page: 12,
+        clauseNumber: 'Table 4',
+        rawText: 'Socket inner diameter for 125mm elastomeric ring joint: [table cell damaged]',
+        highlightedText: 'Socket inner diameter for 125mm elastomeric ring joint: <mark>[table cell damaged]</mark>',
+        reason: 'Table cell appears physically damaged in the source document — cannot reliably extract value',
+        confidence: 0.22,
+        resolved: false,
+        userValue: ''
+    },
+    {
+        id: 'u3',
+        page: 5,
+        clauseNumber: '7.1.1.1',
+        rawText: 'Maximum ovality for 90mm pipe: 1.2mm or 1.3mm (ambiguous decimal point)',
+        highlightedText: 'Maximum ovality for 90mm pipe: <mark>1.2mm or 1.3mm</mark> (ambiguous decimal point)',
+        reason: 'The decimal point is ambiguous due to print quality — could be 1.2 or 1.3',
+        confidence: 0.58,
+        resolved: false,
+        userValue: ''
+    }
+];
+
+// Mock RAG responses
+const IS_MOCK_RAG_RESPONSES = {
+    'default': {
+        text: 'I have analyzed the uploaded IS 4985 (2021) standard. The document contains 14 clauses covering classification, dimensions, physical properties, mechanical properties, and marking requirements. There are 8 tables with dimensional specifications. 3 items require your clarification before full resolution.',
+        citations: [
+            { page: 1, clause: 'Title Page', text: 'IS 4985:2021 — Unplasticized PVC Pipes for Potable Water Supplies' }
+        ]
+    },
+    'sop': {
+        text: '**Standard Operating Procedure — Wall Thickness Measurement (IS 4985:2021)**\n\n**Step 1:** Select pipe specimen as per Clause 12.1 sampling requirements.\n\n**Step 2:** Using a wall thickness gauge calibrated to ±0.01mm, measure wall thickness at minimum 4 equally spaced points around the circumference at each end of the specimen.\n\n**Step 3:** Record the minimum individual measurement. This must not be less than the specified minimum wall thickness as per Clause 7.1.2.1 and Table 2.\n\n**Step 4:** Calculate the mean wall thickness from all measurements. This must not exceed the specified maximum as per Table 2.\n\n**Step 5:** For a 75mm Class 3 pipe, the acceptance criteria are:\n  - Minimum: 2.6 mm\n  - Maximum: 3.1 mm\n\n**Step 6:** Record results in the test report format as per Clause 14.',
+        citations: [
+            { page: 8, clause: 'Cl 7.1.2.1', text: 'Wall thickness requirements and measurement method' },
+            { page: 8, clause: 'Table 2', text: 'Wall thickness values by size and class' },
+            { page: 20, clause: 'Cl 12.1', text: 'Sampling procedure for testing' },
+            { page: 22, clause: 'Cl 14', text: 'Test report format requirements' }
+        ]
+    },
+    'report': {
+        text: '**Test Report Template — IS 4985:2021**\n\n| S.No | Clause | Test Parameter | Specified Value | Type | Observed Value |\n|------|--------|---------------|----------------|------|---------------|\n| 1 | 10.1 | Colour | Light Grey | Qualitative | _______ |\n| 2 | 10.1 | Surface Finish | Smooth, free from defects | Qualitative | _______ |\n| 3 | 7.1.1.1 | Mean OD (Min) | As per Table 1 | Quantitative | _______ mm |\n| 4 | 7.1.1.1 | Mean OD (Max) | As per Table 1 | Quantitative | _______ mm |\n| 5 | 7.1.2.1 | Wall Thickness (Min) | As per Table 2 | Quantitative | _______ mm |\n| 6 | 11.1 | Reversion | Max 5% | Quantitative | _______ % |\n| 7 | 11.2 | Vicat Softening Temp | Min 80°C | Qualitative | _______ |\n| 8 | 11.3 | Density | 1.40 - 1.46 g/cm³ | Quantitative | _______ g/cm³ |\n| 9 | 10.2 | Opacity | Max 0.2% | Quantitative | _______ % |\n| 10 | 11.1 T6 | Hydrostatic Pressure | No failure at test pressure | Qualitative | _______ |\n| 11 | 13.1.2 | Marking | Blue strip for Type A | Qualitative | _______ |\n\n*All test parameters sourced exclusively from IS 4985:2021. Specific tolerances auto-loaded based on selected Nominal Size and Class.*',
+        citations: [
+            { page: 14, clause: 'Cl 10.1', text: 'Visual appearance requirements' },
+            { page: 5, clause: 'Table 1', text: 'Dimensional tolerances for OD' },
+            { page: 8, clause: 'Table 2', text: 'Wall thickness specifications' },
+            { page: 16, clause: 'Cl 11', text: 'Mechanical properties requirements' },
+            { page: 22, clause: 'Cl 13', text: 'Marking requirements' }
+        ]
+    },
+    'tolerance': {
+        text: 'For **75mm Nominal Size, Class 3** pipe as per IS 4985:2021:\n\n| Parameter | Value | Reference |\n|-----------|-------|-----------|\n| Mean OD (Min) | 75.0 mm | Table 1 |\n| Mean OD (Max) | 75.3 mm | Table 1 |\n| Ovality (Max) | 1.0 mm | Table 1 |\n| Wall Thickness (Min) | 2.6 mm | Table 2 |\n| Wall Thickness (Max) | 3.1 mm | Table 2 |\n| Wall Thickness (Avg) | 3.1 mm | Table 2 |\n| Socket Length (Min) | 44 mm | Table 3 |\n| Hydrostatic Test Pressure | 4.19 × 0.6 = 2.514 MPa for 1h | Table 6 |\n\nAll values are directly extracted from the uploaded IS 4985:2021 document. No external data sources used.',
+        citations: [
+            { page: 5, clause: 'Table 1', text: 'OD and ovality values for 75mm' },
+            { page: 8, clause: 'Table 2', text: 'Wall thickness: Class 3 row for 75mm' },
+            { page: 10, clause: 'Table 3', text: 'Socket dimensions for 75mm' },
+            { page: 18, clause: 'Table 6', text: 'Hydrostatic test pressure for Class 3' }
+        ]
+    }
+};
+
+// --- Load IS Intelligence Tab ---
+function loadISIntelligence() {
+    renderISVault();
+    // Select first document by default
+    if (IS_MOCK_VAULT.length > 0 && !isActiveDocument) {
+        selectISDocument(IS_MOCK_VAULT[0]);
+    }
+}
+
+// Hook into existing switchTab
+const originalSwitchTab = switchTab;
+switchTab = function(tabId) {
+    originalSwitchTab(tabId);
+    if (tabId === 'tab-is-intelligence') {
+        loadISIntelligence();
+    }
+};
+
+// --- Render Vault Sidebar ---
+function renderISVault() {
+    const listEl = document.getElementById('is-vault-list');
+    const countEl = document.getElementById('is-vault-count');
+    if (!listEl) return;
+
+    const vault = IS_MOCK_VAULT;
+    if (countEl) countEl.textContent = vault.length;
+
+    if (vault.length === 0) {
+        listEl.innerHTML = '<div class="is-empty-state" style="padding:20px;"><span class="is-empty-icon">📂</span><p style="font-size:0.85rem;">No standards uploaded yet</p></div>';
+        return;
+    }
+
+    listEl.innerHTML = vault.map(doc => {
+        const isActive = isActiveDocument && isActiveDocument.id === doc.id;
+        const statusBadge = doc.status === 'has_uncertainties'
+            ? '<span class="is-badge is-badge-medium">⚠ Flags</span>'
+            : '<span class="is-badge is-badge-high">✓ Ready</span>';
+        const date = new Date(doc.uploadedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+        return `
+            <div class="is-vault-item ${isActive ? 'active' : ''}" onclick="selectISDocument(IS_MOCK_VAULT.find(d=>d.id===${doc.id}))">
+                <span class="is-vault-item-icon">📄</span>
+                <div class="is-vault-item-info">
+                    <div class="is-vault-item-title">${doc.isNumber}</div>
+                    <div class="is-vault-item-meta">${doc.clauseCount} clauses · ${doc.tableCount} tables · ${date}</div>
+                </div>
+                <div class="is-vault-item-status">${statusBadge}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// --- Select a Document ---
+function selectISDocument(doc) {
+    isActiveDocument = doc;
+    renderISVault();
+    renderISAnalysis();
+    renderISChatWelcome();
+
+    // Update scope badge
+    const scopeEl = document.getElementById('is-rag-scope-text');
+    if (scopeEl) scopeEl.textContent = doc.isNumber;
+
+    // Update parse status
+    const statusEl = document.getElementById('is-parse-status-bar');
+    if (statusEl) {
+        statusEl.className = 'is-parse-status success';
+        statusEl.innerHTML = `
+            <span style="font-size:1.2rem;">✅</span>
+            <div class="is-parse-progress">
+                <div style="font-size:0.88rem; font-weight:600; color:var(--success);">${doc.isNumber} — Fully Parsed</div>
+                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">${doc.clauseCount} clauses · ${doc.tableCount} tables · Confidence: ${Math.round(doc.confidenceScore * 100)}%</div>
+                <div class="is-parse-progress-bar" style="margin-top:6px;"><div class="is-parse-progress-fill" style="width:${doc.confidenceScore * 100}%;"></div></div>
+            </div>
+        `;
+    }
+}
+
+// --- Render Analysis: Uncertainties + Clauses ---
+function renderISAnalysis() {
+    renderISUncertainties();
+    renderISClauses();
+    renderISTolerance();
+}
+
+// --- Render Uncertainty Flags ---
+function renderISUncertainties() {
+    const panel = document.getElementById('is-uncertainty-container');
+    if (!panel) return;
+
+    const items = IS_MOCK_UNCERTAINTIES;
+    const unresolvedCount = items.filter(i => !i.resolved).length;
+
+    if (unresolvedCount === 0) {
+        panel.style.display = 'none';
+        return;
+    }
+
+    panel.style.display = 'block';
+    const countEl = document.getElementById('is-uncertainty-count');
+    if (countEl) countEl.textContent = unresolvedCount;
+
+    const listEl = document.getElementById('is-uncertainty-list');
+    if (!listEl) return;
+
+    listEl.innerHTML = items.map(item => {
+        const confidenceColor = item.confidence < 0.4 ? 'color: var(--danger);' : item.confidence < 0.7 ? 'color: var(--warning);' : 'color: var(--success);';
+        const resolvedClass = item.resolved ? 'resolved' : '';
+        const inputArea = item.resolved
+            ? `<div style="display:flex;align-items:center;gap:8px;"><span class="is-badge is-badge-resolved">✓ Resolved</span><span style="font-size:0.85rem;font-weight:600;color:var(--success);">${item.userValue}</span></div>`
+            : `<div class="is-uncertainty-input-row">
+                <input type="text" id="is-clarify-${item.id}" placeholder="Enter the correct value..." />
+                <button onclick="submitISClarification('${item.id}')" class="primary" style="padding:8px 14px;">Confirm</button>
+              </div>`;
+
+        return `
+            <div class="is-uncertainty-card ${resolvedClass}" id="is-card-${item.id}">
+                <div class="is-uncertainty-location">
+                    <span class="is-citation" style="cursor:default;">Page ${item.page}, ${item.clauseNumber}</span>
+                    <span class="is-uncertainty-confidence" style="${confidenceColor}">Confidence: ${Math.round(item.confidence * 100)}%</span>
+                </div>
+                <div class="is-uncertainty-rawtext">${item.highlightedText}</div>
+                <div class="is-uncertainty-reason">⚠️ ${item.reason}</div>
+                ${inputArea}
+            </div>
+        `;
+    }).join('');
+}
+
+// --- Submit Clarification ---
+function submitISClarification(itemId) {
+    const input = document.getElementById(`is-clarify-${itemId}`);
+    if (!input || !input.value.trim()) {
+        showToast('Please enter the correct value before confirming.', 'error');
+        return;
+    }
+
+    const item = IS_MOCK_UNCERTAINTIES.find(i => i.id === itemId);
+    if (item) {
+        item.resolved = true;
+        item.userValue = input.value.trim();
+        item.confidence = 1.0;
+    }
+
+    renderISUncertainties();
+    showToast(`Clarification confirmed for ${item.clauseNumber}. Value: "${item.userValue}"`, 'success');
+}
+
+// --- Render Parsed Clauses Accordion ---
+function renderISClauses() {
+    const container = document.getElementById('is-clauses-list');
     if (!container) return;
 
-    const isHidden = container.style.display === 'none' || container.style.display === '';
-    if (isHidden) {
-        container.style.display = 'block';
-        if (btn) btn.textContent = '📜 Hide Audit Logs';
-        // Always fetch fresh data when opening
-        fetchScAuditLog();
-        // Smooth scroll to the logs
-        setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-    } else {
-        container.style.display = 'none';
-        if (btn) btn.textContent = '📜 View Audit Logs';
+    container.innerHTML = IS_MOCK_CLAUSES.map((clause, idx) => {
+        const tableTag = clause.hasTable
+            ? `<span style="font-size:0.72rem;background:#e8f0fe;color:var(--accent);padding:2px 8px;border-radius:4px;font-weight:600;margin-left:8px;">📊 Table</span>`
+            : '';
+        return `
+            <div class="is-clause-item" id="is-clause-${idx}">
+                <div class="is-clause-trigger" onclick="toggleISClause(${idx})">
+                    <div class="is-clause-trigger-left">
+                        <span class="is-clause-number">Cl ${clause.clauseNumber}</span>
+                        <span class="is-clause-title">${clause.title}${tableTag}</span>
+                    </div>
+                    <span class="is-clause-arrow">▼</span>
+                </div>
+                <div class="is-clause-content">
+                    <div class="is-clause-body">
+                        <p style="white-space:pre-line;">${clause.content}</p>
+                        ${clause.hasTable ? `<div style="margin-top:10px;padding:8px 12px;background:#f0f4ff;border-radius:6px;border:1px solid #d2e3fc;font-size:0.82rem;font-weight:600;color:var(--accent);">📊 ${clause.tablePreview}</div>` : ''}
+                        <div class="is-clause-page-ref">📄 Page ${clause.page} · ${isActiveDocument ? isActiveDocument.isNumber : ''}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// --- Toggle Clause Accordion ---
+function toggleISClause(idx) {
+    const el = document.getElementById(`is-clause-${idx}`);
+    if (el) el.classList.toggle('open');
+}
+
+// --- Render Chat Welcome ---
+function renderISChatWelcome() {
+    const msgContainer = document.getElementById('is-rag-messages');
+    if (!msgContainer) return;
+
+    const welcome = IS_MOCK_RAG_RESPONSES['default'];
+    const citationsHtml = welcome.citations.map(c => `<span class="is-citation">${c.clause}, Page ${c.page}</span>`).join(' ');
+
+    msgContainer.innerHTML = `
+        <div class="is-rag-msg ai">
+            <div class="is-rag-msg-avatar">🤖</div>
+            <div class="is-rag-msg-body">
+                <div class="is-rag-msg-sender">IS Intelligence</div>
+                <div class="is-rag-msg-text">
+                    ${welcome.text}
+                    <div style="margin-top:8px;">${citationsHtml}</div>
+                </div>
+            </div>
+        </div>
+    `;
+    isChatHistory = [];
+}
+
+// --- Send RAG Query ---
+function sendISQuery() {
+    const input = document.getElementById('is-rag-input');
+    if (!input || !input.value.trim()) return;
+
+    const query = input.value.trim();
+    input.value = '';
+
+    const msgContainer = document.getElementById('is-rag-messages');
+    if (!msgContainer) return;
+
+    // Add user message
+    msgContainer.innerHTML += `
+        <div class="is-rag-msg user">
+            <div class="is-rag-msg-avatar">👤</div>
+            <div class="is-rag-msg-body">
+                <div class="is-rag-msg-sender">You</div>
+                <div class="is-rag-msg-text">${escapeHtml(query)}</div>
+            </div>
+        </div>
+    `;
+
+    // Show typing indicator
+    msgContainer.innerHTML += `
+        <div class="is-rag-msg ai" id="is-typing-msg">
+            <div class="is-rag-msg-avatar">🤖</div>
+            <div class="is-rag-msg-body">
+                <div class="is-rag-msg-sender">IS Intelligence</div>
+                <div class="is-typing-indicator">
+                    <div class="is-typing-dot"></div>
+                    <div class="is-typing-dot"></div>
+                    <div class="is-typing-dot"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+
+    // Simulate AI response after delay
+    setTimeout(() => {
+        const typingEl = document.getElementById('is-typing-msg');
+        if (typingEl) typingEl.remove();
+
+        // Match query to mock response
+        let response = IS_MOCK_RAG_RESPONSES['default'];
+        const qLower = query.toLowerCase();
+        if (qLower.includes('tolerance') || qLower.includes('dimension') || qLower.includes('size') || qLower.includes('75mm') || qLower.includes('class')) {
+            response = IS_MOCK_RAG_RESPONSES['tolerance'];
+        } else if (qLower.includes('sop') || qLower.includes('procedure') || qLower.includes('how to test') || qLower.includes('method')) {
+            response = IS_MOCK_RAG_RESPONSES['sop'];
+        } else if (qLower.includes('report') || qLower.includes('template') || qLower.includes('format')) {
+            response = IS_MOCK_RAG_RESPONSES['report'];
+        }
+
+        const citationsHtml = response.citations.map(c =>
+            `<span class="is-citation" title="${escapeHtml(c.text)}">${c.clause}, Page ${c.page}</span>`
+        ).join(' ');
+
+        // Convert markdown-like formatting
+        let formattedText = response.text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>')
+            .replace(/\|(.+?)\|/g, (match) => {
+                return match; // Keep table formatting as-is for now
+            });
+
+        msgContainer.innerHTML += `
+            <div class="is-rag-msg ai">
+                <div class="is-rag-msg-avatar">🤖</div>
+                <div class="is-rag-msg-body">
+                    <div class="is-rag-msg-sender">IS Intelligence</div>
+                    <div class="is-rag-msg-text">
+                        ${formattedText}
+                        <div style="margin-top:10px; border-top:1px solid var(--border-light); padding-top:8px;">
+                            <span style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.3px;">Sources:</span><br>
+                            ${citationsHtml}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+    }, 1500);
+}
+
+// --- Quick Action Handlers ---
+function isQuickSOP() {
+    const input = document.getElementById('is-rag-input');
+    if (input) {
+        input.value = 'Generate an SOP for wall thickness measurement as per this standard';
+        sendISQuery();
     }
+}
+
+function isQuickReport() {
+    const input = document.getElementById('is-rag-input');
+    if (input) {
+        input.value = 'Generate a test report template with all testable parameters from this standard';
+        sendISQuery();
+    }
+}
+
+function isQuickTolerance() {
+    const input = document.getElementById('is-rag-input');
+    if (input) {
+        input.value = 'What are the tolerance values for 75mm Class 3 pipe?';
+        sendISQuery();
+    }
+}
+
+function isQuickSummarize() {
+    const input = document.getElementById('is-rag-input');
+    if (input) {
+        input.value = 'Summarize the key testing requirements from this standard';
+        sendISQuery();
+    }
+}
+
+// --- Tolerance Lookup Widget ---
+function renderISTolerance() {
+    // Pre-populate using existing specs_db.js data (IS 4985)
+    lookupISTolerance();
+}
+
+function lookupISTolerance() {
+    const sizeEl = document.getElementById('is-tol-size');
+    const classEl = document.getElementById('is-tol-class');
+    const resultsEl = document.getElementById('is-tolerance-results-body');
+    if (!sizeEl || !classEl || !resultsEl) return;
+
+    const size = parseInt(sizeEl.value);
+    const pipeClass = parseInt(classEl.value);
+
+    // Use existing IS_4985_SPECS if available
+    if (typeof IS_4985_SPECS !== 'undefined' && IS_4985_SPECS.sizes_db && IS_4985_SPECS.sizes_db[size]) {
+        const data = IS_4985_SPECS.sizes_db[size];
+        const thickness = data.thickness && data.thickness[pipeClass] ? data.thickness[pipeClass] : null;
+
+        let rows = `
+            <tr><td>Mean OD (Min)</td><td class="value-cell">${data.min_od.toFixed(1)} mm</td><td><span class="is-citation">Table 1, Cl 7.1.1.1</span></td></tr>
+            <tr><td>Mean OD (Max)</td><td class="value-cell">${data.max_od.toFixed(1)} mm</td><td><span class="is-citation">Table 1, Cl 7.1.1.1</span></td></tr>
+            <tr><td>Ovality (Max)</td><td class="value-cell">${data.ovality.toFixed(1)} mm</td><td><span class="is-citation">Table 1, Cl 7.1.1.2</span></td></tr>
+            <tr><td>Socket Length (Min)</td><td class="value-cell">${data.socket} mm</td><td><span class="is-citation">Table 3, Cl 7.2.1.1</span></td></tr>
+        `;
+
+        if (thickness) {
+            rows += `
+                <tr><td>Wall Thickness (Min)</td><td class="value-cell">${thickness[1]} mm</td><td><span class="is-citation">Table 2, Cl 7.1.2.1</span></td></tr>
+                <tr><td>Wall Thickness (Max)</td><td class="value-cell">${thickness[2]} mm</td><td><span class="is-citation">Table 2, Cl 7.1.2.1</span></td></tr>
+                <tr><td>Wall Thickness (Avg)</td><td class="value-cell">${thickness[0]} mm</td><td><span class="is-citation">Table 2, Cl 7.1.2.1</span></td></tr>
+            `;
+        } else {
+            rows += '<tr><td colspan="3" style="text-align:center;color:var(--warning);font-weight:600;">⚠ Class ${pipeClass} not available for ${size}mm</td></tr>';
+        }
+
+        resultsEl.innerHTML = rows;
+    } else {
+        resultsEl.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:20px;">Select a valid size and class combination</td></tr>';
+    }
+}
+
+// --- Upload IS Standard (Mock) ---
+function uploadISStandard() {
+    const fileInput = document.getElementById('is-pdf-input');
+    if (!fileInput || !fileInput.files.length) {
+        showToast('Please select a PDF file to upload.', 'error');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+        showToast('Only PDF files are accepted for IS Standard upload.', 'error');
+        return;
+    }
+
+    // Show parsing animation
+    const statusEl = document.getElementById('is-parse-status-bar');
+    if (statusEl) {
+        statusEl.className = 'is-parse-status parsing';
+        statusEl.innerHTML = `
+            <div class="is-parse-spinner"></div>
+            <div class="is-parse-progress">
+                <div style="font-size:0.88rem; font-weight:600; color:var(--accent);">Analyzing: ${file.name}</div>
+                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">Gemini AI is reading and parsing the document...</div>
+                <div class="is-parse-progress-bar"><div class="is-parse-progress-fill" id="is-parse-fill"></div></div>
+            </div>
+        `;
+    }
+
+    // Simulate parsing progress
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 95) progress = 95;
+        const fill = document.getElementById('is-parse-fill');
+        if (fill) fill.style.width = progress + '%';
+    }, 400);
+
+    // Simulate completion after 3 seconds
+    setTimeout(() => {
+        clearInterval(progressInterval);
+        const fill = document.getElementById('is-parse-fill');
+        if (fill) fill.style.width = '100%';
+
+        // Show success
+        setTimeout(() => {
+            selectISDocument(IS_MOCK_VAULT[0]);
+            showToast(`${file.name} parsed successfully! 14 clauses and 8 tables extracted.`, 'success');
+            fileInput.value = '';
+        }, 500);
+    }, 3000);
+}
+
+// --- Helper: Escape HTML ---
+function escapeHtml(text) {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// --- Handle Enter key in RAG input ---
+document.addEventListener('DOMContentLoaded', () => {
+    const ragInput = document.getElementById('is-rag-input');
+    if (ragInput) {
+        ragInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendISQuery();
+            }
+        });
+    }
+});
+
+// --- IS Inner Tab Switching ---
+function switchISInnerTab(tabName) {
+    document.querySelectorAll('.is-inner-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.is-inner-content').forEach(c => c.style.display = 'none');
+
+    const activeTab = document.querySelector(`.is-inner-tab[data-tab="${tabName}"]`);
+    if (activeTab) activeTab.classList.add('active');
+
+    const activeContent = document.getElementById(`is-inner-${tabName}`);
+    if (activeContent) activeContent.style.display = 'block';
 }

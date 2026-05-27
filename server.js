@@ -491,7 +491,7 @@ app.get('/api/disposal-reminders/:tpName', async (req, res) => {
     const now = new Date();
     const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-    const filtered = role === 'admin' ? rows : rows.filter(r => r.assignedTo && r.assignedTo.toLowerCase().includes(tpName.toLowerCase()));
+    const filtered = (role === 'admin' || role === 'admin_sample_cell') ? rows : rows.filter(r => r.assignedTo && r.assignedTo.toLowerCase().includes(tpName.toLowerCase()));
 
     const overdue = [];
     const upcoming = [];
@@ -520,8 +520,10 @@ app.get('/api/disposal-reminders/:tpName', async (req, res) => {
 // Admin reset-database
 app.post('/api/admin/reset-database', async (req, res) => {
     const { role, username } = req.body;
-    if (role !== 'admin' || cleanName(username) !== 'Admin') {
-        return res.status(403).json({ error: 'Unauthorized. Only Admin can reset the database.' });
+    const cleanUser = cleanName(username);
+    const isValidAdmin = (role === 'admin' && cleanUser === 'Admin') || (role === 'admin_sample_cell' && (cleanUser === 'Admin' || cleanUser === 'Super Admin' || cleanUser === 'admin_sample_cell'));
+    if (!isValidAdmin) {
+        return res.status(403).json({ error: 'Unauthorized. Only Admin or Super Admin can reset the database.' });
     }
     
     const { error: err1 } = await supabase.from('samples').delete().neq('id', 0);
@@ -793,12 +795,11 @@ app.get('/api/unassigned-samples', async (req, res) => {
         if (!unassignedSamples || unassignedSamples.length === 0) return res.json({ message: 'No unassigned samples found.', recommendations: [], forcedCount: 0 });
 
         // 2. Load preferences
-        let priorityWeight = 5, nonPriorityWeight = 5, leaveWindowDays = 30;
+        let priorityRankingMode = 'prioritize', leaveWindowDays = 30;
         try {
             const { data: prefRows } = await supabase.from('system_preferences').select('*');
             (prefRows || []).forEach(p => {
-                if (p.key === 'priorityWeight') priorityWeight = parseInt(p.value) || 5;
-                if (p.key === 'nonPriorityWeight') nonPriorityWeight = parseInt(p.value) || 5;
+                if (p.key === 'priorityRankingMode') priorityRankingMode = p.value || 'prioritize';
                 if (p.key === 'leaveWindowDays') leaveWindowDays = parseInt(p.value) || 30;
             });
         } catch(e) { /* use defaults */ }
@@ -855,9 +856,9 @@ app.get('/api/unassigned-samples', async (req, res) => {
                 }
             }
 
-            // Priority boost
+            // Priority boost based on mode
             const isPriority = (sample.priorityLevel || '').toLowerCase() === 'priority' || (sample.encodedCode || '').toLowerCase().endsWith('p');
-            const priorityBoost = isPriority ? priorityWeight : nonPriorityWeight;
+            const priorityBoost = (priorityRankingMode === 'prioritize' && isPriority) ? 50 : 0;
 
             // Try competency-matched employees first
             for (const comp of matchingComps) {
@@ -1215,8 +1216,7 @@ app.get('/api/preferences', async (req, res) => {
         if (error) {
             // Table might not exist yet, return defaults
             return res.json({ preferences: {
-                priorityWeight: '5',
-                nonPriorityWeight: '5',
+                priorityRankingMode: 'prioritize',
                 leaveWindowDays: '30',
                 autoRunAssigner: 'false'
             }});
@@ -1224,13 +1224,12 @@ app.get('/api/preferences', async (req, res) => {
         const prefs = {};
         (data || []).forEach(row => { prefs[row.key] = row.value; });
         // Fill defaults
-        if (!prefs.priorityWeight) prefs.priorityWeight = '5';
-        if (!prefs.nonPriorityWeight) prefs.nonPriorityWeight = '5';
+        if (!prefs.priorityRankingMode) prefs.priorityRankingMode = 'prioritize';
         if (!prefs.leaveWindowDays) prefs.leaveWindowDays = '30';
         if (!prefs.autoRunAssigner) prefs.autoRunAssigner = 'false';
         res.json({ preferences: prefs });
     } catch (err) {
-        res.json({ preferences: { priorityWeight: '5', nonPriorityWeight: '5', leaveWindowDays: '30', autoRunAssigner: 'false' } });
+        res.json({ preferences: { priorityRankingMode: 'prioritize', leaveWindowDays: '30', autoRunAssigner: 'false' } });
     }
 });
 
