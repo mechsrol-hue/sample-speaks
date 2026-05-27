@@ -171,6 +171,24 @@ function initializeTables() {
                 uploadedBy TEXT
             )
         `);
+
+        // IS Standards Intelligence Vault table
+        db.run(`
+            CREATE TABLE IF NOT EXISTS is_standards_vault (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                isNumber TEXT NOT NULL,
+                title TEXT,
+                pdfFileName TEXT,
+                rawExtractedContext TEXT,
+                extractedClauses TEXT,
+                extractedTables TEXT,
+                uncertainItems TEXT,
+                isFullyResolved INTEGER DEFAULT 0,
+                confidenceScore REAL DEFAULT 1.0,
+                uploadedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                uploadedBy TEXT
+            )
+        `);
     });
 }
 

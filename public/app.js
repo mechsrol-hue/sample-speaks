@@ -2973,7 +2973,7 @@ function toggleSaUpload() {
 function toggleScAuditLogs() { /* legacy no-op — audit log is always visible now */ }
 
 // ============================================================
-// IS INTELLIGENCE MODULE — Frontend Logic (Phase 1: Mock Data)
+// IS INTELLIGENCE MODULE — Frontend Logic & RAG API Client
 // ============================================================
 
 let isVaultData = [];
@@ -2982,216 +2982,14 @@ let isChatHistory = [];
 let isUncertainItems = [];
 let isParsedClauses = [];
 
-// Mock Vault Data
-const IS_MOCK_VAULT = [
-    {
-        id: 1,
-        isNumber: 'IS 4985 (2021)',
-        title: 'Unplasticized PVC Pipes for Potable Water Supplies',
-        pdfFileName: 'IS_4985_2021.pdf',
-        uploadedAt: '2026-05-20T10:30:00',
-        confidenceScore: 0.94,
-        status: 'parsed',
-        clauseCount: 14,
-        tableCount: 8
-    },
-    {
-        id: 2,
-        isNumber: 'IS 14756 (2024)',
-        title: 'Polyethylene Pipes for Water Supply',
-        pdfFileName: 'IS_14756_2024.pdf',
-        uploadedAt: '2026-05-22T14:15:00',
-        confidenceScore: 0.87,
-        status: 'has_uncertainties',
-        clauseCount: 18,
-        tableCount: 12
-    },
-    {
-        id: 3,
-        isNumber: 'IS 13592 (2020)',
-        title: 'uPVC Pipes for Soil and Waste Discharge',
-        pdfFileName: 'IS_13592_2020.pdf',
-        uploadedAt: '2026-05-25T09:00:00',
-        confidenceScore: 0.91,
-        status: 'parsed',
-        clauseCount: 11,
-        tableCount: 6
-    }
-];
-
-// Mock Parsed Clauses for IS 4985
-const IS_MOCK_CLAUSES = [
-    {
-        clauseNumber: '5',
-        title: 'Classification of Pipes',
-        page: 3,
-        content: 'Pipes shall be classified by their maximum working pressure into Class 1 (0.25 MPa), Class 2 (0.4 MPa), Class 3 (0.6 MPa), Class 4 (0.8 MPa), Class 5 (1.0 MPa), and Class 6 (1.25 MPa).',
-        hasTable: false
-    },
-    {
-        clauseNumber: '5.2',
-        title: 'Application Type Classification',
-        page: 3,
-        content: 'The pipes shall be classified based on their application:\na) Type A — Pipes for water supply; and\nb) Type B — Pipes for agricultural use.',
-        hasTable: false
-    },
-    {
-        clauseNumber: '7.1.1.1',
-        title: 'Mean Outside Diameter',
-        page: 5,
-        content: 'The mean outside diameter and tolerances of pipes shall be as given in Table 1. The mean outside diameter shall be calculated from measurements taken at the same cross-section.',
-        hasTable: true,
-        tablePreview: 'Table 1 — Nominal OD, Min OD, Max OD, Ovality'
-    },
-    {
-        clauseNumber: '7.1.2.1',
-        title: 'Wall Thickness',
-        page: 8,
-        content: 'The minimum wall thickness of pipes for various nominal sizes and classes shall be as given in Table 2. The wall thickness at any point shall not be less than the minimum specified value.',
-        hasTable: true,
-        tablePreview: 'Table 2 — Wall Thickness by Size and Class'
-    },
-    {
-        clauseNumber: '7.2.1.1',
-        title: 'Socket Dimensions for Solvent Cement Jointing',
-        page: 10,
-        content: 'The socket dimensions for solvent cement jointing shall be as given in Table 3. The angle of taper at the bottom of the socket shall not exceed 0°30\' (Note 1).',
-        hasTable: true,
-        tablePreview: 'Table 3 — Socket Length, Taper Angle'
-    },
-    {
-        clauseNumber: '10.1',
-        title: 'Visual Appearance',
-        page: 14,
-        content: 'The colour of the pipes shall be light grey. Slight variations in the appearance of the colour are permitted. The internal and external surfaces shall be smooth, clean and free from grooving and other defects.',
-        hasTable: false
-    },
-    {
-        clauseNumber: '10.2',
-        title: 'Opacity',
-        page: 14,
-        content: 'The wall of the plain pipe shall not transmit more than 0.2 percent of the visible light falling on it when tested in accordance with IS 12235 (Part 3).',
-        hasTable: false
-    },
-    {
-        clauseNumber: '11.1',
-        title: 'Reversion',
-        page: 16,
-        content: 'The longitudinal reversion of a pipe specimen when heated to 150°C for 15 min shall not exceed 5 percent.',
-        hasTable: false
-    },
-    {
-        clauseNumber: '11.2',
-        title: 'Vicat Softening Temperature',
-        page: 16,
-        content: 'The Vicat softening temperature determined in accordance with IS 6307 shall not be less than 80°C.',
-        hasTable: false
-    },
-    {
-        clauseNumber: '11.3',
-        title: 'Density',
-        page: 17,
-        content: 'The density of the material of the pipe shall be between 1.40 g/cm³ and 1.46 g/cm³ when determined in accordance with method A of IS 7328.',
-        hasTable: false
-    },
-    {
-        clauseNumber: '11.1 Table 6',
-        title: 'Hydrostatic Pressure Test',
-        page: 18,
-        content: 'The pipe specimen shall withstand the specified internal hydrostatic pressure without failure (bursting, leaking, or ballooning) when tested at the test duration and temperature given in Table 6.',
-        hasTable: true,
-        tablePreview: 'Table 6 — Test Pressure by Class (4.19 × MWP for 1h)'
-    },
-    {
-        clauseNumber: '13.1.2',
-        title: 'Marking Requirements',
-        page: 22,
-        content: 'Type A pipes shall additionally bear continuous longitudinal blue colour strip printing. These longitudinal blue colour strips shall be placed so as not to merge/disturb the information marked on the pipes.',
-        hasTable: false
-    }
-];
-
-// Mock Uncertainty Items
-const IS_MOCK_UNCERTAINTIES = [
-    {
-        id: 'u1',
-        page: 8,
-        clauseNumber: '7.1.2.1',
-        rawText: 'The minimum wall thickness for 280mm Class 1 pipe shall be ... mm (value partially obscured in scan)',
-        highlightedText: 'The minimum wall thickness for 280mm Class 1 pipe shall be <mark>???</mark> mm (value partially obscured in scan)',
-        reason: 'Scanned text is partially illegible — numeric value appears blurred in the original document',
-        confidence: 0.35,
-        resolved: false,
-        userValue: ''
-    },
-    {
-        id: 'u2',
-        page: 12,
-        clauseNumber: 'Table 4',
-        rawText: 'Socket inner diameter for 125mm elastomeric ring joint: [table cell damaged]',
-        highlightedText: 'Socket inner diameter for 125mm elastomeric ring joint: <mark>[table cell damaged]</mark>',
-        reason: 'Table cell appears physically damaged in the source document — cannot reliably extract value',
-        confidence: 0.22,
-        resolved: false,
-        userValue: ''
-    },
-    {
-        id: 'u3',
-        page: 5,
-        clauseNumber: '7.1.1.1',
-        rawText: 'Maximum ovality for 90mm pipe: 1.2mm or 1.3mm (ambiguous decimal point)',
-        highlightedText: 'Maximum ovality for 90mm pipe: <mark>1.2mm or 1.3mm</mark> (ambiguous decimal point)',
-        reason: 'The decimal point is ambiguous due to print quality — could be 1.2 or 1.3',
-        confidence: 0.58,
-        resolved: false,
-        userValue: ''
-    }
-];
-
-// Mock RAG responses
-const IS_MOCK_RAG_RESPONSES = {
-    'default': {
-        text: 'I have analyzed the uploaded IS 4985 (2021) standard. The document contains 14 clauses covering classification, dimensions, physical properties, mechanical properties, and marking requirements. There are 8 tables with dimensional specifications. 3 items require your clarification before full resolution.',
-        citations: [
-            { page: 1, clause: 'Title Page', text: 'IS 4985:2021 — Unplasticized PVC Pipes for Potable Water Supplies' }
-        ]
-    },
-    'sop': {
-        text: '**Standard Operating Procedure — Wall Thickness Measurement (IS 4985:2021)**\n\n**Step 1:** Select pipe specimen as per Clause 12.1 sampling requirements.\n\n**Step 2:** Using a wall thickness gauge calibrated to ±0.01mm, measure wall thickness at minimum 4 equally spaced points around the circumference at each end of the specimen.\n\n**Step 3:** Record the minimum individual measurement. This must not be less than the specified minimum wall thickness as per Clause 7.1.2.1 and Table 2.\n\n**Step 4:** Calculate the mean wall thickness from all measurements. This must not exceed the specified maximum as per Table 2.\n\n**Step 5:** For a 75mm Class 3 pipe, the acceptance criteria are:\n  - Minimum: 2.6 mm\n  - Maximum: 3.1 mm\n\n**Step 6:** Record results in the test report format as per Clause 14.',
-        citations: [
-            { page: 8, clause: 'Cl 7.1.2.1', text: 'Wall thickness requirements and measurement method' },
-            { page: 8, clause: 'Table 2', text: 'Wall thickness values by size and class' },
-            { page: 20, clause: 'Cl 12.1', text: 'Sampling procedure for testing' },
-            { page: 22, clause: 'Cl 14', text: 'Test report format requirements' }
-        ]
-    },
-    'report': {
-        text: '**Test Report Template — IS 4985:2021**\n\n| S.No | Clause | Test Parameter | Specified Value | Type | Observed Value |\n|------|--------|---------------|----------------|------|---------------|\n| 1 | 10.1 | Colour | Light Grey | Qualitative | _______ |\n| 2 | 10.1 | Surface Finish | Smooth, free from defects | Qualitative | _______ |\n| 3 | 7.1.1.1 | Mean OD (Min) | As per Table 1 | Quantitative | _______ mm |\n| 4 | 7.1.1.1 | Mean OD (Max) | As per Table 1 | Quantitative | _______ mm |\n| 5 | 7.1.2.1 | Wall Thickness (Min) | As per Table 2 | Quantitative | _______ mm |\n| 6 | 11.1 | Reversion | Max 5% | Quantitative | _______ % |\n| 7 | 11.2 | Vicat Softening Temp | Min 80°C | Qualitative | _______ |\n| 8 | 11.3 | Density | 1.40 - 1.46 g/cm³ | Quantitative | _______ g/cm³ |\n| 9 | 10.2 | Opacity | Max 0.2% | Quantitative | _______ % |\n| 10 | 11.1 T6 | Hydrostatic Pressure | No failure at test pressure | Qualitative | _______ |\n| 11 | 13.1.2 | Marking | Blue strip for Type A | Qualitative | _______ |\n\n*All test parameters sourced exclusively from IS 4985:2021. Specific tolerances auto-loaded based on selected Nominal Size and Class.*',
-        citations: [
-            { page: 14, clause: 'Cl 10.1', text: 'Visual appearance requirements' },
-            { page: 5, clause: 'Table 1', text: 'Dimensional tolerances for OD' },
-            { page: 8, clause: 'Table 2', text: 'Wall thickness specifications' },
-            { page: 16, clause: 'Cl 11', text: 'Mechanical properties requirements' },
-            { page: 22, clause: 'Cl 13', text: 'Marking requirements' }
-        ]
-    },
-    'tolerance': {
-        text: 'For **75mm Nominal Size, Class 3** pipe as per IS 4985:2021:\n\n| Parameter | Value | Reference |\n|-----------|-------|-----------|\n| Mean OD (Min) | 75.0 mm | Table 1 |\n| Mean OD (Max) | 75.3 mm | Table 1 |\n| Ovality (Max) | 1.0 mm | Table 1 |\n| Wall Thickness (Min) | 2.6 mm | Table 2 |\n| Wall Thickness (Max) | 3.1 mm | Table 2 |\n| Wall Thickness (Avg) | 3.1 mm | Table 2 |\n| Socket Length (Min) | 44 mm | Table 3 |\n| Hydrostatic Test Pressure | 4.19 × 0.6 = 2.514 MPa for 1h | Table 6 |\n\nAll values are directly extracted from the uploaded IS 4985:2021 document. No external data sources used.',
-        citations: [
-            { page: 5, clause: 'Table 1', text: 'OD and ovality values for 75mm' },
-            { page: 8, clause: 'Table 2', text: 'Wall thickness: Class 3 row for 75mm' },
-            { page: 10, clause: 'Table 3', text: 'Socket dimensions for 75mm' },
-            { page: 18, clause: 'Table 6', text: 'Hydrostatic test pressure for Class 3' }
-        ]
-    }
-};
-
 // --- Load IS Intelligence Tab ---
-function loadISIntelligence() {
-    renderISVault();
-    // Select first document by default
-    if (IS_MOCK_VAULT.length > 0 && !isActiveDocument) {
-        selectISDocument(IS_MOCK_VAULT[0]);
+async function loadISIntelligence() {
+    await fetchISVault();
+    // Select first document by default if available and none active
+    if (isVaultData.length > 0 && !isActiveDocument) {
+        await selectISDocument(isVaultData[0].id);
+    } else if (isVaultData.length === 0) {
+        renderISEmptyState();
     }
 }
 
@@ -3204,32 +3002,61 @@ switchTab = function(tabId) {
     }
 };
 
+// --- Fetch Vault List ---
+async function fetchISVault() {
+    try {
+        const res = await fetch('/api/is-intelligence/vault');
+        const data = await res.json();
+        isVaultData = data.vault || [];
+        renderISVault();
+    } catch(e) {
+        showToast('Failed to load standard vault.', 'error');
+    }
+}
+
+// --- Render Empty State ---
+function renderISEmptyState() {
+    const listEl = document.getElementById('is-vault-list');
+    if (listEl) {
+        listEl.innerHTML = '<div class="is-empty-state" style="padding:20px;"><span class="is-empty-icon">📂</span><p style="font-size:0.85rem;">No standards uploaded yet</p></div>';
+    }
+    const msgContainer = document.getElementById('is-rag-messages');
+    if (msgContainer) {
+        msgContainer.innerHTML = `
+            <div class="is-empty-state" style="padding:40px 20px;">
+                <span class="is-empty-icon">🤖</span>
+                <h5>Select or upload a standard to begin</h5>
+                <p>The AI is waiting to analyze the document.</p>
+            </div>
+        `;
+    }
+}
+
 // --- Render Vault Sidebar ---
 function renderISVault() {
     const listEl = document.getElementById('is-vault-list');
     const countEl = document.getElementById('is-vault-count');
     if (!listEl) return;
 
-    const vault = IS_MOCK_VAULT;
-    if (countEl) countEl.textContent = vault.length;
+    if (countEl) countEl.textContent = isVaultData.length;
 
-    if (vault.length === 0) {
-        listEl.innerHTML = '<div class="is-empty-state" style="padding:20px;"><span class="is-empty-icon">📂</span><p style="font-size:0.85rem;">No standards uploaded yet</p></div>';
+    if (isVaultData.length === 0) {
+        renderISEmptyState();
         return;
     }
 
-    listEl.innerHTML = vault.map(doc => {
+    listEl.innerHTML = isVaultData.map(doc => {
         const isActive = isActiveDocument && isActiveDocument.id === doc.id;
         const statusBadge = doc.status === 'has_uncertainties'
             ? '<span class="is-badge is-badge-medium">⚠ Flags</span>'
             : '<span class="is-badge is-badge-high">✓ Ready</span>';
         const date = new Date(doc.uploadedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
         return `
-            <div class="is-vault-item ${isActive ? 'active' : ''}" onclick="selectISDocument(IS_MOCK_VAULT.find(d=>d.id===${doc.id}))">
+            <div class="is-vault-item ${isActive ? 'active' : ''}" onclick="selectISDocument(${doc.id})">
                 <span class="is-vault-item-icon">📄</span>
                 <div class="is-vault-item-info">
-                    <div class="is-vault-item-title">${doc.isNumber}</div>
-                    <div class="is-vault-item-meta">${doc.clauseCount} clauses · ${doc.tableCount} tables · ${date}</div>
+                    <div class="is-vault-item-title">${escapeHtml(doc.isNumber)}</div>
+                    <div class="is-vault-item-meta">${escapeHtml(doc.title)} · ${date}</div>
                 </div>
                 <div class="is-vault-item-status">${statusBadge}</div>
             </div>
@@ -3238,28 +3065,43 @@ function renderISVault() {
 }
 
 // --- Select a Document ---
-function selectISDocument(doc) {
-    isActiveDocument = doc;
-    renderISVault();
-    renderISAnalysis();
-    renderISChatWelcome();
+async function selectISDocument(docId) {
+    try {
+        const res = await fetch(`/api/is-intelligence/vault/${docId}`);
+        const doc = await res.json();
+        if (doc.error) {
+            showToast(doc.error, 'error');
+            return;
+        }
+        
+        isActiveDocument = doc;
+        isUncertainItems = doc.uncertainItems || [];
+        isParsedClauses = doc.clauses || [];
+        
+        renderISVault();
+        renderISAnalysis();
+        renderISChatWelcome();
 
-    // Update scope badge
-    const scopeEl = document.getElementById('is-rag-scope-text');
-    if (scopeEl) scopeEl.textContent = doc.isNumber;
+        // Update scope badge
+        const scopeEl = document.getElementById('is-rag-scope-text');
+        if (scopeEl) scopeEl.textContent = doc.isNumber;
 
-    // Update parse status
-    const statusEl = document.getElementById('is-parse-status-bar');
-    if (statusEl) {
-        statusEl.className = 'is-parse-status success';
-        statusEl.innerHTML = `
-            <span style="font-size:1.2rem;">✅</span>
-            <div class="is-parse-progress">
-                <div style="font-size:0.88rem; font-weight:600; color:var(--success);">${doc.isNumber} — Fully Parsed</div>
-                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">${doc.clauseCount} clauses · ${doc.tableCount} tables · Confidence: ${Math.round(doc.confidenceScore * 100)}%</div>
-                <div class="is-parse-progress-bar" style="margin-top:6px;"><div class="is-parse-progress-fill" style="width:${doc.confidenceScore * 100}%;"></div></div>
-            </div>
-        `;
+        // Update parse status
+        const statusEl = document.getElementById('is-parse-status-bar');
+        if (statusEl) {
+            statusEl.style.display = 'flex';
+            statusEl.className = 'is-parse-status success';
+            statusEl.innerHTML = `
+                <span style="font-size:1.2rem;">✅</span>
+                <div class="is-parse-progress">
+                    <div style="font-size:0.88rem; font-weight:600; color:var(--success);">${escapeHtml(doc.isNumber)} — Fully Parsed</div>
+                    <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">${doc.clauses.length} clauses · ${doc.tables.length} tables · Parse Confidence: ${Math.round(doc.confidenceScore * 100)}%</div>
+                    <div class="is-parse-progress-bar" style="margin-top:6px;"><div class="is-parse-progress-fill" style="width:${doc.confidenceScore * 100}%;"></div></div>
+                </div>
+            `;
+        }
+    } catch(e) {
+        showToast('Error loading document details.', 'error');
     }
 }
 
@@ -3275,8 +3117,7 @@ function renderISUncertainties() {
     const panel = document.getElementById('is-uncertainty-container');
     if (!panel) return;
 
-    const items = IS_MOCK_UNCERTAINTIES;
-    const unresolvedCount = items.filter(i => !i.resolved).length;
+    const unresolvedCount = isUncertainItems.filter(i => !i.resolved).length;
 
     if (unresolvedCount === 0) {
         panel.style.display = 'none';
@@ -3290,11 +3131,11 @@ function renderISUncertainties() {
     const listEl = document.getElementById('is-uncertainty-list');
     if (!listEl) return;
 
-    listEl.innerHTML = items.map(item => {
+    listEl.innerHTML = isUncertainItems.map(item => {
         const confidenceColor = item.confidence < 0.4 ? 'color: var(--danger);' : item.confidence < 0.7 ? 'color: var(--warning);' : 'color: var(--success);';
         const resolvedClass = item.resolved ? 'resolved' : '';
         const inputArea = item.resolved
-            ? `<div style="display:flex;align-items:center;gap:8px;"><span class="is-badge is-badge-resolved">✓ Resolved</span><span style="font-size:0.85rem;font-weight:600;color:var(--success);">${item.userValue}</span></div>`
+            ? `<div style="display:flex;align-items:center;gap:8px;"><span class="is-badge is-badge-resolved">✓ Resolved</span><span style="font-size:0.85rem;font-weight:600;color:var(--success);">${escapeHtml(item.userValue)}</span></div>`
             : `<div class="is-uncertainty-input-row">
                 <input type="text" id="is-clarify-${item.id}" placeholder="Enter the correct value..." />
                 <button onclick="submitISClarification('${item.id}')" class="primary" style="padding:8px 14px;">Confirm</button>
@@ -3303,11 +3144,11 @@ function renderISUncertainties() {
         return `
             <div class="is-uncertainty-card ${resolvedClass}" id="is-card-${item.id}">
                 <div class="is-uncertainty-location">
-                    <span class="is-citation" style="cursor:default;">Page ${item.page}, ${item.clauseNumber}</span>
+                    <span class="is-citation" style="cursor:default;">Page ${item.page}, ${escapeHtml(item.clauseNumber)}</span>
                     <span class="is-uncertainty-confidence" style="${confidenceColor}">Confidence: ${Math.round(item.confidence * 100)}%</span>
                 </div>
                 <div class="is-uncertainty-rawtext">${item.highlightedText}</div>
-                <div class="is-uncertainty-reason">⚠️ ${item.reason}</div>
+                <div class="is-uncertainty-reason">⚠️ ${escapeHtml(item.reason)}</div>
                 ${inputArea}
             </div>
         `;
@@ -3315,22 +3156,39 @@ function renderISUncertainties() {
 }
 
 // --- Submit Clarification ---
-function submitISClarification(itemId) {
+async function submitISClarification(itemId) {
     const input = document.getElementById(`is-clarify-${itemId}`);
     if (!input || !input.value.trim()) {
         showToast('Please enter the correct value before confirming.', 'error');
         return;
     }
 
-    const item = IS_MOCK_UNCERTAINTIES.find(i => i.id === itemId);
-    if (item) {
-        item.resolved = true;
-        item.userValue = input.value.trim();
-        item.confidence = 1.0;
-    }
+    const val = input.value.trim();
 
-    renderISUncertainties();
-    showToast(`Clarification confirmed for ${item.clauseNumber}. Value: "${item.userValue}"`, 'success');
+    try {
+        const res = await fetch('/api/is-intelligence/clarify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                documentId: isActiveDocument.id,
+                itemId,
+                resolvedValue: val
+            })
+        });
+        const data = await res.json();
+        if (data.error) {
+            showToast(data.error, 'error');
+            return;
+        }
+        
+        isUncertainItems = data.uncertainItems || [];
+        renderISUncertainties();
+        // Refresh vault in case status badge changes
+        await fetchISVault();
+        showToast(`Clarification confirmed! Value: "${val}"`, 'success');
+    } catch(e) {
+        showToast('Error saving clarification.', 'error');
+    }
 }
 
 // --- Render Parsed Clauses Accordion ---
@@ -3338,7 +3196,12 @@ function renderISClauses() {
     const container = document.getElementById('is-clauses-list');
     if (!container) return;
 
-    container.innerHTML = IS_MOCK_CLAUSES.map((clause, idx) => {
+    if (isParsedClauses.length === 0) {
+        container.innerHTML = '<p style="padding:15px;color:var(--text-muted);font-size:0.88rem;">No parsed clauses found.</p>';
+        return;
+    }
+
+    container.innerHTML = isParsedClauses.map((clause, idx) => {
         const tableTag = clause.hasTable
             ? `<span style="font-size:0.72rem;background:#e8f0fe;color:var(--accent);padding:2px 8px;border-radius:4px;font-weight:600;margin-left:8px;">📊 Table</span>`
             : '';
@@ -3346,16 +3209,16 @@ function renderISClauses() {
             <div class="is-clause-item" id="is-clause-${idx}">
                 <div class="is-clause-trigger" onclick="toggleISClause(${idx})">
                     <div class="is-clause-trigger-left">
-                        <span class="is-clause-number">Cl ${clause.clauseNumber}</span>
-                        <span class="is-clause-title">${clause.title}${tableTag}</span>
+                        <span class="is-clause-number">Cl ${escapeHtml(clause.clauseNumber)}</span>
+                        <span class="is-clause-title">${escapeHtml(clause.title)}${tableTag}</span>
                     </div>
                     <span class="is-clause-arrow">▼</span>
                 </div>
                 <div class="is-clause-content">
                     <div class="is-clause-body">
-                        <p style="white-space:pre-line;">${clause.content}</p>
-                        ${clause.hasTable ? `<div style="margin-top:10px;padding:8px 12px;background:#f0f4ff;border-radius:6px;border:1px solid #d2e3fc;font-size:0.82rem;font-weight:600;color:var(--accent);">📊 ${clause.tablePreview}</div>` : ''}
-                        <div class="is-clause-page-ref">📄 Page ${clause.page} · ${isActiveDocument ? isActiveDocument.isNumber : ''}</div>
+                        <p style="white-space:pre-line;">${escapeHtml(clause.content)}</p>
+                        ${clause.hasTable ? `<div style="margin-top:10px;padding:8px 12px;background:#f0f4ff;border-radius:6px;border:1px solid #d2e3fc;font-size:0.82rem;font-weight:600;color:var(--accent);">📊 Extracted Table Data</div>` : ''}
+                        <div class="is-clause-page-ref">📄 Page ${clause.page} · ${escapeHtml(isActiveDocument.isNumber)}</div>
                     </div>
                 </div>
             </div>
@@ -3374,17 +3237,14 @@ function renderISChatWelcome() {
     const msgContainer = document.getElementById('is-rag-messages');
     if (!msgContainer) return;
 
-    const welcome = IS_MOCK_RAG_RESPONSES['default'];
-    const citationsHtml = welcome.citations.map(c => `<span class="is-citation">${c.clause}, Page ${c.page}</span>`).join(' ');
-
     msgContainer.innerHTML = `
         <div class="is-rag-msg ai">
             <div class="is-rag-msg-avatar">🤖</div>
             <div class="is-rag-msg-body">
                 <div class="is-rag-msg-sender">IS Intelligence</div>
                 <div class="is-rag-msg-text">
-                    ${welcome.text}
-                    <div style="margin-top:8px;">${citationsHtml}</div>
+                    I have parsed <strong>${escapeHtml(isActiveDocument.isNumber)}: ${escapeHtml(isActiveDocument.title)}</strong>. 
+                    Ask me any question about the standard, generate an SOP, or get a test report template!
                 </div>
             </div>
         </div>
@@ -3393,7 +3253,12 @@ function renderISChatWelcome() {
 }
 
 // --- Send RAG Query ---
-function sendISQuery() {
+async function sendISQuery() {
+    if (!isActiveDocument) {
+        showToast('Please select a document from the vault first.', 'error');
+        return;
+    }
+
     const input = document.getElementById('is-rag-input');
     if (!input || !input.value.trim()) return;
 
@@ -3430,32 +3295,37 @@ function sendISQuery() {
     `;
     msgContainer.scrollTop = msgContainer.scrollHeight;
 
-    // Simulate AI response after delay
-    setTimeout(() => {
+    try {
+        const res = await fetch('/api/is-intelligence/query', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                documentId: isActiveDocument.id,
+                query: query
+            })
+        });
+        const response = await res.json();
+        
         const typingEl = document.getElementById('is-typing-msg');
         if (typingEl) typingEl.remove();
 
-        // Match query to mock response
-        let response = IS_MOCK_RAG_RESPONSES['default'];
-        const qLower = query.toLowerCase();
-        if (qLower.includes('tolerance') || qLower.includes('dimension') || qLower.includes('size') || qLower.includes('75mm') || qLower.includes('class')) {
-            response = IS_MOCK_RAG_RESPONSES['tolerance'];
-        } else if (qLower.includes('sop') || qLower.includes('procedure') || qLower.includes('how to test') || qLower.includes('method')) {
-            response = IS_MOCK_RAG_RESPONSES['sop'];
-        } else if (qLower.includes('report') || qLower.includes('template') || qLower.includes('format')) {
-            response = IS_MOCK_RAG_RESPONSES['report'];
+        if (response.error) {
+            showToast(response.error, 'error');
+            return;
         }
 
-        const citationsHtml = response.citations.map(c =>
-            `<span class="is-citation" title="${escapeHtml(c.text)}">${c.clause}, Page ${c.page}</span>`
+        const citationsHtml = (response.citations || []).map(c =>
+            `<span class="is-citation" title="${escapeHtml(c.text)}">${escapeHtml(c.clause)}, Page ${c.page}</span>`
         ).join(' ');
 
-        // Convert markdown-like formatting
-        let formattedText = response.text
+        // Basic formatting for Markdown bold/italics/newlines/tables in the response
+        let formattedText = response.answer
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
             .replace(/\n/g, '<br>')
-            .replace(/\|(.+?)\|/g, (match) => {
-                return match; // Keep table formatting as-is for now
+            // Simple markdown table conversion
+            .replace(/\|([\s\S]*?)\|/g, (match) => {
+                return match; 
             });
 
         msgContainer.innerHTML += `
@@ -3465,23 +3335,28 @@ function sendISQuery() {
                     <div class="is-rag-msg-sender">IS Intelligence</div>
                     <div class="is-rag-msg-text">
                         ${formattedText}
+                        ${citationsHtml ? `
                         <div style="margin-top:10px; border-top:1px solid var(--border-light); padding-top:8px;">
-                            <span style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.3px;">Sources:</span><br>
+                            <span style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.3px;">Grounded Citations:</span><br>
                             ${citationsHtml}
-                        </div>
+                        </div>` : ''}
                     </div>
                 </div>
             </div>
         `;
         msgContainer.scrollTop = msgContainer.scrollHeight;
-    }, 1500);
+    } catch(e) {
+        const typingEl = document.getElementById('is-typing-msg');
+        if (typingEl) typingEl.remove();
+        showToast('Error querying local LLM RAG engine.', 'error');
+    }
 }
 
 // --- Quick Action Handlers ---
 function isQuickSOP() {
     const input = document.getElementById('is-rag-input');
     if (input) {
-        input.value = 'Generate an SOP for wall thickness measurement as per this standard';
+        input.value = 'Generate a detailed Step-by-Step SOP for wall thickness measurement as per this standard';
         sendISQuery();
     }
 }
@@ -3489,46 +3364,34 @@ function isQuickSOP() {
 function isQuickReport() {
     const input = document.getElementById('is-rag-input');
     if (input) {
-        input.value = 'Generate a test report template with all testable parameters from this standard';
-        sendISQuery();
-    }
-}
-
-function isQuickTolerance() {
-    const input = document.getElementById('is-rag-input');
-    if (input) {
-        input.value = 'What are the tolerance values for 75mm Class 3 pipe?';
-        sendISQuery();
-    }
-}
-
-function isQuickSummarize() {
-    const input = document.getElementById('is-rag-input');
-    if (input) {
-        input.value = 'Summarize the key testing requirements from this standard';
+        input.value = 'Extract all testable parameters and return a structured markdown test report template';
         sendISQuery();
     }
 }
 
 // --- Tolerance Lookup Widget ---
 function renderISTolerance() {
-    // Pre-populate using existing specs_db.js data (IS 4985)
     lookupISTolerance();
 }
 
-function lookupISTolerance() {
+async function lookupISTolerance() {
     const sizeEl = document.getElementById('is-tol-size');
     const classEl = document.getElementById('is-tol-class');
     const resultsEl = document.getElementById('is-tolerance-results-body');
     if (!sizeEl || !classEl || !resultsEl) return;
 
-    const size = parseInt(sizeEl.value);
-    const pipeClass = parseInt(classEl.value);
+    const size = sizeEl.value;
+    const pipeClass = classEl.value;
 
-    // Use existing IS_4985_SPECS if available
-    if (typeof IS_4985_SPECS !== 'undefined' && IS_4985_SPECS.sizes_db && IS_4985_SPECS.sizes_db[size]) {
-        const data = IS_4985_SPECS.sizes_db[size];
-        const thickness = data.thickness && data.thickness[pipeClass] ? data.thickness[pipeClass] : null;
+    if (!isActiveDocument) {
+        resultsEl.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:20px;">Select a standard from the vault first</td></tr>';
+        return;
+    }
+
+    // Special offline path for IS 4985 (uses hardcoded local JS values)
+    if (isActiveDocument.isNumber.includes('4985') && typeof IS_4985_SPECS !== 'undefined' && IS_4985_SPECS.sizes_db && IS_4985_SPECS.sizes_db[parseInt(size)]) {
+        const data = IS_4985_SPECS.sizes_db[parseInt(size)];
+        const thickness = data.thickness && data.thickness[parseInt(pipeClass)] ? data.thickness[parseInt(pipeClass)] : null;
 
         let rows = `
             <tr><td>Mean OD (Min)</td><td class="value-cell">${data.min_od.toFixed(1)} mm</td><td><span class="is-citation">Table 1, Cl 7.1.1.1</span></td></tr>
@@ -3544,17 +3407,43 @@ function lookupISTolerance() {
                 <tr><td>Wall Thickness (Avg)</td><td class="value-cell">${thickness[0]} mm</td><td><span class="is-citation">Table 2, Cl 7.1.2.1</span></td></tr>
             `;
         } else {
-            rows += '<tr><td colspan="3" style="text-align:center;color:var(--warning);font-weight:600;">⚠ Class ${pipeClass} not available for ${size}mm</td></tr>';
+            rows += `<tr><td colspan="3" style="text-align:center;color:var(--warning);font-weight:600;">⚠ Class ${pipeClass} not available for ${size}mm</td></tr>`;
         }
 
         resultsEl.innerHTML = rows;
-    } else {
-        resultsEl.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:20px;">Select a valid size and class combination</td></tr>';
+        return;
+    }
+
+    // Dynamic backend lookup for any other uploaded IS Standards
+    resultsEl.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:20px;">🤖 Querying local LLM RAG for specifications...</td></tr>';
+    try {
+        const url = `/api/is-intelligence/lookup?isNumber=${encodeURIComponent(isActiveDocument.isNumber)}&size=${size}&class=${pipeClass}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.error) {
+            resultsEl.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--danger);padding:20px;">Error: ${escapeHtml(data.error)}</td></tr>`;
+            return;
+        }
+
+        let rows = '';
+        if (data.min_od) rows += `<tr><td>Mean OD (Min)</td><td class="value-cell">${data.min_od} mm</td><td><span class="is-citation">${escapeHtml(data.citation || 'Extracted')}</span></td></tr>`;
+        if (data.max_od) rows += `<tr><td>Mean OD (Max)</td><td class="value-cell">${data.max_od} mm</td><td><span class="is-citation">${escapeHtml(data.citation || 'Extracted')}</span></td></tr>`;
+        if (data.ovality) rows += `<tr><td>Ovality (Max)</td><td class="value-cell">${data.ovality} mm</td><td><span class="is-citation">${escapeHtml(data.citation || 'Extracted')}</span></td></tr>`;
+        if (data.min_wall) rows += `<tr><td>Wall Thickness (Min)</td><td class="value-cell">${data.min_wall} mm</td><td><span class="is-citation">${escapeHtml(data.citation || 'Extracted')}</span></td></tr>`;
+        if (data.max_wall) rows += `<tr><td>Wall Thickness (Max)</td><td class="value-cell">${data.max_wall} mm</td><td><span class="is-citation">${escapeHtml(data.citation || 'Extracted')}</span></td></tr>`;
+        if (data.socket_length) rows += `<tr><td>Socket Length (Min)</td><td class="value-cell">${data.socket_length} mm</td><td><span class="is-citation">${escapeHtml(data.citation || 'Extracted')}</span></td></tr>`;
+
+        if (!rows) {
+            rows = '<tr><td colspan="3" style="text-align:center;color:var(--warning);padding:20px;">Could not extract specification tables for size/class. Ask the RAG chat for help.</td></tr>';
+        }
+        resultsEl.innerHTML = rows;
+    } catch(e) {
+        resultsEl.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--danger);padding:20px;">Failed to connect to RAG lookup server</td></tr>';
     }
 }
 
-// --- Upload IS Standard (Mock) ---
-function uploadISStandard() {
+// --- Upload IS Standard ---
+async function uploadISStandard() {
     const fileInput = document.getElementById('is-pdf-input');
     if (!fileInput || !fileInput.files.length) {
         showToast('Please select a PDF file to upload.', 'error');
@@ -3570,45 +3459,66 @@ function uploadISStandard() {
     // Show parsing animation
     const statusEl = document.getElementById('is-parse-status-bar');
     if (statusEl) {
+        statusEl.style.display = 'flex';
         statusEl.className = 'is-parse-status parsing';
         statusEl.innerHTML = `
             <div class="is-parse-spinner"></div>
             <div class="is-parse-progress">
-                <div style="font-size:0.88rem; font-weight:600; color:var(--accent);">Analyzing: ${file.name}</div>
-                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">Gemini AI is reading and parsing the document...</div>
-                <div class="is-parse-progress-bar"><div class="is-parse-progress-fill" id="is-parse-fill"></div></div>
+                <div style="font-size:0.88rem; font-weight:600; color:var(--accent);">Uploading &amp; Parsing: ${escapeHtml(file.name)}</div>
+                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">Local LLM is reading, scanning and analyzing pages...</div>
+                <div class="is-parse-progress-bar"><div class="is-parse-progress-fill" id="is-parse-fill" style="width: 10%;"></div></div>
             </div>
         `;
     }
 
-    // Simulate parsing progress
-    let progress = 0;
+    const formData = new FormData();
+    formData.append('pdf', file);
+
+    // Simulate progress while uploading/parsing
+    let progress = 10;
     const progressInterval = setInterval(() => {
-        progress += Math.random() * 15;
-        if (progress > 95) progress = 95;
+        progress += Math.random() * 10;
+        if (progress > 90) progress = 90;
         const fill = document.getElementById('is-parse-fill');
         if (fill) fill.style.width = progress + '%';
-    }, 400);
+    }, 600);
 
-    // Simulate completion after 3 seconds
-    setTimeout(() => {
+    try {
+        const res = await fetch('/api/is-intelligence/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
         clearInterval(progressInterval);
         const fill = document.getElementById('is-parse-fill');
         if (fill) fill.style.width = '100%';
 
-        // Show success
-        setTimeout(() => {
-            selectISDocument(IS_MOCK_VAULT[0]);
-            showToast(`${file.name} parsed successfully! 14 clauses and 8 tables extracted.`, 'success');
-            fileInput.value = '';
-        }, 500);
-    }, 3000);
+        const doc = await res.json();
+        if (doc.error) {
+            showToast(doc.error, 'error');
+            if (statusEl) statusEl.style.display = 'none';
+            return;
+        }
+
+        showToast(`${escapeHtml(file.name)} uploaded and parsed successfully!`, 'success');
+        fileInput.value = '';
+        
+        // Refresh Vault list
+        await fetchISVault();
+        // Select the newly uploaded document
+        await selectISDocument(doc.id);
+    } catch(e) {
+        clearInterval(progressInterval);
+        if (statusEl) statusEl.style.display = 'none';
+        showToast('Error uploading or parsing PDF document.', 'error');
+    }
 }
 
 // --- Helper: Escape HTML ---
 function escapeHtml(text) {
+    if (!text) return '';
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-    return text.replace(/[&<>"']/g, m => map[m]);
+    return text.toString().replace(/[&<>"']/g, m => map[m]);
 }
 
 // --- Handle Enter key in RAG input ---
