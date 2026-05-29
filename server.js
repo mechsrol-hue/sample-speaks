@@ -1530,6 +1530,14 @@ Ensure you scan for any blurred numbers, strange unicode characters in tables, o
             const jsonMatch = rawContent.match(/```json\s*([\s\S]*?)\s*```/) || rawContent.match(/{[\s\S]*}/);
             const jsonStr = jsonMatch ? jsonMatch[1] || jsonMatch[0] : rawContent;
             parsedData = JSON.parse(jsonStr.trim());
+            
+            // Sanitize to prevent missing keys from causing crashes
+            parsedData.isNumber = parsedData.isNumber || `IS Standard (${req.file.originalname})`;
+            parsedData.title = parsedData.title || 'Uploaded Document';
+            parsedData.clauses = parsedData.clauses || [];
+            parsedData.tables = parsedData.tables || [];
+            parsedData.uncertainItems = parsedData.uncertainItems || [];
+            parsedData.confidenceScore = parsedData.confidenceScore || 0.8;
         } catch(e) {
             console.error("LLM parser failed, using fallback:", e);
             parsedData = {
@@ -1558,7 +1566,7 @@ Ensure you scan for any blurred numbers, strange unicode characters in tables, o
             JSON.stringify(parsedData.tables),
             JSON.stringify(parsedData.uncertainItems),
             parsedData.uncertainItems.length === 0 ? 1 : 0,
-            parsedData.confidenceScore || 0.95
+            parsedData.confidenceScore
         ]);
 
         res.json({
@@ -1613,6 +1621,10 @@ You must return your response as a valid JSON object in a \`\`\`json ... \`\`\` 
             const jsonMatch = rawContent.match(/```json\s*([\s\S]*?)\s*```/) || rawContent.match(/{[\s\S]*}/);
             const jsonStr = jsonMatch ? jsonMatch[1] || jsonMatch[0] : rawContent;
             queryResult = JSON.parse(jsonStr.trim());
+            
+            // Sanitize queryResult
+            queryResult.answer = queryResult.answer || "No answer could be generated from the document.";
+            queryResult.citations = queryResult.citations || [];
         } catch(e) {
             console.error("LLM RAG query failed:", e);
             queryResult = {
@@ -1698,6 +1710,15 @@ Respond strictly in JSON format wrapped in a \`\`\`json ... \`\`\` block with th
             const jsonMatch = rawContent.match(/```json\s*([\s\S]*?)\s*```/) || rawContent.match(/{[\s\S]*}/);
             const jsonStr = jsonMatch ? jsonMatch[1] || jsonMatch[0] : rawContent;
             result = JSON.parse(jsonStr.trim());
+            
+            // Sanitize lookup result
+            result.min_od = result.min_od !== undefined ? result.min_od : null;
+            result.max_od = result.max_od !== undefined ? result.max_od : null;
+            result.ovality = result.ovality !== undefined ? result.ovality : null;
+            result.min_wall = result.min_wall !== undefined ? result.min_wall : null;
+            result.max_wall = result.max_wall !== undefined ? result.max_wall : null;
+            result.socket_length = result.socket_length !== undefined ? result.socket_length : null;
+            result.citation = result.citation || "No citation provided.";
         } catch(e) {
             console.error("LLM Lookup failed, using nulls:", e);
             result = { min_od: null, max_od: null, ovality: null, min_wall: null, max_wall: null, socket_length: null, citation: "Error parsing" };
