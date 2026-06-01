@@ -61,6 +61,57 @@
                 </div>
             <div class="profile-page">
 
+                <!-- Disposal Alerts Banner -->
+                <div id="disposal-alerts-banner" style="display:none; background: #fff8e1; border: 1px solid #f59e0b; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <h4 style="margin: 0 0 5px 0; color: #b45309; font-size: 1.1rem;">⚠️ Disposal Action Required</h4>
+                            <p style="margin: 0; font-size: 0.9rem; color: #92400e;">
+                                You have <strong id="disposal-overdue-count">0</strong> samples overdue and <strong id="disposal-upcoming-count">0</strong> upcoming within 7 days.
+                            </p>
+                        </div>
+                        <button onclick="document.getElementById('disposal-alerts-list').style.display = document.getElementById('disposal-alerts-list').style.display === 'none' ? 'block' : 'none';" style="background:transparent; border:1px solid #d97706; color:#d97706; padding:4px 8px; font-size:0.8rem; border-radius:4px;">View List</button>
+                    </div>
+                    <div id="disposal-alerts-list" style="display:none; margin-top: 15px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid #fcd34d;">
+                                    <th style="padding: 8px 4px; color:#b45309;">Encoded Code</th>
+                                    <th style="padding: 8px 4px; color:#b45309;">IS Number</th>
+                                    <th style="padding: 8px 4px; color:#b45309;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="disposal-alerts-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Account Info Card (Moved to Top) -->
+                <div class="glass-panel profile-card" style="margin-bottom: 20px;">
+                    <div class="profile-card-header">
+                        <span class="profile-card-icon">🪪</span>
+                        <h3>Account Information</h3>
+                    </div>
+                    <div class="profile-info-list" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div class="profile-info-row" style="flex: 1; min-width: 200px;">
+                            <span class="profile-info-label">Username</span>
+                            <span class="profile-info-val" id="profile-info-username">—</span>
+                        </div>
+                        <div class="profile-info-row" style="flex: 1; min-width: 200px;">
+                            <span class="profile-info-label">Role</span>
+                            <span class="profile-info-val" id="profile-info-role">—</span>
+                        </div>
+                        <div class="profile-info-row" style="flex: 1; min-width: 200px;">
+                            <span class="profile-info-label">Access Level</span>
+                            <span class="profile-info-val" id="profile-info-access">—</span>
+                        </div>
+                        <div class="profile-info-row" style="flex: 1; min-width: 200px;">
+                            <span class="profile-info-label">Session Status</span>
+                            <span class="profile-info-val" style="color: var(--success); font-weight: 700;">🟢 Active</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Profile Hero Card -->
                 <div class="profile-hero glass-panel">
                     <div class="profile-avatar-large" id="profile-avatar-large">
@@ -93,32 +144,6 @@
 
                 <!-- Profile Details Grid -->
                 <div class="profile-details-grid">
-
-                    <!-- Account Info Card -->
-                    <div class="glass-panel profile-card">
-                        <div class="profile-card-header">
-                            <span class="profile-card-icon">🪪</span>
-                            <h3>Account Information</h3>
-                        </div>
-                        <div class="profile-info-list">
-                            <div class="profile-info-row">
-                                <span class="profile-info-label">Username</span>
-                                <span class="profile-info-val" id="profile-info-username">—</span>
-                            </div>
-                            <div class="profile-info-row">
-                                <span class="profile-info-label">Role</span>
-                                <span class="profile-info-val" id="profile-info-role">—</span>
-                            </div>
-                            <div class="profile-info-row">
-                                <span class="profile-info-label">Access Level</span>
-                                <span class="profile-info-val" id="profile-info-access">—</span>
-                            </div>
-                            <div class="profile-info-row">
-                                <span class="profile-info-label">Session Status</span>
-                                <span class="profile-info-val" style="color: var(--success); font-weight: 700;">🟢 Active</span>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Sample Summary Card -->
                     <div class="glass-panel profile-card">
@@ -156,31 +181,6 @@
                         </div>
                     </div>
 
-                </div>
-
-                <!-- Disposal Alerts Banner -->
-                <div id="disposal-alerts-banner" style="display:none; background: #fff8e1; border: 1px solid #f59e0b; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <div>
-                            <h4 style="margin: 0 0 5px 0; color: #b45309; font-size: 1.1rem;">⚠️ Disposal Action Required</h4>
-                            <p style="margin: 0; font-size: 0.9rem; color: #92400e;">
-                                You have <strong id="disposal-overdue-count">0</strong> samples overdue and <strong id="disposal-upcoming-count">0</strong> upcoming within 7 days.
-                            </p>
-                        </div>
-                        <button onclick="document.getElementById('disposal-alerts-list').style.display = document.getElementById('disposal-alerts-list').style.display === 'none' ? 'block' : 'none';" style="background:transparent; border:1px solid #d97706; color:#d97706; padding:4px 8px; font-size:0.8rem; border-radius:4px;">View List</button>
-                    </div>
-                    <div id="disposal-alerts-list" style="display:none; margin-top: 15px;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
-                            <thead>
-                                <tr style="border-bottom: 1px solid #fcd34d;">
-                                    <th style="padding: 8px 4px; color:#b45309;">Encoded Code</th>
-                                    <th style="padding: 8px 4px; color:#b45309;">IS Number</th>
-                                    <th style="padding: 8px 4px; color:#b45309;">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="disposal-alerts-tbody"></tbody>
-                        </table>
-                    </div>
                 </div>
 
                 <!-- Pending Samples Table in Profile -->
