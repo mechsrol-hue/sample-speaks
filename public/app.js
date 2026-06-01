@@ -2477,6 +2477,7 @@ async function loadEmployees() {
 async function addEmployee() {
     const fullName = document.getElementById('emp-fullname').value;
     const designation = document.getElementById('emp-designation').value;
+    const maxDailySamples = parseInt(document.getElementById('emp-max-capacity').value) || 40;
     const username = document.getElementById('emp-username').value;
     const password = document.getElementById('emp-password').value;
 
@@ -2486,7 +2487,7 @@ async function addEmployee() {
         const res = await fetch('/api/admin/employees', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fullName, designation, username, password })
+            body: JSON.stringify({ fullName, designation, maxDailySamples, username, password })
         });
         const data = await res.json();
         if (res.ok) {
@@ -2666,21 +2667,31 @@ async function loadRecommendations() {
 }
 
 async function loadUnassignedPool() {
-    const tbody = document.getElementById('unassigned-tbody');
+    const tbody = document.getElementById('unassigned-pool-tbody');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
+    
+    // Update the unassigned count from the kpi badge
+    const countSpan = document.getElementById('unassigned-pool-count');
+    if (countSpan) countSpan.textContent = '...';
+
     try {
         const res = await fetch('/api/unassigned-samples');
         const data = await res.json();
         if (res.ok) {
+            if (countSpan) countSpan.textContent = data.samples.length;
             tbody.innerHTML = '';
             if (data.samples.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-muted);">All samples are assigned.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">All samples are assigned.</td></tr>';
             } else {
                 let tpOptions = '<option value="">-- Direct Assign --</option>';
-                allTPUsers.forEach(u => {
-                    tpOptions += `<option value="${u.username}">${u.username}</option>`;
-                });
+                // fallback if allTPUsers is not available, we can fetch from DOM or global
+                const selectEl = document.getElementById('leave-employee-select');
+                if (selectEl && selectEl.options.length > 0) {
+                    for(let i=0; i<selectEl.options.length; i++) {
+                        tpOptions += `<option value="${selectEl.options[i].text}">${selectEl.options[i].text}</option>`;
+                    }
+                }
                 
                 data.samples.forEach(s => {
                     const tr = document.createElement('tr');
@@ -2688,8 +2699,9 @@ async function loadUnassignedPool() {
                         <td style="color:var(--accent); font-weight:600;">${s.encodedCode}</td>
                         <td>${s.isNumber || '-'}</td>
                         <td><strong>${s.priorityLevel || '-'}</strong></td>
+                        <td>${s.receivedOn || '-'}</td>
                         <td>
-                            <select onchange="directAssignSample(${s.id}, this.value)" style="padding:4px 8px; border-radius:4px;">
+                            <select onchange="directAssignSample(${s.id}, this.value)" style="padding:4px 8px; border-radius:4px; background: rgba(0,0,0,0.2); color:white; border: 1px solid var(--glass-border);">
                                 ${tpOptions}
                             </select>
                         </td>
@@ -2704,10 +2716,10 @@ async function loadUnassignedPool() {
 async function directAssignSample(sampleId, tpName) {
     if (!tpName) return;
     try {
-        const res = await fetch('/api/admin/direct-assign', {
+        const res = await fetch('/api/assign-sample-manual', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sampleId, assignedTo: tpName })
+            body: JSON.stringify({ sampleId, username: tpName })
         });
         if (res.ok) {
             showToast(`Assigned to ${tpName}`, 'success');
@@ -3846,4 +3858,207 @@ function switchISInnerTab(tabName) {
 
     const activeContent = document.getElementById(`is-inner-${tabName}`);
     if (activeContent) activeContent.style.display = 'block';
+}
+
+// ==========================================
+// MASTER TEMPLATES (MAN-HOURS) LOGIC
+// ==========================================
+
+const RAW_MAN_HOURS_DB = {
+    "7.1.1.1": 7.0,   // Dimensions of pipes
+    "7.1.1.2": 7.0,
+    "7.1.2.1": 7.0,
+    "7.2.1": 7.0,
+    "8": 8.0,         // Sealing Ring
+    "10.1": 0.5,      // Visual Appearance
+    "10.1.1": 0.5,
+    "10.2": 1.0,      // Opacity
+    "11.1": 3.0,      // Reversion / Hydrostatic
+    "11.1.1": 3.0,
+    "11.2": 2.0,      // VST / Impact
+    "11.3": 2.0       // Density
+};
+
+let currentTemplates = {};
+
+function toggleTemplatesUI() {
+    const body = document.getElementById('templates-body');
+    const icon = document.getElementById('templates-toggle-icon');
+    if (!body) return;
+    const isHidden = body.style.display === 'none';
+    body.style.display = isHidden ? 'block' : 'none';
+    icon.textContent = isHidden ? '▲ Hide' : '▼ Expand';
+    
+    if (isHidden) {
+        fetchTemplates();
+    }
+}
+
+async function fetchTemplates() {
+    try {
+        const res = await fetch('/api/admin/templates');
+        if (res.ok) {
+            const data = await res.json();
+            currentTemplates = data.templates || {};
+            
+            // Populate IS select dynamically from EXTRACTED_STANDARDS_DB
+            const isSelect = document.getElementById('template-is-select');
+            if (isSelect && typeof EXTRACTED_STANDARDS_DB !== 'undefined') {
+                // Only populate if empty
+                if (isSelect.options.length === 0) {
+                    Object.keys(EXTRACTED_STANDARDS_DB).forEach(standard => {
+                        const opt = document.createElement('option');
+                        opt.value = standard;
+                        opt.textContent = standard;
+                        isSelect.appendChild(opt);
+                    });
+                }
+            }
+            
+            loadTemplateForIS();
+        }
+    } catch(e) { console.error(e); }
+}
+
+function loadTemplateForIS() {
+    const isSelect = document.getElementById('template-is-select');
+    if (!isSelect) return;
+    const isNumber = isSelect.value;
+    
+    let clauses = [];
+    if (typeof EXTRACTED_STANDARDS_DB !== 'undefined' && EXTRACTED_STANDARDS_DB[isNumber]) {
+        clauses = EXTRACTED_STANDARDS_DB[isNumber];
+    } else if (isNumber === 'IS 4985' && typeof IS_4985_SPECS !== 'undefined') {
+        const rows = IS_4985_SPECS.generateTestParameters(75, 3, "A", "No");
+        const seen = new Set();
+        rows.forEach(r => {
+            let c = r.clause.split(' ')[0];
+            if (!seen.has(c)) {
+                seen.add(c);
+                clauses.push({ clause: c, param: r.param, hours: RAW_MAN_HOURS_DB[c] || 1.0 });
+            }
+        });
+    }
+
+    const tbody = document.getElementById('template-params-tbody');
+    tbody.innerHTML = '';
+    
+    const savedTemplate = currentTemplates[isNumber] || {};
+    const activeClauses = savedTemplate.activeClauses || {};
+
+    const tatInput = document.getElementById('template-tat-days');
+    if (tatInput) tatInput.value = savedTemplate.tatDays || 7;
+
+    let totalHrs = 0;
+
+    clauses.forEach(c => {
+        let isChecked = true;
+        let equipment = '';
+        let passiveHrs = 0;
+        let activeHrs = c.hours || RAW_MAN_HOURS_DB[c.clause] || 1.0;
+
+        if (activeClauses.hasOwnProperty(c.clause)) {
+            const savedC = activeClauses[c.clause];
+            if (typeof savedC === 'object') {
+                isChecked = savedC.active;
+                activeHrs = savedC.activeHours;
+                passiveHrs = savedC.passiveHours || 0;
+                equipment = savedC.equipment || '';
+            } else {
+                isChecked = savedC; // legacy boolean
+            }
+        }
+        
+        if (isChecked) totalHrs += activeHrs;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="text-align: center;">
+                <input type="checkbox" class="template-clause-chk" data-clause="${c.clause}" ${isChecked ? 'checked' : ''} onchange="updateTemplateTotal()">
+            </td>
+            <td><strong>${c.clause}</strong> - ${c.param}</td>
+            <td>
+                <input type="text" class="template-equip-input" value="${equipment}" placeholder="e.g. UTM, Oven" style="width:100%; padding:4px; background:rgba(0,0,0,0.2); border:1px solid var(--glass-border); color:white; border-radius:4px;" onchange="saveTemplateForIS()">
+            </td>
+            <td style="text-align: center;">
+                <input type="number" class="template-active-hrs-input" value="${activeHrs}" step="0.5" style="width:60px; padding:4px; background:rgba(0,0,0,0.2); border:1px solid var(--glass-border); color:white; border-radius:4px;" onchange="updateTemplateTotal()">
+            </td>
+            <td style="text-align: center;">
+                <input type="number" class="template-passive-hrs-input" value="${passiveHrs}" step="0.5" style="width:60px; padding:4px; background:rgba(0,0,0,0.2); border:1px solid var(--glass-border); color:white; border-radius:4px;" onchange="saveTemplateForIS()">
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('template-total-hours').textContent = totalHrs.toFixed(1) + ' hrs';
+}
+
+function updateTemplateTotal() {
+    const trs = document.querySelectorAll('#template-params-tbody tr');
+    let totalHrs = 0;
+    trs.forEach(tr => {
+        const chk = tr.querySelector('.template-clause-chk');
+        const activeInput = tr.querySelector('.template-active-hrs-input');
+        if (chk && chk.checked && activeInput) {
+            totalHrs += parseFloat(activeInput.value) || 0;
+        }
+    });
+    document.getElementById('template-total-hours').textContent = totalHrs.toFixed(1) + ' hrs';
+    saveTemplateForIS(); // Auto-save on change
+}
+
+async function saveTemplateForIS() {
+    const isNumber = document.getElementById('template-is-select').value;
+    const tatInput = document.getElementById('template-tat-days');
+    const trs = document.querySelectorAll('#template-params-tbody tr');
+    
+    let activeClauses = {};
+    let totalHours = 0;
+    
+    trs.forEach(tr => {
+        const chk = tr.querySelector('.template-clause-chk');
+        const activeInput = tr.querySelector('.template-active-hrs-input');
+        const passiveInput = tr.querySelector('.template-passive-hrs-input');
+        const equipInput = tr.querySelector('.template-equip-input');
+        
+        if (!chk) return;
+        
+        const clause = chk.dataset.clause;
+        const isActive = chk.checked;
+        const activeHrs = parseFloat(activeInput.value) || 0;
+        const passiveHrs = parseFloat(passiveInput.value) || 0;
+        const equip = equipInput.value || '';
+
+        activeClauses[clause] = {
+            active: isActive,
+            activeHours: activeHrs,
+            passiveHours: passiveHrs,
+            equipment: equip
+        };
+        
+        if (isActive) totalHours += activeHrs;
+    });
+
+    const templateData = { 
+        tatDays: tatInput ? parseFloat(tatInput.value) : 7,
+        activeClauses, 
+        totalHours 
+    };
+
+    try {
+        const res = await fetch('/api/admin/templates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isNumber, templateData })
+        });
+        if (res.ok) {
+            showToast('Template saved successfully!', 'success');
+            currentTemplates[isNumber] = templateData;
+        } else {
+            showToast('Failed to save template', 'error');
+        }
+    } catch(e) {
+        showToast('Error saving template', 'error');
+        console.error(e);
+    }
 }

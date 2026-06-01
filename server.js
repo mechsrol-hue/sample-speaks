@@ -769,7 +769,7 @@ app.post('/api/admin/employees', async (req, res) => {
 
     const { error: empErr } = await supabase
         .from('employee_profiles')
-        .insert([{ userId: newUser?.id, fullName, designation: designation || '' }]);
+        .insert([{ userId: newUser?.id, fullName, designation: designation || '', maxDailySamples: maxDailySamples || 40 }]);
 
     if (empErr) return res.status(500).json({ error: empErr.message });
     res.json({ message: 'Employee profile created successfully.' });
@@ -832,150 +832,206 @@ app.get('/api/unassigned-samples', async (req, res) => {
         res.json({ samples });
     } catch (err) {
         res.status(500).json({ error: err.message });
-   app.post('/api/auto-assign', async (req, res) => {
-    try {
-        // 1. Get unassigned samples
-        const { data: unassignedSamples, error: sampleErr } = await supabase.from('samples').select('*').or('assignedTo.is.null,assignedTo.eq.');
-        if (sampleErr) throw sampleErr;
-        if (!unassignedSamples || unassignedSamples.length === 0) return res.json({ message: 'No unassigned samples found.', recommendations: [], forcedCount: 0 });
+    }
+});
 
-        // 2. Load preferences
-        let priorityRankingMode = 'prioritize', leaveWindowDays = 30;
+// NEW TEMPLATE ENDPOINTS
+app.get('/api/admin/templates', async (req, res) => {
         try {
-            const { data: prefRows } = await supabase.from('system_preferences').select('*');
-            (prefRows || []).forEach(p => {
-                if (p.key === 'priorityRankingMode') priorityRankingMode = p.value || 'prioritize';
-                if (p.key === 'leaveWindowDays') leaveWindowDays = parseInt(p.value) || 30;
+            const { data } = await supabase.from('system_preferences').select('*').like('key', 'template_%');
+            const templates = {};
+            (data || []).forEach(p => {
+                try { templates[p.key.replace('template_', '')] = JSON.parse(p.value); } catch(e){}
             });
-        } catch(e) { /* use defaults */ }
+            res.json({ templates });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
 
-        // 3. Load employees, competencies, leaves
-        const { data: employees } = await supabase.from('employee_profiles').select('*');
-        const { data: competencies } = await supabase.from('employee_competencies').select('*');
-        
-        // Get leaves within window
-        const today = new Date();
-        const windowEnd = new Date(today.getTime() + leaveWindowDays * 24 * 60 * 60 * 1000);
-        const { data: leavesInWindow } = await supabase.from('employee_leaves').select('employeeId, leaveDate').gte('leaveDate', today.toISOString().split('T')[0]).lte('leaveDate', windowEnd.toISOString().split('T')[0]);
-        
-        // Count leaves per employee
-        const leaveCountMap = {};
-        (leavesInWindow || []).forEach(l => {
-            leaveCountMap[l.employeeId] = (leaveCountMap[l.employeeId] || 0) + 1;
-        });
+    app.post('/api/admin/templates', async (req, res) => {
+        const { isNumber, templateData } = req.body;
+        if (!isNumber || !templateData) return res.status(400).json({ error: 'Missing isNumber or templateData' });
+        try {
+            const { error } = await supabase.from('system_preferences').upsert({
+                key: `template_${isNumber}`,
+                value: JSON.stringify(templateData)
+            }, { onConflict: 'key' });
+            if (error) throw error;
+            res.json({ message: 'Template saved successfully.' });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
 
-        // Build competency map: { isNumber: [{ employeeId, proficiencyLevel }] }
-        const compMap = {};
-        (competencies || []).forEach(c => {
-            if (!compMap[c.isNumber]) compMap[c.isNumber] = [];
-            compMap[c.isNumber].push(c);
-        });
+    app.post('/api/assign-sample-manual', async (req, res) => {
+        const { sampleId, username } = req.body;
+        if (!sampleId || !username) return res.status(400).json({ error: 'Missing sampleId or username' });
+        try {
+            const { error } = await supabase.from('samples').update({ assignedTo: username }).eq('id', sampleId);
+            if (error) throw error;
+            
+            // Cleanup any pending recommendations for this sample
+            await supabase.from('assignment_recommendations').delete().eq('sampleId', sampleId);
+            
+            res.json({ message: 'Sample manually assigned successfully.' });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
 
-        // Count current pending samples per TA
-        const { data: allPending } = await supabase.from('samples').select('assignedTo').in('appStatus', ['Pending']);
-        const loadMap = {};
-        (allPending || []).forEach(s => {
-            if (s.assignedTo) loadMap[s.assignedTo] = (loadMap[s.assignedTo] || 0) + 1;
-        });
+    app.post('/api/auto-assign', async (req, res) => {
+        try {
+            // 1. Get unassigned samples
+            const { data: unassignedSamples, error: sampleErr } = await supabase.from('samples').select('*').or('assignedTo.is.null,assignedTo.eq.');
+            if (sampleErr) throw sampleErr;
+            if (!unassignedSamples || unassignedSamples.length === 0) return res.json({ message: 'No unassigned samples found.', recommendations: [], forcedCount: 0 });
 
-        let recommendationsGenerated = 0;
-        let forcedCount = 0;
+            // 2. Load preferences & Master Templates
+            let priorityRankingMode = 'prioritize';
+            const templates = {};
+            try {
+                const { data: prefRows } = await supabase.from('system_preferences').select('*');
+                (prefRows || []).forEach(p => {
+                    if (p.key === 'priorityRankingMode') priorityRankingMode = p.value || 'prioritize';
+                    if (p.key && p.key.startsWith('template_')) {
+                        try { templates[p.key.replace('template_', '')] = JSON.parse(p.value); } catch(e){}
+                    }
+                });
+            } catch(e) { console.error('Pref load error', e); }
 
-        // Clear old pending recommendations
-        await supabase.from('assignment_recommendations').delete().eq('status', 'pending');
+            // 3. Load employees, competencies, leaves
+            const { data: employees } = await supabase.from('employee_profiles').select('*');
+            const { data: competencies } = await supabase.from('employee_competencies').select('*');
+            
+            // Get leaves for TODAY
+            const todayStr = new Date().toISOString().split('T')[0];
+            const { data: leavesToday } = await supabase.from('employee_leaves').select('employeeId').eq('leaveDate', todayStr);
+            const onLeaveToday = new Set((leavesToday || []).map(l => l.employeeId));
 
-        for (const sample of unassignedSamples) {
-            const matchingComps = compMap[sample.isNumber] || [];
-            let bestEmployee = null;
-            let bestScore = -Infinity;
-            let isForced = false;
-            let bestReason = '';
+            // Build competency map
+            const compMap = {};
+            (competencies || []).forEach(c => {
+                if (!compMap[c.isNumber]) compMap[c.isNumber] = [];
+                compMap[c.isNumber].push(c);
+            });
 
-            // Calculate sample age (FIFO boost)
-            let sampleAge = 0;
-            if (sample.receivedOn) {
-                const parts = sample.receivedOn.split('-');
-                if (parts.length === 3) {
-                    const recDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-                    sampleAge = Math.floor((today - recDate) / (1000 * 60 * 60 * 24));
+            // 4. Calculate Current Load Hours per TA
+            const { data: allPending } = await supabase.from('samples').select('assignedTo, isNumber').in('appStatus', ['Pending']);
+            const loadHoursMap = {};
+            (allPending || []).forEach(s => {
+                if (s.assignedTo) {
+                    let h = 20; // fallback avg hours
+                    if (templates[s.isNumber] && templates[s.isNumber].totalHours) {
+                        h = templates[s.isNumber].totalHours;
+                    }
+                    loadHoursMap[s.assignedTo] = (loadHoursMap[s.assignedTo] || 0) + h;
                 }
-            }
+            });
 
-            // Priority boost based on mode
-            const isPriority = (sample.priorityLevel || '').toLowerCase() === 'priority' || (sample.encodedCode || '').toLowerCase().endsWith('p');
-            const priorityBoost = (priorityRankingMode === 'prioritize' && isPriority) ? 50 : 0;
+            let recommendationsGenerated = 0;
+            let forcedCount = 0;
 
-            // Try competency-matched employees first
-            for (const comp of matchingComps) {
-                const emp = (employees || []).find(e => e.id === comp.employeeId);
-                if (!emp) continue;
+            await supabase.from('assignment_recommendations').delete().eq('status', 'pending');
 
-                // Proficiency multiplier
-                let profMult = 1.0;
-                if (comp.proficiencyLevel === 'Expert') profMult = 1.5;
-                else if (comp.proficiencyLevel === 'Trainee') profMult = 0.6;
+            const today = new Date();
 
-                // Availability factor
-                const leaveDays = leaveCountMap[emp.id] || 0;
-                const workingDays = leaveWindowDays - leaveDays;
-                const availFactor = Math.max(0.1, workingDays / leaveWindowDays);
-
-                // Load factor (lower load = higher score)
-                const currentLoad = loadMap[emp.fullName] || 0;
-                const loadFactor = Math.max(0.1, 1 / (1 + currentLoad * 0.2));
-
-                // FIFO boost (1 point per day old, max 30)
-                const fifoBoost = Math.min(sampleAge, 30);
-
-                const score = (10 * profMult * availFactor * loadFactor) + priorityBoost + fifoBoost;
-
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestEmployee = emp;
-                    bestReason = `IS ${sample.isNumber} competency (${comp.proficiencyLevel}), Load: ${currentLoad}, Avail: ${workingDays}/${leaveWindowDays} days`;
+            for (const sample of unassignedSamples) {
+                let requiredHours = 20; // default
+                if (templates[sample.isNumber] && templates[sample.isNumber].totalHours) {
+                    requiredHours = templates[sample.isNumber].totalHours;
                 }
-            }
 
-            // If no competency match, find best available as forced recommendation
-            if (!bestEmployee && employees && employees.length > 0) {
-                isForced = true;
-                for (const emp of employees) {
-                    const leaveDays = leaveCountMap[emp.id] || 0;
-                    const workingDays = leaveWindowDays - leaveDays;
-                    const availFactor = Math.max(0.1, workingDays / leaveWindowDays);
-                    const currentLoad = loadMap[emp.fullName] || 0;
-                    const loadFactor = Math.max(0.1, 1 / (1 + currentLoad * 0.2));
-                    const score = (5 * availFactor * loadFactor) + priorityBoost;
+                const matchingComps = compMap[sample.isNumber] || [];
+                let bestEmployee = null;
+                let bestScore = -Infinity;
+                let bestReason = '';
+
+                // Calculate FIFO age
+                let sampleAge = 0;
+                if (sample.receivedOn) {
+                    const parts = sample.receivedOn.split('-');
+                    if (parts.length === 3) {
+                        const recDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                        sampleAge = Math.floor((today - recDate) / (1000 * 60 * 60 * 24));
+                    }
+                }
+
+                const isPriority = (sample.priorityLevel || '').toLowerCase() === 'priority' || (sample.encodedCode || '').toLowerCase().endsWith('p');
+                const priorityBoost = (priorityRankingMode === 'prioritize' && isPriority) ? 50 : 0;
+
+                // Evaluate competent employees
+                for (const comp of matchingComps) {
+                    const emp = (employees || []).find(e => e.id === comp.employeeId);
+                    if (!emp) continue;
+
+                    // We no longer strictly skip people on leave or over capacity.
+                    // Instead, we heavily penalize their score and tag the recommendation.
+                    let isOnLeave = onLeaveToday.has(emp.id);
+                    
+                    const maxQueueHours = emp.maxDailySamples || 40; // using maxDailySamples as maxQueueHours
+                    const currentLoadHours = loadHoursMap[emp.fullName] || 0;
+                    const availableCapacity = maxQueueHours - currentLoadHours;
+
+                    let isOverCapacity = availableCapacity < requiredHours;
+
+                    // Trainees cannot do Top Priority
+                    if (comp.proficiencyLevel === 'Trainee' && isPriority) continue;
+
+                    let profMult = 1.0;
+                    if (comp.proficiencyLevel === 'Expert') profMult = 1.5;
+                    else if (comp.proficiencyLevel === 'Trainee') profMult = 0.6;
+
+                    // Load score factor (higher available capacity = better)
+                    const capacityScore = availableCapacity * 2; 
+
+                    // FIFO boost (1 point per day old, max 30)
+                    const fifoBoost = Math.min(sampleAge, 30);
+
+                    // Penalties
+                    const leavePenalty = isOnLeave ? 1000 : 0; // Extremely low priority if on leave
+                    const capacityPenalty = isOverCapacity ? 500 : 0; // Low priority if it overloads their queue
+
+                    let score = (10 * profMult) + capacityScore + priorityBoost + fifoBoost - leavePenalty - capacityPenalty;
 
                     if (score > bestScore) {
                         bestScore = score;
                         bestEmployee = emp;
-                        bestReason = `⚠️ No IS competency match. Best available by load (${currentLoad}) and availability (${workingDays}/${leaveWindowDays} days)`;
+                        
+                        let tags = [];
+                        if (isOnLeave) tags.push('⚠️ ON LEAVE TODAY');
+                        if (isOverCapacity) tags.push('⚠️ EXCEEDS CAPACITY');
+                        let tagStr = tags.length > 0 ? ` [${tags.join(', ')}]` : '';
+                        
+                        bestReason = `IS ${sample.isNumber} (${comp.proficiencyLevel})${tagStr}, Avail: ${availableCapacity.toFixed(1)} hrs left`;
                     }
+                }
+
+                // We DO NOT FORCE an assignment if nobody qualifies. We leave it Unassigned.
+                if (bestEmployee) {
+                    // Update the tracked load so we don't over-assign in the same batch
+                    loadHoursMap[bestEmployee.fullName] = (loadHoursMap[bestEmployee.fullName] || 0) + requiredHours;
+
+                    const { error } = await supabase.from('assignment_recommendations').insert({
+                        sampleId: sample.id,
+                        recommendedEmployeeId: bestEmployee.id,
+                        recommendedEmployeeName: bestEmployee.fullName,
+                        reason: bestReason + ` | Sample Needs: ${requiredHours} hrs`,
+                        score: Math.round(bestScore * 100) / 100,
+                        status: 'pending'
+                    });
+                    if (error) console.error('Auto-assign insert error:', error);
+                    recommendationsGenerated++;
+                } else {
+                    console.log(`Could not assign sample ${sample.encodedCode} - everyone is on leave or at capacity.`);
                 }
             }
 
-            if (bestEmployee) {
-                const { error } = await supabase.from('assignment_recommendations').insert({
-                    sampleId: sample.id,
-                    recommendedEmployeeId: bestEmployee.id,
-                    recommendedEmployeeName: bestEmployee.fullName,
-                    reason: bestReason,
-                    score: Math.round(bestScore * 100) / 100,
-                    status: isForced ? 'forced' : 'pending'
-                });
-                if (error) console.error('Auto-assign insert error:', error);
-                recommendationsGenerated++;
-                if (isForced) forcedCount++;
-            }
+            res.json({ message: `Generated ${recommendationsGenerated} capacity-based recommendations. Unassigned samples remain parked.`, forcedCount: 0 });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
         }
-
-        res.json({ message: `Generated ${recommendationsGenerated} recommendations.`, forcedCount });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});   }
-});
+    });
 
 app.get('/api/admin/recommendations', async (req, res) => {
     try {

@@ -1,0 +1,620 @@
+{
+  "IS 14756": {
+    "IS_NUMBER": "IS 14756",
+    "PARAMETERS": {
+      "Material": {
+        "parameter_name": "Material properties",
+        "estimated_man_hours": 3,
+        "charge_if_any": null
+      },
+      "Shapes, dimensions, workmanship and finish": {
+        "parameter_name": "Shapes, dimensions, workmanship and finish",
+        "estimated_man_hours": 4,
+        "charge_if_any": null
+      },
+      "Staining test": {
+        "parameter_name": "Staining test",
+        "estimated_man_hours": 3,
+        "charge_if_any": null
+      }
+    }
+  },
+  "IS 2185": {
+    "IS_NUMBER": "IS 2185",
+    "PARAMETERS": {
+      "Block density": {
+        "parameter_name": "Block density",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "Compressive strength": {
+        "parameter_name": "Compressive strength",
+        "estimated_man_hours": 6,
+        "charge_if_any": null
+      },
+      "Water absorption": {
+        "parameter_name": "Water absorption",
+        "estimated_man_hours": 3.5,
+        "charge_if_any": null
+      },
+      "Drying shrinkage": {
+        "parameter_name": "Drying shrinkage",
+        "estimated_man_hours": 6,
+        "charge_if_any": null
+      },
+      "Dimensions (24 blocks)": {
+        "parameter_name": "Dimensions",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "Moisture Movement": {
+        "parameter_name": "Moisture Movement",
+        "estimated_man_hours": null,
+        "charge_if_any": null
+      }
+    }
+  },
+  "IS 269": {
+    "IS_NUMBER": "IS 269",
+    "PARAMETERS": {
+      "Setting time (Le Chatelier Method)": {
+        "parameter_name": "Setting time (Le Chatelier Method)",
+        "estimated_man_hours": 1,
+        "charge_if_any": "₹ 300.00"
+      },
+      "Setting time (Autoclave test method)": {
+        "parameter_name": "Setting time (Autoclave test method)",
+        "estimated_man_hours": 2,
+        "charge_if_any": "₹ 600.00"
+      },
+      "Compressive Strength": {
+        "parameter_name": "Compressive Strength",
+        "estimated_man_hours": 4,
+        "charge_if_any": "₹ 1,200.00"
+      },
+      "Transverse Strength (Optional)": {
+        "parameter_name": "Transverse Strength",
+        "estimated_man_hours": 3.5,
+        "charge_if_any": "₹ 1,050.00"
+      }
+    }
+  },
+  "IS 4246": {
+    "raw": "```json\n{\n  \"IS_NUMBER\": \"IS 4246\",\n  \"PARAMETERS\": {\n    \"Design for maintenance\": {\n      \"parameter_name\": \"Design for Maintenance\",\n      \"estimated_man_hours\": 6,\n      \"charge_if_any\": null\n    },\n    \"Rigidity & Stability\": {\n      \"parameter_name\": \"Rigidity and Stability Test\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Finish (Workmanship)\": {\n      \"parameter_name\": \"Workmanship and Finish\",\n      \"estimated_man_hours\": 5.5,\n      \"charge_if_any\": null\n    },\n    \"Finish (External)\": {\n      \"parameter_name\": \"External Finish Test\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Gas taps\": {\n      \"parameter_name\": \"Gas Taps Functionality Check\",\n      \"estimated_man_hours\": 2,\n      \"charge_if_any\": null\n    },\n    \"Injector jets\": {\n      \"parameter_name\": \"Injector Jets Test\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Burners\": {\n      \"parameter_name\": \"Burner Functionality Check\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Pan supports\": {\n      \"parameter_name\": \"Pan Supports Test\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Gas soundness\": {\n      \"parameter_name\": \"Gas Soundness Test\",\n      \"estimated_man_hours\": 1,\n      \"charge_if_any\": null\n    },\n    \"Gas inlet connections\": {\n      \"parameter_name\": \"Gas Inlet Connections Check\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Strength & Rigidity\": {\n      \"parameter_name\": \"Structural Strength and Rigidity Test\",\n      \"estimated_man_hours\": 1.5,\n      \"charge_if_any\": null\n    },\n    \"Gas consumption\": {\n      \"parameter_name\": \"Gas Consumption (Single Burner)\",\n      \"estimated_man_hours\": 1.5,\n      \"charge_if_any\": null\n    },\n    \"Gas consumption\": {\n      \"parameter_name\": \"Gas Consumption (Double Burners)\",\n      \"estimated_man_hours\": 2,\n      \"charge_if_any\": null\n    },\n    \"Gas consumption\": {\n      \"parameter_name\": \"Gas Consumption (Three Burners)\",\n      \"estimated_man_hours\": 2.5,\n      \"charge_if_any\": null\n    },\n    \"Gas consumption\": {\n      \"parameter_name\": \"Gas Consumption (Four Burners)\",\n      \"estimated_man_hours\": 3,\n      \"charge_if_any\": null\n    },\n    \"Gas consumption\": {\n      \"parameter_name\": \"Gas Consumption (Five Burners)\",\n      \"estimated_man_hours\": 3.5,\n      \"charge_if_any\": null\n    },\n    \"Ignition & Flame travel\": {\n      \"parameter_name\": \"Ignition and Flame Travel Test\",\n      \"estimated_man_hours\": 1,\n      \"charge_if_any\": null\n    },\n    \"Flame failure device\": {\n      \"parameter_name\": \"Flame Failure Device Functionality Check\",\n      \"estimated_man_hours\": 1,\n      \"charge_if_any\": null\n    },\n    \"Flame stability\": {\n      \"parameter_name\": \"Flame Stability Test\",\n      \"estimated_man_hours\": 1,\n      \"charge_if_any\": null\n    },\n    \"Noise control\": {\n      \"parameter_name\": \"Noise Control Test\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Flash back\": {\n      \"parameter_name\": \"Flash Back Test\",\n      \"estimated_man_hours\": 1,\n      \"charge_if_any\": null\n    },\n    \"Formation of soot\": {\n      \"parameter_name\": \""
+  },
+  "IS 14735": {
+    "IS_NUMBER": "IS 14735",
+    "PARAMETERS": {
+      "COLOUR OF FITTINGS": {
+        "parameter_name": "Colour of Fittings",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "DIMENSIONS": {
+        "parameter_name": "Dimensions Check",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "SEALING RINGS": {
+        "parameter_name": "Sealing Rings Inspection",
+        "estimated_man_hours": 1,
+        "charge_if_any": null
+      },
+      "WORKMANSHIP": {
+        "parameter_name": "Workmanship Assessment",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "SOCKET AND SPIGOT CONFIGURATION": {
+        "parameter_name": "Socket and Spigot Configuration Check",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "ACCESS OPENING": {
+        "parameter_name": "Access Opening Inspection",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "VENT COWL": {
+        "parameter_name": "Vent Cowl Inspection",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "PIPE CLIPS": {
+        "parameter_name": "Pipe Clips Inspection",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "VISUAL APPEARANCE": {
+        "parameter_name": "Visual Appearance Check",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "STRESS RELIEF TEST": {
+        "parameter_name": "Stress Relief Test",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "VICAT SOFTENING TEMPERATURE": {
+        "parameter_name": "Vicat Softening Temperature Measurement",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "IMPACT TEST (DROP TEST)": {
+        "parameter_name": "Impact Test (Drop Test)",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "WATER TIGHTNESS OF JOINT": {
+        "parameter_name": "Water Tightness of Joint Test",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "MARKING": {
+        "parameter_name": "Marking Verification",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      }
+    }
+  },
+  "IS 1660": {
+    "IS_NUMBER": "IS 1660",
+    "PARAMETERS": {
+      "Marking": {
+        "parameter_name": "Marking check",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "Dimensions (Clause 5.1)": {
+        "parameter_name": "Dimensional measurement",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "Requirement of handle tests (Clause 6)": {
+        "parameter_name": "Handle performance test",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "Workmanship (Clause 7)": {
+        "parameter_name": "General workmanship assessment",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "Visual defects on non-stick coated surface": {
+        "parameter_name": "Visual defect inspection",
+        "estimated_man_hours": 1,
+        "charge_if_any": null
+      },
+      "Sample preparation for taking dimensions of thickness": {
+        "parameter_name": "Thickness measurement sample preparation",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      }
+    }
+  },
+  "IS 1038": {
+    "IS_NUMBER": "IS 1038",
+    "PARAMETERS": {
+      "Standard sizes, tolerances and designation": {
+        "parameter_name": "Standard dimensions and tolerances check",
+        "estimated_man_hours": 5,
+        "charge_if_any": null
+      },
+      "Position of holes, fixing screws and lugs": {
+        "parameter_name": "Positioning of fasteners (holes, screws, lugs)",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "Finish (visual inspection)": {
+        "parameter_name": "Surface finish visual inspection",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "Thickness of Zinc coating": {
+        "parameter_name": "Dimensional thickness of zinc coating",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "Fabrications (Frames, Shutters, etc.)": {
+        "parameter_name": "Structural and dimensional checks of fabrications",
+        "estimated_man_hours": 5,
+        "charge_if_any": null
+      }
+    }
+  },
+  "IS 3196": {
+    "raw": "```json\n{\n  \"IS_NUMBER\": \"IS 3196\",\n  \"PARAMETERS\": {\n    \"Radiographic examination (Clause 13)\": {\n      \"parameter_name\": \"Radiographic examination\",\n      \"estimated_man_hours\": 0.0,\n      \"charge_if_any\": \"0.00\"\n    },\n    \"Water capacity (Clause 14)\": {\n      \"parameter_name\": \"Water capacity test\",\n      \"estimated_man_hours\": 1.0,\n      \"charge_if_any\": \"300.00\"\n    },\n    \"Hydrostatic test (Clause 15)\": {\n      \"parameter_name\": \"Hydrostatic pressure test\",\n      \"estimated_man_hours\": 1.0,\n      \"charge_if_any\": \"300.00\"\n    },\n    \"Pneumatic test (Clause 16)\": {\n      \"parameter_name\": \"Pneumatic leakage test\",\n      \"estimated_man_hours\": 1.0,\n      \"charge_if_any\": \"300.00\"\n    },\n    \"Fatigue test (Clause 17.1)\": {\n      \"parameter_name\": \"Fatigue endurance test\",\n      \"estimated_man_hours\": 8.0,\n      \"charge_if_any\": \"2400.00\"\n    },\n    \"Bursting test (Clause 17.2)\": {\n      \"parameter_name\": \"Burst pressure test\",\n      \"estimated_man_hours\": 2.0,\n      \"charge_if_any\": \"600.00\"\n    },\n    \"Tensile strength - Parent metal (L pc) (Clause 18.1.2)\": {\n      \"parameter_name\": \"Parent metal tensile test (Longitudinal)\",\n      \"estimated_man_hours\": 4.0,\n      \"charge_if_any\": \"1200.00\"\n    },\n    \"Tensile strength - Parent metal (C pc) (Clause 15)\": {\n      \"parameter_name\": \"Parent metal tensile test (Circumferential)\",\n      \"estimated_man_hours\": 4.0,\n      \"charge_if_any\": \"1200.00\"\n    },\n    \"Tensile strength - Parent metal (B pc) (Clause 16)\": {\n      \"parameter_name\": \"Parent metal tensile test (Bias)\",\n      \"estimated_man_hours\": 4.0,\n      \"charge_if_any\": \"1200.00\"\n    },\n    \"Tensile strength - Weld joint (L pc)\": {\n      \"parameter_name\": \"Weld joint tensile test (Longitudinal)\",\n      \"estimated_man_hours\": 4.0,\n      \"charge_if_any\": \"1200.00\"\n    },\n    \"Bend test - Parent metal (L pc) root+face\": {\n      \"parameter_name\": \"Parent metal bend test (Longitudinal)\",\n      \"estimated_man_hours\": 2.0,\n      \"charge_if_any\": \"600.00\"\n    },\n    \""
+  },
+  "IS 4985": {
+    "IS_NUMBER": "IS 4985",
+    "PARAMETERS": {
+      "Dimensions of pipes": {
+        "parameter_name": "Dimensions of pipes",
+        "estimated_man_hours": 7,
+        "charge_if_any": null
+      },
+      "Sealing Ring": {
+        "parameter_name": "Sealing Ring",
+        "estimated_man_hours": 8,
+        "charge_if_any": null
+      },
+      "Visual Appearance": {
+        "parameter_name": "Visual Appearance",
+        "estimated_man_hours": 1,
+        "charge_if_any": null
+      },
+      "Opacity": {
+        "parameter_name": "Opacity",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "Vicat softening test": {
+        "parameter_name": "VST (Vicat softening test)",
+        "estimated_man_hours": 3,
+        "charge_if_any": null
+      },
+      "Density": {
+        "parameter_name": "Density",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "Resistance to external blows at 0 deg.C": {
+        "parameter_name": "Resistance to external blows at 0 deg.C",
+        "estimated_man_hours": 3.5,
+        "charge_if_any": null
+      }
+    }
+  },
+  "IS 4413": {
+    "IS_NUMBER": "IS 4413",
+    "PARAMETERS": {
+      "Physical properties - Tensile Test": {
+        "parameter_name": "Tensile Test",
+        "estimated_man_hours": 1.5,
+        "charge_if_any": null
+      },
+      "Physical properties - Wrapping test": {
+        "parameter_name": "Wrapping test",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "Physical properties - Cold Heading Test (optional)": {
+        "parameter_name": "Cold Heading Test",
+        "estimated_man_hours": 1,
+        "charge_if_any": null
+      },
+      "Freedom from Defect": {
+        "parameter_name": "Freedom from Defect",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "Diameters and tolerances": {
+        "parameter_name": "Diameters and tolerances",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      },
+      "Packing & Marking": {
+        "parameter_name": "Packing & Marking",
+        "estimated_man_hours": 0.5,
+        "charge_if_any": null
+      }
+    }
+  },
+  "IS 4283": {
+    "raw": "```json\n{\n  \"IS_NUMBER\": \"IS 4283\",\n  \"PARAMETERS\": {\n    \"Design & General constructions\": {\n      \"parameter_name\": \"General Design and Construction Review\",\n      \"estimated_man_hours\": 4,\n      \"charge_if_any\": null\n    },\n    \"Verification of marking\": {\n      \"parameter_name\": \"Marking Verification\",\n      \"estimated_man_hours\": 7,\n      \"charge_if_any\": null\n    },\n    \"Hot air output\": {\n      \"parameter_name\": \"Hot Air Output Performance\",\n      \"estimated_man_hours\": 2.5,\n      \"charge_if_any\": null\n    },\n    \"Temperature rise\": {\n      \"parameter_name\": \"Temperature Rise Measurement\",\n      \"estimated_man_hours\": 2.5,\n      \"charge_if_any\": null\n    },\n    \"Starting of fan motor\": {\n      \"parameter_name\": \"Fan Motor Starting Test\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Moisture resistance\": {\n      \"parameter_name\": \"Moisture Resistance Test\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Mechanical strength & stability\": {\n      \"parameter_name\": \"Mechanical Strength and Stability\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Cord grip (l)\": {\n      \"parameter_name\": \"Cord Grip Test (Initial)\",\n      \"estimated_man_hours\": 1,\n      \"charge_if_any\": null\n    },\n    \"Performance of thermal cut-outs (200 cycles)\": {\n      \"parameter_name\": \"Thermal Cut-out Performance\",\n      \"estimated_man_hours\": 3,\n      \"charge_if_any\": null\n    },\n    \"Supply connections (o)\": {\n      \"parameter_name\": \"Supply Connections Check\",\n      \"estimated_man_hours\": 2,\n      \"charge_if_any\": null\n    },\n    \"Cord Grip (p)\": {\n      \"parameter_name\": \"Cord Grip Test (Secondary)\",\n      \"estimated_man_hours\": 1,\n      \"charge_if_any\": null\n    },\n    \"Terminals (q)\": {\n      \"parameter_name\": \"Terminal Inspection\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Screws (r)\": {\n      \"parameter_name\": \"Screw Integrity Check\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Finish (s)\": {\n      \"parameter_name\": \"Product Finish Inspection\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Silent operation (t)\": {\n      \"parameter_name\": \"Acoustic/Silent Operation Test\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any\": null\n    },\n    \"Clause 8.4.13\": {\n      \"parameter_name\": \"General Physical Check (Report Prep)\",\n      \"estimated_man_hours\": 1,\n      \"charge_if_any\": null\n    },\n    \"Clause 8.4.14\": {\n      \"parameter_name\": \"General Physical Check (Report Prep)\",\n      \"estimated_man_hours\": 1,\n      \"charge_if_any\": null\n    },\n    \"5.9\": {\n      \"parameter_name\": \"Physical Test Parameter 5.9\",\n      \"estimated_man_hours\": 0.5,\n      \"charge_if_any"
+  },
+  "IS 303": {
+    "IS_NUMBER": "IS 303",
+    "PARAMETERS": {
+      "Dimensions & Tolerances": {
+        "parameter_name": "Dimensions and Tolerances",
+        "estimated_man_hours": [
+          1,
+          4,
+          0.5
+        ],
+        "charge_if_any": null
+      },
+      "Workmanship & Finish": {
+        "parameter_name": "Workmanship & Finish",
+        "estimated_man_hours": [
+          0.5,
+          2,
+          0.5
+        ],
+        "charge_if_any": null
+      },
+      "Water Resistance Test (MR Grade)": {
+        "parameter_name": "Water Resistance Test (MR Grade)",
+        "estimated_man_hours": [
+          3,
+          3
+        ],
+        "charge_if_any": null
+      },
+      "Water Resistance Test (BWR Grade)": {
+        "parameter_name": "Water Resistance Test (BWR Grade)",
+        "estimated_man_hours": [
+          3,
+          2
+        ],
+        "charge_if_any": null
+      },
+      "Water Resistance Test (BWP Grade)": {
+        "parameter_name": "Water Resistance Test (BWP Grade)",
+        "estimated_man_hours": [
+          2
+        ],
+        "charge_if_any": null
+      },
+      "Moisture Content": {
+        "parameter_name": "Moisture Content",
+        "estimated_man_hours": [
+          2,
+          1
+        ],
+        "charge_if_any": null
+      },
+      "Static Bending Strength": {
+        "parameter_name": "Static Bending Strength",
+        "estimated_man_hours": [
+          6
+        ],
+        "charge_if_any": null
+      },
+      "Glue Shear strength in dry state": {
+        "parameter_name": "Glue Shear strength in dry state",
+        "estimated_man_hours": 1.5,
+        "charge_if_any": null
+      },
+      "Marking": {
+        "parameter_name": "Marking",
+        "estimated_man_hours": [
+          0.5,
+          6,
+          0.25
+        ],
+        "charge_if_any": null
+      },
+      "Manufacture": {
+        "parameter_name": "Manufacture (General Process)",
+        "estimated_man_hours": 5.5,
+        "charge_if_any": null
+      }
+    }
+  },
+  "IS 12330": {
+    "IS_NUMBER": "IS 12330",
+    "PARAMETERS": {
+      "5.1 Fineness": {
+        "parameter_name": "Fineness",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "5.2 Soundness (Le Chatelier method)": {
+        "parameter_name": "Soundness (Le Chatelier)",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "5.2 Soundness (Autoclave test method)": {
+        "parameter_name": "Soundness (Autoclave)",
+        "estimated_man_hours": 4,
+        "charge_if_any": null
+      },
+      "5.3 Setting Time": {
+        "parameter_name": "Setting Time",
+        "estimated_man_hours": 1,
+        "charge_if_any": null
+      },
+      "5.3 False set": {
+        "parameter_name": "False Set",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "5.4 Sulphate Expansion": {
+        "parameter_name": "Sulphate Expansion",
+        "estimated_man_hours": 4,
+        "charge_if_any": null
+      },
+      "5.5 Compressive strength": {
+        "parameter_name": "Compressive Strength",
+        "estimated_man_hours": 9,
+        "charge_if_any": null
+      },
+      "5.6 Transverse strength of plastic mortar (optional)": {
+        "parameter_name": "Transverse Strength (Optional)",
+        "estimated_man_hours": 5,
+        "charge_if_any": null
+      }
+    }
+  },
+  "IS 2556": {
+    "IS_NUMBER": "IS 2556",
+    "PARAMETERS": {
+      "Part-1:1974 - Vitreous Sanitary Appliances": {
+        "Blemishes and defects": {
+          "parameter_name": "Blemishes and defects",
+          "estimated_man_hours": 1.5,
+          "charge_if_any": null
+        },
+        "Thickness and warpage": {
+          "parameter_name": "Thickness and warpage",
+          "estimated_man_hours": 1,
+          "charge_if_any": null
+        },
+        "Crazing test": {
+          "parameter_name": "Crazing test",
+          "estimated_man_hours": 3,
+          "charge_if_any": null
+        },
+        "Water absorption test": {
+          "parameter_name": "Water absorption test",
+          "estimated_man_hours": 3,
+          "charge_if_any": null
+        },
+        "Modulus of rupture test": {
+          "parameter_name": "Modulus of rupture test",
+          "estimated_man_hours": 2,
+          "charge_if_any": null
+        },
+        "Resistance to staining and burning": {
+          "parameter_name": "Resistance to staining and burning",
+          "estimated_man_hours": 1,
+          "charge_if_any": null
+        }
+      },
+      "Part-2:1981 - Wash Down Water Closets": {
+        "Construction and dimensions": {
+          "parameter_name": "Construction and dimensions",
+          "estimated_man_hours": 3,
+          "charge_if_any": null
+        },
+        "Flushing test": {
+          "parameter_name": "Flushing test",
+          "estimated_man_hours": 3.5,
+          "charge_if_any": null
+        }
+      },
+      "Part-3:1994 - Squatting Pans": {
+        "Construction and dimensions": {
+          "parameter_name": "Construction and dimensions",
+          "estimated_man_hours": 3,
+          "charge_if_any": null
+        },
+        "Finish": {
+          "parameter_name": "Finish",
+          "estimated_man_hours": 0.5,
+          "charge_if_any": null
+        },
+        "Flushing test": {
+          "parameter_name": "Flushing test",
+          "estimated_man_hours": 6,
+          "charge_if_any": null
+        }
+      },
+      "Part-3:1981 - Squatting Pans (Third Revision)": {
+        "Construction and dimensions": {
+          "parameter_name": "Construction and dimensions",
+          "estimated_man_hours": 3,
+          "charge_if_any": null
+        },
+        "Flushing test": {
+          "parameter_name": "Flushing test",
+          "estimated_man_hours": 3.5,
+          "charge_if_any": null
+        }
+      },
+      "Part-4:1972 - Wash Basins": {
+        "Construction and dimensions": {
+          "parameter_name": "Construction and dimensions",
+          "estimated_man_hours": 3,
+          "charge_if_any": null
+        }
+      }
+    }
+  },
+  "IS 455": {
+    "IS_NUMBER": "IS 455",
+    "PARAMETERS": {
+      "6.1 Fineness": {
+        "parameter_name": "Fineness",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "6.2 Soundness - By Le Chatelier Method": {
+        "parameter_name": "Soundness (By Le Chatelier Method)",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "6.2 Soundness - By Autoclave test method": {
+        "parameter_name": "Soundness (By Autoclave test method)",
+        "estimated_man_hours": 4,
+        "charge_if_any": null
+      },
+      "6.3 Setting time": {
+        "parameter_name": "Setting time",
+        "estimated_man_hours": 2,
+        "charge_if_any": null
+      },
+      "6.4 Compressive strength": {
+        "parameter_name": "Compressive strength",
+        "estimated_man_hours": 9,
+        "charge_if_any": null
+      },
+      "6.5 Transverse strength": {
+        "parameter_name": "Transverse strength (of plastic mortar)",
+        "estimated_man_hours": 5,
+        "charge_if_any": null
+      }
+    }
+  },
+  "IS 1489": {
+    "IS_NUMBER": "IS 1489",
+    "PARAMETERS": {
+      "Tile/Floor Tile Tests (IS 1489:76)": {
+        "Flatness of the tile surface": {
+          "parameter_name": "Flatness of the tile surface",
+          "estimated_man_hours": 1,
+          "charge_if_any": null
+        },
+        "Perpendicularity": {
+          "parameter_name": "Perpendicularity",
+          "estimated_man_hours": 1,
+          "charge_if_any": null
+        },
+        "Straightness": {
+          "parameter_name": "Straightness",
+          "estimated_man_hours": 1,
+          "charge_if_any": null
+        },
+        "Water absorption": {
+          "parameter_name": "Water absorption",
+          "estimated_man_hours": 2,
+          "charge_if_any": null
+        },
+        "Wet transverse strength": {
+          "parameter_name": "Wet transverse strength",
+          "estimated_man_hours": 4,
+          "charge_if_any": null
+        },
+        "Resistance to wear": {
+          "parameter_name": "Resistance to wear",
+          "estimated_man_hours": 4.5,
+          "charge_if_any": null
+        }
+      },
+      "Cement/Pozzolana Tests (IS 1489(Part1): 1991)": {
+        "Fineness (by air permeability method)": {
+          "parameter_name": "Fineness",
+          "estimated_man_hours": 2,
+          "charge_if_any": null
+        },
+        "Soundness by Le Chatelier method": {
+          "parameter_name": "Soundness (Le Chatelier)",
+          "estimated_man_hours": 2,
+          "charge_if_any": null
+        },
+        "Soundness by autoclave method": {
+          "parameter_name": "Soundness (Autoclave)",
+          "estimated_man_hours": 4,
+          "charge_if_any": null
+        },
+        "Setting time": {
+          "parameter_name": "Setting time",
+          "estimated_man_hours": 2,
+          "charge_if_any": null
+        },
+        "Compressive strength": {
+          "parameter_name": "Compressive strength",
+          "estimated_man_hours": 9,
+          "charge_if_any": null
+        },
+        "Drying Shrinkage": {
+          "parameter_name": "Drying Shrinkage",
+          "estimated_man_hours": 3,
+          "charge_if_any": null
+        }
+      }
+    }
+  }
+}
