@@ -41,7 +41,6 @@
         <div id="admin-tabs" class="tabs-container" style="display: none;">
             <button class="tab-btn active" onclick="switchTab('tab-dashboard')">📊 Dashboard</button>
             <button id="tab-btn-upload" class="tab-btn" onclick="switchTab('tab-upload')">📤 Upload Center</button>
-            <button id="tab-btn-audit" class="tab-btn" onclick="switchTab('tab-audit')">📜 Audit Logs</button>
             <button class="tab-btn" onclick="switchTab('tab-lims')">🤖 LIMS Automator</button>
             <button id="tab-btn-is-intelligence" class="tab-btn" onclick="switchTab('tab-is-intelligence')">📚 IS Intelligence</button>
             <button id="tab-btn-employees" class="tab-btn" onclick="switchTab('tab-employees')">👥 Employee Hub</button>
@@ -610,66 +609,47 @@
                 </div>
             </div>
 
-            <!-- ── Upload Audit Log (always visible, compact) ─────────── -->
-            <div class="glass-panel" style="margin-top:16px; margin-bottom:20px; padding:0; overflow:hidden;">
-                <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--glass-border);">
-                    <h4 style="margin:0; font-size:0.9rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">📜 Upload Audit Log</h4>
-                    <span id="sa-batch-count-badge" style="background:rgba(99,102,241,0.15); color:var(--primary); padding:2px 10px; border-radius:20px; font-size:0.78rem; font-weight:700;">0 batches</span>
-                </div>
-                <div class="table-container" style="max-height:220px; overflow-y:auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Batch ID</th>
-                                <th>Upload Date</th>
-                                <th>File</th>
-                                <th>Samples</th>
-                                <th>Duplicates Updated</th>
-                                <th>Uploaded By</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sc-audit-log-body">
-                            <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No upload history found.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div style="margin-top: 20px; text-align: center;">
+                <button onclick="toggleAuditLogs()" class="secondary" style="padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 0.95rem; background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border-light); cursor: pointer;">
+                    📜 Toggle Audit Trail
+                </button>
             </div>
-        </div>
 
-        <!-- Tab: Audit Logs -->
-        <div id="tab-audit" class="tab-content">
-            <div class="glass-panel" style="padding: 25px; margin-bottom: 25px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <div>
-                        <h3 style="margin:0;">Audit Trail</h3>
-                        <p style="color:var(--text-muted); margin:4px 0 0; font-size:0.9rem;">Chronological log of master database injections. Click any row to inspect batch details.</p>
+            <!-- Full Audit Trail (Hidden by default) -->
+            <div id="upload-audit-trail-container" style="display:none; margin-top: 20px;">
+                <div class="glass-panel" style="padding: 25px; margin-bottom: 25px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <div>
+                            <h3 style="margin:0;">Audit Trail</h3>
+                            <p style="color:var(--text-muted); margin:4px 0 0; font-size:0.9rem;">Chronological log of master database injections.</p>
+                        </div>
                     </div>
-                </div>
-                <!-- Filter Bar -->
-                <div style="display:flex; gap:12px; margin-bottom:15px; flex-wrap:wrap;">
-                    <input type="text" id="audit-search" placeholder="🔍 Search by file name..." oninput="filterAuditTable()" style="flex:1; min-width:200px;">
-                    <select id="audit-user-filter" onchange="filterAuditTable()" style="min-width:160px;">
-                        <option value="ALL">All Uploaders</option>
-                    </select>
-                </div>
-                <div class="table-container" style="max-height: 500px; border: 1px solid var(--border-light);">
-                    <table id="audit-table">
-                        <thead>
-                            <tr>
-                                <th>Upload Date</th>
-                                <th>File Name</th>
-                                <th>Fresh Records</th>
-                                <th>Duplicates Ignored</th>
-                                <th>Uploaded By</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-tbody">
-                            <!-- Rendered by JS -->
-                        </tbody>
-                    </table>
-                </div>
-                <div id="audit-no-results" style="display:none; text-align:center; padding:30px; color:var(--text-muted); font-size:0.95rem;">
-                    No matching audit records found.
+                    <!-- Filter Bar -->
+                    <div style="display:flex; gap:12px; margin-bottom:15px; flex-wrap:wrap;">
+                        <input type="text" id="audit-search" placeholder="🔍 Search by file name..." oninput="filterAuditTable()" style="flex:1; min-width:200px;">
+                        <select id="audit-user-filter" onchange="filterAuditTable()" style="min-width:160px;">
+                            <option value="ALL">All Uploaders</option>
+                        </select>
+                    </div>
+                    <div class="table-container" style="max-height: 500px; border: 1px solid var(--border-light);">
+                        <table id="audit-table">
+                            <thead>
+                                <tr>
+                                    <th>Upload Date</th>
+                                    <th>File Name</th>
+                                    <th>Fresh Records</th>
+                                    <th>Duplicates Ignored</th>
+                                    <th>Uploaded By</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-tbody">
+                                <!-- Rendered by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="audit-no-results" style="display:none; text-align:center; padding:30px; color:var(--text-muted); font-size:0.95rem;">
+                        No matching audit records found.
+                    </div>
                 </div>
             </div>
         </div>

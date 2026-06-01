@@ -324,9 +324,7 @@ function switchTab(tabId) {
     if (btn) btn.classList.add('active');
 
     // Load data specific to tabs
-    if (tabId === 'tab-audit') {
-        viewHistory();
-    } else if (tabId === 'tab-lims') {
+    if (tabId === 'tab-lims') {
         renderTestParametersTable();
     } else if (tabId === 'tab-employees') {
         loadEmployees();
@@ -354,6 +352,18 @@ function openProfileModal() {
 function closeProfileModal() {
     const modal = document.getElementById('profile-modal');
     if (modal) modal.style.display = 'none';
+}
+
+function toggleAuditLogs() {
+    const container = document.getElementById('upload-audit-trail-container');
+    if (container) {
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            viewHistory(); // Fetch fresh audit data when opened
+        } else {
+            container.style.display = 'none';
+        }
+    }
 }
 
 // --- PREFERENCES ---
