@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sample Speaks Workspace</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1.0.1">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -29,7 +29,12 @@
                 <h1>Sample Speaks Workspace</h1>
                 <p id="user-welcome">Welcome, User</p>
             </div>
-            <button class="logout-btn" onclick="logout()">Secure Logout</button>
+            <div class="header-actions">
+                <div class="user-avatar" id="header-avatar" onclick="switchTab('tab-profile')" title="My Profile">
+                    <span id="header-avatar-initials">U</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Secure Logout</button>
+            </div>
         </header>
 
         <!-- Tabs -->
@@ -45,11 +50,167 @@
             <button id="tab-btn-analytics" class="tab-btn" onclick="switchTab('tab-analytics')">📈 Analytics</button>
             <button id="tab-btn-preferences" class="tab-btn" onclick="switchTab('tab-preferences')">⚙️ Preferences</button>
             <button id="tab-btn-super-admin" class="tab-btn" onclick="switchTab('tab-super-admin')" style="display: none;">🔐 Super Admin Analytics</button>
+            <button id="tab-btn-profile" class="tab-btn" onclick="switchTab('tab-profile')">👤 My Profile</button>
+        </div>
+
+        <!-- Tab: Profile -->
+        <div id="tab-profile" class="tab-content">
+            <div class="profile-page">
+
+                <!-- Profile Hero Card -->
+                <div class="profile-hero glass-panel">
+                    <div class="profile-avatar-large" id="profile-avatar-large">
+                        <span id="profile-avatar-initials-large">U</span>
+                    </div>
+                    <div class="profile-hero-info">
+                        <h2 id="profile-name">User</h2>
+                        <div class="profile-role-badge" id="profile-role-badge">TP</div>
+                        <p class="profile-joined" id="profile-joined">Member of Sample Speaks Workspace</p>
+                    </div>
+                    <div class="profile-hero-stats">
+                        <div class="profile-stat">
+                            <div class="profile-stat-val" id="profile-stat-pending">—</div>
+                            <div class="profile-stat-label">Pending Samples</div>
+                        </div>
+                        <div class="profile-stat">
+                            <div class="profile-stat-val" id="profile-stat-priority">—</div>
+                            <div class="profile-stat-label">Priority Queue</div>
+                        </div>
+                        <div class="profile-stat">
+                            <div class="profile-stat-val" id="profile-stat-submitted">—</div>
+                            <div class="profile-stat-label">Submitted</div>
+                        </div>
+                        <div class="profile-stat">
+                            <div class="profile-stat-val" id="profile-stat-sla">—</div>
+                            <div class="profile-stat-label">SLA Overdue</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Details Grid -->
+                <div class="profile-details-grid">
+
+                    <!-- Account Info Card -->
+                    <div class="glass-panel profile-card">
+                        <div class="profile-card-header">
+                            <span class="profile-card-icon">🪪</span>
+                            <h3>Account Information</h3>
+                        </div>
+                        <div class="profile-info-list">
+                            <div class="profile-info-row">
+                                <span class="profile-info-label">Username</span>
+                                <span class="profile-info-val" id="profile-info-username">—</span>
+                            </div>
+                            <div class="profile-info-row">
+                                <span class="profile-info-label">Role</span>
+                                <span class="profile-info-val" id="profile-info-role">—</span>
+                            </div>
+                            <div class="profile-info-row">
+                                <span class="profile-info-label">Access Level</span>
+                                <span class="profile-info-val" id="profile-info-access">—</span>
+                            </div>
+                            <div class="profile-info-row">
+                                <span class="profile-info-label">Session Status</span>
+                                <span class="profile-info-val" style="color: var(--success); font-weight: 700;">🟢 Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sample Summary Card -->
+                    <div class="glass-panel profile-card">
+                        <div class="profile-card-header">
+                            <span class="profile-card-icon">🧪</span>
+                            <h3>Sample Summary</h3>
+                        </div>
+                        <div id="profile-sample-summary">
+                            <div class="profile-sample-breakdown" id="profile-is-breakdown">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Change Password Card -->
+                    <div class="glass-panel profile-card">
+                        <div class="profile-card-header">
+                            <span class="profile-card-icon">🔐</span>
+                            <h3>Change Password</h3>
+                        </div>
+                        <div class="profile-password-form">
+                            <div class="profile-field">
+                                <label>Current Password</label>
+                                <input type="password" id="profile-current-pw" placeholder="Enter current password">
+                            </div>
+                            <div class="profile-field">
+                                <label>New Password</label>
+                                <input type="password" id="profile-new-pw" placeholder="Enter new password">
+                            </div>
+                            <div class="profile-field">
+                                <label>Confirm New Password</label>
+                                <input type="password" id="profile-confirm-pw" placeholder="Re-enter new password">
+                            </div>
+                            <button class="primary" onclick="changePassword()" style="width:100%; margin-top:8px;">Update Password</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Disposal Alerts Banner -->
+                <div id="disposal-alerts-banner" style="display:none; background: #fff8e1; border: 1px solid #f59e0b; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <h4 style="margin: 0 0 5px 0; color: #b45309; font-size: 1.1rem;">⚠️ Disposal Action Required</h4>
+                            <p style="margin: 0; font-size: 0.9rem; color: #92400e;">
+                                You have <strong id="disposal-overdue-count">0</strong> samples overdue and <strong id="disposal-upcoming-count">0</strong> upcoming within 7 days.
+                            </p>
+                        </div>
+                        <button onclick="document.getElementById('disposal-alerts-list').style.display = document.getElementById('disposal-alerts-list').style.display === 'none' ? 'block' : 'none';" style="background:transparent; border:1px solid #d97706; color:#d97706; padding:4px 8px; font-size:0.8rem; border-radius:4px;">View List</button>
+                    </div>
+                    <div id="disposal-alerts-list" style="display:none; margin-top: 15px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid #fcd34d;">
+                                    <th style="padding: 8px 4px; color:#b45309;">Encoded Code</th>
+                                    <th style="padding: 8px 4px; color:#b45309;">IS Number</th>
+                                    <th style="padding: 8px 4px; color:#b45309;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="disposal-alerts-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pending Samples Table in Profile -->
+                <div class="glass-panel profile-samples-section" id="profile-pending-table-wrapper">
+                    <div class="profile-card-header" style="margin-bottom:15px;">
+                        <span class="profile-card-icon">📋</span>
+                        <h3>My Assigned Samples <span id="profile-pending-badge" class="profile-badge">0</span></h3>
+                    </div>
+                    <div class="table-container" style="max-height: 400px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Priority</th>
+                                    <th>Encoded Code</th>
+                                    <th>IS Number</th>
+                                    <th>Forwarded On</th>
+                                    <th>Received On</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="profile-samples-tbody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
         <!-- Tab: Analytics -->
         <div id="tab-analytics" class="tab-content" style="display: none;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; padding: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 20px;">
                 <div class="glass-panel" style="padding:20px;">
                     <h3 style="text-align:center; color:var(--text-main); margin-bottom:15px;">Workload Distribution</h3>
                     <canvas id="workloadChart" style="max-height: 300px; width:100%;"></canvas>
@@ -358,18 +519,115 @@
                     <input type="file" id="excel-file" accept=".xlsx,.xls">
                 </div>
                 <div id="file-info" style="display:none;"></div>
-                <button onclick="uploadExcel()" style="width: 100%; margin-top: 10px; font-size: 1.1rem; padding: 12px;">Analyze Document</button>
+                    <button onclick="uploadExcel()" style="width: 100%; margin-top: 10px; font-size: 1.1rem; padding: 12px;">Analyze Document</button>
             </div>
 
             <!-- Database Utilities Panel (Admin Only) -->
-            <div class="admin-panel glass-panel" style="margin-top: 25px; border-top: 4px solid var(--danger);">
-                <h3>Database Utilities</h3>
-                <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom: 15px;">Destructive administrative actions. Perform with caution.</p>
+            <div id="admin-db-tools" class="glass-panel admin-panel" style="display: none; margin-top: 25px; padding: 25px; border: 1px solid rgba(217, 48, 37, 0.3);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div>
+                        <h3 style="margin: 0; color: var(--danger);">🛠️ Danger Zone</h3>
+                        <p style="color: var(--text-muted); margin: 5px 0 0; font-size: 0.9rem;">Advanced database operations. Proceed with extreme caution.</p>
+                    </div>
+                </div>
+                
                 <div style="background: rgba(217, 48, 37, 0.05); border: 1px solid rgba(217, 48, 37, 0.2); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
                     <h4 style="margin: 0 0 5px 0; color: var(--danger); font-weight: 600;">⚠️ Delete All Data (Database Reset)</h4>
                     <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">This action will permanently delete all sample records, upload audit history logs, and all Testing Person (TP) accounts. The primary <strong>Admin</strong> account will be kept so you can remain logged in.</p>
                 </div>
                 <button onclick="resetDatabase()" style="background: var(--danger); width: 100%; font-size: 1.05rem; padding: 12px; font-weight: 600;">Delete All Data & Reset Workspace</button>
+            </div>
+
+            <!-- ── Upload Engine (Collapsible) ───────────────────────── -->
+            <div class="glass-panel" style="margin-top: 25px; margin-bottom:20px; overflow:hidden;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; cursor:pointer;" onclick="toggleSaUpload()">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:1.1rem;">🔒</span>
+                        <span style="font-weight:700; font-size:0.95rem;">Upload Engine — Add / Update Confidential Records</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <button onclick="event.stopPropagation(); wipeSampleCellData()" style="background:rgba(239,68,68,0.15); color:var(--danger); border:1px solid rgba(239,68,68,0.3); padding:5px 12px; border-radius:6px; font-size:0.8rem; font-weight:700; cursor:pointer;">🗑️ Wipe All</button>
+                        <span id="sa-upload-toggle-icon" style="color:var(--text-muted); font-size:0.85rem;">▼ Expand</span>
+                    </div>
+                </div>
+                <div id="sa-upload-body" style="display:none; padding:0 20px 20px 20px; border-top:1px solid var(--glass-border);">
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin:14px 0 12px;">Upload the Super Admin master Excel. Duplicate Barcodes will be automatically updated in the vault.</p>
+                    <div id="sc-drag-drop-zone" class="upload-zone" onclick="document.getElementById('sc-excel-file').click()" style="padding:20px;">
+                        <span class="upload-icon" style="font-size:1.8rem;">🔒</span>
+                        <h4 style="margin:8px 0 4px;">Drag &amp; Drop Super Admin Excel Here</h4>
+                        <p style="font-size:0.85rem; color:var(--text-muted);">or click to browse</p>
+                        <input type="file" id="sc-excel-file" accept=".xlsx,.xls" style="display: none;" onchange="handleScFileSelect(event)">
+                    </div>
+                    <div id="sc-file-info" style="display:none; text-align: center; margin-top: 10px; color: var(--success); font-weight: bold;"></div>
+                    <button id="sc-analyze-btn" onclick="analyzeSampleCellExcel()" style="width: 100%; margin-top: 12px; font-size: 1rem; padding: 11px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight:700;">🔍 Analyze &amp; Preview</button>
+                </div>
+            </div>
+
+            <!-- ── Confidential Data Table ───────────────────────────── -->
+            <div class="glass-panel" style="padding:0; overflow:hidden;">
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--glass-border);">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <h3 style="margin:0; font-size:0.95rem; color:var(--text-main);">📋 Confidential Sample Vault</h3>
+                        <span id="sa-table-count" style="background:rgba(99,102,241,0.2); color:var(--primary); padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:700;">0 records</span>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <!-- Age filter chips -->
+                        <div id="sa-age-chips" style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button class="sa-chip active" onclick="filterScTable('all')" data-filter="all" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--primary); background:rgba(99,102,241,0.2); color:var(--primary);">All</button>
+                            <button class="sa-chip" onclick="filterScTable('0-15')" data-filter="0-15" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--glass-border); background:transparent; color:var(--text-muted);">0-15d</button>
+                            <button class="sa-chip" onclick="filterScTable('15-30')" data-filter="15-30" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--glass-border); background:transparent; color:var(--text-muted);">15-30d</button>
+                            <button class="sa-chip" onclick="filterScTable('30-60')" data-filter="30-60" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--glass-border); background:transparent; color:var(--text-muted);">30-60d</button>
+                            <button class="sa-chip" onclick="filterScTable('60-90')" data-filter="60-90" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--warning); background:rgba(245,158,11,0.1); color:var(--warning);">60-90d</button>
+                            <button class="sa-chip" onclick="filterScTable('90+')" data-filter="90+" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--danger); background:rgba(239,68,68,0.1); color:var(--danger);">90d+</button>
+                        </div>
+                        <input id="sa-table-search" type="text" placeholder="Search barcode / IS..." oninput="renderScTableFiltered()" style="padding:6px 10px; border-radius:6px; font-size:0.8rem; min-width:170px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:var(--text-main);">
+                    </div>
+                </div>
+                <div class="table-container" style="max-height:380px; overflow-y:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Barcode</th>
+                                <th>Sample Code</th>
+                                <th>IS Number</th>
+                                <th>Testing Type</th>
+                                <th>Lab</th>
+                                <th>Received On</th>
+                                <th>Age</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sample-cell-tbody">
+                            <!-- Rows rendered dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ── Upload Audit Log (always visible, compact) ─────────── -->
+            <div class="glass-panel" style="margin-top:16px; margin-bottom:20px; padding:0; overflow:hidden;">
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--glass-border);">
+                    <h4 style="margin:0; font-size:0.9rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">📜 Upload Audit Log</h4>
+                    <span id="sa-batch-count-badge" style="background:rgba(99,102,241,0.15); color:var(--primary); padding:2px 10px; border-radius:20px; font-size:0.78rem; font-weight:700;">0 batches</span>
+                </div>
+                <div class="table-container" style="max-height:220px; overflow-y:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Batch ID</th>
+                                <th>Upload Date</th>
+                                <th>File</th>
+                                <th>Samples</th>
+                                <th>Duplicates Updated</th>
+                                <th>Uploaded By</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sc-audit-log-body">
+                            <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No upload history found.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -474,7 +732,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px;">
                                 <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">Class</label>
                                 <select id="lims-class-select" style="width: 100%; border-radius: 6px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white;" onchange="renderTestParametersTable()">
                                     <option value="1">Class 1 (0.25 MPa)</option>
@@ -583,7 +841,7 @@
             <h3>👥 Employee Hub</h3>
             <p style="color:var(--text-muted); font-size:0.9rem;">Manage employee profiles, max daily capacity, and IS competencies.</p>
             
-            <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+            <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
                 <!-- Add New Employee Form -->
                 <div class="setup-card glass-panel" style="padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
                     <h4>➕ Add New Employee</h4>
@@ -593,7 +851,11 @@
                     </div>
                     <div style="margin-bottom: 12px;">
                         <label>Designation</label>
-                        <input type="text" id="emp-designation" style="width: 100%; border-radius: 4px; padding: 8px;">
+                        <select id="emp-designation" style="width: 100%; border-radius: 4px; padding: 8px;">
+                            <option value="Technical Assistant">Technical Assistant</option>
+                            <option value="Testing Person">Testing Person</option>
+                            <option value="Laboratory Officer">Laboratory Officer</option>
+                        </select>
                     </div>
                     <hr style="border:0; border-top:1px solid var(--border-light); margin: 15px 0;">
                     <div style="margin-bottom: 12px;">
@@ -767,6 +1029,25 @@
                     </label>
                 </div>
 
+                <!-- Remnant Storage Days -->
+                <div class="setup-card glass-panel" style="padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+                    <h4 style="margin: 0 0 15px 0;">🗑️ Remnant Storage Days</h4>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Configure the retention period before a submitted sample must be disposed.</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:8px; font-weight:600;">Passed Samples</label>
+                            <input type="number" id="pref-pass-storage" value="15" min="0" max="365" style="width:100%; padding:10px; border-radius:6px;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:8px; font-weight:600;">Failed Samples</label>
+                            <input type="number" id="pref-fail-storage" value="45" min="0" max="365" style="width:100%; padding:10px; border-radius:6px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr; gap: 20px;">
+
                 <!-- IS Parameter Database Placeholder -->
                 <div class="setup-card glass-panel" style="padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
                     <h4 style="margin: 0 0 15px 0;">📊 IS Parameter Database</h4>
@@ -780,6 +1061,7 @@
 
             <button onclick="savePreferences()" class="primary" style="margin-top:20px; width:100%; font-size:1.1rem; padding:12px;">💾 Save Preferences</button>
         </div>
+    </div>
 
         <!-- Tab: Super Admin Analytics -->
         <div id="tab-super-admin" class="tab-content" style="display: none;">
@@ -835,96 +1117,6 @@
                 </div>
             </div>
 
-            <!-- ── Upload Engine (Collapsible) ───────────────────────── -->
-            <div class="glass-panel" style="margin-bottom:20px; overflow:hidden;">
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; cursor:pointer;" onclick="toggleSaUpload()">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span style="font-size:1.1rem;">🔒</span>
-                        <span style="font-weight:700; font-size:0.95rem;">Upload Engine — Add / Update Confidential Records</span>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <button onclick="event.stopPropagation(); wipeSampleCellData()" style="background:rgba(239,68,68,0.15); color:var(--danger); border:1px solid rgba(239,68,68,0.3); padding:5px 12px; border-radius:6px; font-size:0.8rem; font-weight:700; cursor:pointer;">🗑️ Wipe All</button>
-                        <span id="sa-upload-toggle-icon" style="color:var(--text-muted); font-size:0.85rem;">▼ Expand</span>
-                    </div>
-                </div>
-                <div id="sa-upload-body" style="display:none; padding:0 20px 20px 20px; border-top:1px solid var(--glass-border);">
-                    <p style="font-size:0.85rem; color:var(--text-muted); margin:14px 0 12px;">Upload the Super Admin master Excel. Duplicate Barcodes will be automatically updated in the vault.</p>
-                    <div id="sc-drag-drop-zone" class="upload-zone" onclick="document.getElementById('sc-excel-file').click()" style="padding:20px;">
-                        <span class="upload-icon" style="font-size:1.8rem;">🔒</span>
-                        <h4 style="margin:8px 0 4px;">Drag &amp; Drop Super Admin Excel Here</h4>
-                        <p style="font-size:0.85rem; color:var(--text-muted);">or click to browse</p>
-                        <input type="file" id="sc-excel-file" accept=".xlsx,.xls" style="display: none;" onchange="handleScFileSelect(event)">
-                    </div>
-                    <div id="sc-file-info" style="display:none; text-align: center; margin-top: 10px; color: var(--success); font-weight: bold;"></div>
-                    <button id="sc-analyze-btn" onclick="analyzeSampleCellExcel()" style="width: 100%; margin-top: 12px; font-size: 1rem; padding: 11px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight:700;">🔍 Analyze &amp; Preview</button>
-                </div>
-            </div>
-
-            <!-- ── Confidential Data Table ───────────────────────────── -->
-            <div class="glass-panel" style="padding:0; overflow:hidden;">
-                <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--glass-border);">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <h3 style="margin:0; font-size:0.95rem; color:var(--text-main);">📋 Confidential Sample Vault</h3>
-                        <span id="sa-table-count" style="background:rgba(99,102,241,0.2); color:var(--primary); padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:700;">0 records</span>
-                    </div>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <!-- Age filter chips -->
-                        <div id="sa-age-chips" style="display:flex; gap:6px; flex-wrap:wrap;">
-                            <button class="sa-chip active" onclick="filterScTable('all')" data-filter="all" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--primary); background:rgba(99,102,241,0.2); color:var(--primary);">All</button>
-                            <button class="sa-chip" onclick="filterScTable('0-15')" data-filter="0-15" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--glass-border); background:transparent; color:var(--text-muted);">0-15d</button>
-                            <button class="sa-chip" onclick="filterScTable('15-30')" data-filter="15-30" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--glass-border); background:transparent; color:var(--text-muted);">15-30d</button>
-                            <button class="sa-chip" onclick="filterScTable('30-60')" data-filter="30-60" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--glass-border); background:transparent; color:var(--text-muted);">30-60d</button>
-                            <button class="sa-chip" onclick="filterScTable('60-90')" data-filter="60-90" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--warning); background:rgba(245,158,11,0.1); color:var(--warning);">60-90d</button>
-                            <button class="sa-chip" onclick="filterScTable('90+')" data-filter="90+" style="padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid var(--danger); background:rgba(239,68,68,0.1); color:var(--danger);">90d+</button>
-                        </div>
-                        <input id="sa-table-search" type="text" placeholder="Search barcode / IS..." oninput="renderScTableFiltered()" style="padding:6px 10px; border-radius:6px; font-size:0.8rem; min-width:170px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:var(--text-main);">
-                    </div>
-                </div>
-                <div class="table-container" style="max-height:380px; overflow-y:auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Barcode</th>
-                                <th>Sample Code</th>
-                                <th>IS Number</th>
-                                <th>Testing Type</th>
-                                <th>Lab</th>
-                                <th>Received On</th>
-                                <th>Age</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sample-cell-tbody">
-                            <!-- Rows rendered dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- ── Upload Audit Log (always visible, compact) ─────────── -->
-            <div class="glass-panel" style="margin-top:16px; padding:0; overflow:hidden;">
-                <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--glass-border);">
-                    <h4 style="margin:0; font-size:0.9rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">📜 Upload Audit Log</h4>
-                    <span id="sa-batch-count-badge" style="background:rgba(99,102,241,0.15); color:var(--primary); padding:2px 10px; border-radius:20px; font-size:0.78rem; font-weight:700;">0 batches</span>
-                </div>
-                <div class="table-container" style="max-height:220px; overflow-y:auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Batch ID</th>
-                                <th>Upload Date</th>
-                                <th>File</th>
-                                <th>Samples</th>
-                                <th>Duplicates Updated</th>
-                                <th>Uploaded By</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sc-audit-log-body">
-                            <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No upload history found.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
             </div>
 
         </div>
@@ -992,9 +1184,9 @@
             <!-- Missing Accounts Banner -->
             <div id="missing-accounts-banner" style="display:none;"></div>
             
-            <div class="review-split">
+            <div class="review-split" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
                 <div class="review-section">
-                    <h4 style="color: var(--success);">Fresh Inject (<span id="fresh-count">0</span>)</h4>
+                    <h4 style="color: var(--success); margin-bottom: 8px;">Assigned Fresh (<span id="fresh-count">0</span>)</h4>
                     <div class="table-container small-table" style="border: 1px solid rgba(16, 185, 129, 0.2); max-height: 250px;">
                         <table>
                             <thead><tr><th>Encoded Code</th><th>Assigned To</th><th>Priority</th><th>Status</th></tr></thead>
@@ -1003,7 +1195,16 @@
                     </div>
                 </div>
                 <div class="review-section">
-                    <h4 style="color: var(--danger);">Duplicates caught (<span id="duplicate-count">0</span>)</h4>
+                    <h4 style="color: var(--warning); margin-bottom: 8px;">Unassigned Pool (<span id="unassigned-modal-count">0</span>)</h4>
+                    <div class="table-container small-table" style="border: 1px solid rgba(245, 158, 11, 0.2); max-height: 250px;">
+                        <table>
+                            <thead><tr><th>Encoded Code</th><th>IS Number</th><th>Priority</th><th>Status</th></tr></thead>
+                            <tbody id="unassigned-modal-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="review-section">
+                    <h4 style="color: var(--danger); margin-bottom: 8px;">Duplicates caught (<span id="duplicate-count">0</span>)</h4>
                     <div class="table-container small-table" style="border: 1px solid rgba(239, 68, 68, 0.2); max-height: 250px;">
                         <table>
                             <thead><tr><th style="width:120px; text-align:center;">Decision</th><th>Encoded Code</th><th>Assigned To</th></tr></thead>
@@ -1076,7 +1277,7 @@
             <h3 style="color: var(--accent);">Batch History Details</h3>
             
             <!-- Batch Summary -->
-            <div id="batch-summary" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:20px; background:rgba(0,0,0,0.05); padding:15px; border-radius:8px; border:1px solid var(--border-light);">
+            <div id="batch-summary" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:20px; background:rgba(0,0,0,0.05); padding:15px; border-radius:8px; border:1px solid var(--border-light);">
                 <div><span style="font-size:0.8rem; color:var(--text-muted);">Batch ID</span><br><strong id="batch-id-display"></strong></div>
                 <div><span style="font-size:0.8rem; color:var(--text-muted);">Upload Date</span><br><strong id="batch-date-display"></strong></div>
                 <div><span style="font-size:0.8rem; color:var(--text-muted);">Uploaded By</span><br><strong id="batch-uploader-display"></strong></div>
@@ -1157,6 +1358,6 @@
     </div>
 
     <script src="specs_db.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js?v=1.0.2"></script>
 </body>
 </html>

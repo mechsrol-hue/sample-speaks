@@ -78,6 +78,16 @@ function initializeTables() {
                     });
                 }
             });
+
+            // Create default Super Admin user securely if it doesn't exist
+            db.get("SELECT * FROM users WHERE username = 'Super Admin'", (err, row) => {
+                if (!row) {
+                    db.run("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", ['Super Admin', 'superadmin123', 'super_admin'], (err) => {
+                        if (err) console.error('Super Admin seed error:', err.message);
+                        else console.log('Default Super Admin account seeded successfully.');
+                    });
+                }
+            });
         });
 
         // --- NEW TABLES FOR EMPLOYEE & WORKLOAD MANAGEMENT ---

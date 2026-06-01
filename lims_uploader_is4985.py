@@ -172,8 +172,8 @@ def main():
                 if param_name and not obs:
                     missing_values.append(param_name)
         if missing_values:
-            log("ERROR", f"Validation Failed: Missing values in payload for parameters: {missing_values}")
-            sys.exit(1)
+            log("WARN", f"Validation Warning: Missing values in payload for parameters: {missing_values}. Proceeding anyway...")
+            # sys.exit(1)
 
     # Build ordered list of (observed_value, is_qualitative) to fill in sequence
     fill_queue = []

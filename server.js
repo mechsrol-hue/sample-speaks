@@ -79,6 +79,29 @@ app.post('/api/login', async (req, res) => {
     res.json({ message: 'Login successful', user: { id: row.id, username: row.username, role: row.role } });
 });
 
+// Change Password
+app.post('/api/change-password', async (req, res) => {
+    const { userId, currentPassword, newPassword } = req.body;
+    if (!userId || !currentPassword || !newPassword) return res.status(400).json({ error: 'All fields are required.' });
+
+    const { data: row, error: fetchErr } = await supabase
+        .from('users')
+        .select('password')
+        .eq('id', userId)
+        .single();
+
+    if (fetchErr || !row) return res.status(404).json({ error: 'User not found.' });
+    if (row.password !== currentPassword) return res.status(401).json({ error: 'Current password is incorrect.' });
+
+    const { error: updateErr } = await supabase
+        .from('users')
+        .update({ password: newPassword })
+        .eq('id', userId);
+
+    if (updateErr) return res.status(500).json({ error: updateErr.message });
+    res.json({ message: 'Password changed successfully.' });
+});
+
 // Admin Account Management Routes
 app.get('/api/admin/users', async (req, res) => {
     const { data: rows, error } = await supabase
@@ -455,10 +478,18 @@ app.get('/api/samples/:tpName', async (req, res) => {
     const tpName = cleanName(req.params.tpName);
     const { role } = req.query;
 
-    // Simplified Supabase query
-    const { data, error } = await supabase.from('samples').select('*').limit(100);
+    const isAdmin = role === 'admin' || role === 'admin_sample_cell' || role === 'super_admin';
+
+    let query = supabase.from('samples').select('*');
+
+    // TP users can ONLY see samples assigned to them
+    if (!isAdmin) {
+        query = query.eq('assignedTo', tpName);
+    }
+
+    const { data, error } = await query;
     if (error) return res.status(500).json({ error: error.message });
-    res.json({ samples: data });
+    res.json({ samples: data || [] });
 });
 
 // Submit Sample Workflow
@@ -467,11 +498,24 @@ app.post('/api/submit-sample', async (req, res) => {
     let disposalDate = null;
     let appStatus = 'Submitted';
     const now = new Date();
+    
+    let passStorageDays = 15;
+    let failStorageDays = 45;
+    try {
+        const { data: prefs } = await supabase.from('system_preferences').select('*').in('key', ['passStorageDays', 'failStorageDays']);
+        if (prefs) {
+            const pPass = prefs.find(p => p.key === 'passStorageDays');
+            const pFail = prefs.find(p => p.key === 'failStorageDays');
+            if (pPass) passStorageDays = parseInt(pPass.value) || 15;
+            if (pFail) failStorageDays = parseInt(pFail.value) || 45;
+        }
+    } catch (e) { console.error('Could not fetch storage prefs:', e); }
 
     if (passFail === 'Pass') {
+        now.setDate(now.getDate() + passStorageDays);
         disposalDate = now.toISOString();
     } else if (passFail === 'Fail') {
-        now.setDate(now.getDate() + 45);
+        now.setDate(now.getDate() + failStorageDays);
         disposalDate = now.toISOString();
     }
 
@@ -708,7 +752,8 @@ app.get('/api/admin/employees', async (req, res) => {
 });
 
 app.post('/api/admin/employees', async (req, res) => {
-    const { fullName, designation, maxDailySamples, username, password } = req.body;
+    const { fullName, designation, maxDailySamples, password } = req.body;
+    const username = cleanName(req.body.username);
     if (!fullName || !username || !password) return res.status(400).json({ error: 'Missing required fields' });
 
     const { data: row } = await supabase.from('users').select('*').eq('username', username).single();
@@ -1218,7 +1263,9 @@ app.get('/api/preferences', async (req, res) => {
             return res.json({ preferences: {
                 priorityRankingMode: 'prioritize',
                 leaveWindowDays: '30',
-                autoRunAssigner: 'false'
+                autoRunAssigner: 'false',
+                passStorageDays: '15',
+                failStorageDays: '45'
             }});
         }
         const prefs = {};
@@ -1227,9 +1274,11 @@ app.get('/api/preferences', async (req, res) => {
         if (!prefs.priorityRankingMode) prefs.priorityRankingMode = 'prioritize';
         if (!prefs.leaveWindowDays) prefs.leaveWindowDays = '30';
         if (!prefs.autoRunAssigner) prefs.autoRunAssigner = 'false';
+        if (!prefs.passStorageDays) prefs.passStorageDays = '15';
+        if (!prefs.failStorageDays) prefs.failStorageDays = '45';
         res.json({ preferences: prefs });
     } catch (err) {
-        res.json({ preferences: { priorityRankingMode: 'prioritize', leaveWindowDays: '30', autoRunAssigner: 'false' } });
+        res.json({ preferences: { priorityRankingMode: 'prioritize', leaveWindowDays: '30', autoRunAssigner: 'false', passStorageDays: '15', failStorageDays: '45' } });
     }
 });
 

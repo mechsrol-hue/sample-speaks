@@ -1,7 +1,7 @@
 let currentUser = null;
 
-function isSuperAdmin() { return currentUser && currentUser.role === 'admin_sample_cell'; }
-function isAdminOrSuperAdmin() { return currentUser && (currentUser.role === 'admin' || currentUser.role === 'admin_sample_cell'); }
+function isSuperAdmin() { return currentUser && (currentUser.role === 'admin_sample_cell' || currentUser.role === 'super_admin'); }
+function isAdminOrSuperAdmin() { return currentUser && (currentUser.role === 'admin' || currentUser.role === 'admin_sample_cell' || currentUser.role === 'super_admin'); }
 let allSamples = [];
 let currentSubmitId = null;
 let pendingFreshSamples = [];
@@ -15,6 +15,19 @@ let currentPrefs = { priorityRankingMode: 'prioritize', leaveWindowDays: 30, aut
 let pendingColumnMappings = {}; // resolved column mappings from admin
 let uploadMissingAccounts = []; // TA names with no account
 let allTPUsers = []; // cached list of all TP users for direct assign dropdown
+
+const SYSTEM_FIELDS = {
+    encodedCode: { synonyms: ['encoded code', 'encoded sample', 'encodedcode', 'encode', 'sample code', 'samplecode', 'sample no', 'sample number'] },
+    isNumber: { synonyms: ['is number', 'isnumber', 'is_number', 'is no', 'indian standard', 'standard'] },
+    quantity: { synonyms: ['quantity', 'qty'] },
+    priorityLevel: { synonyms: ['priority', 'priority level'] },
+    receivedOn: { synonyms: ['received on', 'receivedon', 'sample received on', 'received_on', 'received date', 'date received', 'recv dt'] },
+    forwardedOn: { synonyms: ['forwarded on', 'forwardedon', 'sample forwarded on', 'forwarded_on', 'forwarded date'] },
+    assignedTo: { synonyms: ['assigned to', 'tp name', 'assignedto', 'tpname', 'testing person name', 'testing person', 'tester', 'tester name', 'officer', 'allocated to', 'allocatedto', 'tp', 'tp_name', 'testing_person', 'tp name standard'] },
+    totalTest: { synonyms: ['total test', 'totaltest', 'total tests'] },
+    pendingTest: { synonyms: ['pending test', 'pendingtest', 'pending tests'] },
+    approvedTest: { synonyms: ['approved test', 'approvedtest', 'approved tests'] }
+};
 
 // --- Toast Notification System ---
 function showToast(message, type = 'info') {
@@ -73,11 +86,12 @@ async function login() {
             currentUser = data.user;
             document.getElementById('auth-container').classList.remove('active');
             document.getElementById('dashboard-container').classList.add('active');
-            const displayRole = currentUser.role === 'admin_sample_cell' ? 'Super Admin' : currentUser.role === 'admin' ? 'Admin' : 'TP';
+            const displayRole = (currentUser.role === 'admin_sample_cell' || currentUser.role === 'super_admin') ? 'Super Admin' : currentUser.role === 'admin' ? 'Admin' : 'TP';
             document.getElementById('user-welcome').textContent = `Welcome, ${currentUser.username} (${displayRole})`;
             
             document.getElementById('admin-tabs').style.display = 'flex';
             toggleAdminViews();
+            updateProfileUI(); // Populate avatar + profile page immediately on login
             switchTab('tab-dashboard');
             
             if (isSuperAdmin()) {
@@ -106,6 +120,199 @@ function logout() {
     showToast('Logged out securely.', 'info');
 }
 
+// --- PROFILE ---
+function getInitials(name) {
+    if (!name) return 'U';
+    const parts = name.trim().split(' ').filter(Boolean);
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
+function updateProfileUI() {
+    if (!currentUser) return;
+
+    const initials = getInitials(currentUser.username);
+    const displayRole = isSuperAdmin() ? 'Super Admin' : currentUser.role === 'admin' ? 'Admin' : 'Testing Person (TP)';
+    const accessLevel = isSuperAdmin() ? 'Full Access — Super Admin' : currentUser.role === 'admin' ? 'Admin — Upload & Manage' : 'Standard TP — Own Samples Only';
+
+    // Header avatar
+    const headerInitialsEl = document.getElementById('header-avatar-initials');
+    if (headerInitialsEl) headerInitialsEl.textContent = initials;
+
+    // Profile page elements
+    const profileInitialsLarge = document.getElementById('profile-avatar-initials-large');
+    if (profileInitialsLarge) profileInitialsLarge.textContent = initials;
+
+    const profileName = document.getElementById('profile-name');
+    if (profileName) profileName.textContent = currentUser.username;
+
+    const profileRoleBadge = document.getElementById('profile-role-badge');
+    if (profileRoleBadge) {
+        profileRoleBadge.textContent = displayRole;
+        profileRoleBadge.className = 'profile-role-badge ' + (isAdminOrSuperAdmin() ? 'badge-admin' : 'badge-tp');
+    }
+
+    const profileInfoUsername = document.getElementById('profile-info-username');
+    if (profileInfoUsername) profileInfoUsername.textContent = currentUser.username;
+
+    const profileInfoRole = document.getElementById('profile-info-role');
+    if (profileInfoRole) profileInfoRole.textContent = displayRole;
+
+    const profileInfoAccess = document.getElementById('profile-info-access');
+    if (profileInfoAccess) profileInfoAccess.textContent = accessLevel;
+
+    // Stats from allSamples
+    refreshProfileStats();
+}
+
+function refreshProfileStats() {
+    if (!currentUser) return;
+
+    const myPending = allSamples.filter(s =>
+        (s.appStatus === 'Pending' || s.appStatus === 'PendingAccount') &&
+        (!isAdminOrSuperAdmin() ? (s.assignedTo || '').toLowerCase() === (currentUser.username || '').toLowerCase() : true)
+    );
+    const mySubmitted = allSamples.filter(s => s.appStatus === 'Submitted' &&
+        (!isAdminOrSuperAdmin() ? (s.assignedTo || '').toLowerCase() === (currentUser.username || '').toLowerCase() : true)
+    );
+    const myPriority = myPending.filter(s => isTopPriority(s));
+    const mySLA = myPending.filter(s => calculateDaysOld(s.forwardedOn) > 15);
+
+    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    setEl('profile-stat-pending', myPending.length);
+    setEl('profile-stat-priority', myPriority.length);
+    setEl('profile-stat-submitted', mySubmitted.length);
+    setEl('profile-stat-sla', mySLA.length);
+
+    // IS Number breakdown
+    const breakdownEl = document.getElementById('profile-is-breakdown');
+    if (breakdownEl) {
+        const isCounts = {};
+        myPending.forEach(s => {
+            if (s.isNumber) isCounts[s.isNumber] = (isCounts[s.isNumber] || 0) + 1;
+        });
+        const sorted = Object.entries(isCounts).sort((a, b) => b[1] - a[1]);
+        if (sorted.length === 0) {
+            breakdownEl.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem; text-align:center; padding:20px;">No pending samples assigned.</p>';
+        } else {
+            breakdownEl.innerHTML = sorted.map(([is, count]) =>
+                `<div class="profile-is-row">
+                    <span class="profile-is-label">${is}</span>
+                    <div class="profile-is-bar-wrap">
+                        <div class="profile-is-bar" style="width:${Math.min(100, (count / (sorted[0][1] || 1)) * 100)}%"></div>
+                    </div>
+                    <span class="profile-is-count">${count}</span>
+                </div>`
+            ).join('');
+        }
+    }
+
+    // Samples table in profile
+    const profileTbody = document.getElementById('profile-samples-tbody');
+    const profileBadge = document.getElementById('profile-pending-badge');
+    if (profileTbody) {
+        profileTbody.innerHTML = '';
+        if (myPending.length === 0) {
+            profileTbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-muted);">🎉 No pending samples in your queue!</td></tr>';
+        } else {
+            const sorted = [...myPending].sort((a, b) => {
+                if (isTopPriority(a) && !isTopPriority(b)) return -1;
+                if (!isTopPriority(a) && isTopPriority(b)) return 1;
+                return calculateDaysOld(b.forwardedOn) - calculateDaysOld(a.forwardedOn);
+            });
+            sorted.forEach(s => {
+                const daysOld = calculateDaysOld(s.forwardedOn);
+                const tr = document.createElement('tr');
+                if (daysOld > 15) tr.classList.add('row-danger-red');
+                else if (daysOld > 7) tr.classList.add('row-warning-yellow');
+
+                let priorityHtml = `<strong>${s.priorityLevel || 'Standard'}</strong>`;
+                if (isTopPriority(s)) priorityHtml += '<br><span class="badge-top-priority">Priority</span>';
+                if (daysOld > 15) priorityHtml += '<br><span class="badge-fifo">SLA: >15 Days</span>';
+
+                tr.innerHTML = `
+                    <td>${priorityHtml}</td>
+                    <td style="color:var(--accent); font-weight:600;">${s.encodedCode}</td>
+                    <td style="color:var(--text-muted);">${s.isNumber || '—'}</td>
+                    <td>${s.forwardedOn || '—'}</td>
+                    <td>${s.receivedOn || '—'}</td>
+                    <td><span class="status-badge status-pending">In Queue</span></td>
+                    <td><button onclick="openSubmitModal(${s.id}, '${s.encodedCode}')">Submit</button></td>
+                `;
+                profileTbody.appendChild(tr);
+            });
+        }
+        if (profileBadge) profileBadge.textContent = myPending.length;
+    }
+
+    checkDisposalReminders();
+}
+
+async function changePassword() {
+    const currentPw = document.getElementById('profile-current-pw').value;
+    const newPw = document.getElementById('profile-new-pw').value;
+    const confirmPw = document.getElementById('profile-confirm-pw').value;
+
+    if (!currentPw || !newPw || !confirmPw) return showToast('Please fill in all password fields.', 'warning');
+    if (newPw !== confirmPw) return showToast('New passwords do not match.', 'error');
+    if (newPw.length < 4) return showToast('Password must be at least 4 characters.', 'warning');
+
+    try {
+        const res = await fetch('/api/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: currentUser.id, currentPassword: currentPw, newPassword: newPw })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            showToast('Password changed successfully! ✅', 'success');
+            document.getElementById('profile-current-pw').value = '';
+            document.getElementById('profile-new-pw').value = '';
+            document.getElementById('profile-confirm-pw').value = '';
+        } else {
+            showToast(data.error || 'Failed to change password.', 'error');
+        }
+    } catch (err) {
+        showToast('Network error while changing password.', 'error');
+    }
+}
+
+async function checkDisposalReminders() {
+    if (!currentUser || !currentUser.username) return;
+    try {
+        const res = await fetch(`/api/disposal-reminders/${currentUser.username}?role=${currentUser.role}`);
+        const data = await res.json();
+        const banner = document.getElementById('disposal-alerts-banner');
+        if (!banner) return;
+
+        if (data.overdue && data.upcoming && (data.overdue.length > 0 || data.upcoming.length > 0)) {
+            banner.style.display = 'block';
+            document.getElementById('disposal-overdue-count').textContent = data.overdue.length;
+            document.getElementById('disposal-upcoming-count').textContent = data.upcoming.length;
+
+            const tbody = document.getElementById('disposal-alerts-tbody');
+            tbody.innerHTML = '';
+            const addRows = (list, labelColor, labelText) => {
+                list.forEach(s => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="padding: 6px 4px; border-bottom: 1px solid rgba(0,0,0,0.05);">${s.encodedCode}</td>
+                        <td style="padding: 6px 4px; border-bottom: 1px solid rgba(0,0,0,0.05);">${s.isNumber || '—'}</td>
+                        <td style="padding: 6px 4px; border-bottom: 1px solid rgba(0,0,0,0.05);"><span style="background:${labelColor}; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${labelText}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            };
+            addRows(data.overdue, '#ef4444', 'Overdue');
+            addRows(data.upcoming, '#f59e0b', 'Upcoming');
+        } else {
+            banner.style.display = 'none';
+        }
+    } catch (err) {
+        console.error('Failed to fetch disposal reminders:', err);
+    }
+}
+
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -132,6 +339,8 @@ function switchTab(tabId) {
     } else if (tabId === 'tab-super-admin') {
         loadSampleCellData();
         fetchScAuditLog();
+    } else if (tabId === 'tab-profile') {
+        refreshProfileStats();
     }
 }
 
@@ -156,7 +365,9 @@ async function loadPreferences() {
             currentPrefs = {
                 priorityRankingMode: data.preferences.priorityRankingMode || 'prioritize',
                 leaveWindowDays: parseInt(data.preferences.leaveWindowDays) || 30,
-                autoRunAssigner: data.preferences.autoRunAssigner === 'true'
+                autoRunAssigner: data.preferences.autoRunAssigner === 'true',
+                passStorageDays: parseInt(data.preferences.passStorageDays) || 15,
+                failStorageDays: parseInt(data.preferences.failStorageDays) || 45
             };
         }
     } catch (err) { console.error('Failed to load preferences:', err); }
@@ -165,8 +376,12 @@ async function loadPreferences() {
 function loadPreferencesUI() {
     const lw = document.getElementById('pref-leave-window');
     const ar = document.getElementById('pref-auto-run');
+    const ps = document.getElementById('pref-pass-storage');
+    const fs = document.getElementById('pref-fail-storage');
     if (lw) lw.value = currentPrefs.leaveWindowDays;
     if (ar) ar.checked = currentPrefs.autoRunAssigner;
+    if (ps) ps.value = currentPrefs.passStorageDays;
+    if (fs) fs.value = currentPrefs.failStorageDays;
     
     setRankingMode(currentPrefs.priorityRankingMode || 'prioritize');
 }
@@ -175,7 +390,9 @@ async function savePreferences() {
     const prefs = {
         priorityRankingMode: selectedRankingMode,
         leaveWindowDays: document.getElementById('pref-leave-window').value,
-        autoRunAssigner: document.getElementById('pref-auto-run').checked ? 'true' : 'false'
+        autoRunAssigner: document.getElementById('pref-auto-run').checked ? 'true' : 'false',
+        passStorageDays: document.getElementById('pref-pass-storage').value,
+        failStorageDays: document.getElementById('pref-fail-storage').value
     };
     try {
         const res = await fetch('/api/preferences', {
@@ -409,14 +626,17 @@ function showReviewModal(fresh, duplicates, newTPs = []) {
     currentDuplicateCount = duplicates.length;
     forceCommittedCodes.clear();
     
-    document.getElementById('fresh-count').textContent = fresh.length;
-    document.getElementById('duplicate-count').textContent = duplicates.length;
-    document.getElementById('commit-btn').disabled = (fresh.length === 0);
+    const assignedFresh = fresh.filter(s => s.assignedTo);
+    const unassignedFresh = fresh.filter(s => !s.assignedTo);
+
+    document.getElementById('fresh-count').textContent = assignedFresh.length;
+    const unassignedModalCount = document.getElementById('unassigned-modal-count');
+    if (unassignedModalCount) unassignedModalCount.textContent = unassignedFresh.length;
 
     // --- Missing Accounts Banner ---
     const existingMissingBanner = document.getElementById('missing-accounts-banner');
     if (existingMissingBanner) {
-        if (uploadMissingAccounts.length > 0) {
+        if (typeof uploadMissingAccounts !== 'undefined' && uploadMissingAccounts.length > 0) {
             existingMissingBanner.style.display = 'block';
             existingMissingBanner.style.cssText = `
                 background: #fff8e1; border: 1px solid #f59e0b; border-left: 4px solid #f59e0b;
@@ -438,12 +658,23 @@ function showReviewModal(fresh, duplicates, newTPs = []) {
 
     const freshTbody = document.getElementById('fresh-tbody');
     freshTbody.innerHTML = '';
-    fresh.forEach(s => {
+    assignedFresh.forEach(s => {
         const tr = document.createElement('tr');
         tr.classList.add('row-success-green');
-        tr.innerHTML = `<td>${s.encodedCode}</td><td>${s.assignedTo}</td><td><strong>${s.priorityLevel}</strong></td>`;
+        tr.innerHTML = `<td>${s.encodedCode}</td><td>${s.assignedTo}</td><td><strong>${s.priorityLevel}</strong></td><td><span class="status-badge" style="background:var(--success); color:white;">Assigned</span></td>`;
         freshTbody.appendChild(tr);
     });
+
+    const unassignedTbody = document.getElementById('unassigned-modal-tbody');
+    if (unassignedTbody) {
+        unassignedTbody.innerHTML = '';
+        unassignedFresh.forEach(s => {
+            const tr = document.createElement('tr');
+            tr.classList.add('row-warning-yellow');
+            tr.innerHTML = `<td>${s.encodedCode}</td><td>${s.isNumber || '—'}</td><td><strong>${s.priorityLevel}</strong></td><td><span class="status-badge" style="background:#fef3c7; color:#d97706;">Unassigned</span></td>`;
+            unassignedTbody.appendChild(tr);
+        });
+    }
 
     const dupTbody = document.getElementById('duplicate-tbody');
     dupTbody.innerHTML = '';
@@ -728,6 +959,7 @@ async function fetchSamples() {
             renderTable();
             populateSampleCodeDatalist();
             if (typeof renderAnalytics === 'function') renderAnalytics();
+            refreshProfileStats(); // Keep profile in sync after data refresh
         }
     } catch (e) { console.error(e); }
 }
@@ -1183,6 +1415,30 @@ function renderTable() {
     const submittedBadge = document.getElementById('submitted-count-badge');
     if (submittedBadge) submittedBadge.textContent = submittedAll.length;
 
+    // --- Populate Unassigned Pool Table (Smart Assigner Tab) ---
+    const unassignedPoolTbody = document.getElementById('unassigned-pool-tbody');
+    if (unassignedPoolTbody) {
+        unassignedPoolTbody.innerHTML = '';
+        if (unassignedAll.length === 0) {
+            unassignedPoolTbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">🎉 No unassigned samples.</td></tr>`;
+        } else {
+            unassignedAll.forEach(s => {
+                const tr = document.createElement('tr');
+                const isPrio = s._isTopPriority ? '<span class="badge-top-priority">Priority</span>' : '<span style="color:var(--text-muted);">Standard</span>';
+                tr.innerHTML = `
+                    <td style="color:var(--accent); font-weight:600;">${s.encodedCode}</td>
+                    <td>${s.isNumber || '—'}</td>
+                    <td>${isPrio}</td>
+                    <td>${s.receivedOn || '—'}</td>
+                    <td><button onclick="openSubmitModal(${s.id}, '${s.encodedCode}')" style="background:var(--primary); padding:4px 8px; font-size:0.8rem;">Direct Assign</button></td>
+                `;
+                unassignedPoolTbody.appendChild(tr);
+            });
+        }
+        const unassignedPoolCount = document.getElementById('unassigned-pool-count');
+        if (unassignedPoolCount) unassignedPoolCount.textContent = unassignedAll.length;
+    }
+
     // --- Pending Queue: apply filters ---
     let pending = pendingAll.filter(s => {
         if (isFilterVal !== 'ALL' && s.isNumber !== isFilterVal) return false;
@@ -1292,10 +1548,17 @@ function renderTable() {
             const now = new Date();
             const dispDate = new Date(s.disposalDate);
             const daysLeft = Math.ceil((dispDate - now) / (1000 * 60 * 60 * 24));
+            const dateStr = dispDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
             if (daysLeft > 0) {
-                disposalHtml = `<span class="badge-countdown" style="background:rgba(245,158,11,0.15); color:#b06000; border:1px solid rgba(245,158,11,0.3);">⏳ ${daysLeft} Days Retained</span>`;
+                disposalHtml = `<div style="display:flex; flex-direction:column; gap:4px;">
+                                    <span style="font-weight:600; font-size:0.9rem;">${dateStr}</span>
+                                    <span class="badge-countdown" style="background:rgba(245,158,11,0.15); color:#b06000; border:1px solid rgba(245,158,11,0.3); align-self:flex-start;">⏳ ${daysLeft} Days Retained</span>
+                                </div>`;
             } else {
-                disposalHtml = `<span class="badge-countdown" style="background:rgba(16,185,129,0.15); color:#137333; border:1px solid rgba(16,185,129,0.3);">✅ Safe to Dispose</span>`;
+                disposalHtml = `<div style="display:flex; flex-direction:column; gap:4px;">
+                                    <span style="font-weight:600; font-size:0.9rem; color:var(--text-muted);">${dateStr}</span>
+                                    <span class="badge-countdown" style="background:rgba(16,185,129,0.15); color:#137333; border:1px solid rgba(16,185,129,0.3); align-self:flex-start;">✅ Safe to Dispose</span>
+                                </div>`;
             }
         }
 
@@ -1420,6 +1683,29 @@ function toggleAdminViews() {
     
     const bulkActionsDisposal = document.getElementById('admin-bulk-actions-disposal');
     if (bulkActionsDisposal) bulkActionsDisposal.style.display = isAdmin ? 'flex' : 'none';
+
+    // Change Section Titles for TP
+    const mainTitle = document.getElementById('section-title');
+    if (mainTitle) mainTitle.textContent = isAdmin ? 'Pending Sample Queue' : 'My Assigned Samples';
+    
+    const tableTitle = document.getElementById('table-section-title');
+    if (tableTitle) tableTitle.textContent = isAdmin ? 'Pending Sample Queue' : 'My Assigned Samples';
+
+    // Helper to safely toggle custom dropdowns
+    const toggleDropdown = (id, show) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const parent = el.parentElement;
+        if (parent && parent.classList.contains('custom-select-wrapper')) {
+            parent.style.display = show ? '' : 'none';
+        } else {
+            el.style.display = show ? '' : 'none';
+        }
+    };
+
+    // Hide TP irrelevant filters (assignedTo dropdown & uploader filter)
+    toggleDropdown('assigned-filter', isAdmin);
+    toggleDropdown('audit-user-filter', isAdmin);
 
     // Toggle specific admin tab buttons in tabs bar
     const uploadBtn = document.getElementById('tab-btn-upload');
@@ -3365,6 +3651,22 @@ function isQuickReport() {
     const input = document.getElementById('is-rag-input');
     if (input) {
         input.value = 'Extract all testable parameters and return a structured markdown test report template';
+        sendISQuery();
+    }
+}
+
+function isQuickTolerance() {
+    const input = document.getElementById('is-rag-input');
+    if (input) {
+        input.value = 'What are the dimensional tolerances and acceptable limits specified in this standard?';
+        sendISQuery();
+    }
+}
+
+function isQuickSummarize() {
+    const input = document.getElementById('is-rag-input');
+    if (input) {
+        input.value = 'Provide a brief executive summary of this standard, including its primary scope and application.';
         sendISQuery();
     }
 }
