@@ -30,7 +30,7 @@
                 <p id="user-welcome">Welcome, User</p>
             </div>
             <div class="header-actions">
-                <div class="user-avatar" id="header-avatar" onclick="switchTab('tab-profile')" title="My Profile">
+                <div class="user-avatar" id="header-avatar" onclick="openProfileModal()" title="My Profile">
                     <span id="header-avatar-initials">U</span>
                 </div>
                 <button class="logout-btn" onclick="logout()">Secure Logout</button>
@@ -50,11 +50,15 @@
             <button id="tab-btn-analytics" class="tab-btn" onclick="switchTab('tab-analytics')">📈 Analytics</button>
             <button id="tab-btn-preferences" class="tab-btn" onclick="switchTab('tab-preferences')">⚙️ Preferences</button>
             <button id="tab-btn-super-admin" class="tab-btn" onclick="switchTab('tab-super-admin')" style="display: none;">🔐 Super Admin Analytics</button>
-            <button id="tab-btn-profile" class="tab-btn" onclick="switchTab('tab-profile')">👤 My Profile</button>
         </div>
 
-        <!-- Tab: Profile -->
-        <div id="tab-profile" class="tab-content">
+        <!-- Profile Modal -->
+        <div id="profile-modal" class="modal">
+            <div class="modal-content large-modal glass-panel" style="max-height: 90vh; overflow-y: auto;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                    <h3 style="color: var(--accent); margin:0;">👤 My Profile</h3>
+                    <button onclick="closeProfileModal()" style="background:transparent; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted);">&times;</button>
+                </div>
             <div class="profile-page">
 
                 <!-- Profile Hero Card -->
@@ -205,6 +209,7 @@
                     </div>
                 </div>
 
+            </div>
             </div>
         </div>
 
@@ -1052,6 +1057,7 @@
                                 📅 Equal Priority (FIFO)
                             </button>
                         </div>
+                        <button onclick="savePriorityRanking()" class="primary" style="width:100%; margin-top:15px; font-size:0.85rem; padding:8px;">💾 Apply Priority Mode Now</button>
                     </div>
                 </div>
 

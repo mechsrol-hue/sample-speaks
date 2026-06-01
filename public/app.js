@@ -316,12 +316,14 @@ async function checkDisposalReminders() {
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    
-    document.getElementById(tabId).classList.add('active');
-    
-    const activeBtn = document.querySelector(`.tab-btn[onclick="switchTab('${tabId}')"]`);
-    if (activeBtn) activeBtn.classList.add('active');
 
+    const content = document.getElementById(tabId);
+    if (content) content.classList.add('active');
+
+    const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick') === `switchTab('${tabId}')`);
+    if (btn) btn.classList.add('active');
+
+    // Load data specific to tabs
     if (tabId === 'tab-audit') {
         viewHistory();
     } else if (tabId === 'tab-lims') {
@@ -339,9 +341,19 @@ function switchTab(tabId) {
     } else if (tabId === 'tab-super-admin') {
         loadSampleCellData();
         fetchScAuditLog();
-    } else if (tabId === 'tab-profile') {
-        refreshProfileStats();
     }
+}
+
+// --- PROFILE MODAL ---
+function openProfileModal() {
+    refreshProfileStats();
+    const modal = document.getElementById('profile-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeProfileModal() {
+    const modal = document.getElementById('profile-modal');
+    if (modal) modal.style.display = 'none';
 }
 
 // --- PREFERENCES ---
@@ -376,14 +388,36 @@ async function loadPreferences() {
 function loadPreferencesUI() {
     const lw = document.getElementById('pref-leave-window');
     const ar = document.getElementById('pref-auto-run');
-    const ps = document.getElementById('pref-pass-storage');
-    const fs = document.getElementById('pref-fail-storage');
     if (lw) lw.value = currentPrefs.leaveWindowDays;
     if (ar) ar.checked = currentPrefs.autoRunAssigner;
-    if (ps) ps.value = currentPrefs.passStorageDays;
-    if (fs) fs.value = currentPrefs.failStorageDays;
+    if (document.getElementById('pref-pass-storage')) document.getElementById('pref-pass-storage').value = currentPrefs.passStorageDays;
+    if (document.getElementById('pref-fail-storage')) document.getElementById('pref-fail-storage').value = currentPrefs.failStorageDays;
     
     setRankingMode(currentPrefs.priorityRankingMode || 'prioritize');
+}
+
+async function savePriorityRanking() {
+    const prefs = {
+        ...currentPrefs,
+        priorityRankingMode: selectedRankingMode
+    };
+    try {
+        const res = await fetch('/api/preferences', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(prefs)
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Priority Mode applied successfully!', 'success');
+            currentPrefs.priorityRankingMode = selectedRankingMode;
+            fetchSamples(); // Reload samples with new ranking logic
+        } else {
+            showToast('Failed to apply Priority Mode.', 'error');
+        }
+    } catch (err) {
+        showToast('Network error while saving.', 'error');
+    }
 }
 
 async function savePreferences() {
