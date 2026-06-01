@@ -1174,7 +1174,9 @@
         <div class="modal-content glass-panel">
             <h3>Manage Competencies: <span id="comp-emp-name" style="color:var(--accent);"></span></h3>
             <div style="margin-top: 15px; display: flex; gap: 10px; margin-bottom: 20px; flex-wrap:wrap;">
-                <input type="text" id="comp-is-number" placeholder="IS Number (e.g. IS 4985)" style="flex:2; padding:8px; min-width:150px;">
+                <select id="comp-is-number" style="flex:2; padding:8px; min-width:150px;">
+                    <!-- Options populated dynamically -->
+                </select>
                 <select id="comp-proficiency" style="flex:1; padding:8px; min-width:120px;">
                     <option value="Standard">Standard</option>
                     <option value="Expert">Expert</option>
@@ -1184,7 +1186,7 @@
             </div>
             <div class="table-container" style="max-height: 250px;">
                 <table>
-                    <thead><tr><th>IS Number</th><th>Proficiency</th></tr></thead>
+                    <thead><tr><th>IS Number</th><th>Proficiency</th><th style="width: 50px;">Action</th></tr></thead>
                     <tbody id="comp-tbody"></tbody>
                 </table>
             </div>
