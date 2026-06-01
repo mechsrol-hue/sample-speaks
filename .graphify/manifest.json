@@ -1,0 +1,314 @@
+{
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/app.js": {
+    "mtime": 1779693583000,
+    "hash": "eec3523dec9c52cbcd20a167f5652e72"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/check_buttons.js": {
+    "mtime": 1780309235005.4272,
+    "hash": "6117b27ac45beb40f546ddd489714268"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/check_wiring.js": {
+    "mtime": 1780309235005.5496,
+    "hash": "e6313d7440de692fd1296d71deecb1fb"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/data.js": {
+    "mtime": 1779693583000,
+    "hash": "02a5d1c1f5b58ce9606b0eed017e61e9"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/database-supabase.js": {
+    "mtime": 1779693583000,
+    "hash": "489197d3759e11b3b4e4330953f3e41b"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/database.js": {
+    "mtime": 1780309235005.7048,
+    "hash": "eb949253d5b2747b26443a1e760778c4"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/delete_test.js": {
+    "mtime": 1780309235005.8193,
+    "hash": "cd6764121291d037b71574ac79e4d56b"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/delete_users.js": {
+    "mtime": 1780309235005.932,
+    "hash": "4f2d4c00eeb6f3fbddff57d6bd299415"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/extract_lm_studio.js": {
+    "mtime": 1780309235143.629,
+    "hash": "fe094f5b5a399514f596c0aa34095db1"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/fix_user.js": {
+    "mtime": 1780309235006.0437,
+    "hash": "d9edd7572e4c46a1bc00c4bb3e52ef82"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/format_db.js": {
+    "mtime": 1780309235143.8496,
+    "hash": "555b43a70b729ea66ea4e590bfc58760"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/generate_report_pdf.py": {
+    "mtime": 1779693583000,
+    "hash": "41f6165f37639a798b8e0d37be95a5a9"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/inspect_lims.py": {
+    "mtime": 1779693583000,
+    "hash": "df1c56e61f5c199d5e31215dd69c1fc2"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/lims_uploader_is4985.py": {
+    "mtime": 1780309235006.4233,
+    "hash": "bdf24195d5e5b1a25d2abfa4721aade0"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/list_users.js": {
+    "mtime": 1780309235006.6147,
+    "hash": "7955ae2ac070a6c67cdcb8ff343bedea"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/public/app.js": {
+    "mtime": 1780314362669.8293,
+    "hash": "1d7f1bd381362bc7c0f002637ffe08c5"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/public/specs_db.js": {
+    "mtime": 1779790549919.209,
+    "hash": "c52acf125dafa8875c132e86b06cf1c8"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/public/standards_db.js": {
+    "mtime": 1780309235145.0283,
+    "hash": "0876d7e8315ad830b16bc0d23d932abd"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/rewrite.js": {
+    "mtime": 1779693583000,
+    "hash": "0047f0d86378710e39a30bdb7927fee1"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/rewrite2.js": {
+    "mtime": 1779693583000,
+    "hash": "b44b74828482366b79049f737cc6b98b"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/seed_super_admin.js": {
+    "mtime": 1780309235010.1228,
+    "hash": "8c97308d6341db3aa78b8c606fa3bd4c"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/server.js": {
+    "mtime": 1780311453375.9312,
+    "hash": "82e64decae51670d54f45fc1c729edb4"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/submitted.js": {
+    "mtime": 1779693583000,
+    "hash": "05666adbeec02f59e568daf757424a41"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/test-assign.js": {
+    "mtime": 1780309235145.3638,
+    "hash": "8493af8a22d408805f2fbe8eada8577e"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/test_auth.js": {
+    "mtime": 1780309235010.5342,
+    "hash": "58a8acefc9f08f6cbc035e8c1ae8420e"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/test_cleanName.js": {
+    "mtime": 1780309235010.6533,
+    "hash": "128bf8a41e7be45e5a8467c476efe6e3"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/test_client.js": {
+    "mtime": 1780309235010.7725,
+    "hash": "68d9ff4a2cbb2b35d33cb9dcabaaeb7d"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/test_client2.js": {
+    "mtime": 1780309235010.8857,
+    "hash": "d8d2312c3c3021e5b4da05ed164ed1da"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/test_confirm.js": {
+    "mtime": 1780309235011.0496,
+    "hash": "45d1c133e33e7eb5608ceb0b254861a3"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/test_submit.js": {
+    "mtime": 1780309235011.194,
+    "hash": "9365952f72078f4895415b6bf4eb48c6"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/test_upload_endpoint.js": {
+    "mtime": 1780309235011.3247,
+    "hash": "ba7271ba45f2b6c9b5899375fdb40fc2"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/test_upload_logic.js": {
+    "mtime": 1780309235011.4534,
+    "hash": "15a33bdd7a102d88dd5c6ec889b6fcda"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/index.html": {
+    "mtime": 1779693583000,
+    "hash": "dc6a481841aabd35448dd9a2a982b4f6"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/lims_dashboard_html.txt": {
+    "mtime": 1779693583000,
+    "hash": "76a6c8f2a265e4ca3ab3f4121b23db8d"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/lims_test_report_html.txt": {
+    "mtime": 1779693583000,
+    "hash": "39d69aa7650d93f86bdc89a575365dac"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/page_01_dashboard.html": {
+    "mtime": 1779693583000,
+    "hash": "b1d17ddbf59b91a5ea4066d591155efb"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/page_02_pending_list.html": {
+    "mtime": 1779693583000,
+    "hash": "3f0931e367312bafdf83936ed74df3d8"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/page_03_filtered_list.html": {
+    "mtime": 1779693583000,
+    "hash": "440790feee4276db9d80ec3404e281ac"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/page_04_parameters_table.html": {
+    "mtime": 1779693583000,
+    "hash": "b239f241d16f4450a8b27d21e5e0afd1"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/page_05_after_start.html": {
+    "mtime": 1779693583000,
+    "hash": "b60973905a8391b8ffa3f2432b1ee2d4"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/page_06_modal_open.html": {
+    "mtime": 1779693583000,
+    "hash": "686be9d67fe89d44152154cf5c2e17d2"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/page_07_modal_scrolled.html": {
+    "mtime": 1779693583000,
+    "hash": "f48bd8a076c5198ee7b900c3631a09cb"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/public/index.html": {
+    "mtime": 1780314291721.8354,
+    "hash": "bcd069127692f53a9baf2f2830d3dc1f"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/public/page_01_dashboard.html": {
+    "mtime": 1779434440000,
+    "hash": "7106d326987f9f74f55015be39beb87d"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/public/page_02_pending_list.html": {
+    "mtime": 1779434448000,
+    "hash": "0a0334c94abecd439586c7e86e4cd739"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/public/page_03_filtered_list.html": {
+    "mtime": 1779434472000,
+    "hash": "3b6c99b882daa70e04b3ecf600fa4443"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/public/page_04_parameters_table.html": {
+    "mtime": 1779434480000,
+    "hash": "6d793a24f08fe3798b8191265c7068bf"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/public/page_05_after_start.html": {
+    "mtime": 1779434488000,
+    "hash": "257216f787ccf57cd31282117e3e4b71"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/public/page_06_modal_open.html": {
+    "mtime": 1779434492000,
+    "hash": "12271da952d9e3fcf6f47a8f2eca6586"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/public/page_07_modal_scrolled.html": {
+    "mtime": 1779434494000,
+    "hash": "463242562cc68b8dbad53241ebd96ce8"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/render.yaml": {
+    "mtime": 1779693583000,
+    "hash": "ee341bfa84f9396e951c74f67e01d76e"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Lims picture/Testing Charges/Testing charges BIS 09.2.2026/From IS 1 to IS 571 09.2.2026.pdf": {
+    "mtime": 1780309235042.209,
+    "hash": "b6b7501ace9dd27961fe4bc8dc6d1430"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Lims picture/Testing Charges/Testing charges BIS 09.2.2026/From IS 1970 to IS 2785 9.2.2026.pdf": {
+    "mtime": 1780309235046.1667,
+    "hash": "49448f600c9749eb82fb81355acf9d9e"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Lims picture/Testing Charges/Testing charges BIS 09.2.2026/From IS 2797 to IS 4990 9.2.2026.pdf": {
+    "mtime": 1780309235052.7588,
+    "hash": "f2f6f2b3da8713f8be2791d3bf2b50ca"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Lims picture/Testing Charges/Testing charges BIS 09.2.2026/From IS 5029 to IS 7407(PART-II&III) 9.2.2026.pdf": {
+    "mtime": 1780309235057.5994,
+    "hash": "071d3e7f74b9e38a0e11912c2f9574ce"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Lims picture/Testing Charges/Testing charges BIS 09.2.2026/From IS 573 to IS 1970 09.2.2026.pdf": {
+    "mtime": 1780309235063.9404,
+    "hash": "98a96b06572fc92a17d8c2908f7fea45"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Lims picture/Testing Charges/Testing charges BIS 09.2.2026/From IS 7407(PART-II&III) to IS 9968 (Part II &Part III) 9.2.26.pdf": {
+    "mtime": 1780309235068.7908,
+    "hash": "eab8952779d8892ff78931eb1582d423"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Lims picture/Testing Charges/Testing charges BIS 09.2.2026/From IS 9968 (Part II & Part III) to IS 18000 9.2.26.pdf": {
+    "mtime": 1780309235078.333,
+    "hash": "ffb5f4bbfb33a4af21c891e3a74f5a9f"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Lims picture/Testing Charges/Testing charges BIS 09.2.2026/Laboratery Module - BIS Testing Charges 9.2.26.pdf": {
+    "mtime": 1780309235086.329,
+    "hash": "e99560c4406b1bd838681f63174603e3"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Report_23456.pdf": {
+    "mtime": 1779779058233.0232,
+    "hash": "b82cec061ead63798b6881d36fe0cfc1"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Report_26M2707B2P.pdf": {
+    "mtime": 1780309235002.9458,
+    "hash": "adefe86fbb25728cf23fae67da031dca"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Report_26M724863N.pdf": {
+    "mtime": 1779693583000,
+    "hash": "87215c26b60d9efa2814982f85c472a3"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Report_26MA61481N.pdf": {
+    "mtime": 1779693583000,
+    "hash": "a47adb1758a33c48eb3a3748e3720ff1"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Report_26MD61F86N.pdf": {
+    "mtime": 1779790549918.003,
+    "hash": "1f4017a2940b767c68b10e5bb6c58629"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Report_707.pdf": {
+    "mtime": 1780309235003.0876,
+    "hash": "c105d3170599290eaf3c1245484e38b0"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Report_qwertyuio.pdf": {
+    "mtime": 1779707262903.0828,
+    "hash": "893c8201de94bb1d918dda3574b550fa"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Report_qwqghjk.pdf": {
+    "mtime": 1780309235003.2168,
+    "hash": "2b2c7e3c177ba916456d14582faa3cdd"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Testing Charges/Testing charges BIS 09.2.2026/From IS 1 to IS 571 09.2.2026.pdf": {
+    "mtime": 1780309235102.4766,
+    "hash": "b6b7501ace9dd27961fe4bc8dc6d1430"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Testing Charges/Testing charges BIS 09.2.2026/From IS 1970 to IS 2785 9.2.2026.pdf": {
+    "mtime": 1780309235105.9006,
+    "hash": "49448f600c9749eb82fb81355acf9d9e"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Testing Charges/Testing charges BIS 09.2.2026/From IS 2797 to IS 4990 9.2.2026.pdf": {
+    "mtime": 1780309235111.5305,
+    "hash": "f2f6f2b3da8713f8be2791d3bf2b50ca"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Testing Charges/Testing charges BIS 09.2.2026/From IS 5029 to IS 7407(PART-II&III) 9.2.2026.pdf": {
+    "mtime": 1780309235115.8823,
+    "hash": "071d3e7f74b9e38a0e11912c2f9574ce"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Testing Charges/Testing charges BIS 09.2.2026/From IS 573 to IS 1970 09.2.2026.pdf": {
+    "mtime": 1780309235121.7732,
+    "hash": "98a96b06572fc92a17d8c2908f7fea45"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Testing Charges/Testing charges BIS 09.2.2026/From IS 7407(PART-II&III) to IS 9968 (Part II &Part III) 9.2.26.pdf": {
+    "mtime": 1780309235126.1973,
+    "hash": "eab8952779d8892ff78931eb1582d423"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Testing Charges/Testing charges BIS 09.2.2026/From IS 9968 (Part II & Part III) to IS 18000 9.2.26.pdf": {
+    "mtime": 1780309235135.333,
+    "hash": "ffb5f4bbfb33a4af21c891e3a74f5a9f"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Testing Charges/Testing charges BIS 09.2.2026/Laboratery Module - BIS Testing Charges 9.2.26.pdf": {
+    "mtime": 1780309235143.1096,
+    "hash": "e99560c4406b1bd838681f63174603e3"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Lims picture/4985.png": {
+    "mtime": 1779693583000,
+    "hash": "06d90217dd037fad7de426b4454eb2d5"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Lims picture/Screenshot 2026-05-21 125558.png": {
+    "mtime": 1779693583000,
+    "hash": "03defeffcd6779c6d9876edeb949c5fb"
+  },
+  "/Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/Lims picture/Screenshot 2026-05-21 143151.png": {
+    "mtime": 1779693583000,
+    "hash": "d784e6ccad34bb5adf284baaa2a616c4"
+  }
+}
