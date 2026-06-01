@@ -2505,10 +2505,37 @@ async function addEmployee() {
 }
 
 let currentCompEmpId = null;
-function openCompetencyModal(empId, empName) {
+async function openCompetencyModal(empId, empName) {
     currentCompEmpId = empId;
     document.getElementById('comp-emp-name').textContent = empName;
     document.getElementById('competency-modal').classList.add('active');
+    
+    // Populate the dropdown with unique IS Numbers from Unassigned pool AND existing db
+    const select = document.getElementById('comp-is-number');
+    select.innerHTML = '<option value="">Loading...</option>';
+    
+    try {
+        const res = await fetch('/api/unassigned-samples');
+        const data = await res.json();
+        const unassigned = data.samples || [];
+        
+        let uniqueIS = new Set(Object.keys(EXTRACTED_STANDARDS_DB));
+        unassigned.forEach(s => {
+            if (s.isNumber) uniqueIS.add(s.isNumber);
+        });
+        
+        select.innerHTML = '<option value="">-- Select IS Standard --</option>';
+        Array.from(uniqueIS).sort().forEach(isNum => {
+            const opt = document.createElement('option');
+            opt.value = isNum;
+            opt.textContent = isNum;
+            select.appendChild(opt);
+        });
+    } catch(err) {
+        console.error(err);
+        select.innerHTML = '<option value="">Error loading standards</option>';
+    }
+
     loadCompetencies(empId);
 }
 
@@ -2526,11 +2553,17 @@ async function loadCompetencies(empId) {
         if (res.ok) {
             tbody.innerHTML = '';
             if (data.competencies.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-muted);">No IS competencies assigned.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);">No IS competencies assigned.</td></tr>';
             }
             data.competencies.forEach(c => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${c.isNumber}</td><td>${c.proficiencyLevel}</td>`;
+                tr.innerHTML = `
+                    <td>${c.isNumber}</td>
+                    <td>${c.proficiencyLevel}</td>
+                    <td style="text-align:center;">
+                        <button onclick="removeCompetency(${c.id})" style="background:transparent; border:none; color:var(--danger); cursor:pointer;" title="Remove">🗑️</button>
+                    </td>
+                `;
                 tbody.appendChild(tr);
             });
         }
@@ -2556,6 +2589,22 @@ async function addCompetency() {
             showToast('Competency added.', 'success');
         }
     } catch (err) {
+        console.error(err);
+    }
+}
+
+async function removeCompetency(compId) {
+    if (!confirm('Are you sure you want to remove this competency?')) return;
+    try {
+        const res = await fetch(`/api/admin/competencies/${compId}`, { method: 'DELETE' });
+        if (res.ok) {
+            showToast('Competency removed.', 'success');
+            if (currentCompEmpId) loadCompetencies(currentCompEmpId);
+        } else {
+            const data = await res.json();
+            showToast(data.error || 'Failed to remove', 'error');
+        }
+    } catch(err) {
         console.error(err);
     }
 }

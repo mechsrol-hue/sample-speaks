@@ -794,6 +794,12 @@ app.post('/api/admin/competencies', async (req, res) => {
     res.json({ message: 'Competency added.' });
 });
 
+app.delete('/api/admin/competencies/:id', async (req, res) => {
+    const { error } = await supabase.from('employee_competencies').delete().eq('id', req.params.id);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: 'Competency removed.' });
+});
+
 app.get('/api/admin/leaves', async (req, res) => {
     try {
         const { data: leaves, error } = await supabase
@@ -916,16 +922,27 @@ app.get('/api/admin/templates', async (req, res) => {
                 compMap[c.isNumber].push(c);
             });
 
-            // 4. Calculate Current Load Hours per TA
+            // 4. Calculate Current Load Hours and Equipment Load
             const { data: allPending } = await supabase.from('samples').select('assignedTo, isNumber').in('appStatus', ['Pending']);
             const loadHoursMap = {};
+            const equipmentLoadMap = {}; // Maps equipmentName -> pendingCount
+            
             (allPending || []).forEach(s => {
-                if (s.assignedTo) {
-                    let h = 20; // fallback avg hours
-                    if (templates[s.isNumber] && templates[s.isNumber].totalHours) {
-                        h = templates[s.isNumber].totalHours;
+                const tmpl = templates[s.isNumber];
+                if (tmpl) {
+                    if (s.assignedTo) {
+                        loadHoursMap[s.assignedTo] = (loadHoursMap[s.assignedTo] || 0) + (tmpl.totalHours || 20);
                     }
-                    loadHoursMap[s.assignedTo] = (loadHoursMap[s.assignedTo] || 0) + h;
+                    // Accumulate equipment load regardless of who is assigned
+                    if (tmpl.activeClauses) {
+                        Object.values(tmpl.activeClauses).forEach(clause => {
+                            if (clause.active && clause.equipment) {
+                                equipmentLoadMap[clause.equipment] = (equipmentLoadMap[clause.equipment] || 0) + 1;
+                            }
+                        });
+                    }
+                } else if (s.assignedTo) {
+                    loadHoursMap[s.assignedTo] = (loadHoursMap[s.assignedTo] || 0) + 20;
                 }
             });
 
@@ -937,86 +954,123 @@ app.get('/api/admin/templates', async (req, res) => {
             const today = new Date();
 
             for (const sample of unassignedSamples) {
-                let requiredHours = 20; // default
-                if (templates[sample.isNumber] && templates[sample.isNumber].totalHours) {
-                    requiredHours = templates[sample.isNumber].totalHours;
+                let requiredHours = 20; 
+                let tatDays = 7;
+                let requiredEquipments = [];
+
+                if (templates[sample.isNumber]) {
+                    requiredHours = templates[sample.isNumber].totalHours || 20;
+                    tatDays = templates[sample.isNumber].tatDays || 7;
+                    if (templates[sample.isNumber].activeClauses) {
+                        Object.values(templates[sample.isNumber].activeClauses).forEach(c => {
+                            if (c.active && c.equipment) requiredEquipments.push(c.equipment);
+                        });
+                    }
                 }
+
+                // Calculate Machine Bottleneck
+                let maxEquipLoad = 0;
+                let bottleneckMachine = '';
+                requiredEquipments.forEach(eq => {
+                    const load = equipmentLoadMap[eq] || 0;
+                    if (load > maxEquipLoad) {
+                        maxEquipLoad = load;
+                        bottleneckMachine = eq;
+                    }
+                });
+
+                // Calculate SLA / TAT Deadline
+                let sampleAge = 0;
+                let daysUntilDeadline = tatDays; // Default
+                if (sample.receivedOn) {
+                    const parts = sample.receivedOn.split('-');
+                    if (parts.length === 3) {
+                        const recDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                        sampleAge = Math.floor((today - recDate) / (1000 * 60 * 60 * 24));
+                        const deadlineDate = new Date(recDate);
+                        deadlineDate.setDate(deadlineDate.getDate() + tatDays);
+                        daysUntilDeadline = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+                    }
+                }
+
+                const isPriority = (sample.priorityLevel || '').toLowerCase() === 'priority' || (sample.encodedCode || '').toLowerCase().endsWith('p');
+                
+                // SLA Urgency Scoring
+                let slaBoost = 0;
+                let slaTag = '';
+                if (daysUntilDeadline < 0) {
+                    slaBoost = 500;
+                    slaTag = '⚠️ SLA OVERDUE';
+                } else if (daysUntilDeadline <= 2) {
+                    slaBoost = 200;
+                    slaTag = '🔥 SLA CRITICAL';
+                } else {
+                    slaBoost = Math.max(0, 50 - (daysUntilDeadline * 5)); // Gradually higher score as it gets closer
+                }
+                
+                const priorityBoost = (priorityRankingMode === 'prioritize' && isPriority) ? 100 : 0;
+                const fifoBoost = Math.min(sampleAge, 30);
 
                 const matchingComps = compMap[sample.isNumber] || [];
                 let bestEmployee = null;
                 let bestScore = -Infinity;
                 let bestReason = '';
 
-                // Calculate FIFO age
-                let sampleAge = 0;
-                if (sample.receivedOn) {
-                    const parts = sample.receivedOn.split('-');
-                    if (parts.length === 3) {
-                        const recDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-                        sampleAge = Math.floor((today - recDate) / (1000 * 60 * 60 * 24));
-                    }
-                }
-
-                const isPriority = (sample.priorityLevel || '').toLowerCase() === 'priority' || (sample.encodedCode || '').toLowerCase().endsWith('p');
-                const priorityBoost = (priorityRankingMode === 'prioritize' && isPriority) ? 50 : 0;
-
                 // Evaluate competent employees
                 for (const comp of matchingComps) {
                     const emp = (employees || []).find(e => e.id === comp.employeeId);
                     if (!emp) continue;
 
-                    // We no longer strictly skip people on leave or over capacity.
-                    // Instead, we heavily penalize their score and tag the recommendation.
                     let isOnLeave = onLeaveToday.has(emp.id);
-                    
-                    const maxQueueHours = emp.maxDailySamples || 40; // using maxDailySamples as maxQueueHours
+                    const maxQueueHours = emp.maxDailySamples || 40; 
                     const currentLoadHours = loadHoursMap[emp.fullName] || 0;
                     const availableCapacity = maxQueueHours - currentLoadHours;
 
                     let isOverCapacity = availableCapacity < requiredHours;
 
-                    // Trainees cannot do Top Priority
                     if (comp.proficiencyLevel === 'Trainee' && isPriority) continue;
 
                     let profMult = 1.0;
                     if (comp.proficiencyLevel === 'Expert') profMult = 1.5;
                     else if (comp.proficiencyLevel === 'Trainee') profMult = 0.6;
 
-                    // Load score factor (higher available capacity = better)
                     const capacityScore = availableCapacity * 2; 
 
-                    // FIFO boost (1 point per day old, max 30)
-                    const fifoBoost = Math.min(sampleAge, 30);
-
                     // Penalties
-                    const leavePenalty = isOnLeave ? 1000 : 0; // Extremely low priority if on leave
-                    const capacityPenalty = isOverCapacity ? 500 : 0; // Low priority if it overloads their queue
+                    const leavePenalty = isOnLeave ? 1000 : 0; 
+                    const capacityPenalty = isOverCapacity ? 500 : 0; 
+                    const machinePenalty = maxEquipLoad * 5; // e.g. 10 pending samples = -50 points
 
-                    let score = (10 * profMult) + capacityScore + priorityBoost + fifoBoost - leavePenalty - capacityPenalty;
+                    let score = (10 * profMult) + capacityScore + priorityBoost + fifoBoost + slaBoost - leavePenalty - capacityPenalty - machinePenalty;
 
                     if (score > bestScore) {
                         bestScore = score;
                         bestEmployee = emp;
                         
                         let tags = [];
-                        if (isOnLeave) tags.push('⚠️ ON LEAVE TODAY');
+                        if (slaTag) tags.push(slaTag);
+                        if (maxEquipLoad > 5) tags.push(`⚠️ [${bottleneckMachine}] BACKLOGGED`);
+                        if (isOnLeave) tags.push('⚠️ ON LEAVE');
                         if (isOverCapacity) tags.push('⚠️ EXCEEDS CAPACITY');
-                        let tagStr = tags.length > 0 ? ` [${tags.join(', ')}]` : '';
+                        let tagStr = tags.length > 0 ? ` [${tags.join(' | ')}]` : '';
                         
-                        bestReason = `IS ${sample.isNumber} (${comp.proficiencyLevel})${tagStr}, Avail: ${availableCapacity.toFixed(1)} hrs left`;
+                        bestReason = `IS ${sample.isNumber} (${comp.proficiencyLevel})${tagStr}, Avail: ${availableCapacity.toFixed(1)}h`;
                     }
                 }
 
-                // We DO NOT FORCE an assignment if nobody qualifies. We leave it Unassigned.
                 if (bestEmployee) {
-                    // Update the tracked load so we don't over-assign in the same batch
                     loadHoursMap[bestEmployee.fullName] = (loadHoursMap[bestEmployee.fullName] || 0) + requiredHours;
+                    
+                    // Also update equipment load to simulate the future backlog
+                    requiredEquipments.forEach(eq => {
+                        equipmentLoadMap[eq] = (equipmentLoadMap[eq] || 0) + 1;
+                    });
 
                     const { error } = await supabase.from('assignment_recommendations').insert({
                         sampleId: sample.id,
                         recommendedEmployeeId: bestEmployee.id,
                         recommendedEmployeeName: bestEmployee.fullName,
-                        reason: bestReason + ` | Sample Needs: ${requiredHours} hrs`,
+                        reason: bestReason + ` | Needs: ${requiredHours}h Active`,
                         score: Math.round(bestScore * 100) / 100,
                         status: 'pending'
                     });
