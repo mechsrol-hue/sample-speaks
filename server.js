@@ -4,17 +4,50 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const multer = require('multer');
 const xlsx = require('xlsx');
+const jwt = require('jsonwebtoken');
 const supabase = require('./database-supabase');
 const db = require('./database');
 const path = require('path');
 const fs = require('fs');
+const { appendSamplesToMaster, updateAssignmentInMaster, updateBulkAssignmentsInMaster } = require('./excel_sync');
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(express.static('public'));
 
-const upload = multer({ storage: multer.memoryStorage() });
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-fallback-key';
+
+// --- AUTHENTICATION MIDDLEWARE ---
+const requireAuth = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) return res.status(401).json({ error: 'Access denied. No token provided.' });
+    
+    const token = authHeader.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Access denied. Malformed token.' });
+    
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded; // Attach user to request
+        next();
+    } catch (err) {
+        return res.status(403).json({ error: 'Invalid or expired token.' });
+    }
+};
+
+const requireAdmin = (req, res, next) => {
+    requireAuth(req, res, () => {
+        if (req.user.role !== 'admin' && req.user.role !== 'super_admin' && req.user.role !== 'admin_sample_cell') {
+            return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
+        }
+        next();
+    });
+};
+
+const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit to prevent memory exhaustion DoS
+});
 
 // --- Universal Name Standardizer ---
 function cleanName(name) {
@@ -76,7 +109,15 @@ app.post('/api/login', async (req, res) => {
         .single();
 
     if (error || !row) return res.status(401).json({ error: 'Invalid credentials.' });
-    res.json({ message: 'Login successful', user: { id: row.id, username: row.username, role: row.role } });
+    
+    // Sign JWT Token
+    const token = jwt.sign(
+        { id: row.id, username: row.username, role: row.role }, 
+        JWT_SECRET, 
+        { expiresIn: '24h' }
+    );
+    
+    res.json({ message: 'Login successful', token, user: { id: row.id, username: row.username, role: row.role } });
 });
 
 // Change Password
@@ -134,7 +175,7 @@ app.delete('/api/admin/users/:id', async (req, res) => {
     res.json({ message: "Account deleted successfully." });
 });
 
-app.post('/api/admin/create-tp', async (req, res) => {
+app.post('/api/admin/create-tp', requireAdmin, async (req, res) => {
     const username = cleanName(req.body.username);
     const password = req.body.password;
     if (!username || !password) return res.status(400).json({ error: 'Username and password are required.' });
@@ -411,6 +452,9 @@ app.post('/api/confirm-upload', async (req, res) => {
     const { error: upsertErr } = await supabase.from('samples').upsert(upsertArray, { onConflict: 'encodedCode' });
     if (upsertErr) return res.status(500).json({ error: 'Batch insert failed: ' + upsertErr.message });
 
+    // Sync to Master Sheet
+    appendSamplesToMaster(upsertArray);
+
     // Create accounts for TPs that don't exist
     for (const tp of uniqueTPs) {
         if (!tpAccountStatus[tp]) {
@@ -562,7 +606,7 @@ app.get('/api/disposal-reminders/:tpName', async (req, res) => {
 });
 
 // Admin reset-database
-app.post('/api/admin/reset-database', async (req, res) => {
+app.post('/api/admin/reset-database', requireAdmin, async (req, res) => {
     const { role, username } = req.body;
     const cleanUser = cleanName(username);
     const isValidAdmin = (role === 'admin' && cleanUser === 'Admin') || (role === 'admin_sample_cell' && (cleanUser === 'Admin' || cleanUser === 'Super Admin' || cleanUser === 'admin_sample_cell'));
@@ -583,7 +627,7 @@ app.post('/api/admin/reset-database', async (req, res) => {
 });
 
 // Admin bulk delete samples
-app.post('/api/admin/delete-samples-bulk', async (req, res) => {
+app.post('/api/admin/delete-samples-bulk', requireAdmin, async (req, res) => {
     const { ids } = req.body;
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
         return res.status(400).json({ error: 'No sample IDs provided.' });
@@ -726,7 +770,7 @@ app.post('/api/lims/stop', (req, res) => {
 
 // --- EMPLOYEE & WORKLOAD MANAGEMENT API ---
 
-app.get('/api/admin/employees', async (req, res) => {
+app.get('/api/admin/employees', requireAdmin, async (req, res) => {
     try {
         const { data: employees, error } = await supabase
             .from('employee_profiles')
@@ -751,7 +795,7 @@ app.get('/api/admin/employees', async (req, res) => {
     }
 });
 
-app.post('/api/admin/employees', async (req, res) => {
+app.post('/api/admin/employees', requireAdmin, async (req, res) => {
     const { fullName, designation, maxDailySamples, password } = req.body;
     const username = cleanName(req.body.username);
     if (!fullName || !username || !password) return res.status(400).json({ error: 'Missing required fields' });
@@ -775,7 +819,7 @@ app.post('/api/admin/employees', async (req, res) => {
     res.json({ message: 'Employee profile created successfully.' });
 });
 
-app.put('/api/admin/employees/:id', async (req, res) => {
+app.put('/api/admin/employees/:id', requireAdmin, async (req, res) => {
     const empId = req.params.id;
     const { fullName, designation, maxDailySamples } = req.body;
     if (!fullName) return res.status(400).json({ error: 'Full Name is required.' });
@@ -803,7 +847,7 @@ app.get('/api/admin/competencies/:employeeId', async (req, res) => {
     }
 });
 
-app.post('/api/admin/competencies', async (req, res) => {
+app.post('/api/admin/competencies', requireAdmin, async (req, res) => {
     const { employeeId, isNumber, avgTestDurationHours, proficiencyLevel } = req.body;
     const { error } = await supabase
         .from('employee_competencies')
@@ -812,13 +856,13 @@ app.post('/api/admin/competencies', async (req, res) => {
     res.json({ message: 'Competency added.' });
 });
 
-app.delete('/api/admin/competencies/:id', async (req, res) => {
+app.delete('/api/admin/competencies/:id', requireAdmin, async (req, res) => {
     const { error } = await supabase.from('employee_competencies').delete().eq('id', req.params.id);
     if (error) return res.status(500).json({ error: error.message });
     res.json({ message: 'Competency removed.' });
 });
 
-app.get('/api/admin/leaves', async (req, res) => {
+app.get('/api/admin/leaves', requireAdmin, async (req, res) => {
     try {
         const { data: leaves, error } = await supabase
             .from('employee_leaves')
@@ -832,7 +876,7 @@ app.get('/api/admin/leaves', async (req, res) => {
     }
 });
 
-app.post('/api/admin/leaves', async (req, res) => {
+app.post('/api/admin/leaves', requireAdmin, async (req, res) => {
     const { employeeId, leaveDate, reason } = req.body;
     const { error } = await supabase
         .from('employee_leaves')
@@ -841,7 +885,7 @@ app.post('/api/admin/leaves', async (req, res) => {
     res.json({ message: 'Leave added.' });
 });
 
-app.delete('/api/admin/leaves/:id', async (req, res) => {
+app.delete('/api/admin/leaves/:id', requireAdmin, async (req, res) => {
     const { error } = await supabase.from('employee_leaves').delete().eq('id', req.params.id);
     if (error) return res.status(500).json({ error: error.message });
     res.json({ message: 'Leave removed.' });
@@ -860,7 +904,7 @@ app.get('/api/unassigned-samples', async (req, res) => {
 });
 
 // NEW TEMPLATE ENDPOINTS
-app.get('/api/admin/templates', async (req, res) => {
+app.get('/api/admin/templates', requireAdmin, async (req, res) => {
         try {
             const { data } = await supabase.from('system_preferences').select('*').like('key', 'template_%');
             const templates = {};
@@ -873,7 +917,7 @@ app.get('/api/admin/templates', async (req, res) => {
         }
     });
 
-    app.post('/api/admin/templates', async (req, res) => {
+    app.post('/api/admin/templates', requireAdmin, async (req, res) => {
         const { isNumber, templateData } = req.body;
         if (!isNumber || !templateData) return res.status(400).json({ error: 'Missing isNumber or templateData' });
         try {
@@ -892,8 +936,12 @@ app.get('/api/admin/templates', async (req, res) => {
         const { sampleId, username } = req.body;
         if (!sampleId || !username) return res.status(400).json({ error: 'Missing sampleId or username' });
         try {
+            const { data: sample } = await supabase.from('samples').select('encodedCode').eq('id', sampleId).single();
             const { error } = await supabase.from('samples').update({ assignedTo: username }).eq('id', sampleId);
             if (error) throw error;
+            
+            // Sync to Master Sheet
+            if (sample) updateAssignmentInMaster(sample.encodedCode, username);
             
             // Cleanup any pending recommendations for this sample
             await supabase.from('assignment_recommendations').delete().eq('sampleId', sampleId);
@@ -926,6 +974,10 @@ app.get('/api/admin/templates', async (req, res) => {
 
             // 3. Load employees, competencies, leaves
             const { data: employees } = await supabase.from('employee_profiles').select('*');
+            const { data: allUsers } = await supabase.from('users').select('id, username');
+            const userMap = {};
+            (allUsers || []).forEach(u => userMap[u.id] = u.username);
+            (employees || []).forEach(e => e.username = userMap[e.userId] || e.fullName);
             const { data: competencies } = await supabase.from('employee_competencies').select('*');
             
             // Get leaves for TODAY
@@ -938,6 +990,14 @@ app.get('/api/admin/templates', async (req, res) => {
             (competencies || []).forEach(c => {
                 if (!compMap[c.isNumber]) compMap[c.isNumber] = [];
                 compMap[c.isNumber].push(c);
+            });
+
+            // Fetch previous REJECTED recommendations to penalize them
+            const { data: rejectedRecs } = await supabase.from('assignment_recommendations').select('sampleId, recommendedEmployeeId').eq('status', 'rejected');
+            const rejectedMap = {}; // { sampleId: Set(employeeId, employeeId) }
+            (rejectedRecs || []).forEach(r => {
+                if (!rejectedMap[r.sampleId]) rejectedMap[r.sampleId] = new Set();
+                rejectedMap[r.sampleId].add(r.recommendedEmployeeId);
             });
 
             // 4. Calculate Current Load Hours and Equipment Load
@@ -1041,7 +1101,7 @@ app.get('/api/admin/templates', async (req, res) => {
 
                     let isOnLeave = onLeaveToday.has(emp.id);
                     const maxQueueHours = emp.maxDailySamples || 40; 
-                    const currentLoadHours = loadHoursMap[emp.fullName] || 0;
+                    const currentLoadHours = loadHoursMap[emp.username] || 0;
                     const availableCapacity = maxQueueHours - currentLoadHours;
 
                     let isOverCapacity = availableCapacity < requiredHours;
@@ -1058,8 +1118,9 @@ app.get('/api/admin/templates', async (req, res) => {
                     const leavePenalty = isOnLeave ? 1000 : 0; 
                     const capacityPenalty = isOverCapacity ? 500 : 0; 
                     const machinePenalty = maxEquipLoad * 5; // e.g. 10 pending samples = -50 points
+                    const rejectPenalty = (rejectedMap[sample.id] && rejectedMap[sample.id].has(emp.id)) ? 9999 : 0; // Extremely high penalty if previously rejected
 
-                    let score = (10 * profMult) + capacityScore + priorityBoost + fifoBoost + slaBoost - leavePenalty - capacityPenalty - machinePenalty;
+                    let score = (10 * profMult) + capacityScore + priorityBoost + fifoBoost + slaBoost - leavePenalty - capacityPenalty - machinePenalty - rejectPenalty;
 
                     if (score > bestScore) {
                         bestScore = score;
@@ -1070,6 +1131,7 @@ app.get('/api/admin/templates', async (req, res) => {
                         if (maxEquipLoad > 5) tags.push(`⚠️ [${bottleneckMachine}] BACKLOGGED`);
                         if (isOnLeave) tags.push('⚠️ ON LEAVE');
                         if (isOverCapacity) tags.push('⚠️ EXCEEDS CAPACITY');
+                        if (rejectPenalty > 0) tags.push('⚠️ PREVIOUSLY REJECTED');
                         let tagStr = tags.length > 0 ? ` [${tags.join(' | ')}]` : '';
                         
                         bestReason = `IS ${sample.isNumber} (${comp.proficiencyLevel})${tagStr}, Avail: ${availableCapacity.toFixed(1)}h`;
@@ -1077,7 +1139,7 @@ app.get('/api/admin/templates', async (req, res) => {
                 }
 
                 if (bestEmployee) {
-                    loadHoursMap[bestEmployee.fullName] = (loadHoursMap[bestEmployee.fullName] || 0) + requiredHours;
+                    loadHoursMap[bestEmployee.username] = (loadHoursMap[bestEmployee.username] || 0) + requiredHours;
                     
                     // Also update equipment load to simulate the future backlog
                     requiredEquipments.forEach(eq => {
@@ -1126,14 +1188,23 @@ app.post('/api/approve-assignment/:id', async (req, res) => {
         const { data: rec, error: fetchErr } = await supabase.from('assignment_recommendations').select('*').eq('id', recId).single();
         if (fetchErr || !rec) return res.status(404).json({ error: 'Recommendation not found' });
 
-        // Update sample assignment
-        await supabase.from('samples').update({ assignedTo: rec.recommendedEmployeeName }).eq('id', rec.sampleId);
+        // Update employee workload and resolve username
+        const { data: emp } = await supabase.from('employee_profiles').select('userId, currentWorkload').eq('id', rec.recommendedEmployeeId).single();
+        let assignedUsername = rec.recommendedEmployeeName;
         
-        // Update employee workload
-        const { data: emp } = await supabase.from('employee_profiles').select('currentWorkload').eq('id', rec.recommendedEmployeeId).single();
         if (emp) {
             await supabase.from('employee_profiles').update({ currentWorkload: (emp.currentWorkload || 0) + 1 }).eq('id', rec.recommendedEmployeeId);
+            if (emp.userId) {
+                const { data: user } = await supabase.from('users').select('username').eq('id', emp.userId).single();
+                if (user && user.username) assignedUsername = user.username;
+            }
         }
+        
+        // Update sample assignment with username
+        await supabase.from('samples').update({ assignedTo: assignedUsername }).eq('id', rec.sampleId);
+        
+        const { data: sample } = await supabase.from('samples').select('encodedCode').eq('id', rec.sampleId).single();
+        if (sample) updateAssignmentInMaster(sample.encodedCode, assignedUsername);
         
         // Mark recommendation as approved
         await supabase.from('assignment_recommendations').update({ status: 'approved', resolvedAt: new Date().toISOString() }).eq('id', recId);
@@ -1369,8 +1440,15 @@ app.get('/api/admin/employees/:id/capacity', async (req, res) => {
         const { data: emp } = await supabase.from('employee_profiles').select('*').eq('id', empId).single();
         if (!emp) return res.status(404).json({ error: 'Employee not found' });
         
+        // Resolve username
+        let assignedUsername = emp.fullName;
+        if (emp.userId) {
+            const { data: user } = await supabase.from('users').select('username').eq('id', emp.userId).single();
+            if (user && user.username) assignedUsername = user.username;
+        }
+
         // Count live pending samples
-        const { data: samples } = await supabase.from('samples').select('id').eq('assignedTo', emp.fullName).in('appStatus', ['Pending']);
+        const { data: samples } = await supabase.from('samples').select('id').eq('assignedTo', assignedUsername).in('appStatus', ['Pending']);
         const currentLoad = samples ? samples.length : 0;
         
         // Get competencies
@@ -1424,7 +1502,7 @@ app.post('/api/preferences', async (req, res) => {
 });
 
 // --- DIRECT ASSIGN ---
-app.post('/api/admin/direct-assign', async (req, res) => {
+app.post('/api/admin/direct-assign', requireAdmin, async (req, res) => {
     const { sampleId, assignedTo } = req.body;
     if (!sampleId || !assignedTo) return res.status(400).json({ error: 'Sample ID and assignee required.' });
     
@@ -1434,7 +1512,7 @@ app.post('/api/admin/direct-assign', async (req, res) => {
 });
 
 // --- ACTIVATE PENDING ACCOUNT ---
-app.post('/api/admin/activate-pending-account', async (req, res) => {
+app.post('/api/admin/activate-pending-account', requireAdmin, async (req, res) => {
     const { tpName } = req.body;
     if (!tpName) return res.status(400).json({ error: 'TP name required.' });
     
@@ -1444,18 +1522,31 @@ app.post('/api/admin/activate-pending-account', async (req, res) => {
 });
 
 // --- APPROVE ALL RECOMMENDATIONS ---
-app.post('/api/admin/approve-all-recommendations', async (req, res) => {
+app.post('/api/admin/approve-all-recommendations', requireAdmin, async (req, res) => {
     try {
         const { data: recs, error: fetchErr } = await supabase.from('assignment_recommendations').select('*').in('status', ['pending', 'forced']);
         if (fetchErr) throw fetchErr;
         if (!recs || recs.length === 0) return res.json({ message: 'No pending recommendations to approve.' });
 
         let approved = 0;
+        const excelUpdates = [];
         for (const rec of recs) {
-            await supabase.from('samples').update({ assignedTo: rec.recommendedEmployeeName }).eq('id', rec.sampleId);
+            let assignedUsername = rec.recommendedEmployeeName;
+            const { data: emp } = await supabase.from('employee_profiles').select('userId').eq('id', rec.recommendedEmployeeId).single();
+            if (emp && emp.userId) {
+                const { data: user } = await supabase.from('users').select('username').eq('id', emp.userId).single();
+                if (user && user.username) assignedUsername = user.username;
+            }
+
+            await supabase.from('samples').update({ assignedTo: assignedUsername }).eq('id', rec.sampleId);
             await supabase.from('assignment_recommendations').update({ status: 'approved', resolvedAt: new Date().toISOString() }).eq('id', rec.id);
+            
+            const { data: sample } = await supabase.from('samples').select('encodedCode').eq('id', rec.sampleId).single();
+            if (sample) excelUpdates.push({ encodedCode: sample.encodedCode, assignedUsername });
+            
             approved++;
         }
+        updateBulkAssignmentsInMaster(excelUpdates);
         res.json({ message: `Approved ${approved} assignments.` });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -1463,7 +1554,7 @@ app.post('/api/admin/approve-all-recommendations', async (req, res) => {
 });
 
 // --- MOCK GENERATOR ---
-app.post('/api/admin/generate-mocks', async (req, res) => {
+app.post('/api/admin/generate-mocks', requireAdmin, async (req, res) => {
     try {
         const mockSamples = [];
         const isNumbers = ['IS 4985', 'IS 13592', 'IS 15778', 'IS 14735', 'IS 15328'];
