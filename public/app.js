@@ -1,12 +1,3 @@
-
-// --- SECURE API FETCH WRAPPER ---
-async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem('jwtToken');
-    if (!options.headers) options.headers = {};
-    if (token) options.headers['Authorization'] = 'Bearer ' + token;
-    return await fetch(url, options);
-}
-
 let currentUser = null;
 
 function isSuperAdmin() { return currentUser && (currentUser.role === 'admin_sample_cell' || currentUser.role === 'super_admin'); }
@@ -65,7 +56,10 @@ async function register() {
     if (!username || !password) return showToast('Enter username and password', 'error');
 
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
         });
         const data = await res.json();
         if (res.ok) {
@@ -73,7 +67,7 @@ async function register() {
         } else {
             showToast(data.error, 'error');
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (e) { console.error(e); }
 }
 
 async function login() {
@@ -82,12 +76,14 @@ async function login() {
     if (!username || !password) return showToast('Enter username and password', 'error');
 
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
         });
         const data = await res.json();
         if (res.ok) {
             currentUser = data.user;
-            localStorage.setItem('jwtToken', data.token); // Save token
             document.getElementById('auth-container').classList.remove('active');
             document.getElementById('dashboard-container').classList.add('active');
             const displayRole = (currentUser.role === 'admin_sample_cell' || currentUser.role === 'super_admin') ? 'Super Admin' : currentUser.role === 'admin' ? 'Admin' : 'TP';
@@ -110,12 +106,11 @@ async function login() {
         } else {
             showToast(data.error, 'error');
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (e) { console.error(e); }
 }
 
 function logout() {
     currentUser = null;
-    localStorage.removeItem('jwtToken'); // Clear token
     toggleAdminViews();
     document.getElementById('dashboard-container').classList.remove('active');
     document.getElementById('auth-container').classList.add('active');
@@ -335,7 +330,7 @@ function renderSkillRadar(canvasId, competencies, chartInstanceObj, setChartObj)
 async function loadProfileSkillGraph() {
     if (!currentUser || !currentUser.id) return;
     try {
-        const res = await apiFetch(`/api/admin/competencies/${currentUser.id}`);
+        const res = await fetch(`/api/admin/competencies/${currentUser.id}`);
         const data = await res.json();
         if (res.ok) {
             renderSkillRadar('profile-skill-radar', data.competencies, profileChartInstance, (c) => profileChartInstance = c);
@@ -353,7 +348,10 @@ async function changePassword() {
     if (newPw.length < 4) return showToast('Password must be at least 4 characters.', 'warning');
 
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: currentUser.id, currentPassword: currentPw, newPassword: newPw })
         });
         const data = await res.json();
         if (res.ok) {
@@ -372,7 +370,7 @@ async function changePassword() {
 async function checkDisposalReminders() {
     if (!currentUser || !currentUser.username) return;
     try {
-        const res = await apiFetch(`/api/disposal-reminders/${currentUser.username}?role=${currentUser.role}`);
+        const res = await fetch(`/api/disposal-reminders/${currentUser.username}?role=${currentUser.role}`);
         const data = await res.json();
         const banner = document.getElementById('disposal-alerts-banner');
         if (!banner) return;
@@ -473,7 +471,7 @@ function setRankingMode(mode) {
 
 async function loadPreferences() {
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/preferences');
         const data = await res.json();
         if (res.ok && data.preferences) {
             currentPrefs = {
@@ -504,7 +502,10 @@ async function savePriorityRanking() {
         priorityRankingMode: selectedRankingMode
     };
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/preferences', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(prefs)
         });
         if (res.ok) {
             showToast('Priority Mode applied successfully!', 'success');
@@ -527,7 +528,10 @@ async function savePreferences() {
         failStorageDays: document.getElementById('pref-fail-storage').value
     };
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/preferences', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(prefs)
         });
         if (res.ok) {
             showToast('Preferences saved successfully.', 'success');
@@ -540,12 +544,12 @@ async function savePreferences() {
 
 async function fetchTPUsers() {
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/admin/users');
         const data = await res.json();
         if (res.ok) {
             allTPUsers = (data.users || []).filter(u => u.role === 'tp');
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) { console.error(err); }
 }
 
 // User Management Modal Functions
@@ -563,7 +567,7 @@ async function fetchUsers() {
     tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Loading directory...</td></tr>';
     
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/admin/users');
         const data = await res.json();
         if (res.ok) {
             tbody.innerHTML = '';
@@ -594,7 +598,10 @@ async function adminCreateTP() {
     if (!username || !password) return showToast('Please enter both name and password.', 'warning');
     
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/admin/create-tp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
         });
         const data = await res.json();
         if (res.ok) {
@@ -620,7 +627,7 @@ async function adminDeleteUser(btn, userId, username) {
         btn.disabled = true;
         btn.textContent = 'Deleting...';
         try {
-            const res = await apiFetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
+            const res = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
             const data = await res.json();
             if (res.ok) {
                 showToast(`Account "${username}" deleted.`, 'success');
@@ -667,7 +674,10 @@ async function uploadExcel() {
 
     showToast("Analyzing structure and duplicates...", 'info');
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
         const data = await res.json();
         if (res.ok) {
             currentFileName = data.fileName || "Unknown.xlsx";
@@ -683,7 +693,7 @@ async function uploadExcel() {
         } else {
             showToast(data.error, 'error');
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (e) { console.error(e); }
 }
 
 function showColumnMappingUI(columnMapping) {
@@ -868,7 +878,10 @@ async function commitUpload() {
             columnMappingLog: Object.keys(pendingColumnMappings).length > 0 ? JSON.stringify(pendingColumnMappings) : null
         };
 
-        const res = await apiFetch()
+        const res = await fetch('/api/confirm-upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
         const data = await res.json();
         showToast(data.message, 'success');
@@ -900,7 +913,7 @@ async function viewHistory() {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">Loading audit trail...</td></tr>';
     
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/upload-history');
         const data = await res.json();
         if (res.ok) {
             allHistory = data.history;
@@ -984,7 +997,7 @@ async function viewBatchDetails(batchId) {
     dupTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading duplicates...</td></tr>';
     
     try {
-        const res = await apiFetch(`/api/batch-details/${batchId}`);
+        const res = await fetch(`/api/batch-details/${batchId}`);
         const data = await res.json();
         if (res.ok) {
             // Populate summary
@@ -1071,7 +1084,7 @@ function closeBatchDetailsModal() {
 async function fetchSamples() {
     if (!currentUser) return;
     try {
-        const res = await apiFetch(`/api/samples/${currentUser.username}?role=${currentUser.role}`);
+        const res = await fetch(`/api/samples/${currentUser.username}?role=${currentUser.role}`);
         const data = await res.json();
         if (res.ok) {
             allSamples = data.samples;
@@ -1081,7 +1094,7 @@ async function fetchSamples() {
             if (typeof renderAnalytics === 'function') renderAnalytics();
             refreshProfileStats(); // Keep profile in sync after data refresh
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (e) { console.error(e); }
 }
 
 let workloadChartInstance = null;
@@ -1715,7 +1728,10 @@ async function confirmSubmit() {
     const passFail = document.getElementById('pass-fail-select').value;
     
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/submit-sample', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: currentSubmitId, passFail })
         });
         if (res.ok) {
             closeModal();
@@ -1918,7 +1934,10 @@ async function deleteSelectedSamples() {
     if (!confirm(confirmMessage)) return;
     
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/admin/delete-samples-bulk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids })
         });
         const data = await res.json();
         if (res.ok) {
@@ -1943,7 +1962,10 @@ async function deleteSelectedSamplesDisposal() {
     if (!confirm(confirmMessage)) return;
     
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/admin/delete-samples-bulk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids })
         });
         const data = await res.json();
         if (res.ok) {
@@ -1962,7 +1984,7 @@ async function deleteSingleSample(id, code) {
     if (!confirm(`Are you sure you want to permanently delete sample "${code}"?`)) return;
     
     try {
-        const res = await apiFetch(`/api/samples/${id}`, {
+        const res = await fetch(`/api/samples/${id}`, {
             method: 'DELETE'
         });
         const data = await res.json();
@@ -1986,7 +2008,13 @@ async function resetDatabase() {
     if (!confirm2) return;
     
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/admin/reset-database', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                role: currentUser ? currentUser.role : '',
+                username: currentUser ? currentUser.username : ''
+            })
         });
         const data = await res.json();
         if (res.ok) {
@@ -2250,7 +2278,10 @@ async function previewLimsPdf() {
 
         showToast('Generating PDF Preview...', 'info');
         
-        const res = await apiFetch()
+        const res = await fetch('/api/lims/preview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
         
         if (res.ok) {
@@ -2369,7 +2400,10 @@ async function startLimsAutomation() {
         appendConsoleLog('[SYSTEM] Sending local UI payload to backend for automation execution...');
         
         try {
-            const res = await apiFetch()
+            const res = await fetch('/api/lims/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
             const data = await res.json();
             
@@ -2398,7 +2432,10 @@ async function stopLimsAutomation() {
     appendConsoleLog('[SYSTEM] Stopping automation process...');
     
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/lims/stop', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
         const data = await res.json();
         
         if (res.ok) {
@@ -2431,12 +2468,12 @@ function stopLimsPolling() {
 async function pollLimsStatusAndLogs() {
     try {
         // Poll status
-        const statusRes = await apiFetch();
+        const statusRes = await fetch('/api/lims/status');
         const statusData = await statusRes.json();
         const status = statusData.status;
         
         // Poll logs
-        const logsRes = await apiFetch();
+        const logsRes = await fetch('/api/lims/logs');
         const logsData = await logsRes.json();
         const logs = logsData.logs || [];
         
@@ -2525,7 +2562,7 @@ function appendConsoleLog(line) {
 
 async function checkActiveLimsOnLoad() {
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/lims/status');
         const data = await res.json();
         if (data.status && data.status !== 'idle') {
             // LIMS is active on backend, let's set UI buttons and start polling
@@ -2548,7 +2585,7 @@ async function loadEmployees() {
     const tbody = document.getElementById('employee-tbody');
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>';
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/admin/employees');
         const data = await res.json();
         if (res.ok) {
             tbody.innerHTML = '';
@@ -2566,7 +2603,9 @@ async function loadEmployees() {
                 tbody.appendChild(tr);
             });
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 async function addEmployee() {
@@ -2579,7 +2618,10 @@ async function addEmployee() {
     if (!fullName || !username || !password) return showToast('Please fill all required fields.', 'warning');
 
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/admin/employees', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullName, designation, maxDailySamples, username, password })
         });
         const data = await res.json();
         if (res.ok) {
@@ -2591,7 +2633,9 @@ async function addEmployee() {
         } else {
             showToast(data.error, 'error');
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 function openEditEmployeeModal(id, fullName, designation, maxDailySamples) {
@@ -2615,7 +2659,7 @@ async function saveEmployeeEdits() {
     if (!fullName) return showToast('Full Name is required.', 'warning');
 
     try {
-        const res = await apiFetch(`/api/admin/employees/${id}`, {
+        const res = await fetch(`/api/admin/employees/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fullName, designation, maxDailySamples })
@@ -2646,7 +2690,7 @@ async function openCompetencyModal(empId, empName) {
     select.innerHTML = '<option value="">Loading...</option>';
     
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/unassigned-samples');
         const data = await res.json();
         const unassigned = data.samples || [];
         
@@ -2679,7 +2723,7 @@ async function loadCompetencies(empId) {
     const tbody = document.getElementById('comp-tbody');
     tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Loading...</td></tr>';
     try {
-        const res = await apiFetch(`/api/admin/competencies/${empId}`);
+        const res = await fetch(`/api/admin/competencies/${empId}`);
         const data = await res.json();
         if (res.ok) {
             tbody.innerHTML = '';
@@ -2699,7 +2743,9 @@ async function loadCompetencies(empId) {
             });
             renderSkillRadar('admin-skill-radar', data.competencies, adminChartInstance, (c) => adminChartInstance = c);
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 async function addCompetency() {
@@ -2708,20 +2754,25 @@ async function addCompetency() {
     if (!isNumber || !currentCompEmpId) return showToast('Please enter an IS number.', 'warning');
 
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/admin/competencies', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ employeeId: currentCompEmpId, isNumber, proficiencyLevel })
         });
         if (res.ok) {
             document.getElementById('comp-is-number').value = '';
             loadCompetencies(currentCompEmpId);
             showToast('Competency added.', 'success');
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 async function removeCompetency(compId) {
     if (!confirm('Are you sure you want to remove this competency?')) return;
     try {
-        const res = await apiFetch(`/api/admin/competencies/${compId}`, { method: 'DELETE' });
+        const res = await fetch(`/api/admin/competencies/${compId}`, { method: 'DELETE' });
         if (res.ok) {
             showToast('Competency removed.', 'success');
             if (currentCompEmpId) loadCompetencies(currentCompEmpId);
@@ -2729,14 +2780,16 @@ async function removeCompetency(compId) {
             const data = await res.json();
             showToast(data.error || 'Failed to remove', 'error');
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch(err) {
+        console.error(err);
+    }
 }
 
 // --- LEAVE MANAGER ---
 
 async function populateLeaveEmployeeDropdown() {
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/admin/employees');
         const data = await res.json();
         if (res.ok) {
             const select = document.getElementById('leave-employee-select');
@@ -2748,14 +2801,14 @@ async function populateLeaveEmployeeDropdown() {
                 select.appendChild(opt);
             });
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) { console.error(err); }
 }
 
 async function loadLeaves() {
     const tbody = document.getElementById('leaves-tbody');
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>';
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/admin/leaves');
         const data = await res.json();
         if (res.ok) {
             tbody.innerHTML = '';
@@ -2773,7 +2826,7 @@ async function loadLeaves() {
                 tbody.appendChild(tr);
             });
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) { console.error(err); }
 }
 
 async function addLeave() {
@@ -2784,24 +2837,27 @@ async function addLeave() {
     if (!employeeId || !leaveDate) return showToast('Select employee and date.', 'warning');
 
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/admin/leaves', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ employeeId, leaveDate, reason })
         });
         if (res.ok) {
             showToast('Leave recorded.', 'success');
             loadLeaves();
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) { console.error(err); }
 }
 
 async function deleteLeave(id) {
     if (!confirm('Remove this leave?')) return;
     try {
-        const res = await apiFetch(`/api/admin/leaves/${id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/admin/leaves/${id}`, { method: 'DELETE' });
         if (res.ok) {
             showToast('Leave removed.', 'success');
             loadLeaves();
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) { console.error(err); }
 }
 
 // --- SMART ASSIGNER ---
@@ -2810,7 +2866,7 @@ async function loadRecommendations() {
     const tbody = document.getElementById('recommendations-tbody');
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/admin/recommendations');
         const data = await res.json();
         if (res.ok) {
             tbody.innerHTML = '';
@@ -2826,13 +2882,13 @@ async function loadRecommendations() {
                     <td>${r.reason} (Score: ${r.score})</td>
                     <td>
                         <button onclick="approveRecommendation(${r.id})" class="primary" style="padding:4px 8px; font-size:0.8rem;">Approve</button>
-                        <button onclick="rejectRecommendation(${r.id})" style="background:var(--danger); padding:4px 8px; font-size:0.8rem; margin-left:5px;">Reject</button>
+                        <button onclick="rejectRecommendation(${r.id}, ${r.sampleId})" style="background:var(--danger); padding:4px 8px; font-size:0.8rem; margin-left:5px;">Reject</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) { console.error(err); }
 }
 
 async function loadUnassignedPool() {
@@ -2845,7 +2901,7 @@ async function loadUnassignedPool() {
     if (countSpan) countSpan.textContent = '...';
 
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/unassigned-samples');
         const data = await res.json();
         if (res.ok) {
             if (countSpan) countSpan.textContent = data.samples.length;
@@ -2879,13 +2935,16 @@ async function loadUnassignedPool() {
                 });
             }
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) { console.error(err); }
 }
 
 async function directAssignSample(sampleId, tpName) {
     if (!tpName) return;
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/assign-sample-manual', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sampleId, username: tpName })
         });
         if (res.ok) {
             showToast(`Assigned to ${tpName}`, 'success');
@@ -2899,7 +2958,7 @@ async function directAssignSample(sampleId, tpName) {
 
 async function approveAllRecommendations() {
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/admin/approve-all-recommendations', { method: 'POST' });
         const data = await res.json();
         if (res.ok) {
             showToast(data.message, 'success');
@@ -2908,13 +2967,13 @@ async function approveAllRecommendations() {
         } else {
             showToast(data.error, 'error');
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) { console.error(err); }
 }
 
 async function generateMockData() {
     if (!confirm('This will inject 50 mock samples into the unassigned pool. Are you sure?')) return;
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/admin/generate-mocks', { method: 'POST' });
         const data = await res.json();
         if (res.ok) {
             showToast(data.message, 'success');
@@ -2929,7 +2988,7 @@ async function generateMockData() {
 async function runAutoAssigner() {
     showToast('Running Smart Assigner...', 'info');
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/auto-assign', { method: 'POST' });
         const data = await res.json();
         if (res.ok) {
             showToast(data.message, 'success');
@@ -2938,7 +2997,7 @@ async function runAutoAssigner() {
         } else {
             showToast(data.error, 'error');
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) { console.error(err); }
 }
 
 async function forceRunAssigner() {
@@ -2947,23 +3006,70 @@ async function forceRunAssigner() {
 
 async function approveRecommendation(id) {
     try {
-        const res = await apiFetch(`/api/approve-assignment/${id}`, { method: 'POST' });
+        const res = await fetch(`/api/approve-assignment/${id}`, { method: 'POST' });
         if (res.ok) {
             showToast('Assignment Approved', 'success');
             loadRecommendations();
             loadUnassignedPool();
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) { console.error(err); }
 }
 
-async function rejectRecommendation(id) {
+async function rejectRecommendation(id, sampleId) {
     try {
         const res = await apiFetch(`/api/reject-assignment/${id}`, { method: 'POST' });
         if (res.ok) {
             showToast('Assignment Rejected', 'info');
             loadRecommendations();
+            openManualAssignModal(sampleId, id);
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (err) { console.error(err); showToast('Network error, please try again.', 'error'); }
+}
+
+function openManualAssignModal(sampleId, recId) {
+    document.getElementById('manual-assign-sample-id').value = sampleId;
+    document.getElementById('manual-assign-rec-id').value = recId;
+    
+    const select = document.getElementById('manual-assign-employee');
+    let tpOptions = '<option value="">-- Direct Assign --</option>';
+    const sourceSelect = document.getElementById('leave-employee-select');
+    if (sourceSelect && sourceSelect.options.length > 0) {
+        for(let i=0; i<sourceSelect.options.length; i++) {
+            tpOptions += `<option value="${sourceSelect.options[i].text}">${sourceSelect.options[i].text}</option>`;
+        }
+    }
+    select.innerHTML = tpOptions;
+    
+    document.getElementById('manual-assign-modal').classList.add('active');
+}
+
+function closeManualAssignModal() {
+    document.getElementById('manual-assign-modal').classList.remove('active');
+}
+
+async function confirmManualAssign() {
+    const sampleId = document.getElementById('manual-assign-sample-id').value;
+    const tpName = document.getElementById('manual-assign-employee').value;
+    
+    if (!tpName) return showToast('Please select an employee.', 'warning');
+    
+    try {
+        const res = await apiFetch('/api/assign-sample-manual', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sampleId, username: tpName })
+        });
+        if (res.ok) {
+            showToast(`Assigned manually to ${tpName}`, 'success');
+            closeManualAssignModal();
+            loadUnassignedPool();
+        } else {
+            showToast('Failed to assign manually.', 'error');
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('Network error.', 'error');
+    }
 }
 
 // ==========================================
@@ -3021,7 +3127,10 @@ async function analyzeSampleCellExcel() {
     if (btn) { btn.textContent = 'Analyzing...'; btn.disabled = true; }
 
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/sample-cell/upload', {
+            method: 'POST',
+            body: formData
+        });
         const data = await res.json();
         
         if (res.ok) {
@@ -3091,7 +3200,15 @@ async function commitSampleCellUpload() {
     btn.disabled = true;
 
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/sample-cell/commit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fresh: scFreshData,
+                duplicates: scDuplicateData,
+                fileName: scFileName,
+                uploadedBy: currentUser ? currentUser.username : 'Unknown'
+            })
         });
         
         const data = await res.json();
@@ -3235,7 +3352,7 @@ function renderSaCharts(data) {
 
 async function fetchScAuditLog() {
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/sample-cell/history');
         const data = await res.json();
         if (res.ok) {
             const tbody = document.getElementById('sc-audit-log-body');
@@ -3261,14 +3378,14 @@ async function fetchScAuditLog() {
                 `;
             });
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (e) { console.error(e); }
 }
 
 let scActiveFilter = 'all';
 
 async function loadSampleCellData() {
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/sample-cell/data');
         const data = await res.json();
         if (res.ok) {
             currentScData = data.data;
@@ -3298,7 +3415,7 @@ async function loadSampleCellData() {
             setScChipActive('all');
             renderScTableFiltered();
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch (e) { console.error(e); }
 }
 
 function filterScTable(band) {
@@ -3399,7 +3516,7 @@ function renderSampleCellTable() {
 async function wipeSampleCellData() {
     if (!confirm('WARNING: Are you sure you want to permanently delete ALL confidential sample records? This cannot be undone.')) return;
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/sample-cell/data', { method: 'DELETE' });
         const data = await res.json();
         if (res.ok) {
             showToast(data.message, 'success');
@@ -3458,7 +3575,7 @@ switchTab = function(tabId) {
 // --- Fetch Vault List ---
 async function fetchISVault() {
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/is-intelligence/vault');
         const data = await res.json();
         isVaultData = data.vault || [];
         renderISVault();
@@ -3520,7 +3637,7 @@ function renderISVault() {
 // --- Select a Document ---
 async function selectISDocument(docId) {
     try {
-        const res = await apiFetch(`/api/is-intelligence/vault/${docId}`);
+        const res = await fetch(`/api/is-intelligence/vault/${docId}`);
         const doc = await res.json();
         if (doc.error) {
             showToast(doc.error, 'error');
@@ -3619,7 +3736,14 @@ async function submitISClarification(itemId) {
     const val = input.value.trim();
 
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/is-intelligence/clarify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                documentId: isActiveDocument.id,
+                itemId,
+                resolvedValue: val
+            })
         });
         const data = await res.json();
         if (data.error) {
@@ -3742,7 +3866,13 @@ async function sendISQuery() {
     msgContainer.scrollTop = msgContainer.scrollHeight;
 
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/is-intelligence/query', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                documentId: isActiveDocument.id,
+                query: query
+            })
         });
         const response = await res.json();
         
@@ -3940,7 +4070,10 @@ async function uploadISStandard() {
     }, 600);
 
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/is-intelligence/upload', {
+            method: 'POST',
+            body: formData
+        });
         
         clearInterval(progressInterval);
         const fill = document.getElementById('is-parse-fill');
@@ -4035,7 +4168,7 @@ function toggleTemplatesUI() {
 
 async function fetchTemplates() {
     try {
-        const res = await apiFetch();
+        const res = await fetch('/api/admin/templates');
         if (res.ok) {
             const data = await res.json();
             currentTemplates = data.templates || {};
@@ -4056,7 +4189,7 @@ async function fetchTemplates() {
             
             loadTemplateForIS();
         }
-    } catch () { console.error(); showToast('Network error, please try again.', 'error'); }
+    } catch(e) { console.error(e); }
 }
 
 function loadTemplateForIS() {
@@ -4185,7 +4318,10 @@ async function saveTemplateForIS() {
     };
 
     try {
-        const res = await apiFetch()
+        const res = await fetch('/api/admin/templates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isNumber, templateData })
         });
         if (res.ok) {
             showToast('Template saved successfully!', 'success');

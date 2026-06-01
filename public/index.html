@@ -1433,6 +1433,28 @@
         </div>
     </div>
 
+    <!-- Modal: Manual Assign After Reject -->
+    <div id="manual-assign-modal" class="modal">
+        <div class="modal-content glass-panel" style="max-width: 400px;">
+            <h3>🔄 Manual Reassignment</h3>
+            <p style="margin-bottom: 15px; color: var(--text-muted); font-size: 0.9rem;">You rejected the AI's recommendation. Who would you rather assign this to?</p>
+            <input type="hidden" id="manual-assign-sample-id">
+            <input type="hidden" id="manual-assign-rec-id">
+            
+            <label>Select Employee:</label>
+            <select id="manual-assign-employee" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; background: rgba(0,0,0,0.2); color:white; border: 1px solid var(--glass-border);">
+                <!-- Populated dynamically -->
+            </select>
+            
+            <div class="modal-actions" style="margin-top: 25px;">
+                <button onclick="closeManualAssignModal()" style="background: transparent; border: 1px solid var(--glass-border);">Skip (Ask AI Later)</button>
+                <button class="primary" onclick="confirmManualAssign()">Assign Now</button>
+            </div>
+        </div>
+    </div>
+
+    
+
     <script src="specs_db.js"></script>
     <script src="standards_db.js"></script>
     <script src="app.js?v=1.0.2"></script>
