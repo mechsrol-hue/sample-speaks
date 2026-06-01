@@ -2591,10 +2591,11 @@ async function loadEmployees() {
             tbody.innerHTML = '';
             data.employees.forEach(e => {
                 const tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
                 tr.innerHTML = `
-                    <td><strong>${e.fullName}</strong><br><span style="font-size:0.8rem;color:var(--text-muted);">${e.designation}</span></td>
-                    <td>${e.loginUsername}</td>
-                    <td>${e.currentWorkload} / ${e.maxDailySamples}</td>
+                    <td onclick="openEditEmployeeModal(${e.id}, '${e.fullName}', '${e.designation}', ${e.maxDailySamples})"><strong>${e.fullName}</strong><br><span style="font-size:0.8rem;color:var(--text-muted);">${e.designation}</span></td>
+                    <td onclick="openEditEmployeeModal(${e.id}, '${e.fullName}', '${e.designation}', ${e.maxDailySamples})">${e.loginUsername}</td>
+                    <td onclick="openEditEmployeeModal(${e.id}, '${e.fullName}', '${e.designation}', ${e.maxDailySamples})">${e.currentWorkload} / ${e.maxDailySamples}</td>
                     <td>
                         <button onclick="openCompetencyModal(${e.id}, '${e.fullName}')" style="font-size:0.85rem; padding:4px 8px;">IS Skills</button>
                     </td>
@@ -2634,6 +2635,47 @@ async function addEmployee() {
         }
     } catch (err) {
         console.error(err);
+    }
+}
+
+function openEditEmployeeModal(id, fullName, designation, maxDailySamples) {
+    document.getElementById('edit-emp-id').value = id;
+    document.getElementById('edit-emp-fullname').value = fullName;
+    document.getElementById('edit-emp-designation').value = designation;
+    document.getElementById('edit-emp-max-capacity').value = maxDailySamples;
+    document.getElementById('edit-employee-modal').classList.add('active');
+}
+
+function closeEditEmployeeModal() {
+    document.getElementById('edit-employee-modal').classList.remove('active');
+}
+
+async function saveEmployeeEdits() {
+    const id = document.getElementById('edit-emp-id').value;
+    const fullName = document.getElementById('edit-emp-fullname').value;
+    const designation = document.getElementById('edit-emp-designation').value;
+    const maxDailySamples = document.getElementById('edit-emp-max-capacity').value;
+
+    if (!fullName) return showToast('Full Name is required.', 'warning');
+
+    try {
+        const res = await fetch(`/api/admin/employees/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullName, designation, maxDailySamples })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            showToast('Employee updated successfully.', 'success');
+            closeEditEmployeeModal();
+            loadEmployees();
+            fetchTPUsers();
+        } else {
+            showToast(data.error || 'Failed to update employee.', 'error');
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('Network error.', 'error');
     }
 }
 

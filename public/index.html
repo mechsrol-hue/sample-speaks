@@ -829,8 +829,6 @@
         </div>
     </div>
 
-    </div>
-
     <!-- Tab: Employee Hub -->
     <div id="tab-employees" class="tab-content">
         <div class="glass-panel admin-panel" style="padding: 25px;">
@@ -1402,6 +1400,35 @@
 
             <div class="modal-actions" style="margin-top: 20px;">
                 <button onclick="closeUserManagement()" style="background: transparent; border: 1px solid var(--glass-border);">Close Manager</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Modal: Edit Employee -->
+    <div id="edit-employee-modal" class="modal-overlay">
+        <div class="modal-content glass-panel" style="max-width: 500px;">
+            <h3>✏️ Edit Employee Details</h3>
+            <input type="hidden" id="edit-emp-id">
+            
+            <div style="margin-top: 15px;">
+                <label>Full Name</label>
+                <input type="text" id="edit-emp-fullname" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px;">
+            </div>
+            
+            <div style="margin-top: 15px;">
+                <label>Designation / Department</label>
+                <input type="text" id="edit-emp-designation" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px;">
+            </div>
+            
+            <div style="margin-top: 15px;">
+                <label>Max Daily Capacity</label>
+                <input type="number" id="edit-emp-max-capacity" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px;">
+            </div>
+            
+            <div class="modal-actions" style="margin-top: 25px;">
+                <button onclick="closeEditEmployeeModal()" style="background: transparent; border: 1px solid var(--glass-border);">Cancel</button>
+                <button class="primary" onclick="saveEmployeeEdits()">Save Changes</button>
             </div>
         </div>
     </div>

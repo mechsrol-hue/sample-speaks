@@ -775,6 +775,24 @@ app.post('/api/admin/employees', async (req, res) => {
     res.json({ message: 'Employee profile created successfully.' });
 });
 
+app.put('/api/admin/employees/:id', async (req, res) => {
+    const empId = req.params.id;
+    const { fullName, designation, maxDailySamples } = req.body;
+    if (!fullName) return res.status(400).json({ error: 'Full Name is required.' });
+
+    try {
+        const { error } = await supabase
+            .from('employee_profiles')
+            .update({ fullName, designation: designation || '', maxDailySamples: parseInt(maxDailySamples) || 40 })
+            .eq('id', empId);
+
+        if (error) throw error;
+        res.json({ message: 'Employee profile updated successfully.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get('/api/admin/competencies/:employeeId', async (req, res) => {
     try {
         const { data: competencies, error } = await supabase.from('employee_competencies').select('*').eq('employeeId', req.params.employeeId);
@@ -1077,7 +1095,7 @@ app.get('/api/admin/templates', async (req, res) => {
                     if (error) console.error('Auto-assign insert error:', error);
                     recommendationsGenerated++;
                 } else {
-                    console.log(`Could not assign sample ${sample.encodedCode} - everyone is on leave or at capacity.`);
+                    console.log(`Could not assign sample ${sample.encodedCode} - no competent employee found or everyone is on leave/at capacity.`);
                 }
             }
 
