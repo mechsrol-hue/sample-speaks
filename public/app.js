@@ -246,6 +246,96 @@ function refreshProfileStats() {
     }
 
     checkDisposalReminders();
+    loadProfileSkillGraph();
+}
+
+// --- SKILL GRAPHIFY ---
+let profileChartInstance = null;
+let adminChartInstance = null;
+
+function getProficiencyScore(level) {
+    if (level === 'Expert') return 3;
+    if (level === 'Standard') return 2;
+    if (level === 'Trainee') return 1;
+    return 0;
+}
+
+function renderSkillRadar(canvasId, competencies, chartInstanceObj, setChartObj) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    
+    if (chartInstanceObj) chartInstanceObj.destroy();
+    
+    if (!competencies || competencies.length === 0) {
+        setChartObj(new Chart(ctx, {
+            type: 'radar',
+            data: { labels: ['No Skills'], datasets: [{ data: [0] }] },
+            options: { plugins: { legend: { display: false } }, scales: { r: { display: false, min: 0, max: 3 } } }
+        }));
+        return;
+    }
+    
+    const labels = competencies.map(c => c.isNumber);
+    const data = competencies.map(c => getProficiencyScore(c.proficiencyLevel));
+    
+    setChartObj(new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Proficiency Level',
+                data: data,
+                backgroundColor: 'rgba(56, 189, 248, 0.2)',
+                borderColor: 'rgba(56, 189, 248, 1)',
+                pointBackgroundColor: 'rgba(255, 255, 255, 1)',
+                pointBorderColor: 'rgba(56, 189, 248, 1)',
+                pointHoverBackgroundColor: 'rgba(56, 189, 248, 1)',
+                pointHoverBorderColor: 'rgba(255, 255, 255, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    pointLabels: { color: 'rgba(255, 255, 255, 0.7)', font: { size: 11, family: 'Inter' } },
+                    ticks: {
+                        display: false,
+                        min: 0,
+                        max: 3,
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const val = context.raw;
+                            if (val === 3) return 'Expert';
+                            if (val === 2) return 'Standard';
+                            if (val === 1) return 'Trainee';
+                            return 'None';
+                        }
+                    }
+                }
+            }
+        }
+    }));
+}
+
+async function loadProfileSkillGraph() {
+    if (!currentUser || !currentUser.id) return;
+    try {
+        const res = await fetch(`/api/admin/competencies/${currentUser.id}`);
+        const data = await res.json();
+        if (res.ok) {
+            renderSkillRadar('profile-skill-radar', data.competencies, profileChartInstance, (c) => profileChartInstance = c);
+        }
+    } catch(e) {}
 }
 
 async function changePassword() {
@@ -2609,6 +2699,7 @@ async function loadCompetencies(empId) {
                 `;
                 tbody.appendChild(tr);
             });
+            renderSkillRadar('admin-skill-radar', data.competencies, adminChartInstance, (c) => adminChartInstance = c);
         }
     } catch (err) {
         console.error(err);

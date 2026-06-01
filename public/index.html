@@ -157,6 +157,17 @@
                         </div>
                     </div>
 
+                    <!-- Skill Radar Chart -->
+                    <div class="glass-panel profile-card">
+                        <div class="profile-card-header">
+                            <span class="profile-card-icon">🕸️</span>
+                            <h3>Skill Fingerprint</h3>
+                        </div>
+                        <div style="position: relative; height:250px; width:100%; display:flex; justify-content:center;">
+                            <canvas id="profile-skill-radar"></canvas>
+                        </div>
+                    </div>
+
                     <!-- Change Password Card -->
                     <div class="glass-panel profile-card">
                         <div class="profile-card-header">
@@ -1159,6 +1170,9 @@
     <div id="competency-modal" class="modal">
         <div class="modal-content glass-panel">
             <h3>Manage Competencies: <span id="comp-emp-name" style="color:var(--accent);"></span></h3>
+            <div style="position: relative; height: 220px; width: 100%; display: flex; justify-content: center; margin-bottom: 10px;">
+                <canvas id="admin-skill-radar"></canvas>
+            </div>
             <div style="margin-top: 15px; display: flex; gap: 10px; margin-bottom: 20px; flex-wrap:wrap;">
                 <select id="comp-is-number" style="flex:2; padding:8px; min-width:150px;">
                     <!-- Options populated dynamically -->
