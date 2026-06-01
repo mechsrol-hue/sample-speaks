@@ -417,8 +417,7 @@ async function savePriorityRanking() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(prefs)
         });
-        const data = await res.json();
-        if (data.success) {
+        if (res.ok) {
             showToast('Priority Mode applied successfully!', 'success');
             currentPrefs.priorityRankingMode = selectedRankingMode;
             fetchSamples(); // Reload samples with new ranking logic
