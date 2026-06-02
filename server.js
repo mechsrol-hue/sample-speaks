@@ -889,13 +889,25 @@ app.get('/api/admin/templates', async (req, res) => {
     });
 
     app.post('/api/assign-sample-manual', async (req, res) => {
-        const { sampleId, username } = req.body;
-        if (!sampleId || !username) return res.status(400).json({ error: 'Missing sampleId or username' });
+        const { sampleId, username: fullName } = req.body;
+        if (!sampleId || !fullName) return res.status(400).json({ error: 'Missing sampleId or username' });
         try {
-            const { error } = await supabase.from('samples').update({ assignedTo: username }).eq('id', sampleId);
+            let assignedUsername = fullName;
+            const { data: emp } = await supabase.from('employee_profiles').select('userId').eq('fullName', fullName).single();
+            if (emp && emp.userId) {
+                const { data: user } = await supabase.from('users').select('username').eq('id', emp.userId).single();
+                if (user && user.username) assignedUsername = user.username;
+            }
+
+            const { data: sample } = await supabase.from('samples').select('encodedCode').eq('id', sampleId).single();
+            const { error } = await supabase.from('samples').update({ 
+                assignedTo: assignedUsername,
+                appStatus: 'Pending'
+            }).eq('id', sampleId);
             if (error) throw error;
             
-            // Cleanup any pending recommendations for this sample
+            // Sync to Master Sheet
+            if (sample) updateAssignmentInMaster(sample.encodedCode, assignedUsername);   // Cleanup any pending recommendations for this sample
             await supabase.from('assignment_recommendations').delete().eq('sampleId', sampleId);
             
             res.json({ message: 'Sample manually assigned successfully.' });
@@ -1126,8 +1138,18 @@ app.post('/api/approve-assignment/:id', async (req, res) => {
         const { data: rec, error: fetchErr } = await supabase.from('assignment_recommendations').select('*').eq('id', recId).single();
         if (fetchErr || !rec) return res.status(404).json({ error: 'Recommendation not found' });
 
-        // Update sample assignment
-        await supabase.from('samples').update({ assignedTo: rec.recommendedEmployeeName }).eq('id', rec.sampleId);
+        // Update sample assignment with username and mark as active Pending
+        let assignedUsername = rec.recommendedEmployeeName;
+        const { data: empData } = await supabase.from('employee_profiles').select('userId').eq('fullName', rec.recommendedEmployeeName).single();
+        if (empData && empData.userId) {
+            const { data: user } = await supabase.from('users').select('username').eq('id', empData.userId).single();
+            if (user && user.username) assignedUsername = user.username;
+        }
+
+        await supabase.from('samples').update({ 
+            assignedTo: assignedUsername,
+            appStatus: 'Pending'
+        }).eq('id', rec.sampleId);
         
         // Update employee workload
         const { data: emp } = await supabase.from('employee_profiles').select('currentWorkload').eq('id', rec.recommendedEmployeeId).single();
@@ -1429,7 +1451,7 @@ app.post('/api/admin/direct-assign', async (req, res) => {
     if (!sampleId || !assignedTo) return res.status(400).json({ error: 'Sample ID and assignee required.' });
     
     const { error } = await supabase.from('samples').update({ assignedTo, appStatus: 'Pending' }).eq('id', sampleId);
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) return res.status(500).json({ error: err.message });
     res.json({ message: `Sample assigned to ${assignedTo}.` });
 });
 
@@ -1452,7 +1474,17 @@ app.post('/api/admin/approve-all-recommendations', async (req, res) => {
 
         let approved = 0;
         for (const rec of recs) {
-            await supabase.from('samples').update({ assignedTo: rec.recommendedEmployeeName }).eq('id', rec.sampleId);
+            let assignedUsername = rec.recommendedEmployeeName;
+            const { data: empData } = await supabase.from('employee_profiles').select('userId').eq('fullName', rec.recommendedEmployeeName).single();
+            if (empData && empData.userId) {
+                const { data: user } = await supabase.from('users').select('username').eq('id', empData.userId).single();
+                if (user && user.username) assignedUsername = user.username;
+            }
+
+            await supabase.from('samples').update({ 
+                assignedTo: assignedUsername,
+                appStatus: 'Pending'
+            }).eq('id', rec.sampleId);
             await supabase.from('assignment_recommendations').update({ status: 'approved', resolvedAt: new Date().toISOString() }).eq('id', rec.id);
             approved++;
         }
