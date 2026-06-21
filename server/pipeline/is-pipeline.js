@@ -22,11 +22,13 @@ const crypto = require('crypto');
 const OR_BASE = 'https://openrouter.ai/api/v1';
 
 // Claude Opus: brain (understand + finalize)
-const MODEL_BRAIN = process.env.OR_BRAIN_MODEL || 'anthropic/claude-opus-4-5';
-// Gemini 3.5 Flash: vision reader 1 (fast, top OCR)
-const MODEL_R1 = process.env.OR_READER1_MODEL || 'google/gemini-2.5-flash-preview';
-// Qwen3-VL: vision reader 2 (different lineage — essential for consensus)
-const MODEL_R2 = process.env.OR_READER2_MODEL || 'qwen/qwen2.5-vl-72b-instruct';
+const MODEL_BRAIN = process.env.OR_BRAIN_MODEL || 'anthropic/claude-opus-4.8';
+// Gemini 3.5 Flash: vision reader 1 (fast, top OCR — scored 97.8% on IS 4985 Table 1)
+const MODEL_R1 = process.env.OR_READER1_MODEL || 'google/gemini-3.5-flash';
+// Vision reader 2 for consensus. NOTE: qwen2.5-vl-72b garbled rotated tables (16% in
+// testing) — using a reliable Gemini Pro pass instead. Swap via OR_READER2_MODEL once a
+// different-lineage model is validated on rotated IS tables.
+const MODEL_R2 = process.env.OR_READER2_MODEL || 'google/gemini-3.1-pro-preview';
 
 const SCRIPTS_DIR = path.join(__dirname, '../../scripts');
 const SCRATCH_DIR = path.join(__dirname, '../../scratch');
@@ -696,6 +698,29 @@ Assemble final output. Return this JSON schema exactly:
             });
         }
     } catch (ve) { jlog(job, `Validator step skipped: ${ve.message}`); }
+
+    // ── ROW-LOSS FIX ──────────────────────────────────────────────────────────
+    // Opus only saw a truncated sample (~5 rows/table) in its prompt, so its reproduced
+    // dimension_data drops rows on big tables (e.g. IS 4985 Table 1 has 24 DN rows). The
+    // Phase-3 consensus holds EVERY row — use it as the authoritative numeric grid.
+    // Opus's sections / clauses / rounding rules remain as-is (the narrative it's good at).
+    try {
+        const dimTables = (p3Output.tableConsensus || []).map(tc => {
+            const columns = [];
+            (tc.rows || []).forEach(r => Object.keys(r.values || {}).forEach(c => { if (!columns.includes(c)) columns.push(c); }));
+            return {
+                tableId: tc.tableId, type: tc.type, page: tc.page, columns,
+                rows: (tc.rows || []).map(r => ({ key: r.key, values: r.values || {} })),
+                agreementRate: tc.agreementRate,
+            };
+        });
+        const totalRows = dimTables.reduce((n, t) => n + t.rows.length, 0);
+        final.dimension_data = {
+            description: (final.dimension_data && final.dimension_data.description) || 'Extracted tolerance tables — full consensus grid, every row preserved',
+            tables: dimTables,
+        };
+        jlog(job, `Row-loss fix: dimension_data rebuilt from full consensus — ${totalRows} rows across ${dimTables.length} table(s) (Opus prompt only saw ~5/table)`);
+    } catch (ge) { jlog(job, `Grid rebuild skipped: ${ge.message}`); }
 
     jlog(job, `Final: ${(final.test_parameters || []).length} params, ${(final.uncertainItems || []).length} items need review, confidence ${final.confidenceScore}`);
     return final;
