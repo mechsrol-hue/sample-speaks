@@ -1,0 +1,37 @@
+[
+  {
+    "is": "IS 9873",
+    "total_man_hours": 6,
+    "basis": "summed",
+    "confidence": "high",
+    "plausible": true
+  },
+  {
+    "is": "IS 269",
+    "total_man_hours": 41,
+    "basis": "summed",
+    "confidence": "high",
+    "plausible": true
+  },
+  {
+    "is": "IS 4246",
+    "total_man_hours": 19,
+    "basis": "summed",
+    "confidence": "high",
+    "plausible": true
+  },
+  {
+    "is": "IS 455",
+    "total_man_hours": 23.5,
+    "basis": "summed",
+    "confidence": "high",
+    "plausible": true
+  },
+  {
+    "is": "IS 1489",
+    "total_man_hours": 30,
+    "basis": "summed",
+    "confidence": "high",
+    "plausible": true
+  }
+]

@@ -5,9 +5,10 @@ const cors = require('cors');
 const multer = require('multer');
 const xlsx = require('xlsx');
 const supabase = require('./database-supabase');
-const db = require('./database');
 const path = require('path');
 const fs = require('fs');
+const hoursModel = require('./server/ml/hours-model');
+const isPipeline = require('./server/pipeline/is-pipeline');
 
 const app = express();
 app.use(cors());
@@ -15,6 +16,7 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(express.static('public'));
 
 const upload = multer({ storage: multer.memoryStorage() });
+const MASTER_LIST_FILE = path.join(__dirname, 'Sample Speaks.xlsx');
 
 // --- Universal Name Standardizer ---
 function cleanName(name) {
@@ -31,6 +33,13 @@ function cleanName(name) {
     }).join(' ');
 }
 
+// --- Normalize IS Standard Numbers (e.g. "IS 4985 (2021)" -> "IS 4985") ---
+function normalizeISNumber(isStr) {
+    if (!isStr) return '';
+    let match = isStr.toString().match(/IS\s*\d+/i);
+    return match ? match[0].toUpperCase().replace(/\s+/g, ' ') : isStr.trim();
+}
+
 function excelDateToString(excelDate) {
     if (!excelDate) return "";
     if (isNaN(excelDate) && typeof excelDate === 'string') return excelDate.trim();
@@ -45,6 +54,314 @@ function excelDateToString(excelDate) {
     } catch (e) {
         return excelDate.toString();
     }
+}
+
+function inferCompetencyLevel(sampleCount) {
+    if (sampleCount >= 8) return 'Expert';
+    if (sampleCount >= 3) return 'Standard';
+    return 'Trainee';
+}
+
+function normalizePersonKey(value) {
+    return cleanName(value).toLowerCase();
+}
+
+async function loadSampleHistoryAccountCandidates() {
+    const [{ data: samples }, { data: users }, { data: profiles }, { data: competencies }] = await Promise.all([
+        supabase.from('samples').select('assignedTo, isNumber, appStatus'),
+        supabase.from('users').select('id, username, role'),
+        supabase.from('employee_profiles').select('id, userId, fullName, designation, maxDailySamples'),
+        supabase.from('employee_competencies').select('id, employeeId, isNumber, proficiencyLevel, avgTestDurationHours'),
+    ]);
+
+    const userMap = new Map((users || []).map(u => [normalizePersonKey(u.username), u]));
+    const profileMap = new Map((profiles || []).map(p => [normalizePersonKey(p.fullName), p]));
+    const competencyMap = new Map();
+    (competencies || []).forEach(c => {
+        const key = `${c.employeeId}::${normalizeISNumber(c.isNumber)}`;
+        competencyMap.set(key, c);
+    });
+
+    const candidates = new Map();
+    (samples || []).forEach(sample => {
+        const rawName = cleanName(sample.assignedTo);
+        if (!rawName || rawName.toUpperCase() === 'UNASSIGNED') return;
+        const personKey = normalizePersonKey(rawName);
+        if (!candidates.has(personKey)) {
+            candidates.set(personKey, {
+                fullName: rawName,
+                sampleCount: 0,
+                isCounts: {},
+            });
+        }
+        const row = candidates.get(personKey);
+        row.sampleCount += 1;
+        const isKey = normalizeISNumber(sample.isNumber) || 'UNKNOWN';
+        row.isCounts[isKey] = (row.isCounts[isKey] || 0) + 1;
+    });
+
+    const enriched = [...candidates.values()]
+        .sort((a, b) => b.sampleCount - a.sampleCount || a.fullName.localeCompare(b.fullName))
+        .map(candidate => {
+            const user = userMap.get(normalizePersonKey(candidate.fullName)) || null;
+            const profile = profileMap.get(normalizePersonKey(candidate.fullName)) || null;
+            const competencyPreview = Object.entries(candidate.isCounts)
+                .filter(([isNumber]) => isNumber && isNumber !== 'UNKNOWN')
+                .sort((a, b) => b[1] - a[1])
+                .map(([isNumber, count]) => ({
+                    isNumber,
+                    sampleCount: count,
+                    inferredLevel: inferCompetencyLevel(count),
+                    alreadyExists: !!(profile && competencyMap.has(`${profile.id}::${normalizeISNumber(isNumber)}`)),
+                }));
+
+            return {
+                ...candidate,
+                hasUser: !!user,
+                hasProfile: !!profile,
+                userId: user?.id || null,
+                profileId: profile?.id || null,
+                existingDesignation: profile?.designation || '',
+                existingCapacity: profile?.maxDailySamples || null,
+                competencies: competencyPreview,
+            };
+        });
+
+    return enriched;
+}
+
+async function applySampleHistoryImport({ defaultPassword = '1234', defaultDesignation = 'Testing Person', defaultCapacity = 40 } = {}) {
+    const candidates = await loadSampleHistoryAccountCandidates();
+    const summary = {
+        scannedPeople: candidates.length,
+        createdUsers: 0,
+        createdProfiles: 0,
+        linkedProfiles: 0,
+        addedCompetencies: 0,
+        skippedExistingCompetencies: 0,
+        candidates: [],
+    };
+
+    for (const candidate of candidates) {
+        let userId = candidate.userId;
+        let profileId = candidate.profileId;
+
+        if (!userId) {
+            const { data: newUser, error: userErr } = await supabase
+                .from('users')
+                .insert([{ username: candidate.fullName, password: defaultPassword, role: 'tp' }])
+                .select('id')
+                .single();
+            if (userErr) throw userErr;
+            userId = newUser.id;
+            summary.createdUsers += 1;
+        }
+
+        if (!profileId) {
+            const { data: newProfile, error: profileErr } = await supabase
+                .from('employee_profiles')
+                .insert([{
+                    userId,
+                    fullName: candidate.fullName,
+                    designation: defaultDesignation,
+                    maxDailySamples: defaultCapacity,
+                }])
+                .select('id')
+                .single();
+            if (profileErr) throw profileErr;
+            profileId = newProfile.id;
+            summary.createdProfiles += 1;
+        } else if (!candidate.userId) {
+            const { error: linkErr } = await supabase
+                .from('employee_profiles')
+                .update({ userId })
+                .eq('id', profileId);
+            if (linkErr) throw linkErr;
+            summary.linkedProfiles += 1;
+        }
+
+        for (const competency of candidate.competencies) {
+            if (!competency.isNumber || competency.alreadyExists) {
+                if (competency.alreadyExists) summary.skippedExistingCompetencies += 1;
+                continue;
+            }
+
+            const { error: compErr } = await supabase
+                .from('employee_competencies')
+                .insert([{
+                    employeeId: profileId,
+                    isNumber: competency.isNumber,
+                    avgTestDurationHours: 8,
+                    proficiencyLevel: competency.inferredLevel,
+                }]);
+            if (compErr) throw compErr;
+            summary.addedCompetencies += 1;
+        }
+
+        summary.candidates.push({
+            fullName: candidate.fullName,
+            sampleCount: candidate.sampleCount,
+            isCount: candidate.competencies.length,
+            createdUser: !candidate.userId,
+            createdProfile: !candidate.profileId,
+        });
+    }
+
+    return summary;
+}
+
+function readWorkbookRows(filePath) {
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`Master list file not found at ${filePath}`);
+    }
+
+    const workbook = xlsx.readFile(filePath, { cellDates: true });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    return xlsx.utils.sheet_to_json(sheet, { defval: '', raw: false });
+}
+
+async function loadMasterListAccountCandidates() {
+    const rows = readWorkbookRows(MASTER_LIST_FILE);
+    const candidates = new Map();
+
+    for (const row of rows) {
+        const rawName = cleanName(row['Assigned To'] || row['Assigned to'] || row['assignedTo'] || row['assigned to']);
+        if (!rawName || rawName.toUpperCase() === 'UNASSIGNED') continue;
+
+        const personKey = normalizePersonKey(rawName);
+        if (!candidates.has(personKey)) {
+            candidates.set(personKey, {
+                fullName: rawName,
+                sampleCount: 0,
+                isCounts: {},
+            });
+        }
+
+        const candidate = candidates.get(personKey);
+        candidate.sampleCount += 1;
+
+        const isNumber = normalizeISNumber(row['IS Number'] || row['IS number'] || row['isNumber'] || row['is number']);
+        if (!isNumber) continue;
+        candidate.isCounts[isNumber] = (candidate.isCounts[isNumber] || 0) + 1;
+    }
+
+    const users = await supabase.from('users').select('id, username, role');
+    const profiles = await supabase.from('employee_profiles').select('id, userId, fullName, designation, maxDailySamples');
+    const competencies = await supabase.from('employee_competencies').select('id, employeeId, isNumber, proficiencyLevel, avgTestDurationHours');
+
+    const userMap = new Map((users.data || []).map(u => [normalizePersonKey(u.username), u]));
+    const profileMap = new Map((profiles.data || []).map(p => [normalizePersonKey(p.fullName), p]));
+    const competencyMap = new Map();
+    (competencies.data || []).forEach(c => {
+        competencyMap.set(`${c.employeeId}::${normalizeISNumber(c.isNumber)}`, c);
+    });
+
+    return [...candidates.values()]
+        .sort((a, b) => b.sampleCount - a.sampleCount || a.fullName.localeCompare(b.fullName))
+        .map(candidate => {
+            const user = userMap.get(normalizePersonKey(candidate.fullName)) || null;
+            const profile = profileMap.get(normalizePersonKey(candidate.fullName)) || null;
+            const competencyPreview = Object.entries(candidate.isCounts)
+                .sort((a, b) => b[1] - a[1])
+                .map(([isNumber, count]) => ({
+                    isNumber,
+                    sampleCount: count,
+                    inferredLevel: inferCompetencyLevel(count),
+                    alreadyExists: !!(profile && competencyMap.has(`${profile.id}::${normalizeISNumber(isNumber)}`)),
+                }));
+
+            return {
+                ...candidate,
+                hasUser: !!user,
+                hasProfile: !!profile,
+                userId: user?.id || null,
+                profileId: profile?.id || null,
+                existingDesignation: profile?.designation || '',
+                existingCapacity: profile?.maxDailySamples || null,
+                competencies: competencyPreview,
+            };
+        });
+}
+
+async function applyMasterListImport({ defaultPassword = '1234', defaultDesignation = 'Testing Person', defaultCapacity = 40 } = {}) {
+    const candidates = await loadMasterListAccountCandidates();
+    const summary = {
+        scannedPeople: candidates.length,
+        createdUsers: 0,
+        createdProfiles: 0,
+        linkedProfiles: 0,
+        addedCompetencies: 0,
+        skippedExistingCompetencies: 0,
+        candidates: [],
+    };
+
+    for (const candidate of candidates) {
+        let userId = candidate.userId;
+        let profileId = candidate.profileId;
+
+        if (!userId) {
+            const { data: newUser, error: userErr } = await supabase
+                .from('users')
+                .insert([{ username: candidate.fullName, password: defaultPassword, role: 'tp' }])
+                .select('id')
+                .single();
+            if (userErr) throw userErr;
+            userId = newUser.id;
+            summary.createdUsers += 1;
+        }
+
+        if (!profileId) {
+            const { data: newProfile, error: profileErr } = await supabase
+                .from('employee_profiles')
+                .insert([{
+                    userId,
+                    fullName: candidate.fullName,
+                    designation: defaultDesignation,
+                    maxDailySamples: defaultCapacity,
+                }])
+                .select('id')
+                .single();
+            if (profileErr) throw profileErr;
+            profileId = newProfile.id;
+            summary.createdProfiles += 1;
+        } else if (!candidate.userId) {
+            const { error: linkErr } = await supabase
+                .from('employee_profiles')
+                .update({ userId })
+                .eq('id', profileId);
+            if (linkErr) throw linkErr;
+            summary.linkedProfiles += 1;
+        }
+
+        for (const competency of candidate.competencies) {
+            if (!competency.isNumber || competency.alreadyExists) {
+                if (competency.alreadyExists) summary.skippedExistingCompetencies += 1;
+                continue;
+            }
+
+            const { error: compErr } = await supabase
+                .from('employee_competencies')
+                .insert([{
+                    employeeId: profileId,
+                    isNumber: competency.isNumber,
+                    avgTestDurationHours: 8,
+                    proficiencyLevel: competency.inferredLevel,
+                }]);
+            if (compErr) throw compErr;
+            summary.addedCompetencies += 1;
+        }
+
+        summary.candidates.push({
+            fullName: candidate.fullName,
+            sampleCount: candidate.sampleCount,
+            isCount: candidate.competencies.length,
+            createdUser: !candidate.userId,
+            createdProfile: !candidate.profileId,
+        });
+    }
+
+    return summary;
 }
 
 // Auth Routes
@@ -71,7 +388,7 @@ app.post('/api/login', async (req, res) => {
     const { data: row, error } = await supabase
         .from('users')
         .select('*')
-        .eq('username', username)
+        .ilike('username', username)
         .eq('password', password)
         .single();
 
@@ -157,6 +474,7 @@ app.post('/api/admin/create-tp', async (req, res) => {
 
 // --- SYSTEM_FIELDS: Two-Layer Column Matching ---
 const SYSTEM_FIELDS = {
+    sNo: { synonyms: ['s.no.', 's.no', 'sno', 'sr no', 'sr.no', 'sr. no', 'sr no.', 'serial no', 'serial number', 'sl no', 'sl.no', 'sl. no'] },
     encodedCode: { synonyms: ['encoded code', 'encoded sample', 'encodedcode', 'encode', 'sample code', 'samplecode', 'sample no', 'sample number'], contentTest: (vals) => vals.some(v => /^[0-9]{2}[A-Z]{1,2}[0-9]+[A-Z]?$/i.test(v)) },
     isNumber: { synonyms: ['is number', 'isnumber', 'is_number', 'is no', 'indian standard', 'standard'], contentTest: (vals) => vals.some(v => /^(IS\s*)?\d{3,5}/.test(v)) },
     quantity: { synonyms: ['quantity', 'qty'] },
@@ -164,9 +482,11 @@ const SYSTEM_FIELDS = {
     receivedOn: { synonyms: ['received on', 'receivedon', 'sample received on', 'received_on', 'received date', 'date received', 'recv dt'], contentTest: (vals) => vals.some(v => !isNaN(v) || /\d{2}[-\/]\d{2}[-\/]\d{2,4}/.test(v)) },
     forwardedOn: { synonyms: ['forwarded on', 'forwardedon', 'sample forwarded on', 'forwarded_on', 'forwarded date'], contentTest: (vals) => vals.some(v => !isNaN(v) || /\d{2}[-\/]\d{2}[-\/]\d{2,4}/.test(v)) },
     assignedTo: { synonyms: ['assigned to', 'tp name', 'assignedto', 'tpname', 'testing person name', 'testing person', 'tester', 'tester name', 'officer', 'allocated to', 'allocatedto', 'tp', 'tp_name', 'testing_person', 'tp name standard'], contentTest: null },
+    reportStatus: { synonyms: ['report status', 'status', 'report_status'] },
     totalTest: { synonyms: ['total test', 'totaltest', 'total tests'] },
     pendingTest: { synonyms: ['pending test', 'pendingtest', 'pending tests'] },
-    approvedTest: { synonyms: ['approved test', 'approvedtest', 'approved tests'] }
+    approvedTest: { synonyms: ['approved test', 'approvedtest', 'approved tests'] },
+    pendencyDays: { synonyms: ['pendency in days', 'pendency days', 'pending days', 'days pending'] }
 };
 
 // Upload Parsing — fully async, safe for 500-1000+ row files
@@ -178,7 +498,27 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
         const workbook = xlsx.read(req.file.buffer, { type: 'buffer', cellDates: false });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const rows = xlsx.utils.sheet_to_json(sheet, { defval: '' });
+
+        // Auto-detect header row: scan first 10 rows for recognized column names
+        const allSynonyms = [];
+        for (const config of Object.values(SYSTEM_FIELDS)) {
+            allSynonyms.push(...config.synonyms.map(s => s.toLowerCase()));
+        }
+
+        let headerRowIndex = 0;
+        const rawData = xlsx.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+        for (let i = 0; i < Math.min(rawData.length, 10); i++) {
+            const row = rawData[i];
+            if (!Array.isArray(row)) continue;
+            const cellTexts = row.map(c => String(c || '').toLowerCase().trim()).filter(Boolean);
+            const matchCount = cellTexts.filter(ct => allSynonyms.some(s => ct === s || ct.includes(s))).length;
+            if (matchCount >= 2) {
+                headerRowIndex = i;
+                break;
+            }
+        }
+
+        const rows = xlsx.utils.sheet_to_json(sheet, { defval: '', range: headerRowIndex });
 
         if (!rows || rows.length === 0) {
             return res.status(400).json({ error: 'Excel file appears to be empty or has no readable rows.' });
@@ -306,6 +646,11 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
             const encodedCode = encodedCodeKey ? String(row[encodedCodeKey] || '').trim() : '';
             if (!encodedCode) continue; // skip rows with no encoded code
 
+            // Reject non-mechanical samples (3rd character must be 'M')
+            if (encodedCode.length < 3 || encodedCode.charAt(2).toUpperCase() !== 'M') {
+                continue; 
+            }
+
             let priorityLevel = priorityKey ? String(row[priorityKey] || '').trim() : '';
             if (!priorityLevel || priorityLevel.toLowerCase() === 'non-priority') {
                 priorityLevel = encodedCode.toLowerCase().endsWith('p') ? 'Priority' : 'Non-Priority';
@@ -373,9 +718,25 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
 // Confirm and Insert Fresh Samples & Approved Re-allotted Duplicates
 app.post('/api/confirm-upload', async (req, res) => {
-    const { samples, duplicates, duplicateCount, fileName, uploadedBy, columnMappingLog } = req.body;
+    const { samples, duplicates, duplicateCount, fileName, uploadedBy, columnMappingLog, nameMapping } = req.body;
     if (!samples || !Array.isArray(samples)) return res.status(400).json({ error: 'Invalid sample data provided.' });
     if (samples.length === 0) return res.json({ message: 'No new records to commit.' });
+
+    // Apply Name Mappings (Interactive resolution of typos)
+    if (nameMapping) {
+        samples.forEach(s => {
+            if (s.assignedTo && nameMapping[s.assignedTo] && nameMapping[s.assignedTo] !== 'CREATE_NEW') {
+                s.assignedTo = nameMapping[s.assignedTo];
+            }
+        });
+        if (duplicates && Array.isArray(duplicates)) {
+            duplicates.forEach(s => {
+                if (s.assignedTo && nameMapping[s.assignedTo] && nameMapping[s.assignedTo] !== 'CREATE_NEW') {
+                    s.assignedTo = nameMapping[s.assignedTo];
+                }
+            });
+        }
+    }
 
     const batchId = 'BATCH-' + Date.now();
 
@@ -387,7 +748,14 @@ app.post('/api/confirm-upload', async (req, res) => {
         tpAccountStatus[tp] = !!user;
     }
 
-    const upsertArray = samples.map(s => {
+    // Deduplicate by encodedCode — keep last occurrence to avoid Postgres upsert conflict within same batch
+    const seenCodes = new Map();
+    samples.forEach(s => {
+        if (s.encodedCode) seenCodes.set(s.encodedCode.toLowerCase(), s);
+    });
+    const dedupedSamples = [...seenCodes.values()];
+
+    const upsertArray = dedupedSamples.map(s => {
         let appStatus = 'Pending';
         if (s.assignedTo && !tpAccountStatus[s.assignedTo]) {
             appStatus = 'PendingAccount';
@@ -519,8 +887,15 @@ app.post('/api/submit-sample', async (req, res) => {
         disposalDate = now.toISOString();
     }
 
+    // Capture pre-update IS/assignee for the ML lifecycle log.
+    const { data: sBefore } = await supabase.from('samples').select('isNumber, assignedTo').eq('id', id).single();
+
     const { error } = await supabase.from('samples').update({ appStatus, passFail, disposalDate }).eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
+
+    // ML: record the completion so the hours model can learn real durations.
+    hoursModel.appendEvent({ sampleId: id, isNumber: sBefore && sBefore.isNumber, taName: sBefore && sBefore.assignedTo, event: 'submitted' });
+
     res.json({ message: 'Sample submitted successfully', disposalDate });
 });
 
@@ -572,7 +947,7 @@ app.post('/api/admin/reset-database', async (req, res) => {
     
     const { error: err1 } = await supabase.from('samples').delete().neq('id', 0);
     const { error: err2 } = await supabase.from('upload_history').delete().neq('id', 0);
-    const { error: err3 } = await supabase.from('users').delete().neq('username', 'Admin');
+    const { error: err3 } = await supabase.from('users').delete().neq('username', 'Admin').neq('username', 'Super Admin');
 
     const errors = [err1, err2, err3].filter(Boolean);
     if (errors.length > 0) {
@@ -595,6 +970,21 @@ app.post('/api/admin/delete-samples-bulk', async (req, res) => {
 });
 
 // Delete single sample
+app.post('/api/samples/:id/start-testing', async (req, res) => {
+    const { id } = req.params;
+    const { data: sample } = await supabase.from('samples').select('appStatus, assignedTo, isNumber').eq('id', id).single();
+    if (!sample) return res.status(404).json({ error: 'Sample not found' });
+    if (sample.appStatus !== 'Pending') return res.status(400).json({ error: 'Only Pending samples can be started' });
+    if (!sample.assignedTo) return res.status(400).json({ error: 'Sample must be assigned before starting testing' });
+    const { error } = await supabase.from('samples').update({ appStatus: 'Testing' }).eq('id', id);
+    if (error) return res.status(500).json({ error: error.message });
+
+    // ML: mark the start of active testing — the clock for actual man-hours.
+    hoursModel.appendEvent({ sampleId: id, isNumber: sample.isNumber, taName: sample.assignedTo, event: 'testing_started' });
+
+    res.json({ message: 'Testing started' });
+});
+
 app.delete('/api/samples/:id', async (req, res) => {
     const { id } = req.params;
     const { error } = await supabase.from('samples').delete().eq('id', id);
@@ -619,15 +1009,6 @@ app.post('/api/lims/start', (req, res) => {
         return res.status(400).json({ error: 'An automation process is already running.' });
     }
     
-    // Save payload to a temporary file for Python script
-    const payloadPath = path.resolve(__dirname, 'lims_payload.json');
-    try {
-        fs.writeFileSync(payloadPath, JSON.stringify(payload, null, 2));
-    } catch (err) {
-        console.error('Failed to write lims_payload.json', err);
-        return res.status(500).json({ error: 'Failed to initialize automation payload.' });
-    }
-
     limsLogs = [];
     limsStatus = 'running';
     limsLogs.push(`[SYSTEM] Initializing Native LIMS automator for sample: ${payload.metadata.sampleCode}...`);
@@ -635,7 +1016,9 @@ app.post('/api/lims/start', (req, res) => {
     console.log(`Spawning LIMS uploader with payload for: ${payload.metadata.sampleCode}`);
     
     const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
-    activeLimsProcess = spawn(pythonCmd, ['lims_uploader_is4985.py', '--payload', payloadPath]);
+    activeLimsProcess = spawn(pythonCmd, ['lims_uploader_is4985.py', '--payload', '-']);
+    activeLimsProcess.stdin.write(JSON.stringify(payload));
+    activeLimsProcess.stdin.end();
     
     activeLimsProcess.stdout.on('data', (data) => {
         const text = data.toString();
@@ -646,10 +1029,19 @@ app.post('/api/lims/start', (req, res) => {
             limsStatus = 'waiting_for_login';
         } else if (text.includes('[SUCCESS] Login detected')) {
             limsStatus = 'running';
+        } else if (text.includes('[[SUBMITTED_SAMPLE]]:')) {
+            const matches = text.match(/\[\[SUBMITTED_SAMPLE\]\]:(.+)/);
+            if (matches && matches[1]) {
+                const sampleCode = matches[1].trim();
+                const nowStr = new Date().toISOString().split('T')[0].split('-').reverse().join('-');
+                supabase.from('lims_submitted_samples').upsert({ sampleCode, submittedDate: nowStr }, { onConflict: 'sampleCode' }).then();
+                // Also update the main sample record status to Submitted
+                supabase.from('samples').update({ appStatus: 'Submitted' }).eq('encodedCode', sampleCode).then();
+            }
         }
         
         // Add to log lines
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.includes('[[SUBMITTED_SAMPLE]]:'));
         limsLogs.push(...lines);
     });
     
@@ -672,25 +1064,24 @@ app.post('/api/lims/start', (req, res) => {
 app.post('/api/lims/preview', (req, res) => {
     const payload = req.body;
     
-    // Save payload to a temporary file for Python script
-    const payloadPath = path.resolve(__dirname, 'lims_payload.json');
-    try {
-        fs.writeFileSync(payloadPath, JSON.stringify(payload, null, 2));
-    } catch (err) {
-        console.error('Failed to write lims_payload.json', err);
-        return res.status(500).json({ error: 'Failed to initialize preview payload.' });
-    }
-
     const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
     // We don't track this in activeLimsProcess because it's just a fast preview generator
-    const previewProcess = spawn(pythonCmd, ['lims_uploader_is4985.py', '--payload', payloadPath, '--preview']);
+    const previewProcess = spawn(pythonCmd, ['lims_uploader_is4985.py', '--payload', '-', '--preview']);
+    previewProcess.stdin.write(JSON.stringify(payload));
+    previewProcess.stdin.end();
     
     previewProcess.on('close', (code) => {
         if (code === 0) {
             const sampleCode = payload.metadata.sampleCode || 'UNKNOWN';
             const pdfFile = path.resolve(__dirname, `Report_${sampleCode}.pdf`);
             if (fs.existsSync(pdfFile)) {
-                res.sendFile(pdfFile);
+                res.sendFile(pdfFile, (err) => {
+                    if (err) console.error("Error sending PDF:", err);
+                    // Delete the file after sending to keep file system clean
+                    fs.unlink(pdfFile, (err) => {
+                        if (err) console.error("Failed to delete PDF:", err);
+                    });
+                });
             } else {
                 res.status(500).json({ error: 'PDF was generated but file not found.' });
             }
@@ -781,13 +1172,72 @@ app.put('/api/admin/employees/:id', async (req, res) => {
     if (!fullName) return res.status(400).json({ error: 'Full Name is required.' });
 
     try {
+        // Fetch the employee to get the associated userId
+        const { data: emp, error: fetchErr } = await supabase.from('employee_profiles').select('userId').eq('id', empId).single();
+        if (fetchErr) throw fetchErr;
+
         const { error } = await supabase
             .from('employee_profiles')
             .update({ fullName, designation: designation || '', maxDailySamples: parseInt(maxDailySamples) || 40 })
             .eq('id', empId);
 
         if (error) throw error;
+
+        // Also update the username in the users table to keep them synced for login
+        if (emp && emp.userId) {
+            await supabase.from('users').update({ username: fullName }).eq('id', emp.userId);
+        }
+
         res.json({ message: 'Employee profile updated successfully.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/admin/employees/:id', async (req, res) => {
+    try {
+        // Cascade delete competencies, leaves, and assignment recommendations
+        await supabase.from('employee_competencies').delete().eq('employeeId', req.params.id);
+        await supabase.from('employee_leaves').delete().eq('employeeId', req.params.id);
+        await supabase.from('assignment_recommendations').delete().eq('recommendedEmployeeId', req.params.id);
+        
+        // Delete the profile
+        const { error } = await supabase.from('employee_profiles').delete().eq('id', req.params.id);
+        if (error) throw error;
+        res.json({ message: 'Employee deleted successfully.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/admin/master-list-import-preview', async (req, res) => {
+    try {
+        const candidates = await loadMasterListAccountCandidates();
+        res.json({
+            candidates,
+            totals: {
+                people: candidates.length,
+                missingUsers: candidates.filter(c => !c.hasUser).length,
+                missingProfiles: candidates.filter(c => !c.hasProfile).length,
+                totalSampleCount: candidates.reduce((sum, c) => sum + c.sampleCount, 0),
+            },
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/admin/master-list-import', async (req, res) => {
+    try {
+        const result = await applyMasterListImport({
+            defaultPassword: req.body?.defaultPassword || '1234',
+            defaultDesignation: req.body?.defaultDesignation || 'Testing Person',
+            defaultCapacity: parseInt(req.body?.defaultCapacity) || 40,
+        });
+        res.json({
+            message: `Imported ${result.createdUsers} users, ${result.createdProfiles} profiles, and ${result.addedCompetencies} competencies from sample history.`,
+            ...result,
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -862,9 +1312,9 @@ app.get('/api/unassigned-samples', async (req, res) => {
 // NEW TEMPLATE ENDPOINTS
 app.get('/api/admin/templates', async (req, res) => {
         try {
-            const { data } = await supabase.from('system_preferences').select('*').like('key', 'template_%');
-            const templates = {};
-            (data || []).forEach(p => {
+            let templates = {};
+            const { data: prefs } = await supabase.from('system_preferences').select('*').like('key', 'template_%');
+            (prefs || []).forEach(p => {
                 try { templates[p.key.replace('template_', '')] = JSON.parse(p.value); } catch(e){}
             });
             res.json({ templates });
@@ -884,6 +1334,336 @@ app.get('/api/admin/templates', async (req, res) => {
             if (error) throw error;
             res.json({ message: 'Template saved successfully.' });
         } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    app.post('/api/admin/templates/seed', async (req, res) => {
+        try {
+            const dbPath = path.join(__dirname, 'public/standards_db.js');
+            if (!fs.existsSync(dbPath)) {
+                return res.status(404).json({ error: 'public/standards_db.js not found' });
+            }
+            const fileContent = fs.readFileSync(dbPath, 'utf8');
+            const vm = require('vm');
+            const sandbox = {};
+            vm.createContext(sandbox);
+            const code = fileContent.replace('const EXTRACTED_STANDARDS_DB', 'var EXTRACTED_STANDARDS_DB');
+            vm.runInNewContext(code, sandbox);
+            
+            const standardsDb = sandbox.EXTRACTED_STANDARDS_DB;
+            if (!standardsDb) {
+                return res.status(500).json({ error: 'EXTRACTED_STANDARDS_DB not found in file' });
+            }
+            
+            const keys = Object.keys(standardsDb);
+            const upsertData = [];
+            
+            for (const isNumber of keys) {
+                const clauses = standardsDb[isNumber];
+                let totalHours = 0;
+                const activeClauses = {};
+                
+                clauses.forEach(c => {
+                    const hrs = parseFloat(c.hours) || 0;
+                    totalHours += hrs;
+                    activeClauses[c.clause] = {
+                        active: true,
+                        activeHours: hrs,
+                        passiveHours: 0,
+                        equipment: ''
+                    };
+                });
+                
+                const templateData = {
+                    tatDays: 7,
+                    activeClauses,
+                    totalHours
+                };
+                
+                upsertData.push({
+                    key: `template_${isNumber}`,
+                    value: JSON.stringify(templateData)
+                });
+            }
+            
+            const { error } = await supabase.from('system_preferences').upsert(upsertData, { onConflict: 'key' });
+            if (error) throw error;
+            
+            res.json({ message: `Successfully seeded ${keys.length} default templates into database.` });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    // ============================================================
+    // PDF → Master Template importer (deterministic parser)
+    // Extracts IS templates from BIS testing-charges PDFs.
+    // Two-step: /preview returns parsed JSON for OIC review;
+    // /commit upserts approved templates into system_preferences.
+    // ============================================================
+    function parseBISTestingChargesPDF(rawText) {
+        const text = (rawText || '').replace(/\r/g, '');
+        // Split into IS sections. Each section starts with a heading like:
+        //   "Testing charges for IS 2791:1992" or "TESTING CHARGES FOR IS 2797:1994"
+        //   "The BIS testing charges for IS 2802:1964 effective from ..."
+        // Heading anchors. We accept three forms of section start:
+        //   1. "Testing charges for IS 2791:1992"  (and uppercase variants)
+        //   2. "OUR REF ... IS 2830:1975" (heading appears after OUR REF line)
+        //   3. Any line that is *only* "IS NNNN:YYYY ..." — a bare title line
+        // For each match we capture the IS number; later we dedupe by IS#.
+        const headingPatterns = [
+            /testing\s+charges\s+for\s+IS\s*[:\s]*(\d{3,5})\s*[:\-]?\s*(\d{4})?/gi,
+            /OUR\s+REF[\s\S]{0,200}?IS\s*[:\s]*(\d{3,5})\s*[:\-]?\s*(\d{4})?/gi
+        ];
+        const matches = [];
+        for (const re of headingPatterns) {
+            let m;
+            while ((m = re.exec(text)) !== null) {
+                matches.push({ isNumber: m[1], year: m[2] || '', index: m.index });
+            }
+        }
+        if (matches.length === 0) return [];
+
+        // Dedupe by IS number FIRST (keep first occurrence as canonical section start),
+        // THEN slice sections from one canonical start to the next. This avoids
+        // tiny slivers between repeated mentions of the same IS code.
+        const firstOf = new Map();
+        for (const mm of matches) {
+            if (!firstOf.has(mm.isNumber)) firstOf.set(mm.isNumber, mm);
+        }
+        const anchors = [...firstOf.values()].sort((a, b) => a.index - b.index);
+        const unique = [];
+        for (let i = 0; i < anchors.length; i++) {
+            const start = anchors[i].index;
+            const end = i + 1 < anchors.length ? anchors[i + 1].index : text.length;
+            unique.push({
+                isNumber: anchors[i].isNumber,
+                year: anchors[i].year,
+                body: text.slice(start, end)
+            });
+        }
+
+        const templates = [];
+        for (const sec of unique) {
+            const parsed = parseISTemplateSection(sec);
+            if (parsed) templates.push(parsed);
+        }
+        return templates;
+    }
+
+    function parseISTemplateSection({ isNumber, year, body }) {
+        const lines = body.split('\n').map(l => l.trim()).filter(Boolean);
+        if (!lines.length) return null;
+
+        // Product name: usually appears as "(Soluble Coffee Powder)" or after "for IS X:Y"
+        let productName = '';
+        const prodMatch = body.match(/IS\s*\d{3,5}\s*[:\-]?\s*\d{0,4}\s*(?:Amd[\-\s]?\d+)?\s*\(([^)]+)\)/i);
+        if (prodMatch) productName = prodMatch[1].trim();
+        else {
+            const altMatch = body.match(/for\s+([A-Z][A-Za-z0-9 ,\-]+?)\s+as\s+per\s+IS/i);
+            if (altMatch) productName = altMatch[1].trim();
+        }
+
+        // Lab origin (for audit trail)
+        let lab = '';
+        const labMatch = body.match(/BIS\s+(NROL|WROL|EROL|SROL|CROL|Central\s+Laboratory)[\s,]+([A-Za-z]+)?/i);
+        if (labMatch) lab = `BIS ${labMatch[1]}${labMatch[2] ? ' ' + labMatch[2] : ''}`;
+
+        // Parse table rows. Two patterns (try strict first, then loose):
+        //   STRICT:  "<num>. <test name> <Cl X.Y[ Table N]> <hours>"
+        //   LOOSE :  "<num>. <test name> <hours>"   (no clause ref, e.g. central-lab format)
+        // Hours can be a number, a unicode fraction (½ ¼ ¾), or an inactive marker (**, --, N/A).
+        const FRAC = { '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 0.33, '⅔': 0.67, '⅛': 0.125 };
+        const HOURS_TOKEN = '(?:[\\d.]+(?:\\s*[½¼¾⅓⅔⅛])?|[½¼¾⅓⅔⅛]|\\*+|--|—|N\\/?A)';
+        const clauseRowRe = new RegExp(
+            `^\\s*\\d+\\.?\\s+(.+?)\\s+(Cl\\.?\\s*\\d[\\d.]*(?:\\s*Table\\s*\\d+)?|Table\\s*\\d+\\s*,\\s*[ivxlcdm]+\\)|\\d[\\d.]*(?:\\s*&\\s*\\d[\\d.]*)?)\\s+(${HOURS_TOKEN})\\b`,
+            'i'
+        );
+        const looseRowRe = new RegExp(`^\\s*\\d+\\.?\\s+(.+?)\\s+(${HOURS_TOKEN})\\s*$`, 'i');
+
+        const parseHours = (raw) => {
+            if (!raw) return 0;
+            raw = String(raw).trim();
+            if (/^\*+$|^--$|^—$|^N\/?A$/i.test(raw)) return null; // inactive
+            // Mixed "1 ½" → 1.5
+            const mixed = raw.match(/^([\d.]+)\s*([½¼¾⅓⅔⅛])$/);
+            if (mixed) return parseFloat(mixed[1]) + (FRAC[mixed[2]] || 0);
+            if (FRAC[raw]) return FRAC[raw];
+            const n = parseFloat(raw);
+            return Number.isFinite(n) ? n : 0;
+        };
+
+        const clauses = {};
+        let totalFromRows = 0;
+        let totalDeclared = 0;
+        const lastTotalMatch = body.match(/Total\s*(?:Man[\-\s]*Hours|Time)?\s*[:\-]?\s*(\d+(?:\.\d+)?(?:\s*[½¼¾⅓⅔⅛])?)/i);
+        if (lastTotalMatch) totalDeclared = parseHours(lastTotalMatch[1]) || 0;
+
+        let rowIdx = 0;
+        for (const line of lines) {
+            if (/^(sr|s\.?\s*no|sl\.?\s*no|requirements?|tests?|clause|man[\-\s]*hours?|electricity|consumable|grade\s*\d|total\b)/i.test(line)) continue;
+
+            let testName = '', clauseRef = '', hoursRaw = '';
+            let mm = line.match(clauseRowRe);
+            if (mm) { testName = mm[1]; clauseRef = mm[2]; hoursRaw = mm[3]; }
+            else {
+                mm = line.match(looseRowRe);
+                if (!mm) continue;
+                testName = mm[1];
+                clauseRef = `Row ${++rowIdx}`;
+                hoursRaw = mm[2];
+            }
+            testName = testName.replace(/\s+/g, ' ').trim();
+            clauseRef = clauseRef.replace(/\s+/g, ' ').trim();
+
+            const hours = parseHours(hoursRaw);
+            const isInactive = hours === null;
+            const safeHours = isInactive ? 0 : hours;
+            if (!isInactive && safeHours <= 0) continue;
+
+            // Avoid duplicate clause keys
+            let key = clauseRef;
+            let dupCount = 2;
+            while (clauses[key]) { key = `${clauseRef} (${dupCount++})`; }
+            clauses[key] = {
+                active: !isInactive,
+                activeHours: safeHours,
+                passiveHours: 0,
+                equipment: '',
+                name: testName
+            };
+            if (!isInactive) totalFromRows += safeHours;
+        }
+
+        // If we couldn't parse any rows, bail
+        if (Object.keys(clauses).length === 0) return null;
+
+        // Always include report preparation (most PDFs list it; if missing, add 0.5h default)
+        if (!Object.keys(clauses).some(k => /report/i.test(clauses[k].name || ''))) {
+            clauses['Report Prep'] = {
+                active: true,
+                activeHours: 0.5,
+                passiveHours: 0,
+                equipment: '',
+                name: 'Preparation of Test Report'
+            };
+            totalFromRows += 0.5;
+        }
+
+        // Prefer declared TOTAL if present and within 20% of summed rows (cross-check),
+        // else use summed rows.
+        let totalHours = totalFromRows;
+        let confidence = 'high';
+        if (totalDeclared > 0) {
+            const delta = Math.abs(totalDeclared - totalFromRows) / Math.max(totalDeclared, 1);
+            if (delta <= 0.2) {
+                totalHours = totalDeclared;
+            } else {
+                confidence = 'review'; // row sum disagrees with declared total
+            }
+        } else {
+            confidence = 'medium'; // no declared total found
+        }
+
+        return {
+            isNumber: `IS ${isNumber}`,
+            year,
+            productName,
+            sourceLab: lab,
+            totalHours,
+            tatDays: 7, // default shelf-life — OIC can override
+            activeClauses: clauses,
+            confidence,
+            clauseCount: Object.keys(clauses).length
+        };
+    }
+
+    app.post('/api/admin/templates/import-pdf/preview', upload.single('pdf'), async (req, res) => {
+        try {
+            if (!req.file) return res.status(400).json({ error: 'No PDF file uploaded' });
+            
+            const engine = req.body.engine || 'js';
+            let extractedText = '';
+            
+            if (engine === 'python') {
+                const pyResult = await extractPdfWithPython(req.file.buffer);
+                extractedText = pyResult.text;
+            } else {
+                const data = await pdfParseBuffer(req.file.buffer);
+                extractedText = data.text || '';
+            }
+            
+            const parsed = parseBISTestingChargesPDF(extractedText);
+            if (parsed.length === 0) {
+                return res.json({
+                    templates: [],
+                    summary: { total: 0, clean: 0, review: 0, medium: 0 },
+                    warning: 'No IS templates detected. The PDF may be scanned (image-only) or use an unrecognized format.'
+                });
+            }
+            const summary = {
+                total: parsed.length,
+                clean: parsed.filter(t => t.confidence === 'high').length,
+                medium: parsed.filter(t => t.confidence === 'medium').length,
+                review: parsed.filter(t => t.confidence === 'review').length
+            };
+            res.json({ templates: parsed, summary });
+        } catch (err) {
+            console.error('[PDF import preview] error:', err);
+            res.status(500).json({ error: err.message || 'PDF parse failed' });
+        }
+    });
+
+    app.post('/api/admin/templates/import-pdf/commit', async (req, res) => {
+        try {
+            const { templates, overwrite } = req.body;
+            if (!Array.isArray(templates) || templates.length === 0) {
+                return res.status(400).json({ error: 'No templates provided' });
+            }
+
+            // Optionally fetch existing keys to skip if not overwriting
+            let existingKeys = new Set();
+            if (!overwrite) {
+                const { data: existing } = await supabase
+                    .from('system_preferences')
+                    .select('key')
+                    .like('key', 'template_%');
+                existingKeys = new Set((existing || []).map(r => r.key));
+            }
+
+            const upsertData = [];
+            let skipped = 0;
+            for (const t of templates) {
+                if (!t || !t.isNumber) continue;
+                const key = `template_${t.isNumber}`;
+                if (!overwrite && existingKeys.has(key)) { skipped++; continue; }
+                const templateData = {
+                    tatDays: parseInt(t.tatDays) || 7,
+                    totalHours: parseFloat(t.totalHours) || 0,
+                    activeClauses: t.activeClauses || {},
+                    productName: t.productName || '',
+                    sourceLab: t.sourceLab || '',
+                    importedAt: new Date().toISOString(),
+                    importedFrom: 'PDF'
+                };
+                upsertData.push({ key, value: JSON.stringify(templateData) });
+            }
+
+            if (upsertData.length > 0) {
+                const { error } = await supabase
+                    .from('system_preferences')
+                    .upsert(upsertData, { onConflict: 'key' });
+                if (error) throw error;
+            }
+
+            res.json({
+                message: `Imported ${upsertData.length} template(s)${skipped ? `, skipped ${skipped} existing` : ''}.`,
+                imported: upsertData.length,
+                skipped
+            });
+        } catch (err) {
+            console.error('[PDF import commit] error:', err);
             res.status(500).json({ error: err.message });
         }
     });
@@ -916,6 +1696,75 @@ app.get('/api/admin/templates', async (req, res) => {
         }
     });
 
+    app.post('/api/download-allotted', async (req, res) => {
+        const { sampleIds } = req.body;
+        if (!sampleIds || !Array.isArray(sampleIds) || sampleIds.length === 0) {
+            return res.status(400).json({ error: 'Missing or invalid sampleIds' });
+        }
+        try {
+            const { data: samples, error } = await supabase.from('samples').select('*').in('id', sampleIds);
+            if (error) throw error;
+            
+            const worksheetData = [
+                ["Job Allotment Report", "", "", "", "", "", "", ""],
+                ["Generated On", new Date().toLocaleString(), "", "", "", "", "", ""],
+                [],
+                ["Sample ID", "IS Number", "Priority Level", "Quantity", "Assigned To", "Received On", "Forwarded On", "Status"]
+            ];
+            
+            (samples || []).forEach(s => {
+                worksheetData.push([
+                    s.encodedCode,
+                    s.isNumber || '',
+                    s.priorityLevel || 'Standard',
+                    s.quantity || '',
+                    s.assignedTo || '',
+                    s.receivedOn || '',
+                    s.forwardedOn || '',
+                    s.appStatus || ''
+                ]);
+            });
+            
+            const worksheet = xlsx.utils.aoa_to_sheet(worksheetData);
+            worksheet['!cols'] = [
+                { wch: 18 },
+                { wch: 12 },
+                { wch: 15 },
+                { wch: 10 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 15 }
+            ];
+            
+            const workbook = xlsx.utils.book_new();
+            xlsx.utils.book_append_sheet(workbook, worksheet, "Allotments");
+            
+            const buffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+            
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', 'attachment; filename="allotment_slip.xlsx"');
+            res.send(buffer);
+        } catch(err) {
+            console.error(err);
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    app.post('/api/samples-by-ids', async (req, res) => {
+        const { sampleIds } = req.body;
+        if (!sampleIds || !Array.isArray(sampleIds) || sampleIds.length === 0) {
+            return res.status(400).json({ error: 'Missing or invalid sampleIds' });
+        }
+        try {
+            const { data: samples, error } = await supabase.from('samples').select('*').in('id', sampleIds);
+            if (error) throw error;
+            res.json({ samples });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
     app.post('/api/auto-assign', async (req, res) => {
         try {
             // 1. Get unassigned samples
@@ -931,50 +1780,149 @@ app.get('/api/admin/templates', async (req, res) => {
                 (prefRows || []).forEach(p => {
                     if (p.key === 'priorityRankingMode') priorityRankingMode = p.value || 'prioritize';
                     if (p.key && p.key.startsWith('template_')) {
-                        try { templates[p.key.replace('template_', '')] = JSON.parse(p.value); } catch(e){}
+                        try { 
+                            const val = JSON.parse(p.value);
+                            const baseKey = p.key.replace('template_', '');
+                            const normKey = normalizeISNumber(baseKey);
+                            templates[baseKey] = val; 
+                            if (baseKey !== normKey) {
+                                templates[normKey] = val;
+                            }
+                        } catch(e){}
                     }
                 });
             } catch(e) { console.error('Pref load error', e); }
 
+            // 2b. Load the local ML hours-model (batch-aware, learns from history).
+            // Cold-starts from BIS priors if never trained — always returns sane numbers.
+            let mlModel = null;
+            try { mlModel = await hoursModel.loadModel(); } catch (e) { console.warn('ML model load failed, using template hours:', e.message); }
+
             // 3. Load employees, competencies, leaves
             const { data: employees } = await supabase.from('employee_profiles').select('*');
             const { data: competencies } = await supabase.from('employee_competencies').select('*');
+            const { data: usersForAssign } = await supabase.from('users').select('id, username');
+
+            // IDENTITY BRIDGE: samples.assignedTo stores the USERNAME, but employee_profiles
+            // carries fullName. They often differ. To make the existing-load pass (keyed off
+            // assignedTo) and the candidate loop (keyed off emp.fullName) agree, we canonicalize
+            // every assignee to normalizePersonKey(fullName). usernameKeyToFullKey maps a
+            // username's key -> the employee's fullName key via employee_profiles.userId.
+            const userIdToUsername = new Map((usersForAssign || []).map(u => [u.id, u.username]));
+            const usernameKeyToFullKey = {};
+            (employees || []).forEach(e => {
+                const uname = userIdToUsername.get(e.userId);
+                if (uname) usernameKeyToFullKey[normalizePersonKey(uname)] = normalizePersonKey(e.fullName);
+            });
+            // Canonical key for any assignee identity (username or fullName) used in this handler.
+            const assigneeKey = (name) => {
+                const k = normalizePersonKey(name);
+                return usernameKeyToFullKey[k] || k;
+            };
             
             // Get leaves for TODAY
             const todayStr = new Date().toISOString().split('T')[0];
             const { data: leavesToday } = await supabase.from('employee_leaves').select('employeeId').eq('leaveDate', todayStr);
             const onLeaveToday = new Set((leavesToday || []).map(l => l.employeeId));
 
+            // Best-effort attendance lookup. If an attendance table exists,
+            // use explicit present/absent rows to influence assignment. If no
+            // table exists, keep the current leave-only behavior.
+            const attendanceStatusByEmployeeId = new Map();
+            const attendanceTables = ['employee_attendance', 'attendance_records', 'attendance_logs'];
+            const parseDateLike = (value) => {
+                if (!value) return null;
+                if (typeof value === 'string' && /^\d{2}[-/]\d{2}[-/]\d{4}$/.test(value)) {
+                    const [d, m, y] = value.split(/[-/]/);
+                    const t = Date.parse(`${y}-${m}-${d}`);
+                    return Number.isFinite(t) ? new Date(t).toISOString().slice(0, 10) : null;
+                }
+                const t = Date.parse(value);
+                return Number.isFinite(t) ? new Date(t).toISOString().slice(0, 10) : null;
+            };
+            for (const table of attendanceTables) {
+                try {
+                    const { data: attendanceRows, error: attendanceErr } = await supabase.from(table).select('*');
+                    if (attendanceErr || !attendanceRows || attendanceRows.length === 0) continue;
+
+                    for (const row of attendanceRows) {
+                        const employeeId = row.employeeId ?? row.employee_id ?? row.empId ?? row.emp_id ?? row.userId ?? row.user_id;
+                        if (!employeeId) continue;
+
+                        const dateValue = row.attendanceDate ?? row.attendance_date ?? row.date ?? row.logDate ?? row.log_date ?? row.workDate ?? row.work_date;
+                        const rowDate = parseDateLike(dateValue);
+                        if (rowDate && rowDate !== todayStr) continue;
+
+                        const rawStatus = String(
+                            row.status ?? row.attendanceStatus ?? row.attendance_status ?? row.presentStatus ?? row.present_status ?? ''
+                        ).trim().toLowerCase();
+
+                        if (['present', 'p', 'in', 'checked-in', 'checked in', 'working', 'office'].includes(rawStatus)) {
+                            attendanceStatusByEmployeeId.set(employeeId, 'present');
+                        } else if (['absent', 'a', 'out', 'not present', 'missing'].includes(rawStatus)) {
+                            attendanceStatusByEmployeeId.set(employeeId, 'absent');
+                        }
+                    }
+
+                    // Stop after the first attendance source that returns rows.
+                    if (attendanceStatusByEmployeeId.size > 0) break;
+                } catch (_) {
+                    // Ignore missing tables / incompatible schemas and fall back.
+                }
+            }
+
             // Build competency map
             const compMap = {};
             (competencies || []).forEach(c => {
-                if (!compMap[c.isNumber]) compMap[c.isNumber] = [];
-                compMap[c.isNumber].push(c);
+                const normC = normalizeISNumber(c.isNumber);
+                if (!compMap[normC]) compMap[normC] = [];
+                compMap[normC].push(c);
+                if (c.isNumber !== normC) {
+                    if (!compMap[c.isNumber]) compMap[c.isNumber] = [];
+                    compMap[c.isNumber].push(c);
+                }
             });
 
             // 4. Calculate Current Load Hours and Equipment Load
+            // BATCH-AWARE: a TA already holding several samples of the same IS shares
+            // that IS's fixed setup, so their real load is setup + n·marginal — NOT
+            // n × full-hours. We group each TA's pending work by IS and price the
+            // group through the ML model (falls back to flat hours if no model).
             const { data: allPending } = await supabase.from('samples').select('assignedTo, isNumber').in('appStatus', ['Pending']);
             const loadHoursMap = {};
-            const equipmentLoadMap = {}; // Maps equipmentName -> pendingCount
-            
+            const equipmentLoadMap = {};                 // equipmentName -> pendingCount
+            // empIsCounts[assignee][normIS] = how many of that IS the TA already holds.
+            // Drives both the realistic load above and the marginal cost of new work below.
+            const empIsCounts = {};
+
             (allPending || []).forEach(s => {
-                const tmpl = templates[s.isNumber];
-                if (tmpl) {
-                    if (s.assignedTo) {
-                        loadHoursMap[s.assignedTo] = (loadHoursMap[s.assignedTo] || 0) + (tmpl.totalHours || 20);
-                    }
-                    // Accumulate equipment load regardless of who is assigned
-                    if (tmpl.activeClauses) {
-                        Object.values(tmpl.activeClauses).forEach(clause => {
-                            if (clause.active && clause.equipment) {
-                                equipmentLoadMap[clause.equipment] = (equipmentLoadMap[clause.equipment] || 0) + 1;
-                            }
-                        });
-                    }
-                } else if (s.assignedTo) {
-                    loadHoursMap[s.assignedTo] = (loadHoursMap[s.assignedTo] || 0) + 20;
+                const normIS = normalizeISNumber(s.isNumber);
+                const tmpl = templates[s.isNumber] || templates[normIS];
+                if (s.assignedTo) {
+                    // Canonicalize username -> fullName key so this matches emp.fullName below.
+                    const aKey = assigneeKey(s.assignedTo);
+                    if (!empIsCounts[aKey]) empIsCounts[aKey] = {};
+                    empIsCounts[aKey][normIS] = (empIsCounts[aKey][normIS] || 0) + 1;
+                }
+                // Equipment backlog is per-sample regardless of who holds it.
+                if (tmpl && tmpl.activeClauses) {
+                    Object.values(tmpl.activeClauses).forEach(clause => {
+                        if (clause.active && clause.equipment) {
+                            equipmentLoadMap[clause.equipment] = (equipmentLoadMap[clause.equipment] || 0) + 1;
+                        }
+                    });
                 }
             });
+            // Price each TA's grouped pending load through the batch model.
+            for (const [assignee, isCounts] of Object.entries(empIsCounts)) {
+                let total = 0;
+                for (const [normIS, n] of Object.entries(isCounts)) {
+                    total += mlModel
+                        ? hoursModel.estimateBatchHours(mlModel, normIS, n, templates)
+                        : ((templates[normIS] && templates[normIS].totalHours) || 20) * n;
+                }
+                loadHoursMap[assignee] = total;
+            }
 
             let recommendationsGenerated = 0;
             let forcedCount = 0;
@@ -982,21 +1930,54 @@ app.get('/api/admin/templates', async (req, res) => {
             await supabase.from('assignment_recommendations').delete().eq('status', 'pending');
 
             const today = new Date();
+            const recommendationsToInsert = [];
 
-            for (const sample of unassignedSamples) {
-                let requiredHours = 20; 
+            // --- STRICT FIFO within priority buckets ---
+            // Split into two queues, sort each oldest-first by pendencyDays (direct from file)
+            // then fall back to receivedOn date. Priority queue is processed first.
+            const parsePendency = (s) => {
+                if (s.pendencyDays && !isNaN(parseInt(s.pendencyDays))) return parseInt(s.pendencyDays);
+                if (s.receivedOn) {
+                    const parts = s.receivedOn.split('-');
+                    if (parts.length === 3) {
+                        const recDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                        return Math.floor((today - recDate) / (1000 * 60 * 60 * 24));
+                    }
+                }
+                return 0;
+            };
+
+            const isPrioritySample = (s) => (s.priorityLevel || '').toLowerCase() === 'priority' || (s.encodedCode || '').toLowerCase().endsWith('p');
+
+            const priorityQueue    = unassignedSamples.filter(s =>  isPrioritySample(s)).sort((a, b) => parsePendency(b) - parsePendency(a));
+            const nonPriorityQueue = unassignedSamples.filter(s => !isPrioritySample(s)).sort((a, b) => parsePendency(b) - parsePendency(a));
+            const orderedSamples   = [...priorityQueue, ...nonPriorityQueue];
+
+            for (const sample of orderedSamples) {
                 let tatDays = 7;
                 let requiredEquipments = [];
 
-                if (templates[sample.isNumber]) {
-                    requiredHours = templates[sample.isNumber].totalHours || 20;
-                    tatDays = templates[sample.isNumber].tatDays || 7;
-                    if (templates[sample.isNumber].activeClauses) {
-                        Object.values(templates[sample.isNumber].activeClauses).forEach(c => {
+                const sampleNorm = normalizeISNumber(sample.isNumber);
+                const tmpl = templates[sample.isNumber] || templates[sampleNorm];
+                if (tmpl) {
+                    tatDays = tmpl.tatDays || 7;
+                    if (tmpl.activeClauses) {
+                        Object.values(tmpl.activeClauses).forEach(c => {
                             if (c.active && c.equipment) requiredEquipments.push(c.equipment);
                         });
                     }
                 }
+
+                // Full standalone cost (setup+marginal) — used for display and as the
+                // fallback when no candidate already holds this IS. The actual cost
+                // charged to a TA is computed PER-CANDIDATE below, because a TA who
+                // already has this IS in their queue only pays the marginal hours.
+                const fullRequiredHours = mlModel
+                    ? hoursModel.estimateSampleHours(mlModel, { isNumber: sampleNorm, batchPosition: 0, templates })
+                    : ((tmpl && tmpl.totalHours) || 20);
+                const marginalRequiredHours = mlModel
+                    ? hoursModel.estimateSampleHours(mlModel, { isNumber: sampleNorm, batchPosition: 1, templates })
+                    : ((tmpl && tmpl.totalHours) || 20);
 
                 // Calculate Machine Bottleneck
                 let maxEquipLoad = 0;
@@ -1009,42 +1990,35 @@ app.get('/api/admin/templates', async (req, res) => {
                     }
                 });
 
-                // Calculate SLA / TAT Deadline
-                let sampleAge = 0;
-                let daysUntilDeadline = tatDays; // Default
-                if (sample.receivedOn) {
-                    const parts = sample.receivedOn.split('-');
-                    if (parts.length === 3) {
-                        const recDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-                        sampleAge = Math.floor((today - recDate) / (1000 * 60 * 60 * 24));
-                        const deadlineDate = new Date(recDate);
-                        deadlineDate.setDate(deadlineDate.getDate() + tatDays);
-                        daysUntilDeadline = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
-                    }
-                }
+                // Use pendencyDays directly from file if available, else calculate from receivedOn
+                const pendencyDays = parsePendency(sample);
+                const isPriority = isPrioritySample(sample);
 
-                const isPriority = (sample.priorityLevel || '').toLowerCase() === 'priority' || (sample.encodedCode || '').toLowerCase().endsWith('p');
-                
-                // SLA Urgency Scoring
-                let slaBoost = 0;
-                let slaTag = '';
-                if (daysUntilDeadline < 0) {
-                    slaBoost = 500;
-                    slaTag = '⚠️ SLA OVERDUE';
-                } else if (daysUntilDeadline <= 2) {
-                    slaBoost = 200;
-                    slaTag = '🔥 SLA CRITICAL';
+                // Urgency scoring based on actual pendency days
+                let urgencyBoost = 0;
+                let urgencyTag = '';
+                if (pendencyDays > 60) {
+                    urgencyBoost = 500;
+                    urgencyTag = '🔴 CRITICAL — PENDING 60+ DAYS';
+                } else if (pendencyDays > 30) {
+                    urgencyBoost = 200;
+                    urgencyTag = '⚠️ OVERDUE — PENDING 30+ DAYS';
+                } else if (pendencyDays > 14) {
+                    urgencyBoost = 80;
+                    urgencyTag = '🔥 DUE SOON';
                 } else {
-                    slaBoost = Math.max(0, 50 - (daysUntilDeadline * 5)); // Gradually higher score as it gets closer
+                    urgencyBoost = Math.max(0, pendencyDays * 2);
                 }
-                
-                const priorityBoost = (priorityRankingMode === 'prioritize' && isPriority) ? 100 : 0;
-                const fifoBoost = Math.min(sampleAge, 30);
 
-                const matchingComps = compMap[sample.isNumber] || [];
+                const priorityBoost = (priorityRankingMode === 'prioritize' && isPriority) ? 100 : 0;
+                // FIFO within bucket is enforced by queue order above; score reflects age for tie-breaking
+                const fifoBoost = Math.min(pendencyDays, 30);
+
+                const matchingComps = compMap[sample.isNumber] || compMap[sampleNorm] || [];
                 let bestEmployee = null;
                 let bestScore = -Infinity;
                 let bestReason = '';
+                let bestRequiredHours = fullRequiredHours;
 
                 // Evaluate competent employees
                 for (const comp of matchingComps) {
@@ -1052,11 +2026,23 @@ app.get('/api/admin/templates', async (req, res) => {
                     if (!emp) continue;
 
                     let isOnLeave = onLeaveToday.has(emp.id);
-                    const maxQueueHours = emp.maxDailySamples || 40; 
-                    const currentLoadHours = loadHoursMap[emp.fullName] || 0;
+                    const attendanceStatus = attendanceStatusByEmployeeId.get(emp.id) || null;
+                    const isExplicitAbsent = attendanceStatus === 'absent';
+                    const attendanceBonus = attendanceStatus === 'present' ? 25 : 0;
+                    if (isExplicitAbsent) continue;
+                    const maxQueueHours = emp.maxDailySamples || 40;
+                    const empKey = normalizePersonKey(emp.fullName);
+                    const currentLoadHours = loadHoursMap[empKey] || 0;
                     const availableCapacity = maxQueueHours - currentLoadHours;
 
-                    let isOverCapacity = availableCapacity < requiredHours;
+                    // BATCH-AWARE COST: if this TA already holds samples of the same IS
+                    // (existing queue or earlier picks this run), the new sample only
+                    // costs the MARGINAL hours — the setup is already paid. Otherwise
+                    // it costs the full setup+marginal.
+                    const alreadyHasIS = (empIsCounts[empKey] && empIsCounts[empKey][sampleNorm]) || 0;
+                    const empRequiredHours = alreadyHasIS > 0 ? marginalRequiredHours : fullRequiredHours;
+
+                    let isOverCapacity = availableCapacity < empRequiredHours;
 
                     if (comp.proficiencyLevel === 'Trainee' && isPriority) continue;
 
@@ -1064,51 +2050,69 @@ app.get('/api/admin/templates', async (req, res) => {
                     if (comp.proficiencyLevel === 'Expert') profMult = 1.5;
                     else if (comp.proficiencyLevel === 'Trainee') profMult = 0.6;
 
-                    const capacityScore = availableCapacity * 2; 
+                    const capacityScore = availableCapacity * 2;
+
+                    // Consolidation bonus: prefer routing a same-IS sample to a TA who
+                    // is already set up for it — that's the real efficiency win when
+                    // "loading 5 samples together". Scales with the hours saved.
+                    const batchAffinityBonus = alreadyHasIS > 0 ? Math.min(60, (fullRequiredHours - marginalRequiredHours) * 4) : 0;
 
                     // Penalties
-                    const leavePenalty = isOnLeave ? 1000 : 0; 
-                    const capacityPenalty = isOverCapacity ? 500 : 0; 
+                    const leavePenalty = isOnLeave ? 1000 : 0;
+                    const capacityPenalty = isOverCapacity ? 500 : 0;
                     const machinePenalty = maxEquipLoad * 5; // e.g. 10 pending samples = -50 points
+                    const attendancePenalty = attendanceStatus === 'present' ? 0 : 0;
 
-                    let score = (10 * profMult) + capacityScore + priorityBoost + fifoBoost + slaBoost - leavePenalty - capacityPenalty - machinePenalty;
+                    let score = (10 * profMult) + capacityScore + batchAffinityBonus + priorityBoost + fifoBoost + urgencyBoost + attendanceBonus - leavePenalty - capacityPenalty - machinePenalty - attendancePenalty;
 
                     if (score > bestScore) {
                         bestScore = score;
                         bestEmployee = emp;
-                        
+                        bestRequiredHours = empRequiredHours;
+
                         let tags = [];
-                        if (slaTag) tags.push(slaTag);
+                        if (urgencyTag) tags.push(urgencyTag);
+                        if (alreadyHasIS > 0) tags.push(`🔗 BATCHED ×${alreadyHasIS + 1} (saves ${(fullRequiredHours - marginalRequiredHours).toFixed(1)}h)`);
                         if (maxEquipLoad > 5) tags.push(`⚠️ [${bottleneckMachine}] BACKLOGGED`);
                         if (isOnLeave) tags.push('⚠️ ON LEAVE');
+                        if (attendanceStatus === 'present') tags.push('✅ PRESENT');
                         if (isOverCapacity) tags.push('⚠️ EXCEEDS CAPACITY');
                         let tagStr = tags.length > 0 ? ` [${tags.join(' | ')}]` : '';
-                        
+
                         bestReason = `IS ${sample.isNumber} (${comp.proficiencyLevel})${tagStr}, Avail: ${availableCapacity.toFixed(1)}h`;
                     }
                 }
 
                 if (bestEmployee) {
-                    loadHoursMap[bestEmployee.fullName] = (loadHoursMap[bestEmployee.fullName] || 0) + requiredHours;
-                    
+                    const bestKey = normalizePersonKey(bestEmployee.fullName);
+                    loadHoursMap[bestKey] = (loadHoursMap[bestKey] || 0) + bestRequiredHours;
+                    // Track the new same-IS count so the NEXT same-IS sample this run
+                    // is correctly priced as marginal and consolidates onto this TA.
+                    if (!empIsCounts[bestKey]) empIsCounts[bestKey] = {};
+                    empIsCounts[bestKey][sampleNorm] = (empIsCounts[bestKey][sampleNorm] || 0) + 1;
+
                     // Also update equipment load to simulate the future backlog
                     requiredEquipments.forEach(eq => {
                         equipmentLoadMap[eq] = (equipmentLoadMap[eq] || 0) + 1;
                     });
 
-                    const { error } = await supabase.from('assignment_recommendations').insert({
+                    recommendationsToInsert.push({
                         sampleId: sample.id,
                         recommendedEmployeeId: bestEmployee.id,
                         recommendedEmployeeName: bestEmployee.fullName,
-                        reason: bestReason + ` | Needs: ${requiredHours}h Active`,
+                        reason: bestReason + ` | Needs: ${bestRequiredHours.toFixed(1)}h Active`,
                         score: Math.round(bestScore * 100) / 100,
                         status: 'pending'
                     });
-                    if (error) console.error('Auto-assign insert error:', error);
                     recommendationsGenerated++;
                 } else {
                     console.log(`Could not assign sample ${sample.encodedCode} - no competent employee found or everyone is on leave/at capacity.`);
                 }
+            }
+            
+            if (recommendationsToInsert.length > 0) {
+                const { error } = await supabase.from('assignment_recommendations').insert(recommendationsToInsert);
+                if (error) console.error('Auto-assign bulk insert error:', error);
             }
 
             res.json({ message: `Generated ${recommendationsGenerated} capacity-based recommendations. Unassigned samples remain parked.`, forcedCount: 0 });
@@ -1159,8 +2163,12 @@ app.post('/api/approve-assignment/:id', async (req, res) => {
         
         // Mark recommendation as approved
         await supabase.from('assignment_recommendations').update({ status: 'approved', resolvedAt: new Date().toISOString() }).eq('id', recId);
-        
-        res.json({ message: 'Assignment approved.' });
+
+        // ML: record the assignment event (start of the sample's lifecycle clock).
+        const { data: sMeta } = await supabase.from('samples').select('isNumber').eq('id', rec.sampleId).single();
+        hoursModel.appendEvent({ sampleId: rec.sampleId, isNumber: sMeta && sMeta.isNumber, taName: assignedUsername, event: 'assigned' });
+
+        res.json({ message: 'Assignment approved.', sampleId: rec.sampleId });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1171,6 +2179,96 @@ app.post('/api/reject-assignment/:id', async (req, res) => {
     try {
         await supabase.from('assignment_recommendations').update({ status: 'rejected', resolvedAt: new Date().toISOString() }).eq('id', recId);
         res.json({ message: 'Assignment rejected.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- Local ML hours-model ops (all local, no cloud) -------------------------
+// Status: what the model currently believes per IS (setup/marginal hours) and
+// per-TA proficiency, plus how much real data it has learned from.
+app.get('/api/admin/ml/status', async (req, res) => {
+    try {
+        const model = await hoursModel.loadModel();
+        const templates = await hoursModel.loadTemplates();
+        const standards = Object.entries(model.isStates || {}).map(([is, st]) => ({
+            isNumber: is,
+            setupHours: Math.round(st.theta[0] * 100) / 100,
+            marginalHours: Math.round(st.theta[1] * 100) / 100,
+            standalone: Math.round((st.theta[0] + st.theta[1]) * 100) / 100,
+            perSampleInBatchOf5: Math.round((hoursModel.estimateBatchHours(model, is, 5, templates) / 5) * 100) / 100,
+            observations: st.n || 0,
+        })).sort((a, b) => a.isNumber.localeCompare(b.isNumber));
+        res.json({
+            updatedAt: model.updatedAt,
+            trainedEvents: model.trainedEvents || 0,
+            standardsModeled: standards.length,
+            tasProfiled: Object.keys(model.taFactors || {}).length,
+            taFactors: model.taFactors || {},
+            standards,
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Retrain on demand from the persisted lifecycle event log + current templates.
+app.post('/api/admin/ml/retrain', async (req, res) => {
+    try {
+        const summary = await hoursModel.rebuildFromHistory();
+        res.json({ message: 'ML hours-model retrained from lifecycle history.', ...summary });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Edit recommendation — swap suggested employee (or set unassigned)
+app.patch('/api/admin/recommendations/:id', async (req, res) => {
+    const recId = req.params.id;
+    const { employeeName, employeeId } = req.body;
+    try {
+        await supabase.from('assignment_recommendations').update({
+            recommendedEmployeeName: employeeName || null,
+            recommendedEmployeeId: employeeId || null
+        }).eq('id', recId);
+        res.json({ message: 'Recommendation updated.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Bulk reject recommendations
+app.post('/api/admin/recommendations/bulk-reject', async (req, res) => {
+    const { ids } = req.body;
+    if (!ids || !ids.length) return res.status(400).json({ error: 'No ids provided.' });
+    try {
+        await supabase.from('assignment_recommendations')
+            .update({ status: 'rejected', resolvedAt: new Date().toISOString() })
+            .in('id', ids);
+        res.json({ message: `${ids.length} recommendation(s) rejected.` });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get competent employees for a given IS number (for inline edit dropdown)
+app.get('/api/admin/competent-employees', async (req, res) => {
+    const { isNumber } = req.query;
+    if (!isNumber) return res.status(400).json({ error: 'isNumber required' });
+    try {
+        const normalize = s => s ? s.trim().replace(/\s+/g, ' ').toUpperCase() : '';
+        const { data: competencies } = await supabase
+            .from('employee_competencies')
+            .select('employeeId, isNumber')
+            .ilike('isNumber', `%${isNumber.trim()}%`);
+        const empIds = [...new Set((competencies || []).map(c => c.employeeId))];
+        if (!empIds.length) return res.json({ employees: [] });
+        const { data: profiles } = await supabase
+            .from('employee_profiles')
+            .select('id, fullName, currentWorkload')
+            .in('id', empIds)
+            .order('currentWorkload', { ascending: true });
+        res.json({ employees: profiles || [] });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1202,7 +2300,7 @@ app.post('/api/sample-cell/upload', upload.single('file'), (req, res) => {
                 const findKey = (searchStrings) => firstRowKeys.find(k => searchStrings.some(s => k.toLowerCase().includes(s.toLowerCase())));
 
                 const sNoKey = findKey(['s.no', 'sno', 's no', 'sl no']);
-                const barcodeKey = findKey(['barcode', 'bar code', 'bar-code']);
+                const barcodeKey = findKey(['barcode', 'bar code', 'bar-code', 'encode']);
                 const sampleCodeKey = findKey(['sample code', 'samplecode', 'sample id']);
                 const isNumberKey = findKey(['is number', 'isnumber', 'is_number', 'is-number']);
                 const testingTypeKey = findKey(['testing type', 'testing_type']);
@@ -1258,66 +2356,43 @@ app.post('/api/sample-cell/upload', upload.single('file'), (req, res) => {
     }
 });
 
-app.post('/api/sample-cell/commit', (req, res) => {
+app.post('/api/sample-cell/commit', async (req, res) => {
     const { fresh, duplicates, fileName, uploadedBy } = req.body;
     if (!fresh || !duplicates) return res.status(400).json({ error: 'Invalid payload.' });
 
     const allRecords = [...fresh, ...duplicates];
     if (allRecords.length === 0) return res.status(400).json({ error: 'No records to commit.' });
 
-    db.serialize(() => {
-        db.run('BEGIN TRANSACTION');
+    const batchId = 'SC-BATCH-' + Date.now();
+    try {
+        const { error: histErr } = await supabase.from('sample_cell_history').insert([{
+            batchId, uploadDate: new Date().toISOString(), fileName, sampleCount: fresh.length, duplicateCount: duplicates.length, uploadedBy
+        }]);
+        if (histErr) throw histErr;
 
-        const stmt = db.prepare(`
-            INSERT INTO sample_cell_data (
-                sNo, barcode, sampleCode, isNumber, testingType, labName, 
-                sampleReceivedOn, timeLagDays, reportIssuedOn, sampleStatus, reportStatus, source
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(barcode) DO UPDATE SET
-                sampleCode=excluded.sampleCode,
-                isNumber=excluded.isNumber,
-                testingType=excluded.testingType,
-                labName=excluded.labName,
-                sampleReceivedOn=excluded.sampleReceivedOn,
-                timeLagDays=excluded.timeLagDays,
-                reportIssuedOn=excluded.reportIssuedOn,
-                sampleStatus=excluded.sampleStatus,
-                reportStatus=excluded.reportStatus,
-                source=excluded.source
-        `);
+        const { error: dataErr } = await supabase.from('sample_cell_data').upsert(allRecords, { onConflict: 'barcode' });
+        if (dataErr) throw dataErr;
 
-        allRecords.forEach(r => {
-            stmt.run(r.sNo, r.barcode, r.sampleCode, r.isNumber, r.testingType, r.labName, r.sampleReceivedOn, r.timeLagDays, r.reportIssuedOn, r.sampleStatus, r.reportStatus, r.source);
-        });
-        stmt.finalize();
-
-        const batchId = 'SC-BATCH-' + Date.now();
-        db.run(`
-            INSERT INTO sample_cell_history (batchId, uploadDate, fileName, sampleCount, duplicateCount, uploadedBy)
-            VALUES (?, ?, ?, ?, ?, ?)
-        `, [batchId, new Date().toISOString(), fileName, fresh.length, duplicates.length, uploadedBy], function(err) {
-            if (err) {
-                db.run('ROLLBACK');
-                return res.status(500).json({ error: 'Audit log failed: ' + err.message });
-            }
-            db.run('COMMIT', (err) => {
-                if (err) return res.status(500).json({ error: 'Transaction failed: ' + err.message });
-                res.json({ message: `Successfully committed ${allRecords.length} records. Batch: ${batchId}` });
-            });
-        });
-    });
+        res.json({ message: `Successfully committed ${allRecords.length} records. Batch: ${batchId}` });
+    } catch(err) {
+        res.status(500).json({ error: 'Transaction failed: ' + err.message });
+    }
 });
 
-app.get('/api/sample-cell/history', (req, res) => {
-    db.all('SELECT * FROM sample_cell_history ORDER BY id DESC', [], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
+app.get('/api/sample-cell/history', async (req, res) => {
+    try {
+        const { data: rows, error } = await supabase.from('sample_cell_history').select('*').order('id', { ascending: false });
+        if (error) throw error;
         res.json({ history: rows || [] });
-    });
+    } catch(err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-app.get('/api/sample-cell/data', (req, res) => {
-    db.all('SELECT * FROM sample_cell_data ORDER BY id DESC', [], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
+app.get('/api/sample-cell/data', async (req, res) => {
+    try {
+        const { data: rows, error } = await supabase.from('sample_cell_data').select('*').order('id', { ascending: false });
+        if (error) throw error;
 
         let over15 = 0;
         let over30 = 0;
@@ -1374,14 +2449,19 @@ app.get('/api/sample-cell/data', (req, res) => {
             data: dataWithAge,
             analytics: { over15, over30, over45, over60, over90, totalPending }
         });
-    });
+    } catch(err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-app.delete('/api/sample-cell/data', (req, res) => {
-    db.run('DELETE FROM sample_cell_data', function(err) {
-        if (err) return res.status(500).json({ error: 'Failed to delete confidential data: ' + err.message });
+app.delete('/api/sample-cell/data', async (req, res) => {
+    try {
+        const { error } = await supabase.from('sample_cell_data').delete().neq('id', 0);
+        if (error) throw error;
         res.json({ message: 'All confidential data successfully wiped from the local vault.' });
-    });
+    } catch(err) {
+        res.status(500).json({ error: 'Failed to delete confidential data: ' + err.message });
+    }
 });
 
 // --- EMPLOYEE CAPACITY ---
@@ -1481,14 +2561,76 @@ app.post('/api/admin/approve-all-recommendations', async (req, res) => {
                 if (user && user.username) assignedUsername = user.username;
             }
 
+            // Update the sample assignment
             await supabase.from('samples').update({ 
                 assignedTo: assignedUsername,
                 appStatus: 'Pending'
             }).eq('id', rec.sampleId);
+
+            // Update employee workload
+            if (rec.recommendedEmployeeId) {
+                const { data: emp } = await supabase.from('employee_profiles').select('currentWorkload').eq('id', rec.recommendedEmployeeId).single();
+                if (emp) {
+                    await supabase.from('employee_profiles').update({ currentWorkload: (emp.currentWorkload || 0) + 1 }).eq('id', rec.recommendedEmployeeId);
+                }
+            }
+
+            // Mark recommendation as approved
             await supabase.from('assignment_recommendations').update({ status: 'approved', resolvedAt: new Date().toISOString() }).eq('id', rec.id);
+
+            // ML: record the assignment event (start of the sample's lifecycle clock)
+            const { data: sMeta } = await supabase.from('samples').select('isNumber').eq('id', rec.sampleId).single();
+            hoursModel.appendEvent({ 
+                sampleId: rec.sampleId, 
+                isNumber: sMeta && sMeta.isNumber, 
+                taName: assignedUsername, 
+                event: 'assigned' 
+            });
+
             approved++;
         }
-        res.json({ message: `Approved ${approved} assignments.` });
+        res.json({ message: `Approved ${approved} assignments.`, sampleIds: recs.map(r => r.sampleId) });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- ASSIGNMENT HISTORY & REVOKE ---
+app.get('/api/admin/assignment-history', async (req, res) => {
+    try {
+        const { data: history, error } = await supabase
+            .from('samples')
+            .select('id, encodedCode, isNumber, assignedTo')
+            .not('assignedTo', 'is', null)
+            .neq('assignedTo', '')
+            .order('id', { ascending: false })
+            .limit(50);
+        if (error) throw error;
+        res.json({ history });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/admin/revoke-assignment', async (req, res) => {
+    try {
+        const { sampleId } = req.body;
+        if (!sampleId) return res.status(400).json({ error: 'Sample ID is required' });
+
+        // Update the sample to unassigned
+        await supabase.from('samples').update({ assignedTo: null }).eq('id', sampleId);
+        
+        // Also remove any approved recommendation so it can be picked up again
+        await supabase.from('assignment_recommendations').delete().eq('sampleId', sampleId);
+
+        // Update the master sheet via excel_sync
+        const { data: sample } = await supabase.from('samples').select('encodedCode').eq('id', sampleId).single();
+        if (sample && sample.encodedCode) {
+            const { updateAssignmentInMaster } = require('./excel_sync');
+            updateAssignmentInMaster(sample.encodedCode, ''); // Clear the assignment in sheet
+        }
+
+        res.json({ message: 'Assignment revoked successfully.' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1517,7 +2659,7 @@ app.post('/api/admin/generate-mocks', async (req, res) => {
         const { error } = await supabase.from('samples').insert(mockSamples);
         if (error) throw error;
         
-        res.json({ message: '50 Mock samples successfully injected into unassigned pool!' });
+        res.json({ message: '50 Mock samples successfully injected into unalloted samples!' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1527,62 +2669,69 @@ app.post('/api/admin/generate-mocks', async (req, res) => {
 // IS INTELLIGENCE MODULE — Backend Logic & Local RAG API
 // ============================================================
 
-const pdfParse = require('pdf-parse');
+const { PDFParse } = require('pdf-parse');
+async function pdfParseBuffer(buffer) {
+    const p = new PDFParse({ data: buffer });
+    return await p.getText();
+}
 
 // Promisified SQLite functions
-function dbRun(query, params = []) {
-    return new Promise((resolve, reject) => {
-        db.run(query, params, function(err) {
-            if (err) reject(err);
-            else resolve(this);
-        });
-    });
-}
 
-function dbAll(query, params = []) {
-    return new Promise((resolve, reject) => {
-        db.all(query, params, (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
-}
-
-function dbGet(query, params = []) {
-    return new Promise((resolve, reject) => {
-        db.get(query, params, (err, row) => {
-            if (err) reject(err);
-            else resolve(row);
-        });
-    });
-}
-
-// Extract PDF page by page
+// Extract PDF page by page (pdf-parse v2 API)
 async function extractPdfPages(buffer) {
-    let pages = [];
-    const options = {
-        pagerender: function(pageData) {
-            return pageData.getTextContent().then(function(textContent) {
-                let lastY, text = '';
-                for (let item of textContent.items) {
-                    if (lastY == item.transform[5] || !lastY){
-                        text += item.str;
-                    } else {
-                        text += '\n' + item.str;
-                    }
-                    lastY = item.transform[5];
-                }
-                pages.push({
-                    page: pageData.pageIndex + 1,
-                    text: text
-                });
-                return text;
-            });
-        }
-    };
-    await pdfParse(buffer, options);
-    pages.sort((a, b) => a.page - b.page);
+    const p = new PDFParse({ data: buffer });
+    const result = await p.getText();
+    const pages = (result.pages || []).map((pg, idx) => ({
+        page: pg.pageNumber || (idx + 1),
+        text: pg.text || ''
+    }));
     return pages;
+}
+
+// Extract text from PDF (pdfplumber) or image (PaddleOCR) — fully local, no cloud
+const crypto = require('crypto');
+const IMAGE_EXTS = new Set(['.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.tif', '.webp']);
+
+async function extractFileWithPython(buffer, originalName) {
+    return new Promise((resolve, reject) => {
+        const ext = path.extname(originalName || '.pdf').toLowerCase();
+        const tempPath = path.join(__dirname, 'scratch', `temp_${crypto.randomBytes(8).toString('hex')}${ext}`);
+        if (!fs.existsSync(path.join(__dirname, 'scratch'))) {
+            fs.mkdirSync(path.join(__dirname, 'scratch'));
+        }
+
+        fs.writeFile(tempPath, buffer, (err) => {
+            if (err) return reject(err);
+
+            const pyProcess = spawn('python3', [path.join(__dirname, 'scripts', 'python_pdf_extractor.py'), tempPath]);
+            let outputData = '';
+            let errorData = '';
+
+            pyProcess.stdout.on('data', (data) => outputData += data.toString());
+            pyProcess.stderr.on('data', (data) => errorData += data.toString());
+
+            pyProcess.on('close', (code) => {
+                fs.unlink(tempPath, () => {});
+                if (code !== 0) {
+                    return reject(new Error(`Python process exited with code ${code}. ${errorData}`));
+                }
+                try {
+                    const result = JSON.parse(outputData);
+                    if (result.success) {
+                        resolve(result);
+                    } else {
+                        reject(new Error(result.error || 'Extraction failed'));
+                    }
+                } catch (e) {
+                    reject(new Error('Failed to parse Python output: ' + outputData));
+                }
+            });
+        });
+    });
+}
+// Backward-compatible alias
+async function extractPdfWithPython(buffer) {
+    return extractFileWithPython(buffer, 'document.pdf');
 }
 
 // Call LM Studio with retry and model discovery
@@ -1653,10 +2802,13 @@ function findRelevantPages(pages, query, topN = 3) {
 // 1. Vault List
 app.get('/api/is-intelligence/vault', async (req, res) => {
     try {
-        const rows = await dbAll('SELECT id, isNumber, title, pdfFileName, uncertainItems, confidenceScore, uploadedAt FROM is_standards_vault ORDER BY id DESC');
-        const formatted = rows.map(r => {
+        const { data: rows, error } = await supabase.from('is_standards_vault').select('id, isNumber, title, pdfFileName, uncertainItems, confidenceScore, uploadedAt').order('id', { ascending: false });
+        if (error) throw error;
+        const formatted = (rows || []).map(r => {
             let uncertain = [];
-            try { uncertain = JSON.parse(r.uncertainItems || '[]'); } catch(e){}
+            try { 
+                uncertain = typeof r.uncertainItems === 'string' ? JSON.parse(r.uncertainItems || '[]') : (r.uncertainItems || []); 
+            } catch(e){}
             const hasUncertainties = uncertain.some(item => !item.resolved);
             return {
                 id: r.id,
@@ -1679,8 +2831,8 @@ app.get('/api/is-intelligence/vault', async (req, res) => {
 // 1b. Single Vault Item Details
 app.get('/api/is-intelligence/vault/:id', async (req, res) => {
     try {
-        const row = await dbGet('SELECT * FROM is_standards_vault WHERE id = ?', [req.params.id]);
-        if (!row) {
+        const { data: row, error } = await supabase.from('is_standards_vault').select('*').eq('id', req.params.id).single();
+        if (error || !row) {
             return res.status(404).json({ error: "Document not found" });
         }
         res.json({
@@ -1688,10 +2840,10 @@ app.get('/api/is-intelligence/vault/:id', async (req, res) => {
             isNumber: row.isNumber,
             title: row.title,
             pdfFileName: row.pdfFileName,
-            clauses: JSON.parse(row.extractedClauses || '[]'),
-            tables: JSON.parse(row.extractedTables || '[]'),
-            uncertainItems: JSON.parse(row.uncertainItems || '[]'),
-            isFullyResolved: row.isFullyResolved === 1,
+            clauses: typeof row.extractedClauses === 'string' ? JSON.parse(row.extractedClauses || '[]') : (row.extractedClauses || []),
+            tables: typeof row.extractedTables === 'string' ? JSON.parse(row.extractedTables || '[]') : (row.extractedTables || []),
+            uncertainItems: typeof row.uncertainItems === 'string' ? JSON.parse(row.uncertainItems || '[]') : (row.uncertainItems || []),
+            isFullyResolved: row.isFullyResolved === 1 || row.isFullyResolved === true,
             confidenceScore: row.confidenceScore,
             uploadedAt: row.uploadedAt
         });
@@ -1701,93 +2853,274 @@ app.get('/api/is-intelligence/vault/:id', async (req, res) => {
 });
 
 // 2. Upload and Parse IS Standard
-app.post('/api/is-intelligence/upload', upload.single('pdf'), async (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: "No PDF file uploaded" });
-    }
-    try {
-        const pages = await extractPdfPages(req.file.buffer);
-        // We take the first 10 pages for parsing metadata and index
-        const firstPagesText = pages.slice(0, 10).map(p => `--- PAGE ${p.page} ---\n${p.text}`).join('\n');
-        
-        const systemPrompt = `You are a technical document parser. Analyze the text of the uploaded Indian Standard (IS) document and extract key metadata in strict JSON format.
-Respond ONLY with a JSON object wrapped inside a \`\`\`json ... \`\`\` code block.
+// Call LM Studio with a vision (image) message — for reading table images
+async function callLMStudioVision(systemPrompt, textPrompt, imageBase64) {
+    const lmStudioUrl = process.env.LM_STUDIO_URL || 'http://localhost:1234/v1';
+    let modelId = null;
 
-JSON Schema:
-{
-  "isNumber": "e.g. 'IS 4985 (2021)'",
-  "title": "e.g. 'Unplasticized PVC Pipes for Potable Water Supplies'",
-  "confidenceScore": 0.0 to 1.0,
-  "clauses": [
-     { "clauseNumber": "e.g. '5'", "title": "Classification", "page": 3, "content": "Summary of classification parameters" }
-  ],
-  "tables": [
-     { "tableNumber": "e.g. 'Table 1'", "title": "Mean Outside Diameter", "page": 5, "previewContent": "Brief description of the structure" }
-  ],
-  "uncertainItems": [
-     { "id": "u1", "page": 5, "clauseNumber": "Table 1", "rawText": "Raw text matching the obscured/unclear block", "highlightedText": "Raw text with unclear parts wrapped in <mark>???</mark>", "reason": "Reason for uncertainty", "confidence": 0.35, "resolved": false, "userValue": "" }
-  ]
+    try {
+        const modelsRes = await fetch(`${lmStudioUrl}/models`);
+        if (modelsRes.ok) {
+            const modelsData = await modelsRes.json();
+            if (modelsData.data && modelsData.data.length > 0) {
+                // Prefer vision model (VL in name), fallback to any loaded model
+                modelId = (modelsData.data.find(m => /vl|vision|llava/i.test(m.id)) || modelsData.data[0]).id;
+            }
+        }
+    } catch(e) {
+        console.warn("Could not query LM Studio models:", e.message);
+    }
+
+    if (!modelId) throw new Error('No model loaded in LM Studio');
+
+    const payload = {
+        model: modelId,
+        messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: [
+                { type: 'text', text: textPrompt },
+                { type: 'image_url', image_url: { url: `data:image/png;base64,${imageBase64}` } }
+            ]}
+        ],
+        temperature: 0.05,
+        max_tokens: 4096,
+    };
+
+    const res = await fetch(`${lmStudioUrl}/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`LM Studio Vision Error: ${res.status} - ${errText}`);
+    }
+
+    const resData = await res.json();
+    return resData.choices[0].message.content;
 }
 
-Ensure you scan for any blurred numbers, strange unicode characters in tables, or values with '?' and put them in 'uncertainItems'. Extract up to 10 key clauses/tables containing dimensions, tolerances, and testing parameters.`;
+// ─────────────────────────────────────────────────────────────────────────────
+// Gemini-backed extraction. Used as the primary extractor; falls back to local
+// LM Studio if Gemini is unavailable or errors.
+// NOTE: this account's accessible models top out at the 2.5 family — "gemini-3.5-flash"
+// returns 403 (not a real model here), so we default to gemini-2.5-flash.
+// Set GEMINI_EXTRACT_MODEL=gemini-2.5-pro for a stronger structure pass.
+// ─────────────────────────────────────────────────────────────────────────────
+const IS_EXTRACT_MODEL = process.env.GEMINI_EXTRACT_MODEL || 'gemini-2.5-flash';
 
-        const userPrompt = `Here is the text of the first 10 pages:\n\n${firstPagesText}`;
-        
-        let parsedData;
-        try {
-            const rawContent = await callLMStudio(systemPrompt, userPrompt);
-            const jsonMatch = rawContent.match(/```json\s*([\s\S]*?)\s*```/) || rawContent.match(/{[\s\S]*}/);
-            const jsonStr = jsonMatch ? jsonMatch[1] || jsonMatch[0] : rawContent;
-            parsedData = JSON.parse(jsonStr.trim());
-            
-            // Sanitize to prevent missing keys from causing crashes
-            parsedData.isNumber = parsedData.isNumber || `IS Standard (${req.file.originalname})`;
-            parsedData.title = parsedData.title || 'Uploaded Document';
-            parsedData.clauses = parsedData.clauses || [];
-            parsedData.tables = parsedData.tables || [];
-            parsedData.uncertainItems = parsedData.uncertainItems || [];
-            parsedData.confidenceScore = parsedData.confidenceScore || 0.8;
-        } catch(e) {
-            console.error("LLM parser failed, using fallback:", e);
-            parsedData = {
-                isNumber: `IS Standard (${req.file.originalname})`,
-                title: 'Uploaded Document',
-                confidenceScore: 0.8,
-                clauses: [
-                    { clauseNumber: "1", title: "Scope", page: 1, content: "This standard covers general requirements." }
-                ],
-                tables: [],
-                uncertainItems: []
-            };
+function geminiAvailable() {
+    const k = process.env.GEMINI_API_KEY;
+    return !!(k && k.length > 10 && !k.startsWith('sk_'));
+}
+
+async function callGeminiJSON(systemPrompt, userPrompt) {
+    const { GoogleGenAI } = require('@google/genai');
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const response = await ai.models.generateContent({
+        model: IS_EXTRACT_MODEL,
+        contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+        config: {
+            systemInstruction: systemPrompt,
+            temperature: 0.1,
+            responseMimeType: 'application/json',
+        },
+    });
+    return response.text;
+}
+
+async function callGeminiVisionJSON(systemPrompt, textPrompt, imageBase64) {
+    const { GoogleGenAI } = require('@google/genai');
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const response = await ai.models.generateContent({
+        model: IS_EXTRACT_MODEL,
+        contents: [{ role: 'user', parts: [
+            { text: textPrompt },
+            { inlineData: { mimeType: 'image/png', data: imageBase64 } },
+        ]}],
+        config: {
+            systemInstruction: systemPrompt,
+            temperature: 0.05,
+            responseMimeType: 'application/json',
+        },
+    });
+    return response.text;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OpenRouter — one key for the best models (Gemini reads, Claude Opus structures).
+// Preferred path when OPENROUTER_API_KEY is set; OpenAI chat-completions compatible.
+// ─────────────────────────────────────────────────────────────────────────────
+const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
+const OR_VISION_MODEL = process.env.OPENROUTER_VISION_MODEL || 'google/gemini-3.5-flash';
+const OR_STRUCTURE_MODEL = process.env.OPENROUTER_STRUCTURE_MODEL || 'anthropic/claude-opus-4.8';
+
+function openRouterAvailable() {
+    const k = process.env.OPENROUTER_API_KEY;
+    return !!(k && k.startsWith('sk-or-'));
+}
+
+async function callOpenRouter(model, messages, opts = {}) {
+    const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'http://localhost:3005',
+            'X-Title': 'SampleSpeaks',
+        },
+        body: JSON.stringify({
+            model,
+            messages,
+            temperature: opts.temperature ?? 0.1,
+            max_tokens: opts.maxTokens ?? 4096,
+        }),
+    });
+    const j = await res.json();
+    if (!res.ok) throw new Error(`OpenRouter ${res.status}: ${(j.error && j.error.message) || JSON.stringify(j).slice(0, 160)}`);
+    return (j.choices && j.choices[0] && j.choices[0].message.content) || '';
+}
+
+// Unified extractor entry points — prefer OpenRouter, then direct Gemini, then local LM Studio.
+async function extractLLM(systemPrompt, userPrompt) {
+    if (openRouterAvailable()) {
+        try { return await callOpenRouter(OR_STRUCTURE_MODEL, [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+        ], { maxTokens: 8192 }); }
+        catch (e) { console.warn('[IS Extract] OpenRouter structure failed, falling back:', e.message); }
+    }
+    if (geminiAvailable()) {
+        try { return await callGeminiJSON(systemPrompt, userPrompt); }
+        catch (e) { console.warn('[IS Extract] Gemini text failed, falling back to LM Studio:', e.message); }
+    }
+    return callLMStudio(systemPrompt, userPrompt);
+}
+
+async function extractVisionLLM(systemPrompt, textPrompt, imageBase64) {
+    if (openRouterAvailable()) {
+        try { return await callOpenRouter(OR_VISION_MODEL, [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: [
+                { type: 'text', text: textPrompt },
+                { type: 'image_url', image_url: { url: `data:image/png;base64,${imageBase64}` } },
+            ] },
+        ], { maxTokens: 4096, temperature: 0.05 }); }
+        catch (e) { console.warn('[IS Extract] OpenRouter vision failed, falling back:', e.message); }
+    }
+    if (geminiAvailable()) {
+        try { return await callGeminiVisionJSON(systemPrompt, textPrompt, imageBase64); }
+        catch (e) { console.warn('[IS Extract] Gemini vision failed, falling back to LM Studio:', e.message); }
+    }
+    return callLMStudioVision(systemPrompt, textPrompt, imageBase64);
+}
+
+// Smart IS table extractor — text from pdfplumber, image renders for table pages
+async function extractISTablesWithPython(buffer, originalName) {
+    return new Promise((resolve, reject) => {
+        const ext = path.extname(originalName || '.pdf').toLowerCase();
+        const tempPath = path.join(__dirname, 'scratch', `is_${crypto.randomBytes(8).toString('hex')}${ext}`);
+        if (!fs.existsSync(path.join(__dirname, 'scratch'))) {
+            fs.mkdirSync(path.join(__dirname, 'scratch'));
+        }
+        fs.writeFile(tempPath, buffer, (err) => {
+            if (err) return reject(err);
+            const pyProcess = spawn('python3', [path.join(__dirname, 'scripts', 'extract_is_tables.py'), tempPath]);
+            let out = '', errOut = '';
+            pyProcess.stdout.on('data', d => out += d.toString());
+            pyProcess.stderr.on('data', d => errOut += d.toString());
+            pyProcess.on('close', code => {
+                fs.unlink(tempPath, () => {});
+                if (code !== 0) return reject(new Error(`Extractor exited ${code}. ${errOut}`));
+                try { resolve(JSON.parse(out)); } catch(e) { reject(new Error('Bad extractor output: ' + out.slice(0, 300))); }
+            });
+        });
+    });
+}
+
+// ── IS Pipeline: upload → start async 6-phase job → return jobId ──────────────
+app.post('/api/is-intelligence/upload', upload.single('pdf'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No PDF file uploaded' });
+    }
+    if (!req.file.originalname.toLowerCase().endsWith('.pdf')) {
+        return res.status(400).json({ error: 'Only PDF files are accepted' });
+    }
+    try {
+        // Start the async 6-phase pipeline — returns immediately with a jobId.
+        // The client polls GET /api/is-intelligence/pipeline/:jobId for progress.
+        const jobId = isPipeline.startPipeline(req.file.buffer, req.file.originalname);
+        console.log(`[IS Pipeline] Job started: ${jobId} for ${req.file.originalname}`);
+        res.json({ jobId, filename: req.file.originalname, message: 'Pipeline started — poll /api/is-intelligence/pipeline/' + jobId });
+    } catch (e) {
+        console.error('IS pipeline start error:', e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ── Pipeline job status (polled by frontend) ──────────────────────────────────
+app.get('/api/is-intelligence/pipeline/:jobId', (req, res) => {
+    const job = isPipeline.getJob(req.params.jobId);
+    if (!job) return res.status(404).json({ error: 'Job not found' });
+    res.json(job);
+});
+
+// ── On-demand page image for the confirm grid ─────────────────────────────────
+// Renders a single PDF page at the requested DPI and returns it as base64 PNG.
+// Used so the confirm UI can show the actual page alongside each flagged cell.
+app.post('/api/is-intelligence/render-page', upload.single('pdf'), async (req, res) => {
+    // This endpoint accepts the same PDF again for on-demand rendering,
+    // OR accepts a page render from a previously saved job image map.
+    // For now, it returns a placeholder instruction — the phase 2 page images
+    // are already stored in the vault uncertainItems.hasPageImage flag.
+    // Full implementation: save the PDF buffer in job state and serve from there.
+    res.json({ error: 'on-demand render: pass the original PDF and use the pipeline job images' });
+});
+
+
+// Fetch structured IS data by IS number — used for dynamic test parameter generation
+// Replaces the hardcoded specs_db.js lookup when IS data has been extracted from a PDF
+app.get('/api/is-intelligence/params/:isNumber', async (req, res) => {
+    try {
+        const isNum = decodeURIComponent(req.params.isNumber).trim();
+        // Try exact match first, then partial
+        let { data: row, error } = await supabase
+            .from('is_standards_vault')
+            .select('id, isNumber, title, testParameters, dimensionData, confidenceScore, pdfFileName, uploadedAt')
+            .ilike('isNumber', `%${isNum.replace(/[^a-zA-Z0-9 ]/g, '%')}%`)
+            .order('uploadedAt', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (error || !row) {
+            return res.status(404).json({ found: false, message: `No extracted data found for ${isNum}` });
         }
 
-        const insertQuery = `
-            INSERT INTO is_standards_vault 
-            (isNumber, title, pdfFileName, rawExtractedContext, extractedClauses, extractedTables, uncertainItems, isFullyResolved, confidenceScore)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-        const result = await dbRun(insertQuery, [
-            parsedData.isNumber,
-            parsedData.title,
-            req.file.originalname,
-            JSON.stringify(pages),
-            JSON.stringify(parsedData.clauses),
-            JSON.stringify(parsedData.tables),
-            JSON.stringify(parsedData.uncertainItems),
-            parsedData.uncertainItems.length === 0 ? 1 : 0,
-            parsedData.confidenceScore
-        ]);
+        let tpRaw = null;
+        let dimData = null;
+        try { tpRaw = typeof row.testParameters === 'string' ? JSON.parse(row.testParameters || 'null') : row.testParameters; } catch(e) {}
+        try { dimData = typeof row.dimensionData === 'string' ? JSON.parse(row.dimensionData || 'null') : row.dimensionData; } catch(e) {}
+
+        // Normalize: old rows stored a flat array; v2 rows store { flat, sections, referenced_standards }.
+        const tpNorm = Array.isArray(tpRaw)
+            ? { flat: tpRaw, sections: [], referenced_standards: [] }
+            : (tpRaw && typeof tpRaw === 'object'
+                ? { flat: tpRaw.flat || [], sections: tpRaw.sections || [], referenced_standards: tpRaw.referenced_standards || [] }
+                : { flat: [], sections: [], referenced_standards: [] });
 
         res.json({
-            id: result.lastID,
-            isNumber: parsedData.isNumber,
-            title: parsedData.title,
-            pdfFileName: req.file.originalname,
-            clauses: parsedData.clauses,
-            tables: parsedData.tables,
-            uncertainItems: parsedData.uncertainItems,
-            status: parsedData.uncertainItems.length > 0 ? 'has_uncertainties' : 'parsed',
-            confidenceScore: parsedData.confidenceScore || 0.95
+            found: true,
+            id: row.id,
+            isNumber: row.isNumber,
+            title: row.title,
+            pdfFileName: row.pdfFileName,
+            confidenceScore: row.confidenceScore,
+            test_parameters: tpNorm.flat,
+            sections: tpNorm.sections,
+            referenced_standards: tpNorm.referenced_standards,
+            dimension_data: dimData,
+            param_count: tpNorm.flat.length
         });
     } catch(e) {
         res.status(500).json({ error: e.message });
@@ -1801,12 +3134,12 @@ app.post('/api/is-intelligence/query', async (req, res) => {
         return res.status(400).json({ error: "Missing required fields: documentId, query" });
     }
     try {
-        const doc = await dbGet('SELECT * FROM is_standards_vault WHERE id = ?', [documentId]);
-        if (!doc) {
+        const { data: doc, error } = await supabase.from('is_standards_vault').select('*').eq('id', documentId).single();
+        if (error || !doc) {
             return res.status(404).json({ error: "Standard not found" });
         }
 
-        const pages = JSON.parse(doc.rawExtractedContext || '[]');
+        const pages = typeof doc.rawExtractedContext === 'string' ? JSON.parse(doc.rawExtractedContext || '[]') : (doc.rawExtractedContext || []);
         const relevant = findRelevantPages(pages, query, 3);
         const contextText = relevant.map(p => `--- PAGE ${p.page} ---\n${p.text}`).join('\n\n');
 
@@ -1854,12 +3187,12 @@ app.post('/api/is-intelligence/clarify', async (req, res) => {
         return res.status(400).json({ error: "Missing required fields: documentId, itemId, resolvedValue" });
     }
     try {
-        const doc = await dbGet('SELECT * FROM is_standards_vault WHERE id = ?', [documentId]);
-        if (!doc) {
+        const { data: doc, error } = await supabase.from('is_standards_vault').select('*').eq('id', documentId).single();
+        if (error || !doc) {
             return res.status(404).json({ error: "Standard not found" });
         }
 
-        let items = JSON.parse(doc.uncertainItems || '[]');
+        let items = typeof doc.uncertainItems === 'string' ? JSON.parse(doc.uncertainItems || '[]') : (doc.uncertainItems || []);
         items = items.map(item => {
             if (item.id === itemId) {
                 item.resolved = true;
@@ -1869,12 +3202,13 @@ app.post('/api/is-intelligence/clarify', async (req, res) => {
             return item;
         });
 
-        const allResolved = items.every(item => item.resolved) ? 1 : 0;
-        await dbRun('UPDATE is_standards_vault SET uncertainItems = ?, isFullyResolved = ? WHERE id = ?', [
-            JSON.stringify(items),
-            allResolved,
-            documentId
-        ]);
+        const allResolved = items.every(item => item.resolved);
+        const { error: updateError } = await supabase.from('is_standards_vault').update({
+            uncertainItems: JSON.stringify(items),
+            isFullyResolved: allResolved
+        }).eq('id', documentId);
+        
+        if (updateError) throw updateError;
 
         res.json({ success: true, uncertainItems: items });
     } catch(e) {
@@ -1889,11 +3223,17 @@ app.get('/api/is-intelligence/lookup', async (req, res) => {
         return res.status(400).json({ error: "Missing size, class or isNumber" });
     }
     try {
-        const doc = await dbGet('SELECT * FROM is_standards_vault WHERE isNumber LIKE ? OR title LIKE ?', [`%${isNumber}%`, `%${isNumber}%`]);
-        if (!doc) {
+        // Supabase wildcard matching requires .or() with .ilike()
+        const { data: docs, error } = await supabase.from('is_standards_vault')
+            .select('*')
+            .or(`isNumber.ilike.%${isNumber}%,title.ilike.%${isNumber}%`)
+            .limit(1);
+            
+        if (error || !docs || docs.length === 0) {
             return res.status(404).json({ error: "Standard not found in vault" });
         }
-        const pages = JSON.parse(doc.rawExtractedContext || '[]');
+        const doc = docs[0];
+        const pages = typeof doc.rawExtractedContext === 'string' ? JSON.parse(doc.rawExtractedContext || '[]') : (doc.rawExtractedContext || []);
         const relevantPages = pages.filter(p => 
             p.text.toLowerCase().includes('table') && 
             (p.text.toLowerCase().includes('dimension') || p.text.toLowerCase().includes('thickness') || p.text.toLowerCase().includes('diameter'))
@@ -1939,10 +3279,1296 @@ Respond strictly in JSON format wrapped in a \`\`\`json ... \`\`\` block with th
 });
 
 // Export for Vercel serverless + listen locally
-const PORT = process.env.PORT || 3000;
+
+// --- LIMS Credentials API ---
+app.get('/api/profile/lims-credentials', async (req, res) => {
+    try {
+        const { data: user, error } = await supabase.from('users').select('limsUsername, limsPassword').eq('id', req.query.userId || 1).single();
+        if (error || !user) return res.status(404).json({ error: 'User not found' });
+        res.json({ limsUsername: user.limsUsername || '', limsPassword: user.limsPassword || '' });
+    } catch(e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/profile/lims-credentials', async (req, res) => {
+    try {
+        const { userId, limsUsername, limsPassword } = req.body;
+        const targetUserId = userId || 1; // Fallback to 1 if not provided
+        const { error } = await supabase.from('users').update({ limsUsername, limsPassword }).eq('id', targetUserId);
+        if (error) throw error;
+        res.json({ message: 'Credentials updated successfully' });
+    } catch(e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// --- LIMS Submitted Samples API ---
+app.get('/api/lims/submitted', async (req, res) => {
+    try {
+        const { data: samples, error } = await supabase.from('lims_submitted_samples').select('sampleCode, submittedDate');
+        if (error) throw error;
+        res.json({ submittedSamples: samples || [] });
+    } catch(e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ============================================================================
+// AI COPILOT API ENDPOINTS
+// ============================================================================
+
+// In-memory store for pending copilot actions
+const pendingCopilotActions = new Map();
+
+app.post('/api/copilot/chat', async (req, res) => {
+    try {
+        const { message, history } = req.body;
+        if (!message) return res.status(400).json({ error: 'Message is required' });
+
+        const geminiApiKey = process.env.GEMINI_API_KEY; // Only use if explicitly set
+        const sarvamApiKey = process.env.SARVAM_API_KEY;
+
+        const { normalizeTaName, normalizeIS: _normIS, getOicPreferences } = require('./server/agent/disha-utils');
+        const dishaTools = require('./server/agent/disha-tools');
+
+        // 1. Fetch live DB context — all queries run in parallel (latency = slowest one, not the sum)
+        const tDb = Date.now();
+        const [
+            { data: allPending },
+            { data: employees, error: employeesError },
+            { count: templatesCount },
+            { data: openNotifications },
+            { data: pendingRecs },
+            oicPrefs,
+        ] = await Promise.all([
+            supabase
+                .from('samples')
+                .select('id, encodedCode, assignedTo, isNumber, priorityLevel, receivedOn')
+                .in('appStatus', ['Pending'])
+                .order('receivedOn', { ascending: true }),
+            supabase
+                .from('employee_profiles')
+                .select('fullName, designation, isActive'),
+            // Count only — template bodies are fetched on demand by the get_template tool
+            supabase
+                .from('system_preferences')
+                .select('key', { count: 'exact', head: true })
+                .like('key', 'template_%'),
+            // Open bell notifications (so Nigrani knows about her own audit signals)
+            supabase
+                .from('lab_notifications')
+                .select('id, type, severity, title, created_at')
+                .eq('status', 'open')
+                .order('created_at', { ascending: false })
+                .limit(10),
+            // Pending auto-assigner recommendations
+            supabase
+                .from('assignment_recommendations')
+                .select('id, sampleId, recommendedEmployeeName, reason, score')
+                .eq('status', 'pending')
+                .limit(50),
+            // Durable OIC preferences (e.g. "recommend before execute")
+            getOicPreferences(),
+        ]);
+        const templatesLoadedCount = templatesCount || 0;
+        console.log(`[Copilot] DB context fetched in ${Date.now() - tDb}ms`);
+        if (employeesError) console.warn('[Copilot] employee_profiles query failed:', employeesError.message);
+
+        // Build workload map with full sample objects (not just codes)
+        const loadMap = {};
+        (allPending || []).forEach(s => {
+            const ta = s.assignedTo || 'UNASSIGNED';
+            if (!loadMap[ta]) loadMap[ta] = [];
+            loadMap[ta].push(s);
+        });
+
+        const activeTAs = (employees || [])
+            .filter(e => e.isActive !== false)
+            .map(e => e.fullName);
+
+        const totalPending = allPending ? allPending.length : 0;
+
+        // --- Compute analytics for richer context ---
+        // Per-TA counts excluding UNASSIGNED, for median calculation
+        const taCounts = Object.entries(loadMap)
+            .filter(([ta]) => ta !== 'UNASSIGNED')
+            .map(([ta, samples]) => ({ ta, count: samples.length }))
+            .sort((a, b) => b.count - a.count);
+
+        const countsOnly = taCounts.map(x => x.count).sort((a, b) => a - b);
+        const median = countsOnly.length
+            ? (countsOnly.length % 2 === 0
+                ? (countsOnly[countsOnly.length / 2 - 1] + countsOnly[countsOnly.length / 2]) / 2
+                : countsOnly[Math.floor(countsOnly.length / 2)])
+            : 0;
+        const overThreshold = median * 1.5;
+        const underThreshold = median * 0.5;
+
+        const overloaded = taCounts.filter(t => t.count > overThreshold);
+        const underutilized = taCounts.filter(t => t.count < underThreshold && t.count > 0);
+
+        // Workload table (compact)
+        const workloadTable = taCounts
+            .map(t => {
+                const flag = t.count > overThreshold ? ' [OVERLOAD]'
+                    : t.count < underThreshold ? ' [CAPACITY]'
+                    : '';
+                return `${t.ta}: ${t.count}${flag}`;
+            })
+            .join(' | ');
+
+        const unassignedCount = (loadMap['UNASSIGNED'] || []).length;
+
+        // Aging buckets (days since receivedOn)
+        const now = Date.now();
+        const ageDays = (iso) => {
+            if (!iso) return null;
+            const d = new Date(iso).getTime();
+            return Number.isFinite(d) ? Math.floor((now - d) / 86400000) : null;
+        };
+        const buckets = { '0-15': 0, '16-30': 0, '31-45': 0, '46-90': 0, '90+': 0, 'unknown': 0 };
+        (allPending || []).forEach(s => {
+            const age = ageDays(s.receivedOn);
+            if (age === null) buckets['unknown']++;
+            else if (age <= 15) buckets['0-15']++;
+            else if (age <= 30) buckets['16-30']++;
+            else if (age <= 45) buckets['31-45']++;
+            else if (age <= 90) buckets['46-90']++;
+            else buckets['90+']++;
+        });
+        const agingLine = Object.entries(buckets)
+            .filter(([, n]) => n > 0)
+            .map(([range, n]) => `${range}d: ${n}`)
+            .join(' | ');
+
+        // Priority distribution
+        const priorityMap = {};
+        (allPending || []).forEach(s => {
+            const p = (s.priorityLevel || 'UNSPECIFIED').toUpperCase();
+            priorityMap[p] = (priorityMap[p] || 0) + 1;
+        });
+        const priorityLine = Object.entries(priorityMap).map(([k, v]) => `${k}: ${v}`).join(' | ');
+
+        // Top 5 oldest pending samples (already sorted ascending by receivedOn)
+        const oldestFive = (allPending || []).slice(0, 5).map(s => {
+            const age = ageDays(s.receivedOn);
+            return `${s.encodedCode} (IS ${s.isNumber || '?'}, ${age !== null ? age + 'd' : 'unknown age'}, ${s.assignedTo || 'UNASSIGNED'}, ${s.priorityLevel || 'NORMAL'})`;
+        }).join('; ');
+
+        // Re-key loadMap with normalised TA names (collapses "Dangale Dangale", lowercase dups)
+        const normLoadMap = {};
+        Object.entries(loadMap).forEach(([rawTa, items]) => {
+            const key = rawTa === 'UNASSIGNED' ? 'UNASSIGNED' : normalizeTaName(rawTa);
+            if (!normLoadMap[key]) normLoadMap[key] = [];
+            normLoadMap[key].push(...items);
+        });
+
+        // Distinct IS counts (pending only) — fixes "how many IS do we have"
+        const isCountMap = new Map();
+        (allPending || []).forEach(s => {
+            const k = _normIS(s.isNumber) || 'UNKNOWN_IS';
+            isCountMap.set(k, (isCountMap.get(k) || 0) + 1);
+        });
+        const distinctIsCount = isCountMap.size;
+        const topIs = [...isCountMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+        // 2. System prompt — analyst persona, evidence-driven, structured output
+        const isRebalanceQuery = /rebalance|reassign/i.test(message);
+
+        const memorySummary = (req.body.memorySummary || '').slice(0, 800);
+
+        const topIsLine = topIs.map(([k, v]) => `${k}:${v}`).join(' | ') || 'none';
+        const openNotifLine = (openNotifications || []).length
+            ? (openNotifications || []).map(n => `[${n.severity}] ${n.title}`).join('; ')
+            : 'none open';
+        const pendingRecsLine = (pendingRecs || []).length
+            ? `${(pendingRecs || []).length} pending recommendations waiting OIC approval`
+            : 'no pending recommendations';
+        const prefsLine = Object.entries(oicPrefs).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join('; ') || 'none';
+
+        let systemPrompt = `You are Nigrani — a friendly assistant for the BIS Sample Receiving Lab. You were built by Saurabh. The name "Nigrani" means "oversight".
+
+WHO YOU TALK TO:
+You are speaking to the OIC, who OWNS this data. Every table in the database is fair game for them — samples, employees, competencies, templates, leaves, recommendations, notifications, audit log. NEVER refuse to share sample IDs, IS standards, TA names, or any other lab data on privacy grounds. The data belongs to the OIC.
+
+THE NO-ASSUMPTION RULE (most important):
+- Never claim a fact that is not in the data passed to you this turn or returned from a tool you called this turn.
+- Banned phrases: "the system will", "probably", "I think", "I believe", "should be", "it just executes directly", "it doesn't have a recommendation mode". Replace with "the data shows" / "the template for IS X says" / "I don't have that data right now — want me to pull it?".
+- If you don't know, say which table or which tool would have the answer. Then offer to call the tool.
+
+TOOLS YOU CAN CALL (function calling):
+- get_workload_snapshot() — per-TA load + median + overload/capacity flags
+- get_sample({sampleCode}) — full row for one sample
+- find_competent_tas({isNumber}) — TAs marked competent for an IS, with proficiency
+- get_aging_breakdown() — age buckets + 5 oldest
+- get_audit_log({sampleCode?, limit?}) — Nigrani's audit trail
+- get_open_notifications() — current bell items
+- get_template({isNumber}) — template details (tatDays, totalHours, active clauses, equipment per clause)
+- list_pending_recommendations() — auto-assigner / Nigrani proposals awaiting OIC approval
+- count_distinct_is() — distinct IS standards among pending samples
+Use a tool whenever the answer is not already in LIVE LAB DATA below.
+
+WHAT YOU CAN AND CANNOT DO:
+- You CAN read every table, propose reassignments (as pending recommendations), and trigger the rules engine.
+- You CANNOT directly mutate samples, edit templates, or execute reassignments. Only the OIC's approval in the UI executes anything.
+- The auto-assigner (POST /api/auto-assign) writes pending recommendations the OIC approves. There IS a recommendation mode.
+
+ANTI-WAFFLE:
+- Never ask "does that sound good?" or "want me to proceed?" if you have the data to just answer.
+- One clarifying question per turn, max. Prefer calling a tool over asking.
+
+OIC POLICIES (durable preferences):
+${prefsLine}
+
+HOW YOU REMEMBER:
+${memorySummary ? `What you and the user have discussed so far:\n"${memorySummary}"\n\nCarry that context forward. If the user says "that one" or "the same TA", you know what they mean.` : 'This appears to be the start of a fresh conversation.'}
+
+LIVE LAB DATA (refreshed every message):
+- Total pending: ${totalPending} (${unassignedCount} unassigned)
+- Distinct IS standards in pending: ${distinctIsCount}; top: ${topIsLine}
+- Templates loaded: ${templatesLoadedCount}
+- TAs on roster: ${activeTAs.join(', ') || 'none'}
+- Median TA load: ${median} (overload >${overThreshold.toFixed(0)}, capacity <${underThreshold.toFixed(0)})
+- Workload now: ${workloadTable || 'no assignments yet'}
+- Overloaded right now: ${overloaded.length ? overloaded.map(t => `${t.ta} (${t.count})`).join(', ') : 'no one'}
+- Has spare capacity: ${underutilized.length ? underutilized.map(t => `${t.ta} (${t.count})`).join(', ') : 'no one obvious'}
+- Aging: ${agingLine || 'no aging data'}
+- Priority mix: ${priorityLine || 'no priority data'}
+- Oldest 5 pending: ${oldestFive || 'n/a'}
+- Open bell notifications: ${openNotifLine}
+- Pending recommendations: ${pendingRecsLine}
+
+WHEN ASKED ABOUT ASSIGNMENT:
+The auto-assigner considers IS competency, man-hours per IS, TAT/shelf-life, equipment bottlenecks, leave. If someone asks "why was X assigned to Y", call get_audit_log({sampleCode:'X'}) and cite the actual reason from the row. Don't speculate.
+
+IDENTITY:
+"I'm Nigrani — your friendly assistant, built by Saurabh." Volunteer only if asked.
+
+STYLE RULES:
+- Default to short. Long lists only if user explicitly asks.
+- No emojis unless the user uses one first.
+- No "as an AI" / "I'd be happy to" preambles.
+- Cite the source of any number you report (the field name or tool you called).`;
+
+        if (isRebalanceQuery) {
+            // Build TOP-N moves (one per overloaded TA), not just one — matches what the LLM will say.
+            const norm = name => name === 'UNASSIGNED' ? 'UNASSIGNED' : normalizeTaName(name);
+            const movesPlan = [];
+            const lightTAs = [...taCounts].reverse().filter(x => x.count < median).slice(0, 5);
+            let lightIdx = 0;
+            for (const heavy of taCounts.filter(t => t.count > overThreshold)) {
+                if (!lightTAs.length) break;
+                const target = lightTAs[lightIdx % lightTAs.length];
+                lightIdx++;
+                const heavySamples = normLoadMap[norm(heavy.ta)] || [];
+                if (!heavySamples.length) continue;
+                const ranked = [...heavySamples].sort((a, b) => {
+                    const score = s => (s.priorityLevel || '').toUpperCase() === 'LOW' ? 0
+                        : (s.priorityLevel || '').toUpperCase() === 'NORMAL' ? 1 : 2;
+                    return score(a) - score(b);
+                });
+                const sampleToMove = ranked[0];
+                if (!sampleToMove) continue;
+                movesPlan.push({
+                    sampleId: sampleToMove.encodedCode,
+                    from: norm(heavy.ta),
+                    to: norm(target.ta),
+                });
+                if (movesPlan.length >= 10) break;
+            }
+            if (movesPlan.length) {
+                systemPrompt += `
+
+REBALANCE CONTEXT:
+${movesPlan.length} moves proposed (one per overloaded TA, capped at 10). State the count plainly, then append EXACTLY this JSON block — no extra prose around it:
+\`\`\`json
+${JSON.stringify({ type: 'rebalance_proposal', moves: movesPlan })}
+\`\`\`
+The OIC will see one row per move in the UI and approve each.`;
+            }
+        }
+
+        // 3. Build messages array (keep last 8 history items so Nigrani can summarise the conversation)
+        const messages = [{ role: 'system', content: systemPrompt }];
+        const recentHistory = (history || []).slice(-8);
+        recentHistory.forEach(h => {
+            messages.push({ role: h.role === 'assistant' ? 'assistant' : 'user', content: h.content });
+        });
+        messages.push({ role: 'user', content: message });
+
+        // 4. Call AI with tool-calling loop (Gemini), falling back to Sarvam (no tools)
+        let aiReply = '';
+        let toolTrace = [];
+
+        const useGemini = geminiApiKey && geminiApiKey.length > 10 && !geminiApiKey.startsWith('sk_');
+
+        if (useGemini) {
+            try {
+                console.log('[Copilot] Trying Gemini with function-calling…');
+                const tAi = Date.now();
+                const { GoogleGenAI } = require('@google/genai');
+                const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+
+                const buildContents = () => messages
+                    .filter(m => m.role !== 'system')
+                    .map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
+
+                const GEMINI_MODEL = 'gemini-3.5-flash'; // pinned; ~1s/round with thinking off, supports all 9 tools
+                const contents = buildContents();
+                const sharedConfig = {
+                    systemInstruction: systemPrompt,
+                    temperature: 0.2,
+                    maxOutputTokens: 2000,
+                    tools: [{ functionDeclarations: dishaTools.functionDeclarations }],
+                    thinkingConfig: { thinkingBudget: 0 },
+                };
+
+                // Round 1: let Gemini decide whether to call any tools.
+                let response = await ai.models.generateContent({
+                    model: GEMINI_MODEL,
+                    contents,
+                    config: sharedConfig,
+                });
+
+                const calls = response.functionCalls || [];
+                if (calls.length) {
+                    console.log(`[Copilot] Gemini requested ${calls.length} tool call(s):`, calls.map(c => c.name).join(', '));
+                    // Echo the model's turn verbatim — Gemini 3.x rejects rebuilt parts missing thoughtSignature.
+                    contents.push(response.candidates?.[0]?.content || {
+                        role: 'model',
+                        parts: calls.map(c => ({ functionCall: { name: c.name, args: c.args || {} } })),
+                    });
+
+                    const results = await Promise.all(calls.map(async c => {
+                        const out = await dishaTools.callTool(c.name, c.args || {});
+                        toolTrace.push({ name: c.name, args: c.args || {}, ok: !out || !out.error });
+                        return { name: c.name, response: out };
+                    }));
+                    contents.push({
+                        role: 'user',
+                        parts: results.map(r => ({ functionResponse: { name: r.name, response: r.response || {} } })),
+                    });
+
+                    // Round 2: final answer, tools off so we don't recurse.
+                    response = await ai.models.generateContent({
+                        model: GEMINI_MODEL,
+                        contents,
+                        config: { ...sharedConfig, tools: undefined },
+                    });
+                }
+
+                if (response && response.text) {
+                    aiReply = response.text;
+                    console.log(`[Copilot] Gemini succeeded in ${Date.now() - tAi}ms.`);
+                }
+            } catch (geminiErr) {
+                console.warn('[Copilot] Gemini failed, falling back to Sarvam:', geminiErr.message || 'Unknown error');
+            }
+        }
+
+        // Use Sarvam if no reply yet
+        if (!aiReply && sarvamApiKey) {
+            console.log('[Copilot] Calling Sarvam AI (sarvam-30b)...');
+            const tSarvam = Date.now();
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
+            
+            try {
+                const sarvamRes = await fetch('https://api.sarvam.ai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sarvamApiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'sarvam-30b',
+                        messages: messages,
+                        temperature: 0.3
+                    }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
+                
+                const sarvamData = await sarvamRes.json();
+                if (sarvamRes.ok && sarvamData.choices && sarvamData.choices[0]?.message) {
+                    const msg = sarvamData.choices[0].message;
+                    // sarvam-30b may put reply in content or reasoning_content
+                    aiReply = msg.content || msg.reasoning_content || '';
+                    // If reasoning_content, extract just the final answer part (last paragraph)
+                    if (!msg.content && msg.reasoning_content) {
+                        // Extract final answer from reasoning (everything after last blank line or summary)
+                        const parts = msg.reasoning_content.split('\n\n');
+                        aiReply = parts[parts.length - 1].trim() || msg.reasoning_content.trim();
+                    }
+                    if (aiReply) {
+                        console.log(`[Copilot] Sarvam-30b succeeded in ${Date.now() - tSarvam}ms, reply length:`, aiReply.length);
+                    } else {
+                        console.warn('[Copilot] Sarvam-30b returned empty content, using fallback');
+                        aiReply = `The lab currently has ${allPending ? allPending.length : 0} pending samples. How can I help you?`;
+                    }
+                } else {
+                    const errMsg = sarvamData.error?.message || JSON.stringify(sarvamData) || 'Unknown Sarvam error';
+                    throw new Error(`Sarvam AI error: ${errMsg}`);
+                }
+            } catch (sarvamErr) {
+                clearTimeout(timeout);
+                if (sarvamErr.name === 'AbortError') {
+                    throw new Error('AI response timed out. Please try again in a moment.');
+                }
+                throw new Error('AI service error: ' + (sarvamErr.message || 'Unknown error'));
+            }
+        }
+
+        if (!aiReply) {
+            throw new Error('No AI service available. Please check your API keys.');
+        }
+
+        // 5. Parse action cards (JSON block)
+        let actionData = null;
+        const jsonMatch = aiReply.match(/```json\n([\s\S]*?)\n```/);
+        if (jsonMatch) {
+            try {
+                const parsed = JSON.parse(jsonMatch[1]);
+                if (parsed.type === 'rebalance_proposal' && parsed.moves && parsed.moves.length > 0) {
+                    const actionId = 'act_' + Date.now() + Math.random().toString(36).substr(2, 5);
+                    pendingCopilotActions.set(actionId, parsed.moves);
+                    actionData = { type: 'rebalance_proposal', actionId, moves: parsed.moves };
+                    aiReply = aiReply.replace(/```json\n[\s\S]*?\n```/, '').trim();
+                }
+            } catch (e) { console.warn('[Copilot] Failed to parse JSON action block:', e.message); }
+        }
+
+        res.json({ reply: aiReply, actionData, toolTrace });
+
+    } catch (err) {
+        console.error('[Copilot] Exception:', err.message || err);
+        res.status(500).json({ error: err.message || 'Internal server error' });
+    }
+});
+
+app.post('/api/copilot/action', async (req, res) => {
+    try {
+        const { actionId } = req.body;
+        if (!actionId || !pendingCopilotActions.has(actionId)) {
+            return res.status(400).json({ error: 'Invalid or expired action' });
+        }
+
+        const moves = pendingCopilotActions.get(actionId);
+        
+        // Execute the moves
+        for (const move of moves) {
+            // Validate and update DB
+            const { data: sample } = await supabase.from('samples').select('id, assignedTo').eq('encodedCode', move.sampleId).single();
+            if (sample) {
+                await supabase.from('samples').update({ assignedTo: move.to }).eq('id', sample.id);
+            }
+        }
+
+        // Clear the action so it can't be reused
+        pendingCopilotActions.delete(actionId);
+
+        res.json({ message: 'Action executed successfully', appliedMoves: moves.length });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- CAPITAL EQUIPMENT APIS ---
+app.get('/api/equipments', async (req, res) => {
+    try {
+        const { status, location, search } = req.query;
+        let query = supabase.from('equipments').select('*').order('id', { ascending: true });
+
+        if (status && status !== 'ALL') {
+            query = query.eq('status', status);
+        }
+        if (location && location !== 'ALL') {
+            query = query.eq('location', location);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        let filteredData = data || [];
+        if (search) {
+            const term = search.toLowerCase();
+            filteredData = filteredData.filter(item => 
+                (item.name && item.name.toLowerCase().includes(term)) ||
+                (item.make && item.make.toLowerCase().includes(term)) ||
+                (item.labCode && item.labCode.toLowerCase().includes(term)) ||
+                (item.location && item.location.toLowerCase().includes(term))
+            );
+        }
+
+        res.json({ equipments: filteredData });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/equipments/stats', async (req, res) => {
+    try {
+        const { data, error } = await supabase.from('equipments').select('status, cost');
+        if (error) throw error;
+
+        const total = data ? data.length : 0;
+        let working = 0;
+        let notWorking = 0;
+        let underRepair = 0;
+        let totalCost = 0;
+
+        (data || []).forEach(item => {
+            const status = (item.status || '').toLowerCase().trim();
+            if (status.includes('not working') || status.includes('notworking')) {
+                notWorking++;
+            } else if (status.includes('repair') || status.includes('partially')) {
+                underRepair++;
+            } else {
+                working++;
+            }
+
+            if (item.cost) {
+                const num = parseFloat(item.cost);
+                if (!isNaN(num)) {
+                    totalCost += num;
+                }
+            }
+        });
+
+        res.json({
+            total,
+            working,
+            notWorking,
+            underRepair,
+            totalCost
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/equipments', async (req, res) => {
+    try {
+        const record = req.body;
+        const { data, error } = await supabase.from('equipments').insert([record]).select().single();
+        if (error) throw error;
+        res.status(201).json({ message: 'Equipment added successfully', equipment: data });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/equipments/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const updates = req.body;
+        const { data, error } = await supabase.from('equipments').update(updates).eq('id', id).select().single();
+        if (error) throw error;
+        res.json({ message: 'Equipment updated successfully', equipment: data });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/equipments/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { error } = await supabase.from('equipments').delete().eq('id', id);
+        if (error) throw error;
+        res.json({ message: 'Equipment deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ============================================================================
+// OCR TEST ENDPOINT — fully local PaddleOCR
+// ============================================================================
+
+app.post('/api/ocr/test', upload.single('file'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
+
+    const originalName = req.file.originalname || 'upload.png';
+    const ext = path.extname(originalName).toLowerCase();
+    const allowed = new Set(['.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.tif', '.webp', '.pdf']);
+    if (!allowed.has(ext)) {
+        return res.status(400).json({ error: `Unsupported file type: ${ext}. Use PNG, JPG, TIFF, BMP, or PDF.` });
+    }
+
+    try {
+        const result = await extractFileWithPython(req.file.buffer, originalName);
+        res.json({
+            success: true,
+            text: result.text,
+            method: result.method || 'unknown',
+            lines: (result.text || '').split('\n').filter(l => l.trim()).length
+        });
+    } catch (err) {
+        console.error('OCR test error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ============================================================================
+// STRUCTURED DOCUMENT PARSER — calibration certs + IS standards
+// Hybrid pipeline: regex first (free, instant) → LM Studio fallback → user confirms
+// ============================================================================
+
+async function parseDocumentWithPython(buffer, originalName, docTypeHint) {
+    return new Promise((resolve, reject) => {
+        const ext = path.extname(originalName || '.pdf').toLowerCase();
+        const tempPath = path.join(__dirname, 'scratch', `parse_${crypto.randomBytes(8).toString('hex')}${ext}`);
+        if (!fs.existsSync(path.join(__dirname, 'scratch'))) {
+            fs.mkdirSync(path.join(__dirname, 'scratch'));
+        }
+
+        fs.writeFile(tempPath, buffer, (err) => {
+            if (err) return reject(err);
+
+            const args = [path.join(__dirname, 'scripts', 'parse_document.py'), tempPath];
+            if (docTypeHint) args.push(docTypeHint);
+
+            const pyProcess = spawn('python3', args);
+            let outputData = '';
+            let errorData = '';
+
+            pyProcess.stdout.on('data', (data) => outputData += data.toString());
+            pyProcess.stderr.on('data', (data) => errorData += data.toString());
+
+            pyProcess.on('close', (code) => {
+                fs.unlink(tempPath, () => {});
+                if (code !== 0) {
+                    return reject(new Error(`Parser exited with code ${code}. ${errorData}`));
+                }
+                try {
+                    resolve(JSON.parse(outputData));
+                } catch (e) {
+                    reject(new Error('Failed to parse output: ' + outputData.slice(0, 500)));
+                }
+            });
+        });
+    });
+}
+
+app.post('/api/document/parse-structured', upload.single('file'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
+
+    const originalName = req.file.originalname || 'upload.pdf';
+    const ext = path.extname(originalName).toLowerCase();
+    const allowed = new Set(['.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.tif', '.webp', '.pdf']);
+    if (!allowed.has(ext)) {
+        return res.status(400).json({ error: `Unsupported file type: ${ext}` });
+    }
+
+    const docTypeHint = req.body.doc_type || null;
+
+    try {
+        const regexResult = await parseDocumentWithPython(req.file.buffer, originalName, docTypeHint);
+
+        if (!regexResult.success) {
+            return res.status(500).json({ error: regexResult.error || 'Extraction failed' });
+        }
+
+        if (regexResult.needs_llm && regexResult.raw_text) {
+            try {
+                const llmEnhanced = await enhanceWithLLM(regexResult);
+                return res.json(llmEnhanced);
+            } catch (llmErr) {
+                console.warn('LM Studio unavailable, returning regex-only result:', llmErr.message);
+                return res.json(regexResult);
+            }
+        }
+
+        res.json(regexResult);
+    } catch (err) {
+        console.error('Document parse error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+async function enhanceWithLLM(regexResult) {
+    const { doc_type, parsed, raw_text } = regexResult;
+
+    if (doc_type === 'calibration_certificate') {
+        const missingFields = Object.entries(parsed)
+            .filter(([k, v]) => !v)
+            .map(([k]) => k);
+
+        if (missingFields.length === 0) return regexResult;
+
+        const systemPrompt = `You are a calibration certificate parser. Extract ONLY what is explicitly written in the document. NEVER assume or invent values.
+Return a JSON object with ONLY these missing fields: ${missingFields.join(', ')}
+If a field is not found in the text, set it to empty string "".
+Return ONLY valid JSON, no explanation.`;
+
+        const raw = await callLMStudio(systemPrompt, raw_text.slice(0, 3000));
+        try {
+            const jsonMatch = raw.match(/```json\s*([\s\S]*?)\s*```/) || raw.match(/\{[\s\S]*\}/);
+            const llmParsed = JSON.parse((jsonMatch ? jsonMatch[1] || jsonMatch[0] : raw).trim());
+
+            for (const field of missingFields) {
+                if (llmParsed[field] && llmParsed[field].trim()) {
+                    regexResult.parsed[field] = llmParsed[field].trim();
+                    regexResult.confidence[field] = 0.7;
+                }
+            }
+            regexResult.needs_llm = false;
+            regexResult.llm_enhanced = true;
+        } catch (e) {
+            console.warn('LLM output not parseable:', e.message);
+        }
+        return regexResult;
+    }
+
+    if (doc_type === 'is_standard') {
+        const systemPrompt = `You are an Indian Standard (IS) document parser. Extract test parameters from the document text.
+CRITICAL RULES:
+- Extract ONLY what is explicitly written. NEVER assume or invent values.
+- Every value must come directly from the document text.
+- If a value is not clearly stated, leave it as empty string.
+
+Return a JSON object with this exact structure:
+{
+  "is_number": "e.g. IS 4985:2021",
+  "title": "full title",
+  "test_parameters": [
+    {
+      "clause": "clause number e.g. 7.1.1",
+      "param": "parameter name",
+      "spec_val": "specification value as written in document",
+      "type": "Quantitative or Qualitative",
+      "expected": "expected result for qualitative tests",
+      "min": "minimum value for quantitative tests",
+      "max": "maximum value for quantitative tests"
+    }
+  ]
+}
+
+Return ONLY valid JSON, no explanation.`;
+
+        const raw = await callLMStudio(systemPrompt, raw_text.slice(0, 4000));
+        try {
+            const jsonMatch = raw.match(/```json\s*([\s\S]*?)\s*```/) || raw.match(/\{[\s\S]*\}/);
+            const llmParsed = JSON.parse((jsonMatch ? jsonMatch[1] || jsonMatch[0] : raw).trim());
+
+            if (llmParsed.is_number) {
+                regexResult.parsed.is_number = llmParsed.is_number;
+                regexResult.confidence.is_number = 0.8;
+            }
+            if (llmParsed.title) {
+                regexResult.parsed.title = llmParsed.title;
+                regexResult.confidence.title = 0.8;
+            }
+            if (llmParsed.test_parameters && llmParsed.test_parameters.length > 0) {
+                regexResult.parsed.test_parameters = llmParsed.test_parameters;
+                regexResult.confidence.test_parameters = 0.7;
+            }
+            regexResult.needs_llm = false;
+            regexResult.llm_enhanced = true;
+        } catch (e) {
+            console.warn('LLM output not parseable:', e.message);
+        }
+        return regexResult;
+    }
+
+    return regexResult;
+}
+
+// Save confirmed calibration data
+app.post('/api/calibration/save', async (req, res) => {
+    const { equipment_lab_code, parsed } = req.body;
+    if (!parsed) return res.status(400).json({ error: 'No parsed data provided' });
+
+    try {
+        const record = {
+            equipment_lab_code: equipment_lab_code || parsed.equipment_id || null,
+            certificate_number: parsed.certificate_number || null,
+            date_of_calibration: parsed.date_of_calibration || null,
+            date_next_due: parsed.date_next_due || null,
+            equipment_name: parsed.equipment_name || null,
+            make: parsed.make || null,
+            model: parsed.model || null,
+            range: parsed.range || null,
+            least_count: parsed.least_count || null,
+            calibration_agency: parsed.calibration_agency || null,
+            nabl_certificate: parsed.nabl_certificate || null,
+            reference_standard: parsed.reference_standard || null,
+            temperature: parsed.temperature || null,
+            humidity: parsed.humidity || null,
+            status: 'confirmed',
+            confirmed_at: new Date().toISOString(),
+        };
+
+        const { data, error } = await supabase.from('calibration_records').upsert(record, { onConflict: 'certificate_number' }).select().single();
+        if (error) throw error;
+
+        res.json({ success: true, record: data });
+    } catch (err) {
+        console.error('Calibration save error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Save confirmed IS standard test parameters
+app.post('/api/is-standard/save-params', async (req, res) => {
+    const { is_number, title, test_parameters } = req.body;
+    if (!is_number || !test_parameters) {
+        return res.status(400).json({ error: 'Missing is_number or test_parameters' });
+    }
+
+    try {
+        const { data, error } = await supabase.from('is_standards_vault').upsert({
+            isNumber: is_number,
+            title: title || '',
+            extractedClauses: JSON.stringify(test_parameters),
+            isFullyResolved: true,
+            confidenceScore: 1.0,
+            pdfFileName: req.body.pdf_file_name || '',
+        }, { onConflict: 'isNumber' }).select().single();
+
+        if (error) throw error;
+        res.json({ success: true, record: data });
+    } catch (err) {
+        console.error('IS standard save error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ============================================================================
+// IS AMENDMENTS API ENDPOINTS (WITH RESILIENT FALLBACK)
+// ============================================================================
+
+let inMemoryAmendments = [
+    { id: 1, isNumber: "IS 4985", amendmentNumber: "Amd 1", title: "Amendment No. 1 to IS 4985:2021", isNew: false, publishDate: "2022-05-10", pdfFileName: "IS_4985_Amd_1.pdf" },
+    { id: 2, isNumber: "IS 4985", amendmentNumber: "Amd 2", title: "Amendment No. 2 to IS 4985:2021", isNew: false, publishDate: "2024-11-15", pdfFileName: "IS_4985_Amd_2.pdf" },
+    { id: 3, isNumber: "IS 4985", amendmentNumber: "Amd 3", title: "Amendment No. 3 to IS 4985:2021", isNew: true, publishDate: "2026-05-01", pdfFileName: "IS_4985_Amd_3.pdf" },
+    { id: 4, isNumber: "IS 14735", amendmentNumber: "Amd 1", title: "Amendment No. 1 to IS 14735:1999", isNew: true, publishDate: "2026-04-12", pdfFileName: "IS_14735_Amd_1.pdf" },
+    { id: 5, isNumber: "IS 269", amendmentNumber: "Amd 1", title: "Amendment No. 1 to IS 269:2015", isNew: false, publishDate: "2018-09-05", pdfFileName: "IS_269_Amd_1.pdf" },
+    { id: 6, isNumber: "IS 269", amendmentNumber: "Amd 2", title: "Amendment No. 2 to IS 269:2015", isNew: false, publishDate: "2021-03-20", pdfFileName: "IS_269_Amd_2.pdf" }
+];
+
+app.get('/api/is-intelligence/amendments', async (req, res) => {
+    try {
+        const { data, error } = await supabase.from('is_amendments').select('*').order('id', { ascending: true });
+        if (error) {
+            console.warn("is_amendments table not found/query failed, falling back to in-memory store.");
+            return res.json({ amendments: inMemoryAmendments });
+        }
+        if (!data || data.length === 0) {
+            try {
+                const inserted = await supabase.from('is_amendments').insert(inMemoryAmendments.map(({id, ...r}) => r)).select();
+                if (!inserted.error && inserted.data) {
+                    return res.json({ amendments: inserted.data });
+                }
+            } catch (err) {
+                console.error("Could not auto-seed is_amendments:", err);
+            }
+            return res.json({ amendments: inMemoryAmendments });
+        }
+        res.json({ amendments: data });
+    } catch(err) {
+        res.json({ amendments: inMemoryAmendments });
+    }
+});
+
+app.post('/api/is-intelligence/amendments', async (req, res) => {
+    try {
+        const { isNumber, amendmentNumber, title, isNew, publishDate } = req.body;
+        if (!isNumber || !amendmentNumber || !title) {
+            return res.status(400).json({ error: 'Missing required amendment fields.' });
+        }
+        const record = {
+            isNumber: normalizeISNumber(isNumber),
+            amendmentNumber,
+            title,
+            isNew: isNew !== undefined ? isNew : true,
+            publishDate: publishDate || new Date().toISOString().split('T')[0]
+        };
+
+        const { data, error } = await supabase.from('is_amendments').insert([record]).select().single();
+        if (error) {
+            console.warn("Could not insert to Supabase, updating in-memory store.");
+            const newId = inMemoryAmendments.length > 0 ? Math.max(...inMemoryAmendments.map(a => a.id)) + 1 : 1;
+            const newRecord = { id: newId, ...record };
+            inMemoryAmendments.push(newRecord);
+            return res.json({ message: 'Amendment saved in-memory', amendment: newRecord });
+        }
+        res.status(201).json({ message: 'Amendment added successfully', amendment: data });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/is-intelligence/amendments/toggle-new', async (req, res) => {
+    try {
+        const { id, isNew } = req.body;
+        const targetIsNew = isNew !== undefined ? isNew : false;
+        
+        try {
+            await supabase.from('is_amendments').update({ isNew: targetIsNew }).eq('id', id);
+        } catch(e) {}
+
+        const item = inMemoryAmendments.find(a => a.id === parseInt(id));
+        if (item) {
+            item.isNew = targetIsNew;
+        }
+
+        res.json({ success: true, message: 'Amendment status updated successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/is-intelligence/amendments/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        try {
+            await supabase.from('is_amendments').delete().eq('id', id);
+        } catch(e) {}
+
+        inMemoryAmendments = inMemoryAmendments.filter(a => a.id !== parseInt(id));
+        res.json({ success: true, message: 'Amendment deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ============================================================================
+// DISHA AGENT — Phases 1–3 (HITL notification queue + executor + agentic)
+// ============================================================================
+const dishaMonitor = require('./server/agent/Nigrani-monitor');
+const NigraniMonitor = dishaMonitor;
+
+app.get('/api/notifications', async (req, res) => {
+    try {
+        const status = (req.query.status || 'open').toString();
+        const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
+        let q = supabase.from('lab_notifications')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(limit);
+        if (status !== 'all') q = q.eq('status', status);
+        const { data, error } = await q;
+        if (error) throw error;
+
+        const { count: openCount } = await supabase
+            .from('lab_notifications')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'open');
+
+        res.json({ notifications: data || [], openCount: openCount || 0 });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+async function transitionNotification(id, patch) {
+    const { data, error } = await supabase
+        .from('lab_notifications')
+        .update(patch)
+        .eq('id', id)
+        .select()
+        .maybeSingle();
+    if (error) throw error;
+    if (!data) {
+        const e = new Error('Notification not found');
+        e.status = 404;
+        throw e;
+    }
+    return data;
+}
+
+app.post('/api/notifications/:id/approve', async (req, res) => {
+    try {
+        const notificationId = parseInt(req.params.id, 10);
+        const actor = (req.body && req.body.actor) || 'oic';
+
+        // Mark as approved first
+        const approved = await transitionNotification(notificationId, {
+            status: 'approved',
+            acted_by: actor,
+            acted_at: new Date().toISOString(),
+        });
+        // Phase 1 contract: acknowledge only. No execution on approve.
+        res.json({ notification: approved });
+    } catch (err) {
+        res.status(err.status || 500).json({ error: err.message });
+    }
+});
+
+app.post('/api/notifications/:id/dismiss', async (req, res) => {
+    try {
+        const data = await transitionNotification(req.params.id, {
+            status: 'dismissed',
+            acted_by: (req.body && req.body.actor) || 'oic',
+            acted_at: new Date().toISOString(),
+        });
+        res.json({ notification: data });
+    } catch (err) {
+        res.status(err.status || 500).json({ error: err.message });
+    }
+});
+
+app.post('/api/notifications/:id/snooze', async (req, res) => {
+    try {
+        const hours = Math.max(1, Math.min(parseInt((req.body || {}).hours, 10) || 4, 72));
+        const until = new Date(Date.now() + hours * 3600 * 1000).toISOString();
+        const data = await transitionNotification(req.params.id, {
+            status: 'snoozed',
+            snooze_until: until,
+            acted_by: (req.body && req.body.actor) || 'oic',
+            acted_at: new Date().toISOString(),
+        });
+        res.json({ notification: data });
+    } catch (err) {
+        res.status(err.status || 500).json({ error: err.message });
+    }
+});
+
+// Manual trigger — handy during dev, also used by the bell's "Refresh" button.
+app.post('/api/notifications/run-monitor', async (_req, res) => {
+    try {
+        const result = await dishaMonitor.runOnce({ force: true });
+        res.json(result);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- Audit log endpoints ---
+app.get('/api/disha/audit', async (req, res) => {
+    try {
+        const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
+        const actionType = req.query.actionType || null;
+
+        let q = supabase.from('audit_log')
+            .select('*')
+            .order('executed_at', { ascending: false })
+            .limit(limit);
+
+        if (actionType) q = q.eq('action_type', actionType);
+
+        const { data, error } = await q;
+        if (error) throw error;
+
+        res.json({ audit_log: data || [], count: (data || []).length });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- OIC preferences endpoints ---
+app.get('/api/disha/preferences', async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('oic_preferences')
+            .select('key, value, description');
+
+        if (error) throw error;
+
+        const prefs = {};
+        (data || []).forEach(p => {
+            try {
+                prefs[p.key] = {
+                    value: typeof p.value === 'string' ? JSON.parse(p.value) : p.value,
+                    description: p.description,
+                };
+            } catch (_) {
+                prefs[p.key] = p.value;
+            }
+        });
+
+        res.json(prefs);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/disha/preferences/:key', async (req, res) => {
+    try {
+        const key = req.params.key;
+        const { value, description } = req.body;
+
+        if (!key || typeof value === 'undefined') {
+            return res.status(400).json({ error: 'key and value are required' });
+        }
+
+        const { data, error } = await supabase
+            .from('oic_preferences')
+            .upsert({
+                key,
+                value: typeof value === 'object' ? JSON.stringify(value) : value,
+                description,
+                set_by: 'oic',
+            }, { onConflict: 'key' })
+            .select()
+            .maybeSingle();
+
+        if (error) throw error;
+        res.json({ preference: data });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- ATTENDANCE API ---
+app.get('/api/attendance/today', async (req, res) => {
+    try {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const { data: attendance, error } = await supabase.from('employee_attendance').select('*').eq('attendanceDate', todayStr);
+        if (error) {
+            // Table might not exist yet, return defaults
+            const { data: employees } = await supabase.from('employee_profiles').select('id, fullName');
+            return res.json({ attendance: (employees || []).map(emp => ({ employeeId: emp.id, fullName: emp.fullName, status: 'present' })) });
+        }
+        const { data: employees } = await supabase.from('employee_profiles').select('id, fullName');
+        
+        const result = (employees || []).map(emp => {
+            const record = (attendance || []).find(a => a.employeeId === emp.id);
+            return {
+                employeeId: emp.id,
+                fullName: emp.fullName,
+                status: record ? record.status : 'present' // default present
+            };
+        });
+        res.json({ attendance: result });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/attendance', async (req, res) => {
+    const { employeeId, status } = req.body;
+    const todayStr = new Date().toISOString().split('T')[0];
+    try {
+        const { error } = await supabase.from('employee_attendance').upsert(
+            { employeeId, attendanceDate: todayStr, status },
+            { onConflict: 'employeeId, attendanceDate' }
+        );
+        if (error) throw error;
+        res.json({ message: 'Attendance updated.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/attendance/bulk', async (req, res) => {
+    const { status } = req.body;
+    const todayStr = new Date().toISOString().split('T')[0];
+    try {
+        const { data: employees } = await supabase.from('employee_profiles').select('id');
+        const upserts = (employees || []).map(e => ({ employeeId: e.id, attendanceDate: todayStr, status: status || 'present' }));
+        const { error } = await supabase.from('employee_attendance').upsert(upserts, { onConflict: 'employeeId, attendanceDate' });
+        if (error) throw error;
+        res.json({ message: 'Bulk attendance updated.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- CONFORMANCE LIMITS API ---
+app.get('/api/conformance-limits/:isNumber', async (req, res) => {
+    const { isNumber } = req.params;
+    const variety = req.query.variety;
+    try {
+        let q = supabase.from('is_conformance_limits').select('*').eq('isNumber', isNumber);
+        if (variety) q = q.eq('varietyTag', variety);
+        const { data, error } = await q;
+        if (error) {
+            // Table might not exist yet
+            return res.json({ limits: [] });
+        }
+        res.json({ limits: data || [] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/conformance-limits', async (req, res) => {
+    try {
+        const payload = req.body; // should be the record object or array
+        const { data, error } = await supabase.from('is_conformance_limits').upsert(payload, { onConflict: 'isNumber, clauseRef, parameter, varietyTag' });
+        if (error) throw error;
+        res.json({ message: 'Limits saved.', data });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/conformance-limits/:id', async (req, res) => {
+    try {
+        const { error } = await supabase.from('is_conformance_limits').delete().eq('id', req.params.id);
+        if (error) throw error;
+        res.json({ message: 'Limit deleted.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- TEST REPORT API ---
+app.get('/api/test-report/:sampleId', async (req, res) => {
+    try {
+        const { data: sample, error } = await supabase.from('samples').select('*').eq('id', req.params.sampleId).single();
+        if (error || !sample) throw new Error('Sample not found');
+        
+        let limits = [];
+        let obs = [];
+        try {
+            const { data: l } = await supabase.from('is_conformance_limits').select('*').eq('isNumber', sample.isNumber);
+            if (l) limits = l;
+            const { data: o } = await supabase.from('test_report_observations').select('*').eq('sampleId', req.params.sampleId);
+            if (o) obs = o;
+        } catch (e) {
+            // Ignore if tables don't exist yet
+        }
+        
+        res.json({ sample, limits, observations: obs });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/test-report/:sampleId/observations', async (req, res) => {
+    const { sampleId } = req.params;
+    const { observations } = req.body; // array of { limitId, observedValue, verdict, remarks, enteredBy }
+    try {
+        const upserts = observations.map(o => ({
+            sampleId,
+            limitId: o.limitId,
+            observedValue: o.observedValue,
+            verdict: o.verdict,
+            remarks: o.remarks,
+            enteredBy: o.enteredBy || 'system'
+        }));
+        const { error } = await supabase.from('test_report_observations').upsert(upserts, { onConflict: 'sampleId, limitId' });
+        if (error) throw error;
+        res.json({ message: 'Observations saved.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+const PORT = process.env.PORT || 3005;
 if (!process.env.VERCEL) {
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
+        NigraniMonitor.start();
+
+        // Local ML: retrain the hours-model from lifecycle history shortly after
+        // boot, then once a day. Pure-local, no cloud — keeps per-IS setup/marginal
+        // hours and TA proficiency tracking reality as samples complete.
+        const retrain = () => hoursModel.rebuildFromHistory()
+            .then(s => console.log(`[ml] hours-model retrained — ${s.standardsModeled} standards, ${s.batches} batches, ${s.tasProfiled} TAs`))
+            .catch(e => console.warn('[ml] retrain failed:', e.message));
+        setTimeout(retrain, 30 * 1000);
+        setInterval(retrain, 24 * 60 * 60 * 1000);
     });
 }
-module.exports = app;
+module.exports = {
+    app,
+    loadSampleHistoryAccountCandidates,
+    applySampleHistoryImport,
+    loadMasterListAccountCandidates,
+    applyMasterListImport,
+};

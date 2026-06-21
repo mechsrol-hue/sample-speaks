@@ -1,0 +1,2302 @@
+{
+  "IS 14756": {
+    "tatDays": 7,
+    "activeClauses": {
+      "Material": {
+        "active": true,
+        "activeHours": 3,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Shapes, dimensions, workmanship and finish": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Staining test": {
+        "active": false,
+        "activeHours": 3,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": 9,
+    "isNumber": "IS 14756",
+    "productName": "",
+    "parsedClauses": {
+      "3": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Material",
+        "note": "-"
+      },
+      "7": {
+        "active": true,
+        "activeHours": 3,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Staining test"
+      },
+      "5&6": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Shapes, dimensions, workmanship"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 9,
+    "_oldTotalHours": 9,
+    "confidence": "high",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 9873": {
+    "isNumber": "IS 9873",
+    "productName": "",
+    "totalHours": null,
+    "tatDays": 7,
+    "activeClauses": {
+      "1": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (2)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (3)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (4)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (5)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (6)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (7)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (8)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (9)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      }
+    },
+    "parsedClauses": {
+      "1": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (2)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (3)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (4)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (5)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (6)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (7)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (8)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      },
+      "1 (9)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sample Preparation",
+        "note": "500"
+      }
+    },
+    "rowSum": 0,
+    "_oldTotalHours": null,
+    "confidence": "low",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 2185": {
+    "tatDays": 7,
+    "activeClauses": {
+      "Block density": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Compressive strength": {
+        "active": true,
+        "activeHours": 6,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Water absorption": {
+        "active": true,
+        "activeHours": 3.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Drying shrinkage": {
+        "active": true,
+        "activeHours": 6,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Dimensions (24 blocks)": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Moisture Movement": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": 17,
+    "isNumber": "IS 2185",
+    "productName": "",
+    "parsedClauses": {
+      "8.1": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "a) General"
+      },
+      "Block density 8.3,Table 1": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Block density 8.3,Table 1"
+      },
+      "Compressive strength 8.4,Table 1": {
+        "active": true,
+        "activeHours": 6,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Compressive strength 8.4,Table 1"
+      },
+      "8.5": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Thermal conductivity",
+        "note": "Tasting facility not"
+      },
+      "8.6": {
+        "active": true,
+        "activeHours": 6,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Drying shrinkage"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 16.5,
+    "_oldTotalHours": 17,
+    "confidence": "high",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 269": {
+    "tatDays": 7,
+    "activeClauses": {
+      "Setting time (Le Chatelier Method)": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Setting time (Autoclave test method)": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Compressive Strength": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Transverse Strength (Optional)": {
+        "active": true,
+        "activeHours": 3.5,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": null,
+    "isNumber": "IS 269",
+    "productName": "",
+    "parsedClauses": {
+      "Chemical requirements": {
+        "active": true,
+        "activeHours": 5.1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Chemical requirements"
+      },
+      "Physical Requirements": {
+        "active": true,
+        "activeHours": 6,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Physical Requirements"
+      },
+      "8.2": {
+        "active": true,
+        "activeHours": 3,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Chloride content for cement"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 14.6,
+    "_oldTotalHours": 10.5,
+    "confidence": "low",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 4246": {
+    "tatDays": 7,
+    "activeClauses": {
+      "Design for maintenance": {
+        "active": true,
+        "activeHours": 6,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Rigidity & Stability": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Finish (Workmanship)": {
+        "active": true,
+        "activeHours": 5.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Finish (External)": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Gas taps": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Injector jets": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Burners": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Pan supports": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Gas soundness": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Gas inlet connections": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Strength & Rigidity": {
+        "active": true,
+        "activeHours": 1.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Gas consumption": {
+        "active": true,
+        "activeHours": 3.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Ignition & Flame travel": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Flame failure device": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Flame stability": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Noise control": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Flash back": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": null,
+    "isNumber": "IS 4246",
+    "productName": "",
+    "parsedClauses": {
+      "1": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Ga soundness"
+      },
+      "2": {
+        "active": true,
+        "activeHours": 60,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Resistance to draught"
+      },
+      "5": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Fire hazard & limiting",
+        "note": "740"
+      },
+      "6": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Design for maintenance"
+      },
+      "7": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Rigidity & Stability"
+      },
+      "9": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Gas taps"
+      },
+      "10": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Injector jets"
+      },
+      "11": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Burners"
+      },
+      "12": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Pan supports"
+      },
+      "14": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Gas inlet connections"
+      },
+      "15": {
+        "active": true,
+        "activeHours": 1.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Strength & Rigidity"
+      },
+      "17": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Gas consumptions"
+      },
+      "9.5": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Material(Analysis & Mercurous 5116:",
+        "note": "600"
+      },
+      "Finish": {
+        "active": true,
+        "activeHours": 8,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Finish"
+      },
+      "1 (2)": {
+        "active": true,
+        "activeHours": 180,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Ignition & Flame travel 18.1,18.2 &"
+      },
+      "1 (3)": {
+        "active": true,
+        "activeHours": 180,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Flame failure device"
+      },
+      "1 (4)": {
+        "active": true,
+        "activeHours": 180,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Flame stability"
+      },
+      "0.5": {
+        "active": true,
+        "activeHours": 180,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Noise control"
+      },
+      "1 (5)": {
+        "active": true,
+        "activeHours": 200,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Flash back"
+      },
+      "1.5": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Formation of soot",
+        "note": "390"
+      },
+      "Combustion": {
+        "active": true,
+        "activeHours": 24,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Combustion"
+      },
+      "Thermal Efficiency test": {
+        "active": true,
+        "activeHours": 26,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Thermal Efficiency test"
+      },
+      "28 & 29": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Instructions & Marking"
+      },
+      "1 (6)": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Time in cutting gas cock &"
+      }
+    },
+    "rowSum": 1053.5,
+    "_oldTotalHours": 27,
+    "confidence": "low",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 14735": {
+    "tatDays": 7,
+    "activeClauses": {
+      "COLOUR OF FITTINGS": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "DIMENSIONS": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "SEALING RINGS": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "WORKMANSHIP": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "SOCKET AND SPIGOT CONFIGURATION": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "ACCESS OPENING": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "VENT COWL": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "PIPE CLIPS": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "VISUAL APPEARANCE": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "STRESS RELIEF TEST": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "VICAT SOFTENING TEMPERATURE": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "IMPACT TEST (DROP TEST)": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "WATER TIGHTNESS OF JOINT": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "MARKING": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": 29,
+    "isNumber": "IS 14735",
+    "productName": "",
+    "parsedClauses": {
+      "5": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "COLOUR OF FITTINGS"
+      },
+      "7": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "DIMENSIONS"
+      },
+      "8": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "SEALING RINGS"
+      },
+      "10": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "WORKMANSHIP"
+      },
+      "13": {
+        "active": true,
+        "activeHours": 3,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "RESISTANCE TO SULPHURIC ACID"
+      },
+      "14": {
+        "active": true,
+        "activeHours": 6,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "TITANIU DIOXIDE CONTENT"
+      },
+      "15": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "SULPHATED ASH CONTENT"
+      },
+      "17": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "WATER TIGHTNESS OF JOINT"
+      },
+      "19": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "MARKING"
+      },
+      "11.2": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "SOCKET AND SPIGOT CONFIGURATION"
+      },
+      "11.3": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "ACCESS OPENING"
+      },
+      "11.4": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "VENT COWL"
+      },
+      "11.5": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "PIPE CLIPS"
+      },
+      "12.1": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "VISUAL APPEARANCE"
+      },
+      "12.2": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "STRESS RELIEF TEST"
+      },
+      "12.3": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "VICAT SOFTENING TEMPERATURE"
+      },
+      "16.1": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "IMPACT TEST (DROP TEST)"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 29,
+    "_oldTotalHours": 29,
+    "confidence": "high",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 1660": {
+    "tatDays": 7,
+    "activeClauses": {
+      "Marking": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Dimensions (Clause 5.1)": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Requirement of handle tests (Clause 6)": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Workmanship (Clause 7)": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Visual defects on non-stick coated surface": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Sample preparation for taking dimensions of thickness": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": 5,
+    "isNumber": "IS 1660",
+    "productName": "",
+    "parsedClauses": {
+      "6": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Requirement of handle tests"
+      },
+      "7": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Workmanship"
+      },
+      "9": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Marking"
+      },
+      "5.1": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Dimensions"
+      },
+      "Visual defects on non-stick 3.2 & 7.5 of": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Visual defects on non-stick 3.2 & 7.5 of IS 9730"
+      },
+      "Time required for sample": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Time required for sample"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 4.5,
+    "_oldTotalHours": 5,
+    "confidence": "high",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 1038": {
+    "tatDays": 7,
+    "activeClauses": {
+      "Standard sizes, tolerances and designation": {
+        "active": true,
+        "activeHours": 5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Position of holes, fixing screws and lugs": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Finish (visual inspection)": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Thickness of Zinc coating": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Fabrications (Frames, Shutters, etc.)": {
+        "active": true,
+        "activeHours": 5,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": 10,
+    "isNumber": "IS 1038",
+    "productName": "",
+    "parsedClauses": {
+      "4": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Standard sizes,"
+      },
+      "7": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Position of holes,"
+      },
+      "9": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Glazing",
+        "note": "Glazing is done"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 2,
+    "_oldTotalHours": 10,
+    "confidence": "review",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 3196": {
+    "tatDays": 7,
+    "activeClauses": {
+      "Radiographic examination (Clause 13)": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Water capacity (Clause 14)": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Hydrostatic test (Clause 15)": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Pneumatic test (Clause 16)": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Fatigue test (Clause 17.1)": {
+        "active": true,
+        "activeHours": 8,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Bursting test (Clause 17.2)": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Tensile strength - Parent metal (L pc) (Clause 18.1.2)": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Tensile strength - Parent metal (C pc) (Clause 15)": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Tensile strength - Parent metal (B pc) (Clause 16)": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Tensile strength - Weld joint (L pc)": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Bend test - Parent metal (L pc) root+face": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": 54,
+    "isNumber": "IS 3196",
+    "productName": "",
+    "parsedClauses": {
+      "0": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Manufature",
+        "note": "600.00"
+      },
+      "0.00": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Material (Chemical Test)",
+        "note": "As per"
+      },
+      "0 (2)": {
+        "active": true,
+        "activeHours": 150,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Valves Pad"
+      },
+      "0 (3)": {
+        "active": true,
+        "activeHours": 150,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Valves protection"
+      },
+      "0 (4)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Valves protection",
+        "note": "300.00"
+      },
+      "0 (5)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Handle",
+        "note": "300.00"
+      },
+      "0 (6)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Foot ring",
+        "note": "300.00"
+      },
+      "0 (7)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Bung",
+        "note": "300.00"
+      },
+      "0.00 (2)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Radiographic examination",
+        "note": "Test facility"
+      },
+      "0 (8)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Water capacity",
+        "note": "300.00"
+      },
+      "0 (9)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Hydrostatic test",
+        "note": "345.00"
+      },
+      "0 (10)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Pneumatic test",
+        "note": "327.00"
+      },
+      "0 (11)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Fatigue test",
+        "note": "2760.00"
+      },
+      "0 (12)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Bursting test",
+        "note": "690.00"
+      },
+      "0 (13)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Tensile (L pc) Parent metal",
+        "note": "1380.00"
+      },
+      "0 (14)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Tensile (C pc) Parent metal",
+        "note": "1380.00"
+      },
+      "1380.00": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Tensile (B pc) Parent metal",
+        "note": "applicable to"
+      },
+      "1380.00 (2)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Tensile strength (L pc) Weld",
+        "note": "applicable to"
+      },
+      "0 (15)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Tensile strength (C pc) Weld",
+        "note": "1380.00"
+      },
+      "600.00": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Bend test (L pc) root+face",
+        "note": "applicable to"
+      },
+      "0 (16)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Bend test (C pc)root+face",
+        "note": "600.00"
+      },
+      "600.00 (2)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Macro examination (L pc)",
+        "note": "applicable to"
+      },
+      "0 (17)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Macro examination (C pc)",
+        "note": "600.00"
+      },
+      "0 (18)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Macro examination (Neck)",
+        "note": "600.00"
+      },
+      "0 (19)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Minimum thickness",
+        "note": "300.00"
+      },
+      "0.00 (3)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Additional test",
+        "note": "Test facility"
+      },
+      "0 (20)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Coating",
+        "note": "600.00"
+      },
+      "0 (21)": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Report preparation",
+        "note": "300.00"
+      }
+    },
+    "rowSum": 300,
+    "_oldTotalHours": 54,
+    "confidence": "review",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 4985": {
+    "tatDays": 7,
+    "activeClauses": {
+      "11.1.1": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "oven"
+      },
+      "11.1.2": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "11.1.3": {
+        "active": true,
+        "activeHours": 1.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "11.1.4": {
+        "active": false,
+        "activeHours": 2.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "11.1.5": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "11.1.6": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "11.1.7": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "11.1.8": {
+        "active": false,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "11.1.9": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "11.1.10": {
+        "active": true,
+        "activeHours": 10,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "11.1.11": {
+        "active": true,
+        "activeHours": 3,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": 15,
+    "isNumber": "IS 4985",
+    "productName": "",
+    "parsedClauses": {
+      "7": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Dimensions of pipes"
+      },
+      "8": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sealing Ring",
+        "note": "As per IS 5382"
+      },
+      "10.1": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Visual Appearance"
+      },
+      "10.2": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Opacity"
+      },
+      "10.4": {
+        "active": true,
+        "activeHours": 3,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Reversion test"
+      },
+      "10.5": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "VST (Vicat softening"
+      },
+      "10.6": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Density"
+      },
+      "10.7": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Sulphated Ash Content",
+        "note": "facility N/A"
+      },
+      "11.2": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Resistance to external"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 15,
+    "_oldTotalHours": 15,
+    "confidence": "high",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 4413": {
+    "tatDays": 7,
+    "activeClauses": {
+      "Physical properties - Tensile Test": {
+        "active": true,
+        "activeHours": 1.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Physical properties - Wrapping test": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Physical properties - Cold Heading Test (optional)": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Freedom from Defect": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Diameters and tolerances": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Packing & Marking": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": 15,
+    "isNumber": "IS 4413",
+    "productName": "",
+    "parsedClauses": {
+      "4": {
+        "active": true,
+        "activeHours": 10,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Chemical composition"
+      },
+      "6": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Freedom from Defect"
+      },
+      "7": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Diameters and tolerances"
+      },
+      "9 & 10": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Packing & Marking"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 12,
+    "_oldTotalHours": 15,
+    "confidence": "high",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 4283": {
+    "tatDays": 7,
+    "activeClauses": {
+      "Design & General constructions": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Verification of marking": {
+        "active": true,
+        "activeHours": 7,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Hot air output": {
+        "active": true,
+        "activeHours": 2.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Temperature rise": {
+        "active": true,
+        "activeHours": 2.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Starting of fan motor": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Moisture resistance": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Mechanical strength & stability": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Cord grip (l)": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Performance of thermal cut-outs (200 cycles)": {
+        "active": true,
+        "activeHours": 3,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Supply connections (o)": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Cord Grip (p)": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Terminals (q)": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Screws (r)": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Finish (s)": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Silent operation (t)": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Clause 8.4.13": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Clause 8.4.14": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": 28,
+    "isNumber": "IS 4283",
+    "productName": "",
+    "parsedClauses": {
+      "4": {
+        "active": true,
+        "activeHours": 3,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Design & General"
+      },
+      "Verification of marking": {
+        "active": true,
+        "activeHours": 7,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Verification of marking"
+      },
+      "Tests": {
+        "active": true,
+        "activeHours": 8,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Tests"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 1.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 19.5,
+    "_oldTotalHours": 28,
+    "confidence": "review",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 303": {
+    "tatDays": 7,
+    "activeClauses": {
+      "Dimensions & Tolerances": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Workmanship & Finish": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Water Resistance Test (MR Grade)": {
+        "active": true,
+        "activeHours": 3,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Water Resistance Test (BWR Grade)": {
+        "active": true,
+        "activeHours": 3,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Water Resistance Test (BWP Grade)": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Moisture Content": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Static Bending Strength": {
+        "active": true,
+        "activeHours": 6,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Glue Shear strength in dry state": {
+        "active": true,
+        "activeHours": 1.5,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Marking": {
+        "active": true,
+        "activeHours": 6,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Manufacture": {
+        "active": true,
+        "activeHours": 5.5,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": 23,
+    "isNumber": "IS 303",
+    "productName": "",
+    "parsedClauses": {
+      "9": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Workmanship & Finish"
+      },
+      "Type and Quality requirements 5 Table 1 ": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Type and Quality requirements 5 Table 1 & 2"
+      },
+      "Materials": {
+        "active": true,
+        "activeHours": 6,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Materials"
+      },
+      "Dimensions and Tolerances": {
+        "active": true,
+        "activeHours": 8,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Dimensions and Tolerances"
+      },
+      "Marking": {
+        "active": true,
+        "activeHours": 12,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Marking"
+      },
+      "Tests": {
+        "active": true,
+        "activeHours": 11,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Tests"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 41.5,
+    "_oldTotalHours": 23,
+    "confidence": "review",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 12330": {
+    "tatDays": 7,
+    "activeClauses": {
+      "5.1 Fineness": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "5.2 Soundness (Le Chatelier method)": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "5.2 Soundness (Autoclave test method)": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "5.3 Setting Time": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "5.3 False set": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "5.4 Sulphate Expansion": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "5.5 Compressive strength": {
+        "active": true,
+        "activeHours": 9,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "5.6 Transverse strength of plastic mortar (optional)": {
+        "active": true,
+        "activeHours": 5,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": 49,
+    "isNumber": "IS 12330",
+    "productName": "",
+    "parsedClauses": {
+      "Chemical Requirements": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Chemical Requirements"
+      },
+      "Physical Requirements": {
+        "active": true,
+        "activeHours": 5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Physical Requirements"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 9.5,
+    "_oldTotalHours": 49,
+    "confidence": "review",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 2556": {
+    "tatDays": 7,
+    "activeClauses": {
+      "Part-1:1974 - Vitreous Sanitary Appliances": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Part-2:1981 - Wash Down Water Closets": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Part-3:1994 - Squatting Pans": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Part-3:1981 - Squatting Pans (Third Revision)": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Part-4:1972 - Wash Basins": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": 13,
+    "isNumber": "IS 2556",
+    "productName": "",
+    "parsedClauses": {
+      "3.2": {
+        "active": true,
+        "activeHours": 1.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Blemishes and defects"
+      },
+      "Thickness and warpage 4 and 6.1": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Thickness and warpage 4 and 6.1"
+      },
+      "6.2": {
+        "active": true,
+        "activeHours": 3,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Crazing test"
+      },
+      "6.3": {
+        "active": true,
+        "activeHours": 3,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Water absorption test"
+      },
+      "6.4": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Chemical resistance test"
+      },
+      "6.5": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Modulus of rupture test"
+      },
+      "6.6": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Resistance to staining"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 13,
+    "_oldTotalHours": 13,
+    "confidence": "high",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 455": {
+    "tatDays": 7,
+    "activeClauses": {
+      "6.1 Fineness": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "6.2 Soundness - By Le Chatelier Method": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "6.2 Soundness - By Autoclave test method": {
+        "active": true,
+        "activeHours": 4,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "6.3 Setting time": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "6.4 Compressive strength": {
+        "active": true,
+        "activeHours": 9,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "6.5 Transverse strength": {
+        "active": true,
+        "activeHours": 5,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": null,
+    "isNumber": "IS 455",
+    "productName": "",
+    "parsedClauses": {
+      "6": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Physical requirements"
+      },
+      "Chemical Requirements": {
+        "active": true,
+        "activeHours": 5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Chemical Requirements"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 7.5,
+    "_oldTotalHours": 24,
+    "confidence": "low",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 710": {
+    "isNumber": "IS 710",
+    "productName": "",
+    "totalHours": 33,
+    "tatDays": 7,
+    "activeClauses": {
+      "5": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Dimensions"
+      },
+      "4.1.1": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Defect in veneers"
+      },
+      "4.2": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Assembly"
+      },
+      "4.3": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preservative treatment",
+        "note": "-"
+      },
+      "Moisture content": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Moisture content"
+      },
+      "Workmanship & Finish": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Workmanship & Finish"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "parsedClauses": {
+      "5": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Dimensions"
+      },
+      "4.1.1": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Defect in veneers"
+      },
+      "4.2": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Assembly"
+      },
+      "4.3": {
+        "active": false,
+        "activeHours": 0,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preservative treatment",
+        "note": "-"
+      },
+      "Moisture content": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Moisture content"
+      },
+      "Workmanship & Finish": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Workmanship & Finish"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 2,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 10,
+    "_oldTotalHours": 33,
+    "confidence": "review",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  },
+  "IS 1489": {
+    "tatDays": 7,
+    "activeClauses": {
+      "Tile/Floor Tile Tests (IS 1489:76)": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      },
+      "Cement/Pozzolana Tests (IS 1489(Part1): 1991)": {
+        "active": true,
+        "activeHours": 1,
+        "passiveHours": 0,
+        "equipment": ""
+      }
+    },
+    "totalHours": null,
+    "isNumber": "IS 1489",
+    "productName": "",
+    "parsedClauses": {
+      "Chemical Requirements:-": {
+        "active": true,
+        "activeHours": 6,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Chemical Requirements:-"
+      },
+      "Physical Requirements": {
+        "active": true,
+        "activeHours": 7,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Physical Requirements"
+      },
+      "Report Prep": {
+        "active": true,
+        "activeHours": 0.5,
+        "passiveHours": 0,
+        "equipment": "",
+        "name": "Preparation of Test Report"
+      }
+    },
+    "rowSum": 13.5,
+    "_oldTotalHours": 2,
+    "confidence": "low",
+    "source": "local-deterministic pdftotext 2026-06-13",
+    "samplesPerRun": 1
+  }
+}

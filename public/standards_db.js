@@ -348,39 +348,59 @@ const EXTRACTED_STANDARDS_DB = {
   ],
   "IS 4985": [
     {
-      "clause": "Dimensions of pipes",
-      "param": "Dimensions of pipes",
-      "hours": 7
+      "clause": "11.1.1",
+      "param": "Dimensions (Outside Diameter & Wall Thickness)",
+      "hours": 0.5
     },
     {
-      "clause": "Sealing Ring",
-      "param": "Sealing Ring",
-      "hours": 8
+      "clause": "11.1.2",
+      "param": "Visual Appearance (Colour & Finish)",
+      "hours": 0.5
     },
     {
-      "clause": "Visual Appearance",
-      "param": "Visual Appearance",
-      "hours": 1
-    },
-    {
-      "clause": "Opacity",
+      "clause": "11.1.3",
       "param": "Opacity",
-      "hours": 2
+      "hours": 1.5
     },
     {
-      "clause": "Vicat softening test",
-      "param": "VST (Vicat softening test)",
-      "hours": 3
+      "clause": "11.1.4",
+      "param": "Effect on Water",
+      "hours": 2.5
     },
     {
-      "clause": "Density",
+      "clause": "11.1.5",
+      "param": "Reversion Test",
+      "hours": 2.0
+    },
+    {
+      "clause": "11.1.6",
+      "param": "Vicat Softening Temperature (VST)",
+      "hours": 2.0
+    },
+    {
+      "clause": "11.1.7",
       "param": "Density",
-      "hours": 2
+      "hours": 1.0
     },
     {
-      "clause": "Resistance to external blows at 0 deg.C",
-      "param": "Resistance to external blows at 0 deg.C",
-      "hours": 3.5
+      "clause": "11.1.8",
+      "param": "Sulphated Ash Content",
+      "hours": 4.0
+    },
+    {
+      "clause": "11.1.9",
+      "param": "Hydrostatic Pressure Test (Acceptance)",
+      "hours": 2.0
+    },
+    {
+      "clause": "11.1.10",
+      "param": "Hydrostatic Pressure Test (Type Test)",
+      "hours": 10.0
+    },
+    {
+      "clause": "11.1.11",
+      "param": "Resistance to External Blows at 0°C",
+      "hours": 3.0
     }
   ],
   "IS 4413": [

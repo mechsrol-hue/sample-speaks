@@ -131,12 +131,14 @@ def main():
     args = parser.parse_args()
 
     # 1. Load payload
-    if not os.path.exists(args.payload):
-        log("ERROR", f"Payload file not found: {args.payload}")
-        sys.exit(1)
-
-    with open(args.payload, encoding="utf-8") as f:
-        data = json.load(f)
+    if args.payload == '-':
+        data = json.load(sys.stdin)
+    else:
+        if not os.path.exists(args.payload):
+            log("ERROR", f"Payload file not found: {args.payload}")
+            sys.exit(1)
+        with open(args.payload, encoding="utf-8") as f:
+            data = json.load(f)
 
     lims_user   = data.get("lims_user", "").strip()
     lims_pass   = data.get("lims_pass", "").strip()
@@ -797,27 +799,16 @@ def main():
                     time.sleep(15) # Wait for page reload
                     
                     # Track sample in submitted.js
+                    # Track sample via Supabase instead of submitted.js
                     try:
-                        track_file = os.path.join(os.path.dirname(os.path.abspath(args.payload)), "submitted.js")
-                        submitted_data = []
-                        if os.path.exists(track_file):
-                            with open(track_file, "r") as f:
-                                content = f.read().replace('const SUBMITTED_SAMPLES = ', '').replace(';', '').strip()
-                                if content:
-                                    submitted_data = json.loads(content)
-                        from datetime import datetime
-                        
-                        # Add if not already present
-                        if not any(s.get("sampleCode") == sample_code for s in submitted_data):
-                            submitted_data.append({
-                                "sampleCode": sample_code,
-                                "date": datetime.now().strftime("%d-%m-%Y")
-                            })
-                            with open(track_file, "w") as f:
-                                f.write("const SUBMITTED_SAMPLES = " + json.dumps(submitted_data, indent=2) + ";")
-                            log("INFO", f"Sample {sample_code} successfully tracked in submitted.js")
+                        import urllib.request
+                        # We send a small POST to our own Node.js server which handles Supabase, 
+                        # or we just write a special log that Node.js reads.
+                        # Since we are running in a subprocess, printing a specific SUCCESS log is safest.
+                        print(f"[[SUBMITTED_SAMPLE]]:{sample_code}", flush=True)
+                        log("INFO", f"Sample {sample_code} successfully tracked via stdout for Node.js")
                     except Exception as track_err:
-                        log("WARN", f"Failed to track sample in JS: {track_err}")
+                        log("WARN", f"Failed to track sample: {track_err}")
 
                 except Exception as ex:
                     log("ERROR", f"Failed to mark remaining clauses as NA: {ex}")
