@@ -1,0 +1,201 @@
+IS 2347 : 2023
+Indian Standard
+DOMESTIC PRESSURE COOKER — SPECIFICATION
+( Seventh Revision )
+ICS 98.540.50
+© BIS 2023 — Bureau of Indian Standards
+Utensils, Cutlery Domestic Hardware Sectional Committee, MED 33
+September 2023, Price Group 10
+
+FOREWORD
+This Indian Standard (Seventh Revision) was adopted by the Bureau of Indian Standards, after the draft
+finalized by Utensils, Cutlery Domestic Hardware Sectional Committee had been approved by the Mechanical
+Engineering Division Council. First published 1963; revised 1966, 1974, 1987, 1995, 2006 and 2017.
+Major modifications in this revision include: new terminology; tolerance on gross capacity; aluminium alloy
+grades per IS 21; additional requirements for electric pressure cooker; glass lid for serving; visual pressure
+indicator; chain for linking PRD with vent tube; requirement for 'change in shape'; internal level marking;
+pressure drop after PRD operation; cooker fastened by screw clamps / locking device under tests for removal
+of lid under pressure; test for effectiveness for induction bottom.
+SI units: Pressure 1 Pa (Pascal) = 1 N/m2; 1 kgf/mm2 = 9.806 650 MPa.
+
+1 SCOPE
+This standard covers the requirements for domestic pressure cookers. This standard does not cover
+microwaveable pressure cookers.
+
+2 REFERENCES — standards listed in Annex A.
+
+3 TERMINOLOGY
+3.1 Pressure Cooker — A closed domestic pressure cooking vessel for use with external/integral heat source
+and capable of maintaining nominal cooking steam pressure over 0.1 kgf/cm2 and up to 1.0 kgf/cm2 gauge nominal.
+3.2 Gross Nominal Capacity of the Cooker — The full water capacity of the vessel, total internal volume with lid in position.
+3.3 Cooking Capacity — maximum cooking capacity of the vessel is two-third of the capacity as specified in 3.9.
+3.4 Container — Vessel placed inside the pressure cooker for cooking foods separately (separator).
+3.5 Grid — used inside a pressure cooker to ensure gap between separator and base.
+3.6 Nominal Cooking Pressure — pressure at which the cooker operates, within a limit of ± 20 percent of the
+declared nominal cooking steam pressure.
+3.7 Pressure Regulating Device (PRD) — Device which regulates the pressure inside the cooker during use.
+3.8 Safety Relief Device — Device which prevents the cooker from exceeding the safety pressure. Could be
+destructive or resettable type. A cooker using gasket release system (GRS) shall also have additional safety relief device.
+3.9 Body Capacity — Maximum quantity of water contained in the cooker body, on a flat, horizontal surface.
+3.9.1 Body capacity shall be more than 2/3rd of the gross nominal capacity as given in 3.2.
+3.10 Greatest Nominal Cooking Pressure — Maximum pressure achieved during test for PRD (see 8.3) in
+first five readings of operations of PRD.
+
+4 CAPACITIES
+The gross capacity of pressure cookers shall be from 1 litre to 24 litre and shall be expressed only in complete
+or half litre units. The tolerance on the gross capacity shall be +499/0 ml (i.e. +499 ml, −0 ml). For pressure
+cooker with integral electrical heating (see 8.13), gross capacity shall be from 1 litre to 10 litre.
+4.1 The gross capacity of the cooker shall be tested as given in Annex B.
+4.2 Body Capacity — The body of the cooker shall be kept on flat and horizontal surface, filled with water up
+to the brim; the volume of water measured shall be the body capacity.
+
+5 MATERIALS
+5.1 Body, Lid, Containers and Grid
+5.1.1 Body/lid material: aluminium alloy designations 19000, 19500, 31000, 40800 of IS 21 or stainless steel
+X04Cr19Ni9/X07Cr18Ni9 of IS 5522 or X8Cr16Mn8Cu2Ni2N of IS 15997.
+5.1.3 Composite bottom SS cooker shall conform to IS 15960. Protector plate may be X07Cr17 (grade 430) per IS 6911.
+5.1.4 Induction friendly base material as per 430 or 439 series of IS 6911.
+5.1.5 3-ply body: inner X04Cr19Ni9 (304) of IS 5522, middle aluminium per IS 21, outer X07Cr17 (430)/X02Cr18Ti (439) of IS 6911.
+5.2 Safety Relief Device
+5.2.1 Destructive Type — fusible plug chemical composition such that it melts/ejects before a gauge pressure
+greater than 3 kgf/cm2 (300 kN/m2 approximately) is reached. Maximum lead content shall not exceed 0.05 percent
+by mass in fusible plug pellet.
+5.2.2 Resettable Type — aluminium alloy / stainless steel / brass per referenced specs; spring SS per IS 4454 (Part 4).
+5.3 Gasket — shall conform to IS 7466.
+5.4 Handles and Knobs — construction and material per IS 13395.
+5.5 Pressure Regulating Device — metallic part of PRD (except vent seal pin) brass per IS 319 or SS.
+5.10 Tempered glass lid — conform to performance requirements 8.15. Minimum thickness of glass shall be 3.5 mm.
+SS rim, if provided, material per IS 5522 or IS 15997 and rim thickness shall be 0.25 mm minimum.
+5.11 Visual Pressure Indicator — indicates there is pressure inside the cooker (more than 0.04 kgf/cm2 or 4 kPa).
+5.12 Gasket Release System — gasket shall comply IS 7466; GRS shall comply with H-1.2.
+
+6 CONSTRUCTION
+6.1 Pressure Regulating Device — free fall dead weight valve.
+6.1.1 Minimum inside diameter of vent pipe shall be 2.5 mm.
+6.1.5 The vent pipe nut shall have a minimum of two holes; combined area of holes more than area of vent pipe hole.
+6.1.6 Metallic chain for linking PRD with vent tube; chain of brass or coated steel.
+6.2 Safety Relief Device — independent safety relief device, destructible or resettable or both.
+6.3 Temperature Responsive Safety Relief Device.
+6.3.1 A temperature responsive safety relief device shall comply to Annex C.
+6.3.2 If the safety pressure relief device is not of the fusible type, the cooker shall satisfy the type test prescribed in Annex D.
+6.3.3 In case of electrical pressure cooker, in addition to 6.3.2, a thermal fuse shall be provided. The thermal fuse shall
+be deemed to have passed the test if it functions when the steam reaches a gauge pressure between 1.25 and 3 times
+the greatest nominal cooking pressure.
+6.4 Handles and Knobs per IS 13395.
+6.7 Internal Level Marking — may be marked to indicate two-third and half of body capacity, max and min level.
+6.8 Fully dimensioned sectional drawing submitted; basic minimum dimensions include flange/lug thickness for
+body, thickness for lid, wall thickness of body at the middle, cooker base thickness.
+
+7 WORKMANSHIP AND FINISH
+7.1 Body and lid free from wrinkles, scratches, and other surface defects (naked eye or corrected vision).
+7.2 Body and lid neat and clean.
+7.3 Brass parts (except screws, studs, nuts) plated chromium over nickel; plating conform to service condition number 2
+of IS 1068 (adhesion and thickness tested). Corrosion test per IS 1068 is a type test.
+7.4 Cooker, if hard anodized, fully or partially, shall satisfy Annex E (anodized portions only).
+
+8 TESTS
+8.1 Air Pressure Test — subjected to air pressure of 40 percent of the nominal cooking steam pressure, slowly raised
+to nominal cooking steam pressure; shall not show any sign of leakage or deformation.
+8.2 Proof Pressure Test — as prescribed in Annex F; no sign of leakage or other forms of failure during or after.
+8.3 Operating Test for Pressure Regulating Device.
+8.3.1 The PRD shall operate within ± 20 percent of the nominal cooking steam pressure as declared by the manufacturer.
+Pass test in Annex G. The drop in pressure after operation of PRD shall not be more than 40 percent of the average
+measured cooking steam pressure (see G-2).
+8.3.2 Each PRD tested before assembly per 8.3.1; not more than 5 percent rejection.
+8.4 Test for Safety Relief Device.
+8.4.1 Device shall satisfy the test in Annex H. After the test, the cooker shall be in normal serviceable condition.
+8.4.2 Test 5 samples of destructible safety relief device per 8.4.1; result shall be within a range of ± 20 percent of the mean values.
+8.5 Bursting Pressure Test — bursting pressure shall be not less than 6 kgf/cm2. The cooker shall pass test per Annex J.
+Pressure developed approximate 10 kgf/cm2 in reservoir and released gradually. May deform but shall not show any incipient
+fracture nor any crack. Separation of base/bottom of composite cooker (see 8.8) is acceptable.
+8.6 Tests for Removal of Lid Under Pressure.
+8.6.1 For Outer Lid Cooker — A force of 12 kgf (120 N approximately), applied to lid/cover or its fastening/locking device,
+shall not be able to release the lid/cover unless the steam pressure inside has fallen below 0.18 kgf/cm2 (18 kN/m2) gauge (see Annex K).
+8.6.2 For Inner Lid Cooker — A force of 12 kgf (120 N approximately) shall not be able to release the lid/cover unless the
+steam pressure inside has fallen below 0.18 kgf/cm2 (18 kN/m2) gauge (see Annex L).
+8.6.3 For Cooker Fastened by Screw Clamps or Any Other Locking Device — 8.6.3.1 A force of 12 kgf (120 N approximately)
+applied to the opening device; lid/cover shall not open until the steam pressure has fallen below 0.18 kgf/cm2 (18 kN/m2) gauge (see Annex T).
+8.6.4 Electrical pressure cooker — lid cannot be removed while pressure within container is excessive; per IS 302 (Part 2/Sec 15).
+8.7 Test for Spring Loaded Mechanism — spring compressed and kept 24 h; then compressed and released 3 000 times consecutively;
+after test, spring shall not suffer a permanent set of more than 3 percent in length.
+8.8 Test for stainless steel cookers with composite base/bottom — refer tests in IS 15960.
+8.9 Stainless steel, aluminium induction compatible base and 3-ply cooker tested per Annex M (on a separate cooker).
+8.10 Handles tested per IS 13395: a) Resistance to burning; b) Heat resistance; c) Torque strength; d) Bending strength;
+e) Fatigue resistance; f) Thermal insulation test. (Handle tests done at least once a year — type tests.)
+8.11 External Coating — 8.11.1 powder/ceramic/high temperature resistant liquid coating per thickness test, adhesion test as per
+IS 9730; coating comply IS 9806; minimum thickness declared by the manufacturer.
+8.11.1.1 Dry heat the cooker body on gas stove to 220 +5/-0 °C and quench in water at ambient; repeat 25 times. No blistering of coating.
+8.12 Internal Coating — non-stick coating shall conform to IS 9730.
+8.13 Pressure cooker with integral electrical heating device shall conform to IS 302 (Part 2/Sec 15).
+8.14 For 3-ply construction cooker body — tested per Annex R; no separation/delamination of 3 ply nor blisters after 50 cycles.
+8.15 Test(s) on Tempered Glass Lid.
+8.15.1 Fragmentation Test — sample lid broken by center punch; particle count completed within 3 min. There shall be not less than
+60 particles in a square of side 50 mm (50 mm × 50 mm).
+8.15.2 Ball Drop Test — smooth surface steel ball of 225 +0/-5 g placed at a minimum height of 1 000 mm; free fall on three
+points; no crack shall be seen by the naked eye under normal light.
+8.15.3 Thermal Shock Test — air circulating oven at (120 ± 5) °C, soak 30 min, remove and pour one litre of water at ambient;
+lid shall not shatter. (Applicable for glass lids used for cooking utensils; optional for others.)
+8.15.4 Free Fall Test — Glass lid with rim: drop from 900 mm onto vitrified tile/level concrete; glass shall not break/crack.
+Glass lid without rim: drop from 900 mm; glass shall not break/crack.
+8.16 If the PRD is provided with the chain (see 6.1.6), the chain shall be tested per 8.16.1.
+8.16.1 Hang a weight of three times the weight of PRD (weight valve) for 4 h; no deformation or breakage of chain or its locating area.
+8.17 Test for Effectiveness for Induction Bottom — applicable to induction bottom cooker (includes SS and 3-ply induction
+compatible). This test is a type test. Tested per Annex S. After test, cooker shall be stable on gas stove or induction cooktop.
+If the induction plate detaches during or after the test, the cooker fails the test.
+
+9 SAMPLING — Lot Inspection Plan per 9.2. Table 1 Scale of Sampling (sampling/acceptance — EXCLUDED from report).
+
+10 INSTRUCTIONS FOR USE — marking and safeguards.
+
+11 MARKING
+11.1 Each cooker permanently marked on body: a) Nominal cooking pressure (NCP); b) Gross capacity; c) Grade of material of
+body and lid; d) Batch number.
+11.2 Lid: name/trade-mark of manufacturer.
+11.4 BIS Certification Marking — Standard Mark per BIS Act 2016.
+
+ANNEX A — List of Referred Standards (IS 21, IS 228, IS 302, IS 319, IS 733, IS 739, IS 740, IS 1068, IS 1342, IS 4246,
+IS 4454 (Part 4), IS 4905, IS 5522, IS 5523, IS 6012, IS 6057, IS 6527, IS 6528, IS 6603, IS 6911, IS 7466, IS 9730,
+IS 9806, IS 13395, IS 15960, IS 15997).
+
+ANNEX B (Clause 4.1) — Gross Capacity Test: filled with water up to brim of vent pipe; volume measured = gross capacity.
+ANNEX C (Clause 6.3.1) — Test for Temperature Responsive Safety Relief Device: water 1/16 of internal volume; the temperature
+responsive device shall release before a gauge pressure not greater than 3 kgf/cm2 (300 kN/m2 approximately) is reached.
+ANNEX D (Clause 6.3.2) — Temperature Test for Cookers Without Fusible Safety Relief Device (type test).
+ANNEX E (Clause 7.4) — Test for Hard Anodized Surface. E-2 Thickness: minimum thickness of anodized layer shall be 25 µm.
+E-4 Hardness: E-4.1 Type Test — hardness by micro-indentation, tested once in 6 month or once in 2 lakh cooker produced
+(whichever is greater); the hardness should be more than 350 HV. E-5 Resistance to staining (Annex N) — no staining visible.
+E-6 Alkali resistance (Annex P) — no loss of insulating properties.
+ANNEX F (Clauses 8.2, 5.2.1 and 5.2.2) — Proof Pressure Test: a pressure not less than twice the greatest nominal cooking
+pressure shall be applied; cooker shall not show any sign of leakage or other forms of failure during or after the test.
+ANNEX G (Clauses 8.3.1 and 8.4.1) — Operating Test for PRD: operating pressure shall be within ± 20 percent of the nominal
+cooking pressure declared by the manufacturer; note five readings for operating pressure and pressure drops, take average.
+ANNEX H (Clauses 8.4.1 and S-3) — Test for Safety Relief Device. Water 1/16 of internal volume.
+H-1.1 For Destructible Devices — deemed to have passed if it functions when steam reaches a gauge pressure between 1.25 and 3
+times the greatest nominal cooking pressure.
+H-1.2 For Gasket Release System — deemed to have passed if it functions when steam reaches a gauge pressure between 1.25 and 2.5
+times the greatest nominal cooking pressure.
+H-1.3 For Resettable Devices (other than H-1.2) — H-1.3.1 deemed to have passed if it functions when steam reaches a gauge
+pressure between 1.25 and 3 times the greatest nominal cooking pressure. H-1.3.2 tested 25 times as per H-1.3.1 (type test).
+ANNEX J (Clause 8.5) — Bursting Pressure Test: gradually increasing hydraulic pressure until rupture or appreciable leakage;
+maximum gauge pressure obtained taken as bursting pressure. If the cooker satisfactorily stands a pressure of 6 kgf/cm2, further
+applications of pressure is not necessary.
+ANNEX K (Clause 8.6.1) — Tests for Removal of Lid Under Pressure for Outer Lid Cooker: K-12 Put a load of 12 kgf; the cooker
+should not open until the pressure inside has fallen below 0.18 kgf/cm2.
+ANNEX L (Clause 8.6.2) — Tests for Removal of Lid Under Pressure for Inner Lid Cooker: L-12 Put a load of 12 kgf; the cooker
+should not open until the pressure inside has fallen below 0.18 kgf/cm2.
+ANNEX M (Clause 8.9) — Test for Stainless Steel, Aluminium Induction Compatible Base and 3-Ply Cooker: dry heat 250 +25/-0 °C
+and quench, 25 cycles gas + 25 cycles induction (total 50). Induction steel base shall not peel off or separate; 3-ply shall not
+show separation (delamination) nor blisters.
+ANNEX N (Clause E-5) — Resistance to Staining of Anodized Coatings (nitric acid + dye, visual).
+ANNEX P (Clause E-6) — Resistance to Alkali of Anodized Aluminium (5 percent NaOH, multimeter conductivity).
+ANNEX Q (Clauses 5.2.1, 5.2.2, 5.5, 5.6, 5.7, 5.8 and 6.4.2.1) — Stainless Steel Property. Q-1.1 chemical composition (in percent):
+C : 0.15 Max ; Si : 1.00 Max ; Mn : 2.00 Max ; S : 0.15 to 0.25 ; P : 0.20 Max ; Cr : 17.0 to 19.0 ; Ni : 8.0 to 10.0.
+Q-1.2 analysis per IS 228.
+ANNEX R (Clause 8.14) — Test for Adhesion of 3-Ply Construction Cooker Body: heat 250 +25/-0 °C and quench; repeat 50 cycles.
+ANNEX S (Clause 8.17) — Test for Effectiveness for Induction Bottom: fill 1/16 internal volume; note timing for first PRD operation;
+repeat; the time noted after this test shall not be more than 25 percent of the time noted after S-2. (Minimum 1 800 W induction cooktop.)
+ANNEX T (Clause 8.6.3.1) — Tests for Removal of Lid Under Pressure for Cooker Fastened by Screw Clamps or Any Other Locking
+Device: T-10 A force of 12 kgf (120 N approximately) applied to opening device; lid/cover shall not open until the steam pressure
+inside has fallen below 0.18 kgf/cm2 (18 kN/m2) gauge.
+ANNEX U (Clause 10.4) — Important Safeguards for Electric Pressure Cooker.
+ANNEX V (Foreword) — Committee Composition, MED 33.

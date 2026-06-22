@@ -1,0 +1,477 @@
+{
+  "isNumber": "IS 3196 (Part 1) : 2013",
+  "title": "Welded Low Carbon Steel Cylinders Exceeding 5 Litres Water Capacity for Low Pressure Liquefiable Gases — Part 1 Cylinders for Liquefied Petroleum Gases (LPG) — Specification",
+  "revision": "Sixth Revision (incorporating Amendments 1–4)",
+  "parameterizationDims": ["material", "construction"],
+  "dimensionOptions": {
+    "material": ["IS 6240", "IS 15914"],
+    "construction": ["Two-piece", "Three-piece"]
+  },
+  "defaults": { "material": "IS 6240", "construction": "Two-piece" },
+  "notes": "This standard parameterizes by the steel/material standard used (IS 6240 hot rolled vs IS 15914 high tensile) and by shell construction (two-piece vs three-piece). It has NO size×grade dimension tables; wall thickness is formula-driven and most acceptance criteria are constants. Water-capacity-dependent rules (Cl 14 tolerance, Cl 10.2 foot-ring clearance) are piecewise over a continuous 5–250 l range and are captured as descriptive text rather than a discrete dropdown.",
+  "parameters": [
+    {
+      "clauseRef": "Cl 4.1.2",
+      "section": "Material",
+      "parameterName": "Cast (heat) analysis certificate of steel",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Certificate of cast (heat) analysis obtained and provided; means established to identify cylinders with the steel casts."
+    },
+    {
+      "clauseRef": "Cl 4.2",
+      "section": "Material",
+      "parameterName": "Bung/valve pad material and soundness",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Hot forged from rolled steel bars of Class 1A or Class 2 of IS 1875 or IS 2062; machined bung free from fissures, surface cracks, porosity, laminations, pinholes.",
+      "testMethod": "IS 1875 / IS 2062"
+    },
+    {
+      "clauseRef": "Cl 4.3",
+      "section": "Material",
+      "parameterName": "Foot ring / cap / shroud / stay plate material",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Grade 'O' of IS 1079 or IS 2062 or IS 6240, or any other material approved by statutory authority."
+    },
+    {
+      "clauseRef": "Cl 6.2.1",
+      "section": "Design",
+      "parameterName": "Calculated minimum wall thickness from design formulae",
+      "unit": "mm",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Cylindrical: greater of t=Ph·Do/(200×0.8·J·Re+Ph) and t=0.136·√Do (formula 2 not applicable for IS 15914 steel). Ends: te=Ph·Di/(200×0.8·J·Re+Ph)×K(0.65+0.1K)/4. Ph=25 kg/cm² for LPG vapour pressure ≤16.87 kg/cm² at 15°C."
+    },
+    {
+      "clauseRef": "Cl 6.2.2",
+      "section": "Design",
+      "parameterName": "Minimum wall thickness (by steel standard)",
+      "unit": "mm",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["material"],
+      "valueTable": {
+        "IS 6240": { "expected": "≥2.0 mm for water capacity up to and including 13 l; ≥2.4 mm for water capacity above 13 l (Cl 6.2.2), and not less than the greater of the design formulae in Cl 6.2.1." },
+        "IS 15914": { "expected": "Per Cl 6.2.3: Do<100 mm → 1.1 mm; 100<Do<150 mm → 1.1+0.008(Do−100) mm; Do>150 mm → (Do/250)+0.7 mm (minimum 1.5 mm). Design formula (2) of Cl 6.2.1 not applicable." }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.4",
+      "section": "Design",
+      "parameterName": "Agreed finished thickness ≥ calculated minimum",
+      "unit": "mm",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Agreed finished thickness shall not be less than the minimum calculated wall thickness (Cl 6.2.1 and 6.2.2 or 6.2.3) at any point and any transverse section of the cylindrical portion."
+    },
+    {
+      "clauseRef": "Cl 8.5",
+      "section": "Dimensions",
+      "parameterName": "Eccentricity of bunghole centre line",
+      "unit": "mm",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "max": 2,
+      "expected": "≤1% of nominal diameter of cylinder, subject to a maximum of 2 mm."
+    },
+    {
+      "clauseRef": "Cl 8.5.1",
+      "section": "Dimensions",
+      "parameterName": "Circularity (out-of-roundness, ODmax−ODmin in a cross-section)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["construction"],
+      "valueTable": {
+        "Two-piece": { "expected": "Difference between maximum and minimum outside diameter in same cross-section ≤ 1% of the mean of these diameters (measured adjacent to, not over, welds)." },
+        "Three-piece": { "expected": "Difference between maximum and minimum outside diameter in same cross-section ≤ 1.5% of the mean of these diameters (measured adjacent to, not over, welds)." }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.5.2",
+      "section": "Dimensions",
+      "parameterName": "Surface defects",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Internal and external surfaces free from defects which will adversely affect safe working of the cylinder."
+    },
+    {
+      "clauseRef": "Cl 8.5.3",
+      "section": "Dimensions",
+      "parameterName": "Profile regularity of dished end",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Contour of dished end deviates from approved dimensions by ≤1.25% of nominal diameter (radial) and ≤1% (axial); deviations not abrupt and outside the specified shape."
+    },
+    {
+      "clauseRef": "Cl 8.5.4",
+      "section": "Dimensions",
+      "parameterName": "Straightness of shell",
+      "unit": "% of cylindrical length",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "max": 0.3,
+      "expected": "Maximum deviation of shell from a straight line ≤0.3% of the cylindrical length."
+    },
+    {
+      "clauseRef": "Cl 8.5.5",
+      "section": "Dimensions",
+      "parameterName": "Verticality (deviation from vertical)",
+      "unit": "mm/m length",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "max": 10,
+      "expected": "Deviation from vertical ≤10 mm per metre length."
+    },
+    {
+      "clauseRef": "Cl 8.1",
+      "section": "Welding",
+      "parameterName": "Number of longitudinal seams",
+      "unit": "seams",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "max": 1
+    },
+    {
+      "clauseRef": "Cl 8.1",
+      "section": "Welding",
+      "parameterName": "Number of circumferential seams",
+      "unit": "seams",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "max": 2
+    },
+    {
+      "clauseRef": "Cl 7.4",
+      "section": "Welding",
+      "parameterName": "Plate misalignment at seams",
+      "unit": "% of plate thickness",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "max": 10,
+      "expected": "Surfaces of plates at seams not out of alignment by more than 10% of the plate thickness."
+    },
+    {
+      "clauseRef": "Cl 8.3",
+      "section": "Welding",
+      "parameterName": "End cylindrical skirt / parallel portion length",
+      "unit": "mm",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Minimum length 20 mm or three times the shell thickness, whichever is greater (semi-ellipsoidal end)."
+    },
+    {
+      "clauseRef": "Cl 7.8.2",
+      "section": "Welding",
+      "parameterName": "Weld quality (visual / macro)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Full penetration; smooth fusion; no cracks, notching, porous patches, undercutting or abrupt irregularity; welded bead not concave. Joggled butt welds verified by macro etch, bend and tensile testing."
+    },
+    {
+      "clauseRef": "Cl 13.1",
+      "section": "Radiography",
+      "parameterName": "Radiographic examination of welds",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Technique and acceptability per IS 1182/IS 2595/IS 3657/IS 4853 and 8.7 of IS 2825; sensitive to a defect of thickness equal to 2% of combined thickness of weld and strip. Spot radiography: 1 in every 50 consecutive cylinders (Cl 13.2.1).",
+      "testMethod": "IS 3196 (Part 3)"
+    },
+    {
+      "clauseRef": "Cl 9.3.2",
+      "section": "Valve protection",
+      "parameterName": "Eccentricity of protective metal ring / grill",
+      "unit": "mm",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "max": 3,
+      "expected": "Eccentricity of welded/fixed metal ring or grill w.r.t. valve pad/bung ≤1% of nominal diameter, subject to a maximum of 3 mm (as amended by Amendment No. 2)."
+    },
+    {
+      "clauseRef": "Cl 9.3.4",
+      "section": "Valve protection",
+      "parameterName": "Valve protection drop test (protective device)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": [],
+      "expected": "Water-filled container (half nominal water capacity) dropped from 1.2 m so the protective device strikes a hard flat surface — no damage to the valve. (De-pressurized cylinders only.)"
+    },
+    {
+      "clauseRef": "Cl 10.1",
+      "section": "Fittings",
+      "parameterName": "Handle static load test",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": [],
+      "expected": "Handle/lifting arrangement withstands static loading in any direction equal to twice the weight of the cylinder when filled with water."
+    },
+    {
+      "clauseRef": "Cl 10.2",
+      "section": "Fittings",
+      "parameterName": "Foot ring ground clearance (bottom below cylinder shell)",
+      "unit": "mm",
+      "limitType": "text",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "specText": "Minimum clearance varies with nominal water capacity: ≤34 l → ≥8 mm; >34 l and ≤50 l → ≥15 mm; >50 l → ≥25 mm. Foot ring ≥20 mm from circumferential weld; sheet thickness ≥ calculated wall thickness."
+    },
+    {
+      "clauseRef": "Cl 10.2",
+      "section": "Fittings",
+      "parameterName": "Foot ring deviation from vertical",
+      "unit": "degree",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "max": 1
+    },
+    {
+      "clauseRef": "Cl 10.3",
+      "section": "Fittings",
+      "parameterName": "Bung thread conformity (Annex B)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Bung clean, even, required machining finish; threads smooth, not broken; conform to taper thread gauges of IS 7202 / IS 9122 / IS 15894. 3% of machined bungs inspected; one bung sectioned for thread form and finish."
+    },
+    {
+      "clauseRef": "Cl 11.1",
+      "section": "Heat treatment",
+      "parameterName": "Heat treatment of cylinder (by steel standard)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["material"],
+      "valueTable": {
+        "IS 6240": { "expected": "Efficiently and uniformly normalized OR stress relieved after all welding and before hydrostatic test (Cl 11.1). No localized heat treatment (Cl 11.3). Mark 'N' or 'SR' accordingly." },
+        "IS 15914": { "expected": "Normalizing is COMPULSORY per the material standard (Cl 11.2) in addition to the requirements of Cl 11.1. No localized heat treatment (Cl 11.3). Mark 'N'." }
+      }
+    },
+    {
+      "clauseRef": "Cl 14",
+      "section": "Water capacity",
+      "parameterName": "Water capacity tolerance (weighing method)",
+      "unit": "% / litre",
+      "limitType": "text",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "specText": "Tolerance for water capacity: up to and including 13 l → +5/0 percent; above 13 l → +3/0 percent or 0.65 l, whichever is more. Checked by weighing method."
+    },
+    {
+      "clauseRef": "Cl 15.1",
+      "section": "Hydrostatic test",
+      "parameterName": "Hydrostatic test (each cylinder)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Pressure raised gradually to test pressure and retained ≥30 s after drying; no pressure reduction, no leakage, no visible bulge or deformation. Failure → reject.",
+      "testMethod": "IS 3196 (Part 3)"
+    },
+    {
+      "clauseRef": "Cl 15.1.1",
+      "section": "Hydrostatic test",
+      "parameterName": "Hydrostatic test pressure (Ph)",
+      "unit": "kg/cm²",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 25,
+      "expected": "25 kg/cm² (≈2.45 MPa) for LPG with vapour pressure ≤16.87 kg/cm² (gauge) at 15°C. For vapour pressure >16.87 kg/cm² take value from IS 8867 and approved by statutory authority."
+    },
+    {
+      "clauseRef": "Cl 16.1",
+      "section": "Pneumatic leakage test",
+      "parameterName": "Pneumatic (air) leakage test",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Each cylinder (dried, fitted with valve) subjected to air pressure ≥1.180 MPa (12 kgf/cm²) for 1 min while immersed in water — no leakage from body or valve pad joint. Dry air with safety cap fitted.",
+      "testMethod": "IS 3196 (Part 3)"
+    },
+    {
+      "clauseRef": "Cl 17.1.2",
+      "section": "Fatigue test",
+      "parameterName": "Fatigue / cycle test",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": [],
+      "expected": "Three representative cylinders cycled without failure to either: (a) upper cyclic pressure = 2/3 of test pressure for 80 000 cycles, or (b) = test pressure for 12 000 cycles. Lower cyclic pressure ≤10% of upper; frequency ≤0.25 Hz (15 cycles/min); outside surface temperature ≤50°C. After test the cylinders are burst tested to 17.2."
+    },
+    {
+      "clauseRef": "Cl 17.2.3",
+      "section": "Burst test",
+      "parameterName": "Bursting pressure (Pb), Min",
+      "unit": "% of test pressure Ph",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 225,
+      "expected": "Measured bursting pressure Pb ≥225% of the test pressure Ph under all circumstances.",
+      "testMethod": "IS 3196 (Part 3)"
+    },
+    {
+      "clauseRef": "Cl 17.2.3",
+      "section": "Burst test",
+      "parameterName": "Burst test fracture criteria",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "(a) Burst without fragmentation; (b) fracture not parallel to circumferential weld within 10 mm of its edge; (c) main fracture not brittle — edges at angle to diametrical plane with reduction of area through thickness; (d) no visible defect in the metal."
+    },
+    {
+      "clauseRef": "Cl 17.2.3",
+      "section": "Burst test",
+      "parameterName": "Volumetric expansion ratio at burst, Min",
+      "unit": "%",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Ratio of volumetric expansion to initial volume ≥20% if cylinder length > diameter; ≥17% if length ≤ diameter."
+    },
+    {
+      "clauseRef": "Cl 18.1.2",
+      "section": "Mechanical (acceptance)",
+      "parameterName": "Yield strength of finished cylinder, Min",
+      "unit": "as per material standard",
+      "limitType": "text",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "specText": "Determined yield strength (wherever applicable) shall not be less than the respective requirement for the steel specified in Clause 4 (IS 6240 / IS 15914 / 4.1.1 guaranteed value). Method per IS 3196 (Part 3).",
+      "testMethod": "IS 3196 (Part 3)"
+    },
+    {
+      "clauseRef": "Cl 18.1.2",
+      "section": "Mechanical (acceptance)",
+      "parameterName": "Tensile strength of finished cylinder, Min",
+      "unit": "as per material standard",
+      "limitType": "text",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "specText": "Determined tensile strength shall not be less than the respective requirement for the steel specified in Clause 4 (IS 6240 / IS 15914). Method per IS 3196 (Part 3).",
+      "testMethod": "IS 3196 (Part 3)"
+    },
+    {
+      "clauseRef": "Cl 18.1.2",
+      "section": "Mechanical (acceptance)",
+      "parameterName": "Percentage elongation, Min",
+      "unit": "as per material standard",
+      "limitType": "text",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "specText": "Determined percentage elongation shall not be less than the respective requirement for the steel specified in Clause 4 (IS 6240 / IS 15914). Method per IS 3196 (Part 3).",
+      "testMethod": "IS 3196 (Part 3)"
+    },
+    {
+      "clauseRef": "Cl 18.1.3",
+      "section": "Mechanical (acceptance)",
+      "parameterName": "Bend test",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Bend test specimen having cracks or other open defects exceeding 3 mm, measured in any direction on the convex surface, is treated as a failure.",
+      "testMethod": "IS 3196 (Part 3)"
+    },
+    {
+      "clauseRef": "Cl 19",
+      "section": "Additional test (type)",
+      "parameterName": "Cylinder body integrity impact test (by steel standard)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": ["material"],
+      "valueTable": {
+        "IS 6240": { "expected": "Not required (additional impact test applies only to cylinders manufactured from IS 15914 steel)." },
+        "IS 15914": { "expected": "Required as type test per Annex C-1: Flat surface impact F=30M (striking velocity 7–8 m/s) and Edge impact F=12M (4–5 m/s), M = max operating mass in kg. Pressurized cylinders shall not leak; cylinders subjected to burst meet 17.2 and to fatigue meet 17.1. Damage assessed per IS 16054." }
+      }
+    },
+    {
+      "clauseRef": "Cl 19",
+      "section": "Additional test (type)",
+      "parameterName": "Drop test (by steel standard)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": ["material"],
+      "valueTable": {
+        "IS 6240": { "expected": "Not required (drop test under Annex C applies only to cylinders manufactured from IS 15914 steel)." },
+        "IS 15914": { "expected": "Required as type test per Annex C-2: two finished cylinders (with foot-ring/valve protection) at max operating mass, pressurized to Pf/1.2, dropped from 1.2 m onto a 10 mm steel plate, twice in each of five orientations (10 drops each). Cylinders shall not leak; burst cylinders meet 17.2; fatigue cylinders meet 17.1." }
+      }
+    },
+    {
+      "clauseRef": "Cl 20.2",
+      "section": "Marking",
+      "parameterName": "Marking completeness",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Permanently stamped: serial number/manufacturer monogram/owner ID; this IS number; max working pressure (MPa); test pressure (MPa) and date of hydrostatic test; agreed finished thickness (mm); tare/gross weight (kg) and water capacity (l); inspecting agency mark; 'N' or 'SR'; name of gas. Tare weight includes valve."
+    },
+    {
+      "clauseRef": "Cl 21",
+      "section": "Colour",
+      "parameterName": "Colour identification",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Painted externally signal red colour (Shade No. 537 of IS 5) or any other colour approved by statutory authority."
+    },
+    {
+      "clauseRef": "Cl 23.2(a)",
+      "section": "Protective coating",
+      "parameterName": "Sprayed zinc coating thickness, Min",
+      "unit": "microns",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 37,
+      "expected": "Minimum 37 microns unless otherwise agreed (zinc wire per IS 12447, spraying per IS 6586). Surface grit-blasted to SA 2.5."
+    },
+    {
+      "clauseRef": "Cl 23.2(c)",
+      "section": "Protective coating",
+      "parameterName": "Primer + paint total thickness, Min",
+      "unit": "microns",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 30,
+      "expected": "Both layers of primer and paint total thickness minimum 30 microns (synthetic enamel IS 2932 or polyurethane IS 13213, signal red)."
+    },
+    {
+      "clauseRef": "Cl 23.2(d)",
+      "section": "Protective coating",
+      "parameterName": "Total combined coating thickness, Min",
+      "unit": "microns",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 67
+    },
+    {
+      "clauseRef": "Cl 23.2(e)",
+      "section": "Protective coating",
+      "parameterName": "Powder coating thickness, Min (alternate system)",
+      "unit": "microns",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 50,
+      "expected": "Alternate to zinc+primer+enamel: powder coating per IS 13871, signal red, minimum 50 microns (per Amendment No. 4)."
+    }
+  ]
+}

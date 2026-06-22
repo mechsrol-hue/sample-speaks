@@ -1,0 +1,235 @@
+IS 1786 : 2008
+Indian Standard
+HIGH STRENGTH DEFORMED STEEL BARS AND WIRES FOR CONCRETE REINFORCEMENT — SPECIFICATION
+(Fourth Revision)
+ICS 77.140.15; 91.080.40
+(Incorporating Amendment No. 1, November 2012)
+
+NOTE ON THIS TRANSCRIPT: Where Amendment No. 1 (Nov 2012) substitutes a clause or table, the amended
+(latest, governing) text/values are recorded below. The original 2008 text is also noted where relevant.
+
+=====================================================================================================
+FOREWORD (extract)
+This Indian Standard (Fourth Revision) was adopted by the Bureau of Indian Standards after the draft
+finalized by the Concrete Reinforcement Sectional Committee had been approved by the Civil Engineering
+Division Council. First published 1961; revised 1966, 1979, 1985, and 2008 (fourth revision).
+Important modifications in this revision:
+ a) A new strength grade Fe 600 has been introduced.
+ b) Two categories based on elongation for each grade except Fe 600 have been introduced.
+ c) A new parameter 'percentage total elongation at maximum force' has been introduced.
+ d) Nominal sizes have been rationalized and nominal sizes 7 mm, 18 mm, 22 mm, 45 mm and 50 mm have
+    been removed (NOTE: Amendment No. 1 later re-introduced 45 mm and 50 mm — see Cl 6.1 below).
+Test methods correspond to ISO: IS 1608 (ISO 6892) Tensile testing; IS 1599 (ISO 7438/15630-1) Bend
+test; IS 1786 re-bend (ISO 15630-1).
+
+=====================================================================================================
+1 SCOPE
+1.1 (Substituted by Amendment No. 1) This standard covers the requirements of deformed steel bars and
+wires for use as reinforcement in concrete, in the following strength grades:
+ a) Fe 415, Fe 415D, Fe 415S;
+ b) Fe 500, Fe 500D, Fe 500S;
+ c) Fe 550, Fe 550D; and
+ d) Fe 600.
+NOTES
+ 1 The figures following the symbol Fe indicate the specified minimum 0.2 percent proof stress or yield
+   stress, in N/mm2.
+ 2 The letters D and S following the strength grade indicates the categories with same specified minimum
+   0.2 percent proof stress/yield stress but with enhanced and additional requirements.
+
+GRADE ENUMERATION (option list, verbatim): Grades are Fe 415, Fe 415D, Fe 415S, Fe 500, Fe 500D,
+Fe 500S, Fe 550, Fe 550D, Fe 600.
+
+1.2 This standard allows the chemical composition and carbon equivalent to be limited so that the
+material can be readily welded by conventional welding procedures.
+1.3 Applies to hot-rolled steel without subsequent treatment, hot-rolled steel with controlled cooling
+and tempering, and cold-worked steel. Production process at discretion of manufacturer.
+1.4 Applies to bars/wires supplied in coil form but requirements apply to the straightened product.
+1.5 Also applies to reinforcing bars/wires which may be subsequently coated.
+1.6 Deformed bars produced by re-rolling finished products such as plates and rails or material for
+which the metallurgical history is not documented/known are not acceptable.
+
+2 REFERENCES: IS 228 (Parts 1 to 24) chemical analysis of steels; IS 1387:1993; IS 1599:1985 Bend test;
+IS 1608:2005 Tensile testing; IS 2062:2006; IS 2770 (Part 1):1967 Pull-out test; IS 9417:1989 welding;
+IS 11587:1986 weather resistant steels.
+
+3 TERMINOLOGY (extract)
+3.1 Batch; 3.2 Bundle; 3.3 Elongation; 3.4 Longitudinal Rib; 3.5 Nominal Diameter or Size; 3.6 Nominal
+Mass (density 0.007 85 kg/mm2 per metre); 3.7 Nominal Perimeter (3.14 times nominal diameter);
+3.8 0.2 Percent Proof Stress; 3.9 Percentage Total Elongation at Maximum Force; 3.10 Tensile Strength;
+3.11 Transverse Rib; 3.12 Yield Stress.
+
+=====================================================================================================
+4 MANUFACTURE AND CHEMICAL COMPOSITION
+4.1 Steel by open-hearth, electric, duplex, basic-oxygen process or combination.
+4.1.1 Steel supplied semi-killed or killed.
+4.1.3 Manufactured by hot rolling; may be followed by cold working and/or in-line controlled cooling.
+
+4.2 Chemical Composition (Substituted by Amendment No. 1)
+The ladle analysis of steel for various grades, by the method in relevant parts of IS 228 (or any other
+established instrumental/chemical method), shall have maximum permissible percentage of constituents as
+follows. (Constituent — Percent, Maximum)
+
+Table — Chemical Composition (Clause 4.2), Percent Maximum:
+Constituent          | Fe 415 | Fe 415D | Fe 415S | Fe 500 | Fe 500D | Fe 500S | Fe 550 | Fe 550D | Fe 600
+Carbon               | 0.30   | 0.25    | 0.25    | 0.30   | 0.25    | 0.25    | 0.30   | 0.25    | 0.30
+Sulphur              | 0.060  | 0.045   | 0.045   | 0.055  | 0.040   | 0.040   | 0.055  | 0.040   | 0.040
+Phosphorus           | 0.060  | 0.045   | 0.045   | 0.055  | 0.040   | 0.040   | 0.050  | 0.040   | 0.040
+Sulphur and phosphorus| 0.110 | 0.085   | 0.085   | 0.105  | 0.075   | 0.075   | 0.100  | 0.075   | 0.075
+
+NOTES to 4.2:
+ 1 For guaranteed weldability, Carbon Equivalent CE = C + Mn/6 + (Cr+Mo+V)/5 + (Ni+Cu)/15 shall not be
+   more than 0.53 percent when micro-alloy/low alloys are used. When micro-alloys/low alloys are not used,
+   CE = C + Mn/6 shall not be more than 0.42 percent.
+ 2 Addition of micro-alloying elements (Nb, V, B, Ti) individually or in combination shall not exceed
+   0.30 percent total.
+ 3 Low alloy steel: total content of Cr, Cu, Ni, Mo, P not less than 0.40 percent; when phosphorus used,
+   it shall not exceed 0.12 percent (or carbon restricted to max 0.15 percent if used beyond 4.2 limit).
+ 4 Nitrogen content of the steel should not exceed 0.012 percent (120 ppm), ensured by manufacturer by
+   occasional check analysis. Higher nitrogen up to 0.025 percent (250 ppm) may be permissible provided
+   sufficient quantities of nitrogen binding elements (Nb, V, Ti, Al, etc.) are present, per formula
+   (N - 120) < Al_free/10 + (Ti+V)/7 + Nb/14 (elements in ppm).
+
+4.2.1 Product analysis permissible variation over specified maximum limit, Percent Max: Carbon 0.02;
+Sulphur 0.005; Phosphorus 0.005; Sulphur and phosphorus 0.010.
+4.2.2 For welding of deformed bars, recommendations of IS 9417 shall be followed.
+4.2.3 In case of deviations from specified maximum, two additional test samples taken from same batch.
+
+=====================================================================================================
+5 REQUIREMENTS FOR BOND
+5.1 High strength deformed bars/wires shall satisfy requirements in either 5.2 or 5.7 for routine
+testing. Pull-out test per 5.7 shall be done in addition to 5.2 for approval of new/amended geometry.
+5.2 Deformations and Surface Characteristics. For high strength deformed bars/wires, the mean area of
+ribs (mm2) per unit length (mm) above the core, projected on a plane normal to the axis, calculated per
+5.4 shall not be less than the following values:
+ a) 0.12 phi for phi <= 10 mm,
+ b) 0.15 phi for 10 mm < phi <= 16 mm, and
+ c) 0.17 phi for phi > 16 mm,
+ where phi is the nominal diameter of bar/wire, in mm.
+The mean projected area of transverse ribs alone shall be not less than one-third of the values above.
+5.3, 5.4, 5.5, 5.6: rib geometry definitions and measurement.
+5.7 When subjected to pull-out testing in accordance with IS 2770 (Part 1), the bond strength calculated
+from the load at a measured slip of 0.025 mm and 0.25 mm for deformed bars/wires shall exceed that of a
+plain round bar of the same nominal size by 40 percent and 80 percent respectively.
+
+=====================================================================================================
+6 NOMINAL SIZES
+6.1 (Substituted by Amendment No. 1) The nominal sizes of bars/wires shall be as follows.
+Nominal size: 4, 5, 6, 8, 10, 12, 16, 20, 25, 28, 32, 36, 40, 45, 50 mm
+NOTE — Other sizes may be supplied by mutual agreement.
+(Original 2008 Cl 6.1 list: 4, 5, 6, 8, 10, 12, 16, 20, 25, 28, 32, 36, 40 mm; Amendment added 45, 50.)
+
+6.2 The values for the nominal cross-sectional area and nominal mass of individual bars/wires shall be
+as given in Table 1 subject to the tolerance on nominal mass given in Table 2.
+
+Table 1 Nominal Cross-Sectional Area and Mass (Clause 6.2)
+[rows i to xiii from original + rows xiv, xv inserted by Amendment No. 1]
+Sl No. | Nominal Size mm | Cross-Sectional Area mm2 | Mass per Metre kg
+ i)    | 4   | 12.6    | 0.099
+ ii)   | 5   | 19.6    | 0.154
+ iii)  | 6   | 28.3    | 0.222
+ iv)   | 8   | 50.3    | 0.395
+ v)    | 10  | 78.6    | 0.617
+ vi)   | 12  | 113.1   | 0.888
+ vii)  | 16  | 201.2   | 1.58
+ viii) | 20  | 314.3   | 2.47
+ ix)   | 25  | 491.1   | 3.85
+ x)    | 28  | 615.8   | 4.83
+ xi)   | 32  | 804.6   | 6.31
+ xii)  | 36  | 1018.3  | 7.99
+ xiii) | 40  | 1257.2  | 9.86
+ xiv)  | 45  | 1591.1  | 12.49   (inserted by Amendment No. 1)
+ xv)   | 50  | 1964.4  | 15.42   (inserted by Amendment No. 1)
+
+6.3 Effective Cross-Sectional Area and Mass of Deformed Bars and Wires.
+6.3.1 Gross cross-sectional area = w / (0.007 85 L); w mass kg, L length m.
+
+=====================================================================================================
+7 TOLERANCES ON DIMENSIONS AND NOMINAL MASS
+7.1 Specified Lengths. If bars/wires specified to be cut to certain lengths, each shall be cut within
+deviations of +75/-25 mm on the specified length; for minimum lengths +50/-0 mm.
+7.2 Nominal Mass.
+7.2.1 Density of steel taken as 0.007 85 kg/mm2 of cross-sectional area per metre.
+7.2.2 Tolerances on nominal mass as in Table 2.
+
+Table 2 Tolerances on Nominal Mass (Clauses 6.2 and 7.2.2)
+Sl No. | Nominal Size mm                 | Batch (%) | Individual Sample (%) | Individual Sample for Coils Only (%)
+ i)    | Up to and including 10          | +/-7      | -8                    | +/-8
+ ii)   | Over 10 up to and including 16  | +/-5      | -6                    | +/-6
+ iii)  | Over 16                         | +/-3      | -4                    | +/-4
+(Footnote: For individual sample, plus tolerance is not specified. For coils, batch tolerance not specified.)
+
+=====================================================================================================
+8 PHYSICAL PROPERTIES
+8.1 Mechanical properties for all sizes of deformed bars/wires determined on effective cross-sectional
+area (see 5.3) and in accordance with 9.2 shall be as specified in Table 3.
+8.2 The bars/wires shall withstand the bend test specified in 9.3 and the rebend test specified in 9.4.
+8.3 Bond. Bars/wires satisfying requirements in 5 deemed to satisfy bond requirements.
+
+Table 3 Mechanical Properties of High Strength Deformed Bars and Wires (Clause 8.1)
+[Substituted by Amendment No. 1 — includes Fe 415S and Fe 500S columns and TS/YS ratio form]
+Sl No. | Property | Fe 415 | Fe 415D | Fe 415S | Fe 500 | Fe 500D | Fe 500S | Fe 550 | Fe 550D | Fe 600
+ i) 0.2 percent proof stress/yield stress, Min, N/mm2:
+        | 415.0 | 415.0 | 415.0 | 500.0 | 500.0 | 500.0 | 550.0 | 550.0 | 600.0
+ ii) 0.2 percent proof stress/yield stress, Max, N/mm2:
+        | —     | —     | 540.0 | —     | —     | 625.0 | —     | —     | —
+ iii) TS/YS ratio, N/mm2 (TS/YS ratio = ratio of tensile strength to 0.2 percent proof stress/yield stress):
+        Fe 415 : >= 1.10, but TS not less than 485.0 N/mm2
+        Fe 415D: >= 1.12, but TS not less than 500.0 N/mm2
+        Fe 415S: 1.25
+        Fe 500 : >= 1.08, but TS not less than 545.0 N/mm2
+        Fe 500D: >= 1.10, but TS not less than 565.0 N/mm2
+        Fe 500S: 1.25
+        Fe 550 : >= 1.06, but TS not less than 585.0 N/mm2
+        Fe 550D: >= 1.08, but TS not less than 600.0 N/mm2
+        Fe 600 : >= 1.06, but TS not less than 660.0 N/mm2
+ iv) Elongation, percent, Min, on gauge length 5.65 sqrt(A):
+        | 14.5 | 18.0 | 20.0 | 12.0 | 16.0 | 18.0 | 10.0 | 14.5 | 10.0
+ v) Total elongation at maximum force, percent, Min, on gauge length 5.65 sqrt(A) (test wherever
+    specified by the purchaser):
+        | —    | 5    | 10   | —    | 5    | 8    | —    | 5    | —
+
+=====================================================================================================
+9 TESTS
+9.1 Selection and Preparation of Test Sample (IS 2062 applies). 9.1.1 test pieces selected by purchaser.
+9.2 Tensile Test. Tensile strength, percentage elongation, percentage total elongation, and 0.2 percent
+proof stress per IS 1608 with IS 2062. 9.2.1 proof stress at total strain 0.4% (Fe 415/415D), 0.45%
+(Fe 500/500D/500S), 0.47% (Fe 550/550D/Fe 600). 9.2.2 stresses calculated using effective cross-section.
+
+9.3 Bend Test. Performed per IS 1599; the maximum mandrel diameter for different grades as specified in
+Table 4. The test piece bent cold doubled over the mandrel until the sides are parallel. Passed if no
+rupture or cracks visible to a person of normal or corrected vision on the bent portion.
+
+Table 4 Maximum Mandrel Diameter for Bend Test (Clause 9.3)
+[Substituted by Amendment No. 1; phi = nominal size of test piece, in mm]
+Sl No. | Nominal Size mm        | Fe 415 | Fe 415D | Fe 415S | Fe 500 | Fe 500D | Fe 500S | Fe 550 | Fe 550D | Fe 600
+ i)    | Up to and including 20 | 3 phi  | 2 phi   | 2 phi   | 4 phi  | 3 phi   | 3 phi   | 5 phi  | 4 phi   | 5 phi
+ ii)   | Over 20                | 4 phi  | 3 phi   | 3 phi   | 5 phi  | 4 phi   | 4 phi   | 6 phi  | 5 phi   | 6 phi
+
+9.4 Rebend Test. Test piece bent to included angle of 135 deg using a mandrel of appropriate diameter
+(see 9.4.1), aged in boiling water (100 C) for 30 min and allowed to cool, then bent back to included
+angle of 157.5 deg. Passed if no rupture or cracks visible on the rebent portion.
+
+9.4.1 (Substituted by Amendment No. 1) The maximum diameter of the mandrel for rebend shall be as below
+[phi = nominal size of test piece, in mm]:
+Sl No. | Nominal Size of Specimen | Fe 415 and Fe 500 | Fe 415D, Fe 415S, Fe 500D and Fe 500S | Fe 550 and Fe 600 | Fe 550D
+ i)    | Up to and including 10 mm | 5 phi             | 4 phi                                  | 7 phi             | 6 phi
+ ii)   | Over 10 mm                | 7 phi             | 6 phi                                  | 8 phi             | 7 phi
+
+9.5 Retest. Should any test piece fail, two further samples selected; if both pass, material deemed to
+comply; if either fails, material does not comply.
+
+10 ROUTINE INSPECTION AND TESTING. All material subjected to routine inspection and testing.
+11 SELECTION OF TEST SPECIMENS. 11.1 For checking nominal mass, mechanical properties, bend test and
+rebend test, test specimen cut from each size at frequency: For all sizes 2 per cast (casts/heats below
+100 tonnes), 3 per cast (casts/heats of 100 tonnes or more). [SAMPLING TABLE — excluded from template.]
+11.2 Bond Test frequency as agreed between manufacturer and purchaser/testing authority.
+12 DELIVERY, INSPECTION AND TESTING FACILITIES. 13 IDENTIFICATION AND MARKING. 13.4 BIS Certification Mark.
+
+ANNEX A (Foreword) Information on controlled cooling process (TMT).
+ANNEX B (Foreword) Committee composition CED 54.
+=====================================================================================================
+SUMMARY OF PARAMETERIZATION DIMENSIONS:
+ - size (nominal diameter, mm): affects mass per metre (Table 1 + Table 2 tolerance), nominal cross-
+   sectional area, mean rib area (Cl 5.2), and the mandrel-size category for bend/rebend tests.
+ - grade (Fe 415 .. Fe 600): affects chemical composition (Cl 4.2), all mechanical properties (Cl 8.1
+   Table 3), bend-test mandrel (Cl 9.3 Table 4) and rebend-test mandrel (Cl 9.4.1).

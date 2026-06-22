@@ -144,6 +144,7 @@ async function runReportAgent(pdfPath, opts = {}) {
   const log = [];
   let finalText = '';
   let costUsd = null, numTurns = null, usage = null;
+  const startedAtMs = Date.now();   // used to find the template the agent wrote during THIS run
 
   try {
     for await (const message of query({
@@ -177,10 +178,29 @@ async function runReportAgent(pdfPath, opts = {}) {
     return { ok: false, error: `Agent run failed: ${e.message}`, log, costUsd, numTurns, usage };
   }
 
-  // Tolerant of spacing variants across PDFs: "IS 1786:2008", "IS 1786 : 2008", "IS 1786-2008".
-  const isNumber = opts.isHint || (finalText.match(/IS\s*\d{1,6}\s*[:\-]?\s*\d{4}/i) || [])[0] || '';
-  const slug = slugify(isNumber);
-  const templatePath = slug ? `public/is_templates/${slug}.json` : null;
+  // Tolerant of spacing variants AND "(Part N)" forms: "IS 1786:2008", "IS 1786 : 2008",
+  // "IS 1786-2008", "IS 3196 (Part 1) : 2013". The (Part N) group is what previously broke vault
+  // registration (the old pattern returned null → empty templatePath → upsert silently skipped).
+  let isNumber = opts.isHint || (finalText.match(/IS\s*\d{1,6}\s*(?:\(\s*Part[^)]*\))?\s*[:\-]?\s*\d{4}/i) || [])[0] || '';
+  let slug = slugify(isNumber);
+  let templatePath = slug ? `public/is_templates/${slug}.json` : null;
+  // Bulletproof fallback: if the IS number couldn't be parsed, or the derived file doesn't exist,
+  // use whichever template the agent ACTUALLY wrote during this run (newest in the dir). This
+  // guarantees the caller can always register the result, regardless of the number format.
+  try {
+    const dir = path.join(REPO, 'public/is_templates');
+    if (!templatePath || !fs.existsSync(path.join(REPO, templatePath))) {
+      const newest = fs.readdirSync(dir)
+        .filter(f => f.endsWith('.json'))
+        .map(f => ({ f, m: fs.statSync(path.join(dir, f)).mtimeMs }))
+        .filter(x => x.m >= startedAtMs)
+        .sort((a, b) => b.m - a.m)[0];
+      if (newest) {
+        templatePath = `public/is_templates/${newest.f}`;
+        try { const tpl = JSON.parse(fs.readFileSync(path.join(dir, newest.f), 'utf8')); if (tpl.isNumber) isNumber = tpl.isNumber; } catch (_) {}
+      }
+    }
+  } catch (_) {}
   return { ok: true, isNumber, templatePath, summary: finalText.trim().slice(0, 300), log, costUsd, numTurns, usage };
 }
 

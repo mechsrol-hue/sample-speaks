@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "samplespeaks",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["server.js"],
+      "port": 3030,
+      "autoPort": false,
+      "env": { "PORT": "3030" }
+    }
+  ]
+}

@@ -1,0 +1,215 @@
+IS 303 : 2024
+Indian Standard
+PLYWOOD FOR GENERAL PURPOSES — SPECIFICATION
+( Fourth Revision )
+ICS 79.060.10
+© BIS 2024 — May 2024 — Price Group 7
+Wood and Other Lignocellulosic Products Sectional Committee, CED 20
+
+FOREWORD
+This Indian Standard (Fourth Revision) was adopted by the Bureau of Indian Standards, after the draft
+finalized by the Wood and Other Lignocellulosic Products Sectional Committee had been approved by the
+Civil Engineering Division Council.
+The standard requirements for general purpose plywood was first published in 1951, revised in 1960, 1975
+and 1989. In this revision the following major modifications were incorporated:
+a) Material clause for timber has been modified;
+b) BWP (boiling water proof) grade has been added;
+c) The clause on extender has been modified;
+d) Dimension related clause has been modified;
+e) Mycological test is now applicable for all grades;
+f) Modulus of rupture (MOR) and modulus of elasticity (MOE) requirements have been modified;
+g) Requirements for formaldehyde content for oven dry board and the steady-state formaldehyde
+   emission (optional) have been added;
+h) Marking clause has been modified; and
+j) All amendments to the previous version have been incorporated.
+For the purpose of deciding whether a particular requirement of this standard is complied with the final
+value, observed or calculated, expressing the result of a test or analysis shall be rounded off in accordance
+with IS 2 : 2022.
+
+1 SCOPE
+This standard covers the requirements of plywood used for general purposes.
+
+2 REFERENCES
+The standards listed in Annex A contain provisions which through reference in the text constitute provision
+of this standard.
+
+3 TERMINOLOGY
+For purpose of this standard, the definitions given in IS 707 shall apply.
+
+4 GRADES AND CLASS
+4.1 Plywood for general purposes shall be of the following three grades, depending upon the bond strength
+developed by the adhesive used for bonding the veneers:
+a) MR (moisture resistant) grade;
+b) BWR (boiling water resistant) grade; and
+c) BWP (boiling water proof) grade.
+4.2 In terms of formaldehyde class, each grade of plywood shall be further classified in two classes as
+follows:
+a) Formaldehyde Class, E1
+b) Formaldehyde Class, E2
+4.3 These shall be manufactured in accordance with 7.1 and 7.2. The grades shall conform to the general
+and workmanship requirements given in 8 and 9 respectively, and the test requirements laid down in 11.
+
+5 TYPES BASED ON CLASSIFICATION BY APPEARANCE
+5.1 Plywood for general purposes shall be classified into three types, namely, AA, AB and BB based on
+the quality of the two surfaces, namely, A and B in terms of general permissible defects. The type of plywood
+shall be designated by the kind of surfaces of the panels. The better quality surface shall be called 'face
+(top)', and the opposite side shall be called 'back (bottom)'. If the face (top) and the back (bottom) are of
+the same quality, they are not distinguished. The type of plywood shall denote first the quality of face (top)
+followed by the quality of back (bottom). For example, Type AA shall have both surfaces of quality A,
+Type AB shall have face (top) of quality A and the back (bottom) of quality B and Type BB shall have both
+the surfaces of quality B.
+5.2 The quality requirement of each of the surfaces mentioned under 5.1 shall conform to the requirements
+given in Table 1. However, the maximum number of categories of defects permitted on any one surface of
+the panel shall be restricted in accordance with the requirements laid down in Table 2.
+
+Table 1 Quality Requirements of Surfaces of Plywood for General Purposes (Clause 5.2)
+Sl No. | Defect Categories | A Type | B Type
+i) Blister | A: Nil | B: Nil
+ii) Checks | A: Individual check not more than 50 mm in length and the total length not more than 300 mm per m2 area | B: Individual check not more than 100 mm in length and the total length not more than 1 000 mm per m2 area
+iii) Discolouration | A: Nil | B: 5 percent
+iv) Dote | A: 5 cm per m2 | B: 15 cm per m2
+v) Insect hole | A: Scattered up to 12 holes per m2 | B: Scattered up to 24 holes per m2
+vi) Joints | A: One joint for every multiple of 200 mm, provided no individual piece is less than 100 mm in width | B: No restriction
+vii) Knots (dead) | A: 2 up to 12 mm dia per m2 | B: 4 up to 20 mm dia per m2
+viii) Pin knots (dead) | A: 2 per m2 | B: 6 per m2
+ix) Pin knots (live) | A: No restriction | B: No restriction
+x) Knots (tight) | A: 6 up to 25 mm dia per m2 | B: No restriction
+xi) Patches | A: 4 patches per m2, provided they are all tight patches and do not mar the appearance | B: Any number, provided they are all tight patches and do not mar the appearance
+xii) Splits | A: 2 splits, each not more than 1 mm wide and length not more than 100 mm, provided they are filled with suitable filler | B: 3 splits, each not more than 4 mm wide and length not more than 150 mm, provided they are filled with suitable veneer inserts. Splits up to 25 mm long and 0.8 mm wide may be ignored, provided they are suitably filled with a filler
+xiii) Swirl | A: Unlimited, provided they do not mar the appearance | B: No restriction
+
+Table 2 Permissible Categories of Defects (Clause 5.2)
+Sl No. | Type of Surface | Maximum Number of Categories of Permissible Defects, per m2
+i) A type | 3
+ii) B type | 5
+
+6 MATERIALS
+6.1 Timber — Any species of timber may be used. A list of timber species is given in Annex B for guidance.
+6.2 Adhesive — Any suitable type of synthetic resin adhesive may be used. For type of synthetic resin
+adhesive to use refer IS 848.
+6.2.1 Extenders may be used with synthetic resin adhesive (aminoresins). However, when extender used by
+more than 12 percent, shall contain suitable preservative chemicals to satisfy the mycological test described
+in 11.3.2.
+
+7 MANUFACTURE
+7.1 The veneers for all the grades shall be either rotary cut or sliced.
+7.1.1 Treatment.
+7.2 Assembly.
+7.2.1 Thickness — The thickness of all veneers shall be uniform within a tolerance of ± 5 percent.
+7.2.5 Permissible Defects.
+
+8 DIMENSIONS AND TOLERANCES
+8.1 Any dimensions (length and width) and number of ply as agreed to between the manufacturer and the
+purchaser may be used and shall be declared by the manufacturer. Prevailing dimensions (length × width)
+of plywood boards are as given below:
+a) 2 440 mm × 1 220 mm;
+b) 2 135 mm × 1 220 mm;
+c) 2 135 mm × 915 mm;
+d) 1 830 mm × 1 220 mm; and
+e) 1 830 mm × 915 mm
+8.2 Thickness — The thickness of the plywood boards shall be 3 mm, 4 mm, 5 mm, 6 mm, 9 mm, 12 mm,
+15 mm, 19 mm, 22 mm and 25 mm.
+NOTE — Any other thickness as agreed to between the manufacturer and the purchaser may also be used.
+8.3 Squareness and Edge Straightness — Edge straightness and squareness shall be tested as per Annex C.
+8.4 Tolerances — The tolerances on the dimensions of finished plywood boards shall be as given in Table 3.
+
+Table 3 Tolerances on Dimensions of Plywood for General Purposes (Clause 8.4)
+Sl No. | Dimension | Tolerance
+i) Length | + 6 mm / − 3 mm
+ii) Width | + 3 mm / − 1 mm
+iii) Thickness
+   a) less than 6 mm | ± 10 percent
+   b) 6 mm and above | ± 5 percent
+iv) Squareness, Max | 2 mm/1 000 mm or 0.2 percent
+v) Edge straightness, Max | 2 mm/1 000 mm or 0.2 percent
+
+9 WORKMANSHIP AND FINISH
+9.1 The plywood shall be of uniform thickness within the tolerance limits specified under 8.3.
+9.2 The faces of finished plywood shall be reasonably smooth. Slight sanding may be given to rough
+plywood boards in order to make them reasonably smooth.
+
+10 SAMPLING AND CRITERIA FOR CONFORMITY
+The method of drawing representative samples and the criteria for conformity shall be as prescribed in
+IS 7638.
+
+11 PHYSICAL AND MECHANICAL REQUIREMENTS
+11.1 The plywood shall conform to the requirements given in 11.3 to 11.6.
+11.2 Unless otherwise specified, six test specimens, cut from each of the plywood selected as in 10, shall
+be subjected to tests specified in 11.3 to 11.5. For formaldehyde content and steady-state formaldehyde
+emission test, specimens shall be taken as per IS 13745 and IS/ISO 12460 (Part 1) respectively.
+
+11.3 Glue Adhesion
+Glue adhesion shall be deemed satisfactory if the plywood complies with the requirements specified in
+11.3.1 and 11.3.2.
+11.3.1 Water Resistance Test — Plywood for general purposes of either grade (see 4.1), when tested in the
+manner specified below shall satisfy the minimum pass standard for test for adhesion of plies as given in
+IS 1734 (Part 5).
+11.3.1.1 Three test specimens of size 250 mm × 100 mm with full thickness of plywood shall be prepared
+from each of the boards selected under 10 and shall be tested for respective grade as described below:
+a) For MR Grade — Specimens shall be submerged in water at a temperature of 60 °C ± 2 °C for 3 h
+   and dried for 8 h at a temperature of 65 °C ± 2 °C. Such cycle of submergence and drying shall be
+   followed by two more cycles. The specimens shall then be tested in accordance with IS 1734 (Part 5).
+b) For BWR Grade — Specimens shall be submerged in boiling water for 8 h and then dried for 16 h at
+   a temperature of 65 °C ± 2 °C. Such cycle of submergence and drying shall be followed by two more
+   cycles. The specimens shall then be tested in accordance with IS 1734 (Part 5).
+c) For BWP Grade — The specimens shall be kept submerged in a pan of boiling water for a period of
+   72 h. The specimens shall then be removed, cooled to room temperature and tested in accordance
+   with IS 1734 (Part 5).
+11.3.2 Mycological Test — Plywood when tested in accordance with the method given in IS 1734 (Part 7)
+shall satisfy minimum pass standard for test for adhesion of plies as given in IS 1734 (Part 5).
+
+11.4 Moisture Content
+The plywood when tested in accordance with IS 1734 (Part 1) shall have a moisture content not less than
+5 percent and not more than 15 percent.
+
+11.5 Static Bending Strength
+Three test specimens taken in each direction from the sample of plywood, when tested in accordance with
+IS 1734 (Part 11) shall have an average and a minimum individual modulus of elasticity and modulus of
+rupture not less than the values specified in Table 4 against each grade. This test is applicable only for
+plywood of thickness 6 mm and above.
+
+Table 4 Average and Minimum Individual Values of Modulus of Elasticity (MOE) and Modulus of
+Rupture (MOR) (Clause 11.5)
+Sl No. | Grade | MOE (N/mm2) Average | MOE (N/mm2) Min | MOR (N/mm2) Average | MOR (N/mm2) Min
+i) MR Grade:
+   a) Along [direction parallel to the grain direction of the face (top) veneer] | 3 400 | 3 100 | 26 | 23
+   b) Across [direction perpendicular to the grain direction of the face (top) veneer] | 2 300 | 2 100 | 17 | 15
+ii) BWR Grade and BWP Grade:
+   a) Along [direction parallel to the grain direction of the face (top) veneer] | 4 300 | 3 800 | 34 | 31
+   b) Across [direction perpendicular to the grain direction of the face (top) veneer] | 2 900 | 2 500 | 23 | 21
+
+11.6 Formaldehyde Content Test
+Test of free formaldehyde content in the sample shall be done by perforator method as per IS 13745 and
+test results of drawn sample shall meet the requirements of formaldehyde content as follows:
+a) Formaldehyde Class, E1 : ≤ 8 mg/100 g of oven dry sample; and
+b) Formaldehyde Class, E2 : > 8 mg/100 g of oven dry sample and ≤ 30 mg/100 g of oven dry sample.
+
+11.7 Steady-State Formaldehyde Emission Test (Optional Test)
+Test shall be done by the test method as given in IS/ISO 12460 (Part 1). The test results of drawn sample
+shall meet the requirements of formaldehyde emission value as follows:
+a) Formaldehyde Class, E1 : ≤ 0.124 mg/m3; and
+c) Formaldehyde Class, E2 : > 0.124 mg/m3.
+
+11.8 Other Tests — For testing any other mechanical property, reference shall be made to IS 1734 (Part 1
+to Part 20).
+11.9 Retest.
+
+12 ADDITIONAL REQUIREMENTS FOR ECO-MARK
+
+13 MARKING
+13.1 Each plywood shall be legibly and indelibly marked with: manufacturer's name; 'PLYWOOD FOR
+GENERAL PURPOSE'; grade and type (BWP/AA, BWP/AB, BWP/BB; BWR/AA, BWR/AB, BWR/BB;
+MR/AA, MR/AB, MR/BB); Formaldehyde Class; Nominal length, width and thickness of plywood; Month
+and year of manufacture; Batch No.; ECO-Mark criteria if applicable.
+13.3 BIS Certification Marking.
+
+14 DELIVERY
+
+ANNEX A — LIST OF REFERRED STANDARDS
+IS 707, IS 848, IS 1150, IS 1734 (Parts 1 to 20), IS 5539, IS 7638, IS/ISO 12460-1, IS 13745.
+IS 1734 (Part 1): density and moisture content; (Part 5): adhesion of plies; (Part 7): mycological test;
+(Part 11): static bending strength.
+
+ANNEX B — LIST OF PREVALENT TREE OUTSIDE FOREST (TOF) SPECIES FOR PLYWOOD
+ANNEX C — METHOD OF TEST FOR SQUARENESS AND EDGE STRAIGHTNESS
+ANNEX D — COMMITTEE COMPOSITION

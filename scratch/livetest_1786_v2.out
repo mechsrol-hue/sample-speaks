@@ -1,0 +1,36 @@
+◇ injected env (10) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+
+======================================================================
+▶  AGENT LIVE TEST — IS 1786:2008
+   PDF: /Users/saurabh/Downloads/IS 1786 _ 2008.pdf
+======================================================================
+I'll start by reading the entire PDF.
+The PDF includes Amendment No. 1 (2012) followed by the main standard. Let me read the rest.
+I have the complete document (main standard + Amendment No. 1). Now let me locate the project directory with the scripts.
+I now understand the completeness checker. It requires: (A) size options cover all enumerated DN≥10, (B) every varying param resolves a value for every combo. Let me create dirs and write the transcript.
+Working directory is the project root. Let me write the transcript with absolute paths.
+Pre-existing files from a prior run exist. Let me read them before overwriting.
+Now I'll overwrite the transcript with my complete version.
+Now the JSON template.
+Completeness check passes.
+
+IS 1786:2008: 18 parameters, 15 size options, completeness=ok
+Completeness check passes.
+
+IS 1786:2008: 18 parameters, 15 size options, completeness=ok
+
+✓ 1786: agent finished in 513s
+   isNumber:  IS 1786:2008
+   template:  public/is_templates/IS_1786_2008.json
+   cost:      $1.81   (turns: 18)   running total: $1.81
+   summary:   Completeness check passes.
+
+IS 1786:2008: 18 parameters, 15 size options, completeness=ok
+   completeness (independent re-check): PASS ✅
+     DN expected: 11 | grid: 0 | missing: []
+
+======================================================================
+SUMMARY   (total spend: $1.81 of $5 trial)
+  ✓ 1786    $1.81  513s  IS 1786:2008  completeness=PASS
+======================================================================
+

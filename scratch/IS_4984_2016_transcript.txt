@@ -1,0 +1,266 @@
+IS 4984 : 2016
+Indian Standard
+POLYETHYLENE PIPES FOR WATER SUPPLY — SPECIFICATION
+( Fifth Revision )
+ICS 23.040.20; 91.140.60; 93.025
+Plastic Piping Systems Sectional Committee, CED 50
+
+==================================================================
+1 SCOPE
+1.1 This standard lays down the requirements for polyethylene (PE) pipes (mains and service pipes)
+intended for the conveyance of water for human consumption including raw water prior to treatment and
+also water for general purpose.
+1.2 This standard is applicable for the water supplies with a maximum operating pressure of 2.0 MPa.
+1.3 An operating temperature of 27°C has been taken as the reference temperature.
+1.4 The reference temperature of 20°C for 50 years of continuous stress is considered for the minimum
+required strength (MRS) of polyethylene base resin. To enable an operating water temperature of 27°C,
+the design stress has been accordingly corrected (see Table 1 and corresponding Notes).
+1.5 This standard does not purport to give guidelines for designing and dimensioning of pipe lines.
+
+2 REFERENCES
+IS 2362:1993 Determination of water by Karl Fischer method — Test method (second revision)
+IS 2530:1963 Methods of test for polyethylene moulding materials and polyethylene compounds
+IS 4905:1968 Methods of random sampling
+IS 7328:1992 High Density polyethylene materials for moulding and extrusion — Specification (first revision)
+IS 9845:1998 Method of analysis for determination of specific and/or overall migration of constituents
+IS 10141:1982 Positive list of constituents of polyethylene in contact with foodstuffs, pharmaceuticals and drinking water
+IS 10146:1982 Polyethylene for its safe use in contact with foodstuff, pharmaceuticals and drinking water
+
+3 TERMINOLOGY
+3.1 Nominal Size (DN). 3.2 Nominal Size (DN/OD). 3.3 Nominal Outside Diameter (dn).
+3.4 Outside Diameter at any Point (de). 3.5 Mean Outside Diameter (dem). 3.6 Minimum Mean Outside Diameter (dem,Min).
+3.7 Maximum Mean Outside Diameter (dem,Max). 3.8 Out-of-roundness (Ovality). 3.9 Nominal Wall Thickness (en).
+3.10 Standard Dimension Ratio (SDR) — ratio of nominal outside diameter dn to nominal wall thickness en. SDR = dn/en.
+3.11 Wall Thickness at any Point (e). 3.11.1 Minimum Wall Thickness at any Point (eMin). 3.11.2 Maximum Wall Thickness at any Point (eMax).
+3.12 Mean Wall Thickness (em). 3.13 Tolerance. 3.14 Minimum Required Strength (MRS).
+3.15 Overall Service (Design) Coefficient (C) — minimum value of C for potable water supply pipes is 1.25.
+3.16 Design Stress (s). 3.17 Nominal Pressure (PN). 3.18 Maximum Allowable Operating Pressure (MAOP):
+P(MPa) = [2σ/((SDR)-1)] x fT = [2 MRS / (C ((SDR)-1))] x fT. 3.19 Pressure Reduction Co-efficient (fT).
+3.20 Melt Flow Rate (MFR). 3.21 Virgin Material.
+
+4 GRADE OF RESIN
+Pipes shall be classified according to the grade of the raw material (resin) as given in Table 1.
+
+5 MATERIAL
+5.1 General. 5.2 Polyethylene Resin — PE resin shall conform to parameters in Table 2; in addition resin shall conform to 5.6.2 of IS 7328.
+5.3 Carbon Black Master Batch — loading of carbon black <= 50 percent (m/m); ash content < 0.1 percent;
+density 1.5 to 2.0 g/ml; toluene extract not more than 0.1 percent (m/m); maximum volatile matter 0.9 percent (m/m);
+carbon black particle size less than 0.025 micron.
+5.4 Anti Oxidant — not more than 0.3 percent by mass of finished resin. 5.5 Rework Material.
+
+Table 1 Classification of Materials (Clause 4)
+Sl No. | Material Classification (Grade) | MRS of PE Resin at 20°C for 50 Year Life (MPa) | Design Stress at 20°C (MPa)
+i)   PE 63  | 6.3  | 5
+ii)  PE 80  | 8.0  | 6.3
+iii) PE 100 | 10.0 | 8
+NOTES: Wall thicknesses are calculated based on maximum allowable operating pressure at 27°C rounded up to
+nearest SDR series (PN values). Tolerances calculated from (0.1 eMin + 0.1) mm rounded up to the next 0.1 mm.
+Considering operational problems, maximum wall thickness of pipes are considered around 130 mm.
+
+Table 2 Characteristics of PE Resin as Granules (Clauses 5.2 and 6.1.1)
+Sl No. | Characteristics | Units | Requirements | Test Method
+i)   Base density                              | kg/m3   | 930-960                     | IS 7328
+ii)  Melt flow rate                            | g/10min | 0.2 to 1.1 (both inclusive) | IS 2530
+iii) Thermal stability (oxidation induction time) | min  | >= 20                       | Annex B
+iv)  Volatile matter                           | mg/kg   | <= 350                      | Annex C
+v)   Water content                             | mg/kg   | <= 300                      | Annex D
+
+6 PIPE DESCRIPTION
+6.1 Pipes shall be designated according to grade (6.1.1), SDR (6.1.2), nominal outside diameter (6.1.3) and PN (6.1.4).
+6.1.1 The grade of material shall be as given in Table 1.
+6.1.2 The standard dimension ratio of pipes covered in this standard are:
+SDR 41, SDR 33, SDR 26, SDR 21, SDR 17, SDR 13.6, SDR 11, SDR 9, SDR 7.4 and SDR 6.
+6.1.3 The nominal outside diameter of pipes covered in this standard are:
+16, 20, 25, 32, 40, 50, 63, 75, 90, 110, 125, 140, 160, 180, 200, 225, 250, 280, 315, 355, 400, 450,
+500, 560, 630, 710, 800, 900, 1000, 1200, 1400, 1600, 1800, 2000 mm.
+6.1.4 The pipes shall be classified by pressure rating (PN) corresponding to the maximum allowable
+operating pressure at 27°C, as follows:
+PN 2 = 0.20 MPa; PN 2.5 = 0.25 MPa; PN 3 = 0.30 MPa; PN 3.2 = 0.32 MPa; PN 4 = 0.40 MPa;
+PN 5 = 0.50 MPa; PN 6 = 0.60 MPa; PN 8 = 0.80 MPa; PN 10 = 1.00 MPa; PN 12.5 = 1.25 MPa;
+PN 16 = 1.60 MPa; PN 20 = 2.00 MPa.
+6.2 Colour — black with blue identification stripes.
+6.2.1 Identification Stripes — minimum three longitudinal stripes of minimum width 3 mm in blue colour.
+
+7 GEOMETRIC CHARACTERISTICS OF PIPE
+7.1 Visual Appearance — internal and external surface smooth, clean and free from grooving and other
+defects. Ends cleanly cut square with axis within tolerances (Maximum Out of Square of Pipe End):
+Nominal diameter DN (mm) | Maximum Out of Square of Pipe End (mm)
+16 to 75    | 2
+90 to 125   | 3
+140 to 180  | 4
+200 to 280  | 5
+Above 280   | 7
+7.2 Length — straight pipe length 5 m to 20 m; short lengths of 3 m (minimum) up to 10 percent of total supply permitted.
+7.3 Coiling — minimum internal diameter of coil shall not be less than 18 dn.
+7.4 Dimensions — mean outside diameters dem and out-of-roundness (ovality) as per Table 3. Minimum and
+maximum wall thickness as per Table 4.
+
+Table 3 Mean Outside Diameters and Out-of-Roundness (Clause 7.4)  (All dimensions in millimetres)
+Sl No. | Nominal Size DN/OD | Nominal OD dn | Mean OD dem,Min | Mean OD dem,Max | Maximum Out-of-Roundness (Ovality)
+i)     16   | 16   | 16.0   | 16.3   | 1.2
+ii)    20   | 20   | 20.0   | 20.3   | 1.2
+iii)   25   | 25   | 25.0   | 25.3   | 1.2
+iv)    32   | 32   | 32.0   | 32.3   | 1.3
+v)     40   | 40   | 40.0   | 40.4   | 1.4
+vi)    50   | 50   | 50.0   | 50.4   | 1.4
+vii)   63   | 63   | 63.0   | 63.4   | 1.5
+viii)  75   | 75   | 75.0   | 75.5   | 1.6
+ix)    90   | 90   | 90.0   | 90.6   | 1.8
+x)     110  | 110  | 110.0  | 110.7  | 2.2
+xi)    125  | 125  | 125.0  | 125.8  | 2.5
+xii)   140  | 140  | 140.0  | 140.9  | 2.8
+xiii)  160  | 160  | 160.0  | 161.0  | 3.2
+xiv)   180  | 180  | 180.0  | 181.1  | 3.6
+xv)    200  | 200  | 200.0  | 201.2  | 4.0
+xvi)   225  | 225  | 225.0  | 226.4  | 4.5
+xvii)  250  | 250  | 250.0  | 251.5  | 5.0
+xviii) 280  | 280  | 280.0  | 281.7  | 9.8
+xix)   315  | 315  | 315.0  | 316.9  | 11.1
+xx)    355  | 355  | 355.0  | 357.2  | 12.5
+xxi)   400  | 400  | 400.0  | 402.4  | 14.0
+xxii)  450  | 450  | 450.0  | 452.7  | 15.6
+xxiii) 500  | 500  | 500.0  | 503.0  | 17.5
+xxiv)  560  | 560  | 560.0  | 563.4  | 19.6
+xxv)   630  | 630  | 630.0  | 633.8  | 22.1
+xxvi)  710  | 710  | 710.0  | 716.4  | —
+xxvii) 800  | 800  | 800.0  | 807.2  | —
+xxviii)900  | 900  | 900.0  | 908.1  | —
+xxix)  1000 | 1000 | 1000.0 | 1009.0 | —
+xxx)   1200 | 1200 | 1200.0 | 1210.8 | —
+xxxi)  1400 | 1400 | 1400.0 | 1412.6 | —
+xxxii) 1600 | 1600 | 1600.0 | 1614.4 | —
+xxxiii)1800 | 1800 | 1800.0 | 1816.2 | —
+xxxiv) 2000 | 2000 | 2000.0 | 2018.0 | —
+NOTE — For coiled pipes and for straight lengths with diameters >= 710 mm, the maximum out-of-roundness
+shall be as agreed between the manufacturer and the purchaser.
+
+Table 4 Standard Dimension Ratio (SDR) and Corresponding Wall Thicknesses (e) of Pipes (Clauses 7.4 and E-4.3)
+Nominal Pressure (PN) Bar per grade (PE 63 / PE 80 / PE 100):
+SDR 41:   PN 2 / PN 2.5 / PN 3
+SDR 33:   PN 2.5 / PN 3.2 / PN 4
+SDR 26:   PN 3.2 / PN 4 / PN 5
+SDR 21:   PN 4 / PN 5 / PN 6
+SDR 17:   PN 5 / PN 6 / PN 8
+SDR 13.6: PN 6 / PN 8 / PN 10
+SDR 11:   PN 8 / PN 10 / PN 12.5
+SDR 9:    - / PN 12.5 / PN 16
+SDR 7.4:  - / PN 16 / PN 20
+SDR 6:    - / PN 20 / -
+
+Wall Thicknesses (eMin / eMax in mm) per Nominal OD (rows) and SDR (columns). Blank = combination not offered.
+Columns: SDR41 | SDR33 | SDR26 | SDR21 | SDR17 | SDR13.6 | SDR11 | SDR9 | SDR7.4 | SDR6
+16   |         |         |         |         |         |           |           | 1.8/2.1   | 2.2/2.5   | 2.7/3.1
+20   |         |         |         |         |         |           | 1.9/2.2   | 2.3/2.6   | 2.7/3.1   | 3.4/3.8
+25   |         |         |         |         |         | 1.9/2.2   | 2.3/2.6   | 2.8/3.2   | 3.4/3.8   | 4.2/4.7
+32   |         |         |         |         | 1.9/2.2 | 2.4/2.7   | 2.9/3.3   | 3.6/4.1   | 4.4/4.9   | 5.4/6.0
+40   |         |         |         | 1.9/2.2 | 2.4/2.7 | 3.0/3.4   | 3.7/4.2   | 4.5/5.1   | 5.4/6.0   | 6.7/7.5
+50   |         |         | 2.0/2.3 | 2.4/2.7 | 3.0/3.4 | 3.7/4.2   | 4.6/5.2   | 5.6/6.3   | 6.8/7.6   | 8.4/9.3
+63   |         | 2.0/2.3 | 2.5/2.9 | 3.0/3.4 | 3.8/4.3 | 4.7/5.3   | 5.8/6.5   | 7.0/7.8   | 8.6/9.6   | 10.5/11.7
+75   | 1.9/2.2 | 2.3/2.6 | 2.9/3.3 | 3.6/4.1 | 4.5/5.1 | 5.6/6.3   | 6.9/7.7   | 8.4/9.3   | 10.2/11.3 | 12.5/13.9
+90   | 2.2/2.5 | 2.8/3.2 | 3.5/4.0 | 4.3/4.8 | 5.3/5.9 | 6.7/7.5   | 8.2/9.1   | 10.0/11.1 | 12.2/13.5 | 15.0/16.6
+110  | 2.7/3.1 | 3.4/3.8 | 4.3/4.8 | 5.3/5.9 | 6.6/7.3 | 8.1/9.0   | 10.0/11.1 | 12.3/13.6 | 14.9/16.5 | 18.4/20.3
+125  | 3.1/3.5 | 3.8/4.3 | 4.8/5.4 | 6.0/6.7 | 7.4/8.2 | 9.2/10.2  | 11.4/12.7 | 13.9/15.4 | 16.9/18.7 | 20.9/23.1
+140  | 3.5/4.0 | 4.3/4.8 | 5.4/6.0 | 6.7/7.5 | 8.3/9.2 | 10.3/11.4 | 12.8/14.2 | 15.6/17.3 | 19.0/21.0 | 23.4/25.8
+160  | 3.9/4.4 | 4.9/5.5 | 6.1/6.8 | 7.7/8.6 | 9.5/10.5| 11.8/13.1 | 14.6/16.2 | 17.8/19.7 | 21.7/24.0 | 26.7/29.5
+180  | 4.4/4.9 | 5.5/6.2 | 7.0/7.8 | 8.6/9.6 | 10.6/11.8| 13.3/14.7| 16.4/18.1 | 20.0/22.1 | 24.4/26.9 | 30.0/33.1
+200  | 4.9/5.5 | 6.1/6.8 | 7.7/8.6 | 9.6/10.7| 11.8/13.1| 14.7/16.3| 18.2/20.1 | 22.3/24.6 | 27.1/29.9 | 33.4/36.8
+225  | 5.5/6.2 | 6.9/7.7 | 8.7/9.7 | 10.8/12.0| 13.3/14.7| 16.6/18.4| 20.5/22.7 | 25.0/27.6 | 30.5/33.7 | 37.5/41.4
+250  | 6.1/6.8 | 7.7/8.5 | 9.7/10.8| 12.0/13.3| 14.8/16.4| 18.4/20.3| 22.8/25.2 | 27.8/30.7 | 33.8/37.3 | 41.7/46.0
+280  | 6.9/7.7 | 8.5/9.5 | 10.8/12.0| 13.4/14.8| 16.6/18.4| 20.6/22.8| 25.5/28.2 | 31.2/34.4 | 37.9/41.8 | 46.7/51.5
+315  | 7.7/8.6 | 9.6/10.7| 12.2/13.5| 15.0/16.6| 18.6/20.6| 23.2/25.6| 28.7/31.7 | 35.0/38.6 | 42.6/47.0 | 52.5/57.9
+355  | 8.7/9.7 | 10.8/12.0| 13.7/15.2| 16.9/18.7| 20.9/23.1| 26.1/28.8| 32.3/35.6 | 39.5/43.6 | 48.0/52.9 | 59.2/65.2
+400  | 9.8/10.9| 12.2/13.5| 15.4/17.0| 19.1/21.1| 23.6/26.1| 29.5/32.6| 36.4/40.1 | 44.5/49.1 | 54.1/59.6 | 66.7/73.5
+450  | 11.0/12.2| 13.7/15.2| 17.3/19.1| 21.5/23.8| 26.5/29.3| 33.1/36.5| 40.9/45.1 | 50.0/55.1 | 60.9/67.1 | 75.0/82.6
+500  | 12.2/13.5| 15.2/16.8| 19.3/21.3| 23.9/26.4| 29.5/32.6| 36.8/40.6| 45.5/50.2 | 55.6/61.3 | 67.6/74.5 | 83.4/91.8
+560  | 13.7/15.2| 17.0/18.8| 21.6/23.9| 26.7/29.5| 33.0/36.4| 41.2/45.4| 50.9/56.1 | 62.3/68.6 | 75.7/83.4 | 93.4/102.8
+630  | 15.4/17.0| 19.1/21.1| 24.3/26.8| 30.0/33.1| 37.1/40.9| 46.4/51.1| 57.3/63.1 | 70.0/77.1 | 85.2/93.8 | 105.0/115.6
+710  | 17.3/19.1| 21.6/23.9| 27.3/30.1| 33.9/37.4| 41.8/46.1| 52.2/57.5| 64.6/71.2 | 78.9/86.9 | 96.0/105.7| 118.4/130.3
+800  | 19.5/21.6| 24.3/26.8| 30.8/34.0| 38.1/42.0| 47.1/51.9| 58.9/64.9| 72.8/80.2 | 88.9/97.9 | 108.2/119.1| (blank)
+900  | 22.0/24.3| 27.3/30.1| 34.7/38.3| 42.9/47.3| 53.0/58.4| 66.2/72.9| 81.9/90.2 | 100.0/110.1| 121.7/134.0| (blank)
+1000 | 24.4/26.9| 30.3/33.4| 38.5/42.5| 47.7/52.6| 58.9/64.9| 73.6/81.1| 90.9/100.1| 111.2/122.4| (blank) | (blank)
+1200 | 29.3/32.3| 36.4/40.1| 46.2/50.9| 57.2/63.0| 70.6/77.8| 88.3/97.2| 109.1/120.1| (blank) | (blank) | (blank)
+1400 | 34.1/37.6| 42.5/46.9| 53.9/59.4| 66.7/73.5| 82.4/90.7| 103.0/113.4| (blank) | (blank) | (blank) | (blank)
+1600 | 39.0/43.0| 48.5/53.5| 61.6/67.9| 76.2/83.9| 94.2/103.7| 117.7/129.6| (blank) | (blank) | (blank) | (blank)
+1800 | 43.9/48.4| 54.6/60.2| 69.3/76.3| 85.8/94.5| 105.9/116.6| (blank) | (blank) | (blank) | (blank) | (blank)
+2000 | 48.8/53.8| 60.6/66.8| 77.0/84.8| 95.3/104.9| 117.7/129.6| (blank) | (blank) | (blank) | (blank) | (blank)
+NOTES: 1 Tolerances calculated from (0.1 eMin + 0.1) mm rounded up to next 0.1 mm (printed cells use nearest-0.1
+rounding for the tolerance). 2 All pressure ratings are calculated at 27°C and rounded to nearest pressure class.
+3 Considering operational problems, maximum wall thickness of pipes are considered around 130 mm.
+
+8 PERFORMANCE REQUIREMENTS
+8.1 Hydraulic Characteristics
+8.1.1 Internal Pressure Creep Rupture Test of Pipe — when subjected to internal pressure creep rupture
+test (Annex E) with parameters in Table 5, the pipes shall show no signs of localized swelling, leakage or
+weeping and shall not burst during the prescribed test duration.
+
+Table 5 Hydraulic Characteristic Requirements of Pipes (Clauses 8.1.1 and E-4.3)
+Sl No. | Test Temp °C | Test Duration h | Induced Hoop Stress (MPa): PE 63 | PE 80 | PE 100
+i)   27 | 100  | 6.9 | 8.6 | 10.7
+ii)  80 | 48   | 3.8 | 4.9 | 5.7
+iii) 80 | 165  | 3.5 | 4.5 | 5.4
+iv)  80 | 1000 | 3.2 | 4.0 | 5.0
+
+8.1.2 Internal Pressure Creep Rupture Test of Pipe Joints — butt fusion / electro fusion joint subjected to
+internal pressure creep rupture test at 80°C for 48 h as per Table 5 and Annex E; no localized swelling,
+leakage or weeping and shall not burst.
+8.2 Longitudinal Reversion Test — when tested per Annex F, longitudinal reversion shall not be greater than 3 percent.
+8.3 Carbon Black Content and Dispersion — composite sample of minimum three pipes per IS 2530; carbon
+black content within 2.5 ± 0.5 percent; dispersion of carbon black shall be satisfactory.
+8.4 Melt Flow Rate — composite sample of minimum three pipes per IS 2530 at 190°C with 5 kgf; MFR shall
+not deviate from MFR of resin by more than 30 percent.
+8.5 Oxidation Induction Time — minimum oxidation induction time of pipe (Annex B) shall be not less than 20 min.
+8.6 Overall Migration — composite sample of minimum 3 pipes per IS 9845; overall migration within limits stipulated in IS 10146.
+8.7 Density — composite sample of minimum 3 pipes per IS 7328; base density of pipe between 930 to 960 kg/m3.
+8.8 Tensile Strength for Butt-fusion — per Annex G, test specimens (preferably 110 mm Dia/SDR 11) shall show ductile failure.
+8.9 Elongation at Break — per Annex H, test specimens shall meet requirement as per Table 6 (>= 350 percent).
+8.10 Slow Crack Growth Rate — notched specimens (preferably 110 mm SDR 11) tested per Annex E; no
+localized swelling, leakage or weeping and shall not burst. Test Temperature 80 ± 1 °C, Test Duration 500 h,
+Internal Test Pressure (MPa): PE 63 = 0.64, PE 80 = 0.8, PE 100 = 0.92.
+
+Table 6 Elongation at Break Requirements of Pipes (Clause 8.9)
+i)   Elongation at break for e <= 5 mm        | >= 350 percent | Type 2 test piece, 100 mm/min | Annex H
+ii)  Elongation at break for 5 < e <= 12 mm   | >= 350 percent | Type 1 test piece, 50 mm/min  | Annex H
+iii) Elongation at break for e > 12 mm        | >= 350 percent | Type 1, 25 mm/min OR Type 3, 10 mm/min | Annex H
+
+9 SAMPLING, FREQUENCY OF TESTS AND CRITERIA FOR CONFORMITY
+9.1 Type Tests
+Table 7 Type Tests (Clause 9.1.2)
+i)   Tensile strength for butt-fusion | 3 | 8.8
+ii)  Overall migration | 3 | 8.6
+iii) Internal pressure creep rupture (hydrostatic) at 27°C for 100 h | 3 | 8.1.1
+iv)  Internal pressure creep rupture (hydrostatic) at 80°C for 165 h | 3 | 8.1.1
+v)   Internal pressure creep rupture (hydrostatic) at 80°C for 1 000 h | 3 | 8.1.1
+vi)  Slow crack growth rate test | 3 | 8.10
+9.2 Acceptance Test
+Table 8 Acceptance Tests (Clause 9.2.2)
+i)    Visual appearance and dimensions | Cl 7.1 and 7.4
+ii)   Melt flow rate | 8.4
+iii)  Density | 8.7
+iv)   Reversion test | 8.2
+v)    Elongation at break | 8.9
+vi)   Carbon black content | 8.3
+vii)  Carbon black dispersion | 8.3
+viii) Oxidation Induction | 8.5
+ix)   Internal pressure creep rupture (hydrostatic) at 80°C for 48 h | 8.1.1
+x)    Internal pressure creep rupture (hydrostatic) for joints at 80°C for 48 h | 8.1.2
+(Table 9 Scale of Sampling for Dimensional Requirements and Table 10 Scale of Sampling for Acceptance
+Tests are SAMPLING PLANS — EXCLUDED from testing parameters.)
+
+10 MARKING — Manufacturer's name/trade-mark; Material designation; Pressure rating; SDR; Outside diameter;
+Lot No./Batch No.; BIS Standard Mark.
+
+ANNEX A — Relationship between MRS, PN and SDR. PN = [20σ/(SDR-1)] x fT; σ = MRS/C; C = 1.25; fT = 0.85.
+Table 11 SDR vs PN per material class (PE 63 / PE 80 / PE 100):
+SDR 41 -> 0.2 / 0.25 / 0.3; SDR 33 -> 0.25 / 0.32 / 0.4; SDR 26 -> 0.32 / 0.4 / 0.5; SDR 21 -> 0.4 / 0.5 / 0.6;
+SDR 17 -> 0.5 / 0.6 / 0.8; SDR 13.6 -> 0.6 / 0.8 / 1.0; SDR 11 -> 0.8 / 1.0 / 1.25; SDR 9 -> - / 1.25 / 1.6;
+SDR 7.4 -> - / 1.6 / 2.0; SDR 6 -> - / 2.0 / -.
+
+ANNEX B — Determination of oxidation induction time (thermal stability). 200°C ± 0.1°C isothermal.
+ANNEX C — Determination of volatile content. Drying oven (105 ± 2)°C.
+ANNEX D — Determination of water content (Karl Fischer, IS 2362).
+ANNEX E — Internal pressure creep rupture test. p = 2σi s / (d - s).
+ANNEX F — Longitudinal reversion test. Air oven 110 ± 2°C. T = (l0 - l1)/l0 x 100.
+ANNEX G — Failure mode of test pieces from butt-fused joint. Tensile at 27±2°C, 5±1 mm/min.
+ANNEX H — Determination of elongation at break. E = (L1 - L0)/L0 x 100.
+ANNEX J — Preparation of longitudinally notched test pieces for slow crack growth rate test.
+ANNEX K — Committee composition.

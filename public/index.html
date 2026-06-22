@@ -1450,6 +1450,18 @@ window.addEventListener('unhandledrejection', function(e) {
                     <!-- Pipeline progress (shown while running) -->
                     <div class="is-parse-status" id="is-parse-status-bar" style="display:none;"></div>
 
+                    <!-- Live agent log — streams the REAL agent messages during extraction.
+                         Display-only: it renders exactly what /agent-extract already returns in job.log.
+                         No change to the Agent SDK, the endpoint, or the database. -->
+                    <div class="is-agent-log" id="is-agent-log" style="display:none;">
+                        <div class="is-agent-log-head">
+                            <span class="is-agent-log-dot"></span>
+                            <span id="is-agent-log-title">Claude agent — live log</span>
+                            <span class="is-agent-log-elapsed" id="is-agent-log-elapsed"></span>
+                        </div>
+                        <div class="is-agent-log-body" id="is-agent-log-body"></div>
+                    </div>
+
                     <!-- Results (shown after pipeline / on doc select) -->
                     <div id="is-results-panel" style="display:none;">
                         <!-- Header -->
@@ -3398,7 +3410,7 @@ window.addEventListener('unhandledrejection', function(e) {
 
 <script src="specs_db.js"></script>
 <script src="standards_db.js?v=2.0"></script>
-<script src="app.js?v=2.2.0"></script>
+<script src="app.js?v=2.3.0"></script>
 </body>
 
 </html>

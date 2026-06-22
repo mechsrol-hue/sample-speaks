@@ -1,0 +1,36 @@
+◇ injected env (10) from .env // tip: ⌘ enable debugging { debug: true }
+
+======================================================================
+▶  AGENT LIVE TEST — IS 13592:2013
+   PDF: /Users/saurabh/Downloads/IS 13592 _ 2013.pdf
+======================================================================
+I'll start by reading the entire PDF.
+I have the main content. Let me read the remaining pages.
+I have the full PDF. Let me look at the existing template and check the script.
+I have all the content. Now let me check the existing template and the check script.
+I have all tables clearly. Now let me read the existing template JSON and the check script.
+Now I understand the full structure. Let me write the complete transcript first.
+Now let me build the complete template with all 13 DN sizes and fully populated Tables 2, 3, 4.
+Now let me run the completeness check.
+Completeness passed — all 13 DN sizes and dimension Tables 1–4 present.
+
+IS 13592:2013: 27 parameters, 13 dimension sizes, completeness=ok
+Completeness passed — all 13 DN sizes and dimension Tables 1–4 present.
+
+IS 13592:2013: 27 parameters, 13 dimension sizes, completeness=ok
+
+✓ 13592: agent finished in 197s
+   isNumber:  IS 13592:2013
+   template:  public/is_templates/IS_13592_2013.json
+   cost:      $1.22   (turns: 18)   running total: $1.22
+   summary:   Completeness passed — all 13 DN sizes and dimension Tables 1–4 present.
+
+IS 13592:2013: 27 parameters, 13 dimension sizes, completeness=ok
+   completeness (independent re-check): PASS ✅
+     DN expected: 13 | grid: 13 | missing: []
+
+======================================================================
+SUMMARY   (total spend: $1.22 of $5 trial)
+  ✓ 13592   $1.22  197s  IS 13592:2013  completeness=PASS
+======================================================================
+

@@ -4844,6 +4844,27 @@ async function loadISIntelligence() {
     } else if (isVaultData.length === 0) {
         renderISEmptyState();
     }
+    // Resume any extraction that was still running when the page was last refreshed.
+    reattachActiveAgentJob();
+}
+
+// Re-attach to an in-flight extraction after a page refresh. The server keeps the job and its
+// log in memory, so polling the saved jobId picks the live stream back up where it left off.
+// Read-only: kicks off no new work and mutates nothing on the server.
+function reattachActiveAgentJob() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem('is_active_agent_job') || 'null'); } catch (_) {}
+    if (!saved || !saved.jobId) return;
+    // Already streaming this run (e.g. tabbed away and back) — don't start a duplicate poll loop.
+    if (activeAgentPollJobId === saved.jobId) return;
+    // Ignore stale entries — any run older than an hour has long since finished (and saved to the vault).
+    if (saved.ts && (Date.now() - saved.ts) > 60 * 60 * 1000) {
+        try { localStorage.removeItem('is_active_agent_job'); } catch (_) {}
+        return;
+    }
+    const setStatus = makeISParseStatus(saved.fileName || 'IS standard');
+    setStatus('🔄 Reconnecting to the extraction still in progress…', 8, false);
+    pollAgentJob(saved.jobId, setStatus);
 }
 
 // Hook into existing switchTab
@@ -5974,6 +5995,49 @@ async function addNewAmendment() {
     }
 }
 
+// Pull the IS number (and optional Part) out of a filename or vault label, e.g.
+// "IS 1786 _ 2008.pdf" -> {num:'1786'}, "IS 3196 (Part 1) : 2013" -> {num:'3196', part:'1'}.
+function extractISNumberFromName(name) {
+    const m = String(name || '').match(/\bIS[\s_\-]*([0-9]{2,5})(?:[\s_\-]*\(?\s*part\s*([0-9]+)\)?)?/i);
+    return m ? { num: m[1], part: m[2] || null } : null;
+}
+
+// Find a vault standard that the uploaded file would overwrite, by matching the IS number (+ Part).
+function findExistingVaultMatch(fileName) {
+    const f = extractISNumberFromName(fileName);
+    if (!f || typeof isVaultData === 'undefined' || !Array.isArray(isVaultData)) return null;
+    return isVaultData.find(d => {
+        const v = extractISNumberFromName(d && d.isNumber);
+        if (!v || v.num !== f.num) return false;
+        if (f.part && v.part && f.part !== v.part) return false;
+        return true;
+    }) || null;
+}
+
+// Build a status-bar setter for the IS extraction progress bar. Shared by a fresh upload
+// and by a re-attach after a page refresh, so both render identically.
+function makeISParseStatus(displayName) {
+    const statusEl = document.getElementById('is-parse-status-bar');
+    return function setStatus(line, pct, isError, done) {
+        if (!statusEl) return;
+        statusEl.style.display = 'flex';
+        statusEl.className = 'is-parse-status ' + (isError ? 'error' : (done ? 'success' : 'parsing'));
+        const accent = isError ? 'var(--danger)' : (done ? 'var(--success)' : 'var(--accent)');
+        statusEl.innerHTML = `
+            <div class="is-parse-spinner" style="${isError || done ? 'display:none' : ''}"></div>
+            <div class="is-parse-progress">
+                <div style="font-size:0.88rem; font-weight:600; color:${accent};">
+                    ${isError ? '❌ ' : (done ? '✅ ' : '')}${escapeHtml(displayName)}
+                </div>
+                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">${escapeHtml(line)}</div>
+                <div class="is-parse-progress-bar" style="margin-top:6px;">
+                    <div class="is-parse-progress-fill" style="width:${pct}%; ${isError ? 'background:var(--danger)' : ''};"></div>
+                </div>
+            </div>
+        `;
+    };
+}
+
 // --- Upload IS Standard ---
 async function uploadISStandard() {
     const fileInput = document.getElementById('is-pdf-input');
@@ -5987,27 +6051,29 @@ async function uploadISStandard() {
         return;
     }
 
-    const statusEl = document.getElementById('is-parse-status-bar');
-
-    function setStatus(line, pct, isError, done) {
-        if (!statusEl) return;
-        statusEl.style.display = 'flex';
-        statusEl.className = 'is-parse-status ' + (isError ? 'error' : (done ? 'success' : 'parsing'));
-        const accent = isError ? 'var(--danger)' : (done ? 'var(--success)' : 'var(--accent)');
-        statusEl.innerHTML = `
-            <div class="is-parse-spinner" style="${isError || done ? 'display:none' : ''}"></div>
-            <div class="is-parse-progress">
-                <div style="font-size:0.88rem; font-weight:600; color:${accent};">
-                    ${isError ? '❌ ' : (done ? '✅ ' : '')}${escapeHtml(file.name)}
-                </div>
-                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">${escapeHtml(line)}</div>
-                <div class="is-parse-progress-bar" style="margin-top:6px;">
-                    <div class="is-parse-progress-fill" style="width:${pct}%; ${isError ? 'background:var(--danger)' : ''};"></div>
-                </div>
-            </div>
-        `;
+    // Overwrite guard: if the filename matches a standard already in the vault, re-running will
+    // replace its existing report. Warn + confirm before kicking off the extraction.
+    const existing = findExistingVaultMatch(file.name);
+    if (existing) {
+        const when = existing.uploadedAt ? new Date(existing.uploadedAt).toLocaleString() : 'previously';
+        const ok = confirm(
+            `A report for ${existing.isNumber} already exists (uploaded ${when}).\n\n` +
+            `Running extraction on "${file.name}" will REPLACE that existing report.\n` +
+            `Make sure you have a backup if you need the current version.\n\n` +
+            `Continue and overwrite ${existing.isNumber}?`
+        );
+        if (!ok) {
+            showToast(`Upload cancelled — ${existing.isNumber} was not changed.`, 'info');
+            fileInput.value = '';
+            const ab = document.getElementById('is-analyze-btn');
+            if (ab) ab.style.display = 'none';
+            const fl = document.getElementById('is-upload-filename');
+            if (fl) { fl.textContent = 'AI reads tables & clauses automatically'; fl.style.color = ''; }
+            return;
+        }
     }
 
+    const setStatus = makeISParseStatus(file.name);
     setStatus('🤖 Starting Claude agent — reading the whole PDF…', 5, false);
 
     const formData = new FormData();
@@ -6026,6 +6092,8 @@ async function uploadISStandard() {
             return;
         }
         jobId = startData.jobId;
+        // Persist the active job so a page refresh can re-attach to the live run (server keeps going regardless).
+        try { localStorage.setItem('is_active_agent_job', JSON.stringify({ jobId, fileName: file.name, ts: Date.now() })); } catch (_) {}
         showToast(`Claude agent extracting ${file.name} — reading every clause & table…`, 'info');
     } catch (e) {
         setStatus('Failed to start: ' + e.message, 0, true);
@@ -6039,11 +6107,61 @@ async function uploadISStandard() {
     const filenameLabel = document.getElementById('is-upload-filename');
     if (filenameLabel) { filenameLabel.textContent = 'Claude agent reads clauses & tables'; filenameLabel.style.color = ''; }
 
+    // Fresh run: clear any leftover log from a previous extraction before streaming the new one.
+    const prevLogBody = document.getElementById('is-agent-log-body');
+    if (prevLogBody) prevLogBody.innerHTML = '';
+    const prevLogPanel = document.getElementById('is-agent-log');
+    if (prevLogPanel) { prevLogPanel.style.display = 'none'; prevLogPanel.className = 'is-agent-log'; }
+
     await pollAgentJob(jobId, setStatus);
 }
 
+// Render the REAL agent log lines into the live scrolling panel.
+// Display-only: it shows exactly the strings the server already returns in job.log —
+// no fabricated/crafted lines. The elapsed clock uses job.elapsedMs (real telemetry),
+// kept visually separate from the log so "actual logs only" stays true.
+function renderAgentLog(logLines, elapsedMs, state) {
+    const panel = document.getElementById('is-agent-log');
+    const body = document.getElementById('is-agent-log-body');
+    const elapsedEl = document.getElementById('is-agent-log-elapsed');
+    const titleEl = document.getElementById('is-agent-log-title');
+    if (!panel || !body) return;
+
+    panel.style.display = 'block';
+    panel.className = 'is-agent-log' + (state === 'done' ? ' done' : (state === 'error' ? ' error' : ''));
+
+    // Collapse exact consecutive duplicates so the genuine steps read cleanly (still verbatim).
+    const lines = [];
+    (logLines || []).forEach(l => {
+        const s = String(l == null ? '' : l);
+        if (!s.trim()) return;
+        if (lines.length && lines[lines.length - 1] === s) return;
+        lines.push(s);
+    });
+
+    // Preserve the user's scroll position unless they're already pinned to the bottom.
+    const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 24;
+    body.innerHTML = lines.length
+        ? lines.map(s => `<div class="is-agent-log-line">${escapeHtml(s)}</div>`).join('')
+        : '<div class="is-agent-log-line" style="opacity:.6">starting…</div>';
+    if (atBottom) body.scrollTop = body.scrollHeight;
+
+    if (elapsedEl && typeof elapsedMs === 'number') {
+        const sec = Math.floor(elapsedMs / 1000);
+        elapsedEl.textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')} elapsed`;
+    }
+    if (titleEl) {
+        titleEl.textContent = state === 'done' ? 'Claude agent — complete'
+            : (state === 'error' ? 'Claude agent — stopped' : 'Claude agent — live log');
+    }
+}
+
+// Tracks the jobId currently being polled, so re-entering the IS tab doesn't start a duplicate poll loop.
+let activeAgentPollJobId = null;
+
 // Poll the in-app Claude Agent extraction job and stream its progress into the status bar.
 async function pollAgentJob(jobId, setStatus) {
+    activeAgentPollJobId = jobId;
     const POLL_INTERVAL = 3000;
     const MAX_POLLS = 600; // ~30 min ceiling — dense/large standards (e.g. IS 4984, 14 MB rotated tables) take ~13 min; 11 min was too short and showed a false "timed out"
     let polls = 0;
@@ -6059,22 +6177,35 @@ async function pollAgentJob(jobId, setStatus) {
                 if (typeof fetchISVault === 'function') { try { await fetchISVault(); } catch (_) {} }
                 return resolve(null);
             }
-            let job;
+            let job, httpStatus = 0;
             try {
                 const res = await fetch('/api/is-intelligence/agent-extract/' + jobId);
+                httpStatus = res.status;
                 job = await res.json();
             } catch (e) { setTimeout(poll, POLL_INTERVAL); return; }
+
+            // Server no longer knows this job (it restarted, or the job was evicted from memory).
+            // Any result is already persisted to the vault — stop cleanly instead of polling a ghost.
+            if (httpStatus === 404 || (job && job.error && !job.status)) {
+                try { localStorage.removeItem('is_active_agent_job'); } catch (_) {}
+                setStatus('Reconnected — this run is no longer active on the server. Check the IS Vault for the result.', 95, false);
+                if (typeof fetchISVault === 'function') { try { await fetchISVault(); } catch (_) {} }
+                return resolve(null);
+            }
 
             const lastLine = (job.log && job.log.length) ? String(job.log[job.log.length - 1]) : 'working…';
             const pct = Math.min(94, 6 + polls * 3);
 
             if (job.status === 'running') {
+                renderAgentLog(job.log, job.elapsedMs, 'running');
                 setStatus('🤖 ' + lastLine.slice(0, 150), pct, false);
                 setTimeout(poll, POLL_INTERVAL);
                 return;
             }
             if (job.status === 'error' || (job.result && job.result.ok === false)) {
                 const err = job.error || (job.result && job.result.error) || 'unknown error';
+                try { localStorage.removeItem('is_active_agent_job'); } catch (_) {}
+                renderAgentLog(job.log, job.elapsedMs, 'error');
                 setStatus('Agent failed: ' + err, pct, true);
                 showToast('Agent failed: ' + err, 'error');
                 return resolve(null);
@@ -6082,6 +6213,8 @@ async function pollAgentJob(jobId, setStatus) {
             if (job.status === 'done' && job.result && job.result.ok) {
                 const r = job.result;
                 const cost = (typeof r.costUsd === 'number') ? ` · $${r.costUsd.toFixed(2)}` : '';
+                try { localStorage.removeItem('is_active_agent_job'); } catch (_) {}
+                renderAgentLog(job.log, job.elapsedMs, 'done');
                 setStatus(`${r.isNumber || 'Standard'} — ${r.summary || 'template written'}${cost}`, 100, false, true);
                 showToast(`✅ ${r.isNumber || 'Standard'} extracted by the Claude agent${cost}`, 'success');
                 if (typeof fetchISVault === 'function') await fetchISVault();
@@ -6097,7 +6230,7 @@ async function pollAgentJob(jobId, setStatus) {
             setTimeout(poll, POLL_INTERVAL);
         }
         setTimeout(poll, 1500);
-    });
+    }).finally(() => { if (activeAgentPollJobId === jobId) activeAgentPollJobId = null; });
 }
 
 async function pollPipelineJob(jobId, setStatus, phaseLabels) {

@@ -1,4 +1,32 @@
-◇ injected env (1) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
-◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+◇ injected env (3) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
 Server running on http://localhost:3000
-Connected to SQLite at /Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/database.sqlite
+[Copilot] Calling Sarvam AI (sarvam-30b)...
+[Copilot] Sarvam-30b succeeded, reply length: 67
+[Copilot] Calling Sarvam AI (sarvam-30b)...
+[Copilot] Sarvam-30b succeeded, reply length: 156
+◇ injected env (3) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Server running on http://localhost:3000
+◇ injected env (3) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Server running on http://localhost:3000
+[Nigrani] monitor started (tick every 5min, snapshot TTL 60s)
+[Nigrani] persistFindings select failed: Bad Request
+[Nigrani] monitor tick: 801 findings, 0 new, 0 refreshed (1801ms)
+◇ injected env (3) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+Server running on http://localhost:3030
+[Nigrani] monitor started (tick every 5min, snapshot TTL 60s)
+[Nigrani] persistFindings select failed: Bad Request
+[Nigrani] monitor tick: 801 findings, 0 new, 0 refreshed (1842ms)
+[Copilot] DB context fetched in 1429ms
+[Copilot] Trying Gemini with function-calling…
+[Copilot] Gemini succeeded in 2320ms.
+[Nigrani] persistFindings select failed: Bad Request
+[Nigrani] monitor tick: 801 findings, 0 new, 0 refreshed (747ms)
+[Copilot] DB context fetched in 1418ms
+[Copilot] Trying Gemini with function-calling…
+[Copilot] Gemini failed, falling back to Sarvam: {"error":{"code":503,"message":"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.","status":"UNAVAILABLE"}}
+[Copilot] Calling Sarvam AI (sarvam-30b)...
+[Copilot] Sarvam-30b succeeded in 10834ms, reply length: 403

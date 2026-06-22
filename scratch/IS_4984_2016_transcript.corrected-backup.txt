@@ -1,0 +1,245 @@
+IS 4984 : 2016
+Indian Standard
+POLYETHYLENE PIPES FOR WATER SUPPLY — SPECIFICATION
+(Fifth Revision)
+ICS 23.040.20; 91.140.60; 93.025
+
+================================================================
+1 SCOPE
+1.1 This standard lays down the requirements for polyethylene (PE) pipes (mains and service pipes)
+intended for the conveyance of water for human consumption including raw water prior to treatment and
+also water for general purpose.
+1.2 This standard is applicable for the water supplies with a maximum operating pressure of 2.0 MPa.
+1.3 An operating temperature of 27°C has been taken as the reference temperature.
+1.4 The reference temperature of 20°C for 50 years of continuous stress is considered for the minimum
+required strength (MRS) of polyethylene base resin. (see Table 1)
+1.5 This standard does not purport to give guidelines for designing and dimensioning of pipe lines.
+
+2 REFERENCES
+IS 2362:1993 Determination of water by Karl Fischer method; IS 2530:1963 Methods of test for PE
+moulding materials and compounds; IS 4905:1968 Methods of random sampling; IS 7328:1992 HDPE
+materials for moulding and extrusion; IS 9845:1998 Method of analysis for determination of constituents
+of plastics materials in contact with foodstuffs; IS 10141:1982 Positive list of constituents of PE; IS
+10146:1982 Polyethylene for safe use in contact with foodstuff, pharmaceuticals and drinking water.
+
+3 TERMINOLOGY
+3.1 Nominal Size (DN); 3.2 Nominal Size (DN/OD); 3.3 Nominal Outside Diameter (dn); 3.4 Outside
+Diameter at any Point (de); 3.5 Mean Outside Diameter (dem); 3.6 Minimum Mean Outside Diameter
+(dem,Min); 3.7 Maximum Mean Outside Diameter (dem,Max); 3.8 Out-of-roundness (Ovality); 3.9 Nominal
+Wall Thickness (en); 3.10 Standard Dimension Ratio (SDR) = dn/en; 3.11 Wall Thickness at any Point (e);
+3.11.1 Minimum Wall Thickness at any Point (eMin); 3.11.2 Maximum Wall Thickness at any Point (eMax);
+3.12 Mean Wall Thickness (em); 3.13 Tolerance; 3.14 Minimum Required Strength (MRS); 3.15 Overall
+Service (Design) Coefficient (C) — minimum value of C is 1.25; 3.16 Design Stress (s); 3.17 Nominal
+Pressure (PN); 3.18 Maximum Allowable Operating Pressure (MAOP); 3.19 Pressure Reduction
+Coefficient (fT); 3.20 Melt Flow Rate (MFR); 3.21 Virgin Material.
+
+4 GRADE OF RESIN
+Pipes shall be classified according to the grade of the raw material (resin) as given in Table 1.
+
+Table 1 Classification of Materials (Clause 4)
+Sl No. | Material Classification (Grade) | MRS of PE Resin at 20°C for 50 Year Life (MPa) | Design Stress at 20°C (MPa)
+i)   | PE 63  | 6.3  | 5
+ii)  | PE 80  | 8.0  | 6.3
+iii) | PE 100 | 10.0 | 8
+
+5 MATERIAL
+5.1 General — non-toxic, no microbial growth, no taste/odour/discoloration.
+5.2 Polyethylene Resin — PE resin shall conform to parameters in Table 2 and to 5.6.2 of IS 7328.
+
+Table 2 Characteristics of PE Resin as Granules (Clauses 5.2 and 6.1.1)
+Sl No. | Characteristics | Units | Requirements | Test Parameters | Test Method
+i)   | Base density                          | kg/m3    | 930-960 | 27°C                  | IS 7328
+ii)  | Melt flow rate                        | g/10 min | 0.2 to 1.1 (both inclusive) | 190°C using a 5 kg mass | IS 2530
+iii) | Thermal stability (oxidation induction time) | min | >= 20 | 200°C, isothermal | Annex B
+iv)  | Volatile matter                       | mg/kg    | <= 350  | Number of test pieces 01 | Annex C
+v)   | Water content (1)                     | mg/kg    | <= 300  | Number of test pieces 01 | Annex D
+(1) Applicable only if measured volatile content not in conformity. In case of dispute, water content requirement applies.
+
+5.3 Carbon Black Master Batch — density 1.5 to 2.0 g/ml; toluene extract <=0.1%; max volatile matter
+0.9%; carbon black particle size < 0.025 micron; loading of carbon black <= 50% (m/m); ash content <0.1%.
+5.4 Anti Oxidant — not more than 0.3 percent by mass of finished resin.
+5.5 Rework Material — clean reprocessable own production material may be used.
+
+6 PIPE DESCRIPTION
+6.1 Pipes shall be designated by grade (6.1.1), SDR (6.1.2), nominal outside diameter (6.1.3) and
+pressure rating PN (6.1.4). Example: PE 80, SDR 26, DN 200, PN 0.5.
+6.1.1 The grade of material shall be as given in Table 1.
+6.1.2 The standard dimension ratio of pipes covered in this standard are:
+SDR 41, SDR 33, SDR 26, SDR 21, SDR 17, SDR 13.6, SDR 11, SDR 9, SDR 7.4 and SDR 6.
+6.1.3 The nominal outside diameter of pipes covered in this standard are:
+16, 20, 25, 32, 40, 50, 63, 75, 90, 110, 125, 140, 160, 180, 200, 225, 250, 280, 315, 355, 400, 450, 500, 560, 630, 710, 800, 900, 1000, 1200, 1400, 1600, 1800, 2000 mm.
+6.1.4 The pipes shall be classified by pressure rating (PN) corresponding to the maximum allowable
+operating pressure at 27°C, as follows:
+PN 2 = 0.20 MPa; PN 2.5 = 0.25 MPa; PN 3 = 0.30 MPa; PN 3.2 = 0.32 MPa; PN 4 = 0.40 MPa;
+PN 5 = 0.50 MPa; PN 6 = 0.60 MPa; PN 8 = 0.80 MPa; PN 10 = 1.00 MPa; PN 12.5 = 1.25 MPa;
+PN 16 = 1.60 MPa; PN 20 = 2.00 MPa.
+6.2 Colour — black with blue identification stripes (minimum three longitudinal stripes, width 3 mm).
+
+7 GEOMETRIC CHARACTERISTICS OF PIPE
+7.1 Visual Appearance — internal and external surface smooth, clean and free from grooving and other
+defects. Ends cut cleanly square within the tolerances below.
+Maximum Out of Square of Pipe End (Nominal diameter DN, mm / max mm):
+16 to 75 = 2; 90 to 125 = 3; 140 to 180 = 4; 200 to 280 = 5; Above 280 = 7.
+7.2 Length — straight pipe 5 m to 20 m as agreed; short lengths 3 m minimum up to 10 percent of supply.
+7.3 Coiling — minimum internal diameter of coil shall be not less than 18 dn.
+7.4 Dimensions — mean outside diameters dem and ovality as per Table 3. Min and max wall thickness as
+per Table 4.
+
+Table 3 Mean Outside Diameters and Out-of-Roundness (Clause 7.4) — All dimensions in millimetres
+Sl No. | Nominal Size DN/OD | Nominal OD dn | Mean OD dem,Min | Mean OD dem,Max | Max Out-of-Roundness (Ovality)
+i)     | 16   | 16   | 16.0   | 16.3   | 1.2
+ii)    | 20   | 20   | 20.0   | 20.3   | 1.2
+iii)   | 25   | 25   | 25.0   | 25.3   | 1.2
+iv)    | 32   | 32   | 32.0   | 32.3   | 1.3
+v)     | 40   | 40   | 40.0   | 40.4   | 1.4
+vi)    | 50   | 50   | 50.0   | 50.4   | 1.4
+vii)   | 63   | 63   | 63.0   | 63.4   | 1.5
+viii)  | 75   | 75   | 75.0   | 75.5   | 1.6
+ix)    | 90   | 90   | 90.0   | 90.6   | 1.8
+x)     | 110  | 110  | 110.0  | 110.7  | 2.2
+xi)    | 125  | 125  | 125.0  | 125.8  | 2.5
+xii)   | 140  | 140  | 140.0  | 140.9  | 2.8
+xiii)  | 160  | 160  | 160.0  | 161.0  | 3.2
+xiv)   | 180  | 180  | 180.0  | 181.1  | 3.6
+xv)    | 200  | 200  | 200.0  | 201.2  | 4.0
+xvi)   | 225  | 225  | 225.0  | 226.4  | 4.5
+xvii)  | 250  | 250  | 250.0  | 251.5  | 5.0
+xviii) | 280  | 280  | 280.0  | 281.7  | 9.8
+xix)   | 315  | 315  | 315.0  | 316.9  | 11.1
+xx)    | 355  | 355  | 355.0  | 357.2  | 12.5
+xxi)   | 400  | 400  | 400.0  | 402.4  | 14.0
+xxii)  | 450  | 450  | 450.0  | 452.7  | 15.6
+xxiii) | 500  | 500  | 500.0  | 503.0  | 17.5
+xxiv)  | 560  | 560  | 560.0  | 563.4  | 19.6
+xxv)   | 630  | 630  | 630.0  | 633.8  | 22.1
+xxvi)  | 710  | 710  | 710.0  | 716.4  | — (as agreed between manufacturer and purchaser)
+xxvii) | 800  | 800  | 800.0  | 807.2  | —
+xxviii)| 900  | 900  | 900.0  | 908.1  | —
+xxix)  | 1000 | 1000 | 1000.0 | 1009.0 | —
+xxx)   | 1200 | 1200 | 1200.0 | 1210.8 | —
+xxxi)  | 1400 | 1400 | 1400.0 | 1412.6 | —
+xxxii) | 1600 | 1600 | 1600.0 | 1614.4 | —
+xxxiii)| 1800 | 1800 | 1800.0 | 1816.2 | —
+xxxiv) | 2000 | 2000 | 2000.0 | 2018.0 | —
+NOTE: For coiled pipes and straight lengths with diameters >= 710 mm, maximum out-of-roundness as
+agreed between manufacturer and purchaser.
+
+Table 4 Standard Dimension Ratio (SDR) and Corresponding Wall Thicknesses (e) of Pipes (Clauses 7.4 and E-4.3)
+Nominal Pressure (PN) Bar per SDR and material grade:
+  SDR 41   -> PE 63 = PN 2,   PE 80 = PN 2.5, PE 100 = PN 3
+  SDR 33   -> PE 63 = PN 2.5, PE 80 = PN 3.2, PE 100 = PN 4
+  SDR 26   -> PE 63 = PN 3.2, PE 80 = PN 4,   PE 100 = PN 5
+  SDR 21   -> PE 63 = PN 4,   PE 80 = PN 5,   PE 100 = PN 6
+  SDR 17   -> PE 63 = PN 5,   PE 80 = PN 6,   PE 100 = PN 8
+  SDR 13.6 -> PE 63 = PN 6,   PE 80 = PN 8,   PE 100 = PN 10
+  SDR 11   -> PE 63 = PN 8,   PE 80 = PN 10,  PE 100 = PN 12.5
+  SDR 9    -> PE 80 = PN 12.5, PE 100 = PN 16
+  SDR 7.4  -> PE 80 = PN 16,  PE 100 = PN 20
+  SDR 6    -> PE 80 = PN 20
+Each cell of Table 4 gives wall thickness eMin and eMax for the given nominal OD and SDR.
+Derivation (per NOTES to Table 4): wall thicknesses are calculated based on maximum allowable operating
+pressure at 27°C rounded up to nearest SDR series; eMin = nominal OD / SDR rounded up to the next 0.1 mm.
+Tolerances calculated from (0.1 eMin + 0.1) mm rounded up to the next 0.1 mm, so eMax = eMin + tolerance.
+Maximum wall thickness of pipes is considered around 130 mm; cells whose computed eMin would exceed
+about 130 mm (large OD with thick SDR) or fall below about 1.9 mm (small OD with thin SDR) are blank.
+Sample readable values (eMin/eMax): SDR 6: OD16 2.7/3.1, OD20 3.4/3.9, OD25 4.2/4.7, OD32 5.4/6.0,
+OD40 6.7/7.5, OD50 8.4/9.3, OD63 10.5/11.7, OD75 12.5/13.9. SDR 17: OD32 1.9/2.2, OD40 2.4/2.8,
+OD50 3.0/3.4, OD63 3.7/4.2, OD75 4.5/5.1, OD90 5.3/6.0, OD110 6.5/7.2, OD125 7.4/8.2, OD160 9.5/10.6,
+OD200 11.8/13.1, OD250 14.7/16.3, OD315 18.6/20.5, OD400 23.6/26.1, OD500 29.5/32.6, OD630 37.1/41.0.
+SDR 26: OD50 2.0/2.5, OD63 2.5/3.0, OD75 2.9/3.5, OD90 3.5/4.3, OD110 4.3/4.8.
+SDR 41: OD75 1.9/2.3, OD2000 48.8/53.8. SDR 11: column blank above OD1400 (eMin 127.3 at OD1400).
+NOTES: 1 Tolerances calculated from (0.1 eMin + 0.1) mm rounded up to next 0.1 mm. 2 All pressure ratings
+calculated at 27°C and rounded up to nearest pressure class. 3 Considering operational problems, maximum
+wall thickness of pipes considered around 130 mm.
+
+8 PERFORMANCE REQUIREMENTS
+8.1 Hydraulic Characteristics
+8.1.1 Internal Pressure Creep Rupture Test of Pipe — when subjected to internal pressure creep rupture
+test per Annex E and test parameters in Table 5, the pipes shall show no signs of localized swelling,
+leakage or weeping and shall not burst during the prescribed test period.
+
+Table 5 Hydraulic Characteristic Requirements of Pipes (Clauses 8.1.1 and E-4.3)
+Sl No. | Test Temp °C | Test Duration h | Induced Hoop Stress MPa: PE 63 | PE 80 | PE 100
+i)   | 27 | 100  | 6.9 | 8.6 | 10.7
+ii)  | 80 | 48   | 3.8 | 4.9 | 5.7
+iii) | 80 | 165  | 3.5 | 4.5 | 5.4
+iv)  | 80 | 1000 | 3.2 | 4.0 | 5.0
+
+8.1.2 Internal Pressure Creep Rupture Test of Pipe Joints — butt fusion or electro fusion joint tested at
+80°C for 48 h as per Table 5 (induced hoop stress PE 63 = 3.8, PE 80 = 4.9, PE 100 = 5.7 MPa) per Annex
+E; shall show no localized swelling, leakage or weeping and shall not burst.
+8.2 Longitudinal Reversion Test — when tested per Annex F, the longitudinal reversion shall not be
+greater than 3 percent.
+8.3 Carbon Black Content and Dispersion — tested per IS 2530, carbon black content shall be 2.5 ± 0.5
+percent, and dispersion of carbon black shall be satisfactory.
+8.4 Melt Flow Rate — tested from composite sample of min three pipes per IS 2530 at 190°C with nominal
+load of 5 kgf, MFR shall not deviate from MFR of resin by more than 30 percent.
+8.5 Oxidation Induction Time — minimum oxidation induction time of pipe tested per Annex B shall be
+not less than 20 min.
+8.6 Overall Migration — tested from composite sample of min 3 pipes per IS 9845, overall migration of
+constituents shall be within limits stipulated in IS 10146.
+8.7 Density — tested from composite sample of min 3 pipes per IS 7328, base density of pipe shall be
+between 930 to 960 kg/m3.
+8.8 Tensile Strength for Butt-fusion — tested per Annex G, test specimens shall show ductile failure;
+brittle failure considered a failure.
+8.9 Elongation at Break — tested per Annex H, test specimens shall meet requirement as per Table 6.
+
+Table 6 Elongation at Break Requirements of Pipes (Clause 8.9)
+Sl No. | Characteristics | Requirements | Test piece shape / Test speed | Test Method
+i)   | Elongation at break for e <= 5 mm        | >= 350 percent | Type 2 / 100 mm/min | Annex H
+ii)  | Elongation at break for 5 < e <= 12 mm   | >= 350 percent | Type 1 / 50 mm/min  | Annex H
+iii) | Elongation at break for e > 12 mm        | >= 350 percent | Type 1 / 25 mm/min OR Type 3 / 10 mm/min | Annex H
+
+8.10 Slow Crack Growth Rate — when subjected to test parameters below and tested per Annex E with
+notched test specimens (notched per Annex J) from pipe size preferably 110 mm and SDR 11, shall show
+no localized swelling, leakage or weeping and shall not burst during the prescribed test period.
+Test Temperature 80 ± 1 °C, Test Duration 500 h, Internal Test Pressure (MPa): PE 63 = 0.64, PE 80 = 0.8,
+PE 100 = 0.92.
+
+9 SAMPLING, FREQUENCY OF TESTS AND CRITERIA FOR CONFORMITY
+9.1 Type Tests
+Table 7 Type Tests (Clause 9.1.2)
+i)   Tensile strength for butt-fusion (Cl 8.8), sample 3
+ii)  Overall migration (Cl 8.6), sample 3
+iii) Internal pressure creep rupture (hydrostatic) at 27°C for 100 h (Cl 8.1.1), sample 3
+iv)  Internal pressure creep rupture (hydrostatic) at 80°C for 165 h (Cl 8.1.1), sample 3
+v)   Internal pressure creep rupture (hydrostatic) at 80°C for 1000 h (Cl 8.1.1), sample 3
+vi)  Slow crack growth rate test (Cl 8.10), sample 3
+9.2 Acceptance Test
+Table 8 Acceptance Tests (Clause 9.2.2)
+i)    Visual appearance and dimensions (Cl 7.1 and 7.4)
+ii)   Melt flow rate (Cl 8.4)
+iii)  Density (Cl 8.7)
+iv)   Reversion test (Cl 8.2)
+v)    Elongation at break (Cl 8.9)
+vi)   Carbon black content (Cl 8.3)
+vii)  Carbon black dispersion (Cl 8.3)
+viii) Oxidation Induction (Cl 8.5)
+ix)   Internal pressure creep rupture (hydrostatic) at 80°C for 48 h (Cl 8.1.1)
+x)    Internal pressure creep rupture (hydrostatic) for joints at 80°C for 48 h (Cl 8.1.2)
+[Table 9 Scale of Sampling for Dimensional Requirements and Table 10 Scale of Sampling for Acceptance
+Tests are sampling-plan tables — EXCLUDED from the testing-parameter template.]
+
+10 MARKING
+10.1 Each straight length/coil marked at every 1 m with: a) Manufacturer's name/trade-mark; b) Material
+designation (see 6.1); c) Pressure rating; d) SDR; e) Outside diameter; f) Lot No./Batch No.
+10.2 BIS Certification (Standard) Mark.
+
+ANNEX A Relationship between MRS, PN and SDR.
+Table 11 — SDR / SDR used in wall thickness chart at 27°C, nominal pressure for material class (MPa):
+SDR 41: PE63 0.2, PE80 0.25, PE100 0.3; SDR 33: 0.25/0.32/0.4; SDR 26: 0.32/0.4/0.5; SDR 21: 0.4/0.5/0.6;
+SDR 17: 0.5/0.6/0.8; SDR 13.6: 0.6/0.8/1.0; SDR 11: 0.8/1.0/1.25; SDR 9: —/1.25/1.6; SDR 7.4: —/1.6/2.0;
+SDR 6: —/2.0/—.
+PN = (20 sigma / (SDR-1)) x fT, where sigma = MRS/C, C = 1.25, fT = 0.85 at 27°C.
+
+ANNEX B Method for determination of oxidation induction time (thermal stability) — DSC/DTA at 200°C.
+ANNEX C Method for determination of volatile content at 105°C in PE piping materials.
+ANNEX D Method for determination of water content using Karl Fischer method (IS 2362).
+ANNEX E Internal Pressure Creep Rupture Test (Clauses 8.1.1, 8.1.2 and 8.10). p = 2 sigma_i s / (d - s).
+ANNEX F Longitudinal Reversion Test (Clause 8.2). Oven 110 ± 2 °C. T = (l0 - l1)/l0 x 100. Period of
+stressing: e up to 8 mm = 60±1 min; over 8 up to 16 = 120±2 min; over 16 = 240±5 min.
+ANNEX G Determination of failure mode of test pieces from a butt-fused joint (Clause 8.8). Tested at 27±2°C.
+ANNEX H Determination of elongation at break (Clause 8.9 and Table 6). E = (L1-L0)/L0 x 100.
+Test speed (Table 18): e<=5 Type2 100 mm/min; 5<e<=12 Type1 50; e>12 machining Type1 25; e>12 Type3 10.
+ANNEX J Method of preparation of longitudinally notched test pieces for slow crack growth rate test (Cl 8.10).
+ANNEX K Committee composition.

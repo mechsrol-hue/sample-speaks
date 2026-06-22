@@ -1,0 +1,206 @@
+IS 3196 (Part 1) : 2013  (Reaffirmed 2019)
+Indian Standard
+WELDED LOW CARBON STEEL CYLINDERS EXCEEDING 5 LITRES WATER CAPACITY FOR LOW PRESSURE LIQUEFIABLE GASES
+PART 1 CYLINDERS FOR LIQUEFIED PETROLEUM GASES (LPG) — SPECIFICATION
+(Sixth Revision)
+ICS 23.20.30
+© BIS 2013 — Bureau of Indian Standards. December 2013, Price Group 7.
+Incorporates Amendment No. 1 (Aug 2015), No. 2 (Jul 2017), No. 3 (Aug 2019), No. 4 (Nov 2020).
+
+FOREWORD (summary)
+This Indian Standard (Part 1) (Sixth Revision) was adopted after draft finalized by the Gas Cylinders Sectional Committee, MED 16. Originally issued 1965; revised 1968, 1974, 1982, 1992, 2006. Major changes in this revision:
+a) New material IS 15914:2011 'High tensile strength flat rolled steel plate (up to 6 mm) sheet and strip for the manufacture of welded gas cylinder' included in addition to IS 6240:2008 'Hot rolled steel plate (up to 6 mm) sheet and strip for the manufacture of low pressure liquefiable gas cylinder (fourth revision)'.
+b) Welding and circulatory clause modified.
+c) In fatigue testing number of cycles increased to 12 000 from 10 000.
+d) Normalizing of cylinders is compulsory if manufactured from steel as per IS 15914.
+e) Observation of 'nominal hoop stress (0.95 of minimum specified tensile strength)' replaced by observation of 'measurement of bursting pressure (that is 225 percent of the Test Pressure, Ph)'.
+f) Cylinder body integrity impact test for cylinder manufactured from steel as per IS 15914 added in Annex C.
+Assistance taken from ISO 22991:2004. IS 3196 has four parts: Part 1 LPG; Part 2 liquefiable gases other than LPG; Part 3 Method of tests; Part 4 toxic and corrosive gases. Cylinders up to 5 l covered in IS 7142:1995. Welded stainless steel cylinders covered in IS 15637:2006. Periodic inspection covered under IS 16054. Inspection/reconditioning of used cylinders under IS 13258:1991.
+
+1 SCOPE
+1.1 This standard (Part 1) deals with welded low carbon steel cylinders intended for storage and transportation of liquefied petroleum gases (see IS 4576) of nominal capacity exceeding 5 l up to and including 250 l water capacity. Lays down minimum requirements for materials, design, manufacture, construction, tests and marking.
+
+2 REFERENCES — standards listed in Annex A.
+
+3 TERMINOLOGY (in addition to IS 7241)
+3.1 Normalizing — heat treatment, cylinder heated above upper critical point (AC3) and cooled in controlled/still air.
+3.2 Stress Relieving — heat treatment below lower critical point (AC1) to reduce residual stresses without altering metallurgical structure.
+3.3 Stabilizing — heat treatment below upper critical point (AC3) to stabilize structure and obtain desired mechanical properties.
+3.4 Critical Temperature — temperature at which phase or magnetic changes take place (see IS 1956 (Part I)).
+3.5 Test Pressure (Ph) — the internal pressure required for the hydrostatic test and the hydrostatic stretch test of the cylinders. NOTE — used for cylinder wall thickness calculation.
+3.6 Burst Pressure (Pb) — highest pressure reached in a cylinder during the burst test.
+3.7 Batch (as amended by Amendment No.1) — A batch shall consist of finished cylinders not exceeding 3 000 cylinders made consecutively by the same manufacturer using the same manufacturing technique, to the same design, size and material specifications on the same type of automatic welding machines and subject to the same heat treatment conditions. A batch may contain material from more than one cast.
+3.7.1 Inspection Lots — For acceptance purposes the batch divided into inspection lots not exceeding 1 000 cylinders. For selection of sample cylinders each lot subdivided into sub-lots of 250 cylinders (see Fig.1). Samples for 'mechanical or burst test' alternated between mechanical and burst tests.
+
+Fig.1 Sample Size — Sub-lot 250 cylinders: 2 cylinders (one burst test, one mechanical test); marked sub-lot 250: 1 cylinder (one burst test or mechanical test). [Sampling/scale-of-sampling data — excluded from report parameters.]
+
+4 MATERIAL
+4.1 The steel used in the manufacture of cylinders shall conform to IS 6240 or IS 15914.
+4.1.1 Suitable low carbon steel other than those in 4.1 may be used with prior permission of the statutory authority. Minimum specified value of yield strength guaranteed by the cylinder manufacturer for the finished cylinder used for calculating the wall thickness. Steel certified by steel maker to be other than rimming quality, suitable for pressing or drawing, with acceptable non-ageing properties and fully killed.
+4.1.2 Cylinder manufacturer shall obtain and provide certificate of cast (heat) analysis of the steels and establish means to identify the cylinders with the casts.
+4.2 The bung/valve pad shall be hot forged from rolled steel bars conforming to Class 1A or Class 2 of IS 1875 or IS 2062. The bung machined from such forging shall be free from surface defects such as fissures, surface cracks, porosity, laminations, pinholes, etc (see 10.3).
+4.3 The materials used for foot ring, stout metal cap shroud and stay plate shall conform to Grade 'O' of IS 1079 or IS 2062 or IS 6240 or any other material approved by statutory authority.
+
+5 GENERAL — A fully dimensioned sectional drawing of the cylinder, together with design calculations, guaranteed yield strength and scheme of manufacture, submitted by manufacturer to inspecting authority for final approval.
+
+6 DESIGN
+6.1 The cylinder shall be of welded construction having a cold or hot drawn or pressure formed cylindrical portion with hemi-spherical, ellipsoidal or tori-spherical ends welded to it, or two halves of cold or hot drawn and circumferentially welded together, or any other construction approved by statutory authority.
+6.2 The calculation of thickness of pressure parts related to minimum value of yield strength guaranteed by the cylinder manufacturer for the finished cylinder and the test pressure.
+6.2.1 Agreed finished thickness shall not be lower than calculated from formulae:
+a) For cylindrical portion, greater of: 1) t = Ph·Do/(200×0.8·J·Re + Ph) = Ph·Di/(200×0.8·J·Re − Ph) [Amendment No.1: substitute Do for Di]; 2) t = 0.136 × √Do. NOTE — Formula (2) not applicable for cylinders manufactured from steel as per IS 15914.
+b) For semi-ellipsoidal part or end (see Fig.2): te = Ph·Di/(200×0.8·J·Re + Ph) × K(0.65+0.1K)/4.
+where t = calculated minimum wall thickness of cylindrical shell in mm; te = calculated minimum wall thickness of semi-ellipsoidal ends in mm; Ph = test pressure in kgf/cm². The value of hydrostatic test pressure for LPG with vapour pressure not exceeding 16.87 kg/cm² (gauge) at 15°C shall be taken as 25 kg/cm². For LPG with vapour pressure exceeding 16.87 kg/cm² (gauge) at 15°C value taken from IS 8867 and approved by statutory authority; Di = inner diameter in mm; Do = outer diameter in mm; J = weld joint factor (=1.0 if each weld fully radiographed; =0.9 for circumferential seam/seam only not radiographed; =0.9 for seams other than circumferential which are spot radiographed per 13.2; =0.7 for all other cases); Re = yield strength (minimum value specified in 4.1 and 4.1.1) in kgf/mm², Re not more than minimum value specified in material specification; h0 = external height of domed ends in mm; hi = internal height of domed ends in mm; K = ratio Do/h0 [(h0/Do) ≥ 0.192].
+6.2.2 For cylinders made out of steel conforming to IS 6240 the minimum wall thickness shall be not less than 2 mm for cylinders up to and including 13 l water capacity and not less than 2.4 mm for cylinders above 13 l water capacity.
+6.2.3 For cylinders made out of steel conforming to IS 15914 the minimum wall thickness of the cylindrical shell, t, and of the end, te, shall be not less than value derived from any of the following formulae [Amendment 2: te Minimum]:
+for Do < 100 mm: tMin = te Min = 1.1 mm (1);
+for 100 mm < Do < 150 mm: tMin = te Min = 1.1 + 0.008(D − 100) mm (2);
+for Do > 150 mm: tMin = te Min = (D/250) + 0.7 mm (3) (with a minimum of 1.5 mm). [Amendment 1: substitute Do for D in equations 2 and 3.]
+6.2.4 Notwithstanding above, higher thickness may be provided as agreed between purchaser and manufacturer and subject to approval by statutory body.
+6.3 Before design finally approved, statutory authority may require one or more prototype cylinders tested.
+6.4 Design of Openings.
+6.4.1 Location of all openings restricted to one dished end of the cylinder.
+6.4.2 Opening reinforced by valve boss or pad, of weldable and compatible steel, securely attached by welding, adequate strength, no harmful stress concentrations, confirmed by design calculations or a fatigue test per 17.1.
+6.4.3 If leak-tightness between valve and cylinder assured by a metallic seal, internal valve boss may be fitted by method which need not independently guarantee leak-tightness. NOTE — applicable for cylinders with water capacity up to 13 l only.
+6.4.4 Unless otherwise specified, valve threads conform to IS 8737 or as approved.
+6.4.5 Closure of Openings — apertures fitted with appropriate valve in closed position to protect thread and prevent entry of moisture.
+
+7 WELDING
+7.1 Welding Qualification.
+7.1.1 Manufacturer shall establish welding procedures per IS 7307 (Part 1), welders per IS 7310 (Part 1) and IS 817 for all welding associated with pressure envelope.
+7.1.2 Welding procedure approval tests representative of production.
+7.1.3 Welders shall have passed approval tests for specific work and procedure.
+7.2 Prior to welding components examined per 12.2.
+7.3 Manual arc welding shall not be employed for circumferential seam (joggle joint, external surface smooth). Joggle joint overlap minimum of three times the agreed finished thickness. Longitudinal seam = butt joint without backing material. Manual arc welding not for external longitudinal seam. Typical joggled butt joint see Fig.3.
+7.4 Surfaces of plates at seams shall not be out of alignment with each other at any point by more than 10 percent of the plate thickness.
+7.5 Welds (except ends of longitudinal welds) shall not be dressed without approval. Weld surface smooth contour. Weld joint free from undercuts (slight intermittent occurrences disregarded if not a sharp notch).
+7.6 All welding of shell and attachments completed before final heat treatment.
+7.7 Before welding plates free from scale, grease, oil, dirt. Before closing, longitudinal seam visually examined both sides.
+7.8 Welding consumables such that physical values of welded metal not lower than parent metal.
+7.8.1 As far as possible all welded joints double welded butt joints. Single welded butt joint if second side not possible, with complete fusion and penetration.
+7.8.1.1 Butt weld shall have full penetration. Excess thickness shall not compromise weld integrity.
+7.8.1.2 Joggled butt welds shall have adequate penetration verified by macro etch, bend testing and tensile testing.
+7.8.2 Fusion of welded metal with parent metal smooth, no undercutting/abrupt irregularity. No cracks, notching or porous patches in welded surfaces and surface adjacent to weld. Welded bead not concave.
+
+8 MANUFACTURE
+8.1 Number of longitudinal seams in welded cylinder shall not exceed one and number of circumferential seams shall not exceed two.
+8.2 When welded cylinder contains a longitudinal seam, edges of plate forming longitudinal joint of shell rolled or formed by pressure, not by blows, to required curvature.
+8.3 The end or dished part shall be of semi-ellipsoidal shape. The end shall have a cylindrical skirt or parallel portion of minimum length 20 mm or three times the shell thickness, whichever is greater.
+8.4 Agreed Finished Thickness — shall not be less than the minimum calculated wall thickness obtained by application of formulae in 6.2.1 and 6.2.2 or 6.2.3 at any point and at any transverse section of the cylindrical portion. Additional thickness may cover corrosion allowance and stresses due to horizontal acceleration and retardation during transportation, as agreed and approved.
+8.5 Examination of Cylinders Before Closing-in Operation — examined for wall thickness, circularity, skirt portion, surface defects, profile regularity, offset at joints, straightness. Eccentricity of bunghole centre line with respect to centre line of half/body of cylinder shall not be more than one percent of the nominal diameter of cylinder subject to a maximum of 2 mm.
+8.5.1 Circularity — out-of-roundness of cylindrical shell limited so that difference between maximum and minimum outside diameter in same cross-section is not more than 1 percent of the mean of these diameters for two-piece cylinders, and 1.5 percent for three-piece cylinders. Measurement not taken over any of the welds but adjacent to the welds.
+8.5.2 Surface Defects — internal and external surfaces free from defects which will adversely affect safe working.
+8.5.3 Profile Regularity — contour of dished end shall not deviate from approved dimensions by more than 1.25 percent of the nominal diameter in respect of radial dimensions and by more than 1 percent in respect of axial dimensions. Deviations not abrupt and outside specified shape.
+8.5.4 Straightness — unless otherwise shown, maximum deviation of shell from a straight line shall not exceed 0.3 percent of the cylindrical length (see Fig.4).
+8.5.5 Verticality — deviation from vertical shall not exceed 10 mm/m length (see Fig.4). [Fig.4: 1 = Max 0.01 L, 2 = Max 0.003 L.]
+
+9 VALVE CONNECTION, VALVE PAD AND VALVE PROTECTION
+9.1 Valve Connection — welded pad/bung threaded to suit valve specified in IS 8737.
+9.1.1 Prior to fitting valve, bung threads cleaned using machine tap of same thread profile. Cleaning ensures freedom from grit, zinc, foreign matter; breaking of scale; re-correction of distortion. Valve fitted using approved jointing compound at specific torque after internal cleaning.
+9.1.2 Any other valve connection as agreed and approved.
+9.2 Valve Pad — single or two runs of welding for bungs with backing pad; bungs without backing pad one run inside and one outside. If positive projection of bung inside cylinder is 4 mm or more, welded with single or two runs as per approved design.
+9.3 Valve Protection.
+9.3.1 Cylinder shall have valve protected by stout metal cap or shroud or metal cover or protective metal ring or grill as approved. [Amendment 2: The shroud may be metallic or non-metallic as approved by statutory authority; arrangement for fixing shroud made of compatible steel.] Metal cap/cover vented and screwed onto neck.
+9.3.2 [Amendment 2 substituted] The protective metal ring or grill shall be welded or fixed to the upper end of the cylinder concentric with the neck. The eccentricity of the welded metal ring or grill with respect to the valve pad/bung shall not be more than 1 percent of the nominal diameter of cylinder subject to a maximum of 3 mm.
+9.3.3 Protective ring made of tube/pipe — dimensions as agreed.
+9.3.4 Protective device of adequate construction. When a water filled container with quantity half the nominal water capacity is dropped from a height of 1.2 m so that the protective device struck a hard flat surface, there shall be no damage to the valve. NOTE — drop test only carried out on de-pressurized cylinders.
+
+10 FITTINGS OTHER THAN VALVES
+10.1 Handle — handle or other lifting arrangement provided, capable of withstanding static loading in any direction equal to twice the weight of the cylinder when filled with water.
+10.2 Foot Ring — where fitted as separate fixture at bottom, at least 20 mm away from circumferential weld. Thickness of sheet not less than calculated wall thickness of cylinder body. Foot ring may be intermittently welded; bottom edge curled inwards; provided with ventilation/drainage holes. Maximum permissible deviation from vertical not exceed 1°. Foot ring of steel (see 4.3). Bottom of foot ring not less than 8 mm below outside bottom of cylinder shell for cylinders up to 34 l nominal water capacity. For cylinders more than 34 l and up to 50 l nominal water capacity this value minimum 15 mm, and for cylinders exceeding 50 l nominal water capacity this value minimum 25 mm.
+10.3 Bung — requirements per Annex B; material per 4.2.
+
+11 HEAT TREATMENT
+11.1 All cylinders shall be efficiently and uniformly normalized or stress relieved per recommendations of steel manufacturers and approved by inspecting authority after manufacture and completion of all welding (including attachments) and before hydrostatic test applied. Complete record of heat treatment cycle maintained (see 3.1 and 3.2).
+11.2 Cylinder manufactured from the steel conforming to IS 15914 shall be normalized (see 3.1) as per the material standard.
+11.3 Localized heat treatment shall not be permitted.
+
+12 INSPECTION
+12.1 General — purchaser/inspecting authority free access; may reject any non-complying cylinder.
+12.1.3 Visual inspection limits of defects as per IS 9639.
+12.2 Inspection of Components.
+12.2.1 All pressings, halves and cylindrical shells examined for surface defects before any seam welded; rejected if detrimental.
+12.2.2 At discretion of inspecting authority, 2 percent or more of pressings/halves/shells selected at random for minimum thickness before any seam welded.
+12.2.3 If any pressing/half/shell less than minimum specified thickness, whole output examined; any below minimum de-shaped.
+
+13 RADIOGRAPHIC EXAMINATION
+13.1 Radiographic examination when required conforms to techniques and acceptability criteria of relevant standards (IS 1182, IS 2595, IS 3657, IS 4853, 8.7 of IS 2825). Technique sufficiently sensitive to reveal a defect having thickness equal to 2 percent of combined thickness of weld and strip.
+13.2 Spot Radiography (see definition of J under 6.2.1).
+13.2.1 One out of every 50 consecutive cylinders from continuous production taken at random for spot radiography.
+13.2.2 In addition, after change in type/size of cylinder or welding procedure (including machine settings) or break in production exceeding 4 h, first cylinder welded taken for spot radiography.
+13.3 Testing details of radiography see IS 3196 (Part 3).
+
+14 CHECKING OF WATER CAPACITY
+Water capacity of cylinders checked by weighing method. Tolerance for water capacity shall be +5/0 percent for cylinders up to and including 13 l water capacity and +3/0 percent or 0.65 l whichever is more for cylinder above 13 l water capacity.
+
+15 HYDROSTATIC TEST
+15.1 Each heat treated cylinder subjected to hydrostatic test. Pressure increased gradually till required test pressure reached. After test pressure reached and external surfaces dried, retained for not less than 30 s. Any reduction in pressure during retention or any leakage or visible bulge or deformation treated as failure. Any cylinder which does not pass shall be rejected.
+15.1.1 Value of hydrostatic test pressure for LPG with vapour pressure not exceeding 16.87 kg/cm² (gauge) at 15°C shall be taken as 25 kg/cm². For LPG with vapour pressure exceeding 16.87 kg/cm² (gauge) at 15°C value of hydrostatic test pressure taken from IS 8867 and approved by statutory authority.
+15.1.2 Hydrostatic test carried out according to IS 3196 (Part 3).
+
+16 PNEUMATIC LEAKAGE TEST
+16.1 Each cylinder, after dried and fitted with valve, tested for leakage by subjecting to air pressure of not less than 1.180 MPa (12 kgf/cm²) for a period of 1 min while immersed in water; shall show no leakage from body and valve pad joint. Test carried out using dry air after fixing safety cap on valve.
+16.1.1 Alternatively any other method approved by statutory authority may be used.
+16.1.2 Pneumatic leakage test carried out according to IS 3196 (Part 3).
+
+17 FATIGUE TEST
+17.1 Fatigue Testing/Cycle Testing.
+17.1.1 For this test, three cylinders guaranteed by manufacturer to be representatives of minimum set by design, including all markings, filled with non-corrosive liquid and subjected to successive reversals of hydraulic pressure. This test considered as type test.
+17.1.2 Test carried out as type test an upper cyclic pressure, either: a) equal to two-thirds of the test pressure, in which case cylinder subjected to 80 000 cycles without failure; or b) equal to the test pressure, in which case cylinder subjected to 12 000 cycles without failure. Values of lower cyclical pressure shall not exceed 10 percent of upper cyclic pressure. Frequency of reversals of pressure shall not exceed 0.25 Hz (15 cycles/min). Temperature measured on outside surface shall not exceed 50°C during the test.
+17.1.3 After test cylinders burst tested and meet requirements of 17.2.
+17.2 Burst Test under Hydraulic Pressure — one cylinder selected at random from those passing hydrostatic test subjected to hydraulic pressure gradually till it bursts. Pressure recorded.
+17.2.1 Bursting test per IS 3196 (Part 3). Rate of pumping shall not exceed five times water capacity per hour.
+17.2.2 Criteria for interpretation: a) volume of water between start of pressure rise and bursting; b) difference between volume of cylinder at beginning and end of test (see 17.2.3).
+17.2.3 Minimum Test Requirement — The measured bursting pressure Pb shall not under any circumstances be less than 225 percent of the test pressure Ph, and shall conform to: a) cylinder shall burst without fragmentation (if leakage starts from welding before fracture/bursting, discard and take fresh specimen); b) fracture shall not occur in direction parallel to circumferential weld within 10 mm from edge of circumferential weld; c) main fracture shall not show brittleness — edges not radial but at angle to a diametrical plane, displaying reduction of area throughout thickness; d) fracture shall not reveal a visible defect in the metal; e) ratio of volumetric expansion of cylinder to initial volume shall be greater than or equal to: 1) 20 percent if length of cylinder is greater than its diameter; 2) 17 percent if length of cylinder is equal to or less than its diameter.
+
+18 ACCEPTANCE TESTS
+18.1 For every batch of heat-treated and finished cylinders, sample taken per 3.7.1. Test cylinder selected at random and various acceptance tests carried out on test specimens.
+18.1.1 Number of test specimen and method of testing per IS 3196 (Part 3).
+18.1.2 The percentage elongation and yield strength, wherever applicable, and tensile strength thus determined shall not be less than the respective requirements for the material specified in 4.
+18.1.3 The bend test specimen having cracks or any other open defects, which exceed 3 mm, measured in any direction on the convex surface of the specimen, shall be treated as a failure.
+
+19 ADDITIONAL TEST
+For cylinders manufactured from the steel as per IS 15914 additional test such as cylinder body integrity impact test and drop test shall be carried out as per Annex C. These tests shall be considered as type test.
+
+20 MARKING
+20.1 General Instructions — each cylinder clearly and permanently marked by stamping; name plate not on shoulder if risk of corrosion/embrittlement; space for date of test; markings legible; small radii at changes of section.
+20.2 Each cylinder permanently stamped with: a) Serial number, abbreviated name, monogram of manufacturer and identification of owner; b) Number of this Indian Standard; c) Maximum working pressure, in MPa; d) Test pressure, in MPa and date of hydrostatic test (such as 3/05 for March 2005); e) Agreed finished thickness, in mm; f) Tare weight in kg, gross weight in kg and water capacity in litres; g) Inspecting agency's official mark; h) Letter 'N' or 'SR' next to IS number, if the cylinder is normalized or stress relieved; and j) Name of gas. NOTE — tare weight shall include weight of valve fitted.
+20.2.1 BIS Certification Marking — details with BIS; use of Standard Mark governed by BIS Act 1986.
+20.3 Marking may be made at: a) Foot ring; b) Any non-pressure part; c) Dished end (if demonstrated in burst test fracture does not initiate in markings); d) A plate of compatible material welded soundly.
+
+21 COLOUR IDENTIFICATION — cylinder painted externally with signal red colour (Shade No.537 of IS 5) or any other colour approved by statutory authority.
+
+22 RECORD — record of all tests kept; test certificate approved and signed by inspecting authority forwarded to statutory authority and purchaser.
+
+23 PREPARATION FOR DESPATCH
+23.1 All cylinders thoroughly cleaned and dried internally before fitted with valves.
+23.2 [As amended by Amendment No.3 and No.4] The outside surface shall be grit (see IS 4683) blasted with minimum SA 2.5 grade of blast (see IS 9954) and shall be given following protective coatings:
+a) Spraying zinc to give a coating of minimum thickness of 37 microns unless otherwise agreed; zinc wire per IS 12447; zinc spraying per IS 6586;
+b) One coat of primer as per IS 12744 shall be used in case of enamel paint. If cylinder painted with polyurethane paint, one coat of epoxy primer as per IS 13238 shall be used. Colour of primer as agreed;
+c) One coat of synthetic enamel paint conforming to IS 2932 or polyurethane paint conforming to IS 13213, of signal red colour (Shade No.537 of IS 5). Both layers of primer and paint total thickness minimum 30 microns;
+d) The total combined thicknesses of above protective coatings shall be minimum 67 microns;
+e) As an alternate to a), b) and c), cylinders shall be powder coated conforming to IS 13871 of signal red colour. The minimum thickness of powder coating shall be 50 microns.
+NOTE — coating thickness measurement: 5 gauge readings per spot within 2 cm × 2 cm; 5 spot measurements evenly spaced; each spot not below 80 percent of specified minimum thickness and average not below specified thickness.
+
+ANNEX A — LIST OF REFERRED INDIAN STANDARDS (Clause 2): IS 5:2007; IS 817:1966; IS 1079:1994; IS 1182:1983; IS 1875:1992; IS 1956 (Part 1):1976; IS 2062:2011; IS 2074:1992; IS 2595:2008; IS 2825:1969; IS 2932:2003; IS 3196 (Part 3):2012; IS 3657:1978; IS 4576:1999; IS 4683:1968; IS 4853:1982; IS 6240:2008; IS 6586:1989; IS 7142:1995; IS 7202:1974; IS 7241:1981; IS 7307 (Part 1):1974; IS 7310 (Part 1):1974; IS 8737:1995; IS 8867:1978; IS 9122:2008; IS 9639:1980; IS 9954:1981; IS 12447:1988; IS 13258:1991; IS 13871:1993; IS 15637:2006; IS 15894:2011; IS 15914:2011; IS 16054. (Amendment 3 added IS 2931 (Part 1):2013, IS 12744 (Part 1):2013, IS 13213:2018, IS 13238:1991.)
+
+ANNEX B — REQUIREMENTS OF BUNGS (Clause 10.3)
+B-1 Finish — bung clean, even, without chatter, free from visual defects, required machining finish; threads smooth finished, not broken at any point; manufacturer to check each finished machined bung dimensions (neck diameter, chamfer angle at skirt); bung threads inspected for conformity using gauges per IS 7202/IS 9122/IS 15894.
+B-2 After welding and before fitting valve, bung thread cleaned and checked for conformity using taper thread plug gauges per IS 7202/IS 9122/IS 15894.
+B-3 Inspecting authority test 3 percent of lot of machined bungs; on failure second sample of double drawn and inspected; on failure of any out of second draw, whole lot rejected.
+B-4 One bung out of sample size sectioned and checked for conformity to thread form and finish.
+
+ANNEX C — IMPACT AND DROP TESTS (Foreword and Clause 19)
+C-1 Cylinder Body Integrity Impact Tests.
+C-1.1 General — ability of cylinder design to withstand loadings other than internal pressure demonstrated by series of impact tests. Each type of test on cylinder without internal pressure and cylinders pressurized to Pf/1.2. Specified impact energy and striking velocity achieved by striking with moving striker or dropping cylinder. Strikers (flat surface and edge) metallic, hardness higher than cylinder.
+C-1.2 Flat Surface Impact Test — C-1.2.1 Procedure: striker flat surface, length = overall cylinder length, width = cylinder diameter. Impact energy F = 30 M (F in Joules, M = maximum operating mass in kg). Striking velocity between 7 m/s and 8 m/s. Two un-pressurized cylinders impacted with surface parallel to cylinder, then on shoulder of end with surface at 45° to axis (see Fig.5). Examined per IS 16054. C-1.2.2 Requirement: after impacts, pressurized cylinders shall not leak; burst test cylinders meet 17.2; fatigue cylinders meet 17.1.
+C-1.3 Edge Impact Test — C-1.3.1 Procedure: striker profile per Fig.6 (R3, dimensions 16/28/16, 50/25, base 60 mm), length per Fig.7. Impact energy F = 12 M (M in kg). Striking velocity between 4 m/s and 5 m/s. Two un-pressurized cylinders impacted with edge parallel to cylinder axis, then edge perpendicular, positions separated minimum 45° round circumference. Examined per IS 16054. C-1.3.2 Requirement: after impacts pressurized cylinders shall not leak; burst meets 17.2; fatigue meets 17.1.
+C-2 Drop Tests — C-2.1 Procedure: two finished cylinders, including foot-ring and/or valve protection, weighted to represent maximum operating mass and pressurized to Pf/1.2, dropped twice into a flat surface from 1.2 m, in each of five different orientations (Fig.9), that is 10 drops per cylinder. Steel plate 10 mm thick, flatness ≤2 mm, on concrete bed ≥100 mm thick. Examined per IS 16054. C-2.2 Requirement: after ten drops, cylinders shall not leak; burst meets 17.2; fatigue meets 17.1.
+
+ANNEX D — COMMITTEE COMPOSITION (Gas Cylinders Sectional Committee, MED 16) — membership list [non-technical, omitted from report].
+
+ROUNDING — final value of test/analysis result rounded off per IS 2:1960; significant places same as specified value.
+
+KEY PARAMETERIZATION DIMENSIONS DETECTED:
+- Steel material / construction standard: IS 6240 or IS 15914 (Cl 4.1). Drives wall-thickness rule (Cl 6.2.2 vs 6.2.3), heat treatment (Cl 11.1 vs 11.2 normalizing compulsory), and additional impact+drop tests (Cl 19 — required only for IS 15914).
+- Shell construction: Two-piece or Three-piece. Drives circularity / out-of-roundness limit (Cl 8.5.1: 1% vs 1.5%).
+Water capacity (5–250 l, continuous) drives piecewise rules for water-capacity tolerance (Cl 14: ≤13 l +5/0%, >13 l +3/0% or 0.65 l) and foot-ring ground clearance (Cl 10.2: ≤34 l ≥8 mm, 34–50 l ≥15 mm, >50 l ≥25 mm) — captured as descriptive text rules.

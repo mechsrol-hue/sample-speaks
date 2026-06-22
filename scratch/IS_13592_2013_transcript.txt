@@ -1,0 +1,231 @@
+IS 13592 : 2013
+
+Indian Standard
+UNPLASTICIZED POLYVINYL CHLORIDE (PVC-U) PIPES FOR SOIL AND WASTE
+DISCHARGE SYSTEM FOR INSIDE AND OUTSIDE BUILDINGS INCLUDING VENTILATION
+AND RAIN WATER SYSTEM — SPECIFICATION
+(First Revision)
+
+ICS 91.140.80; 23.040.20
+
+FOREWORD
+This Indian Standard was adopted by the Bureau of Indian Standards, after the draft finalized by the
+Plastic Piping Systems Sectional Committee had been approved by the Civil Engineering Division Council.
+This standard was first published in 1992. In the revision of this standard considerable assistance has been
+derived from ISO 3633 : 2002. In this revision following major modifications have been made:
+a) Pipes of nominal outside diameters up to 315 mm have been included,
+b) Method for 'Effect on sunlight' test has been modified,
+c) 'Resistance to external blows at 0°C' and 'Tensile' tests are not alternate to each other, and
+d) 'Resistance to dichloromethane at specified temperature' test has been included.
+
+1 SCOPE
+This standard covers requirements for plain and socket end unplasticized polyvinyl chloride (PVC-U) pipes
+with nominal outside diameters 40 mm to 315 mm for use for soil and waste discharge system inside and
+outside buildings including ventilation, rain water and rain water harvesting applications.
+
+2 REFERENCES
+IS 4669 : 1968 Methods of test for polyvinyl chloride resins
+IS 4905 : 1968 Methods for random sampling
+IS 4985 : 2000 Unplasticized PVC pipes for potable water supplies — Specification
+IS 12235 Thermoplastics pipes and fittings — Methods of test:
+  (Part 1) : 2004 Measurement of dimensions
+  (Part 2) : 2004 Determination of vicat softening temperature
+  (Part 5) : 2004 Longitudinal reversion
+  (Part 6) : 2004 Stress relief test
+  (Part 7) : 2004 Resistance to sulphuric acid
+  (Part 8) : 2004 Resistance to internal hydrostatic pressure
+  (Part 9) : 2004 Resistance to external blows (impact resistance) at 0°C (round-the-clock method)
+  (Part 11) : 2004 Resistance to dichloromethane at specified temperature
+  (Part 13) : 2004 Determination of tensile strength and elongation
+IS 14182 : 2004 Solvent cement for use with polyvinyl chloride pipes and fittings
+
+3 TYPES OF PIPES
+Type A — for use in ventilation pipe work and rain water and rain water harvesting applications.
+Type B — for use in soil and waste discharge systems.
+
+4 SIZE DESIGNATION
+4.1 Pipes shall be designated by the nominal outside diameter DN, in mm.
+4.2 Nominal outside diameter DN of pipes as covered in the standard are 40, 50, 63, 75, 90, 110, 125, 140,
+160, 180, 200, 250 and 315 mm.
+
+5 COLOUR OF PIPE
+Surface colour of the pipes shall be dark shade of grey.
+
+6 MATERIALS
+6.1 The material from which the pipes are produced shall consist essentially of polyvinyl chloride to which
+may be added only those additives that are needed to facilitate the manufacture of sound and durable pipes.
+6.2 The addition of the manufacturer's own rework material is permissible.
+6.3 The composition shall be based on PVC resin having a K-value of 64 or greater when tested in accordance
+with IS 4669.
+
+7 DIMENSIONS
+7.1 Diameter and Wall Thickness
+Mean outside diameter, outside diameter at any point and wall thickness for Type A and Type B pipes
+manufactured plain or with socket shall be as given in Table 1. Dimensions shall be measured according to
+the method given in IS 12235 (Part 1).
+
+Table 1 Dimension of Pipes (Clause 7.1)
+All dimensions in millimetres.
+Sl No. | DN | Mean OD Min | Mean OD Max | OD at Any Point Min | OD at Any Point Max | Wall Thickness S Type A Min | Type A Max | Wall Thickness S Type B Min | Type B Max
+i)    | 40  | 40.0  | 40.3  | 39.5  | 40.5  | 1.8 | 2.2 | 3.2 | 3.8
+ii)   | 50  | 50.0  | 50.3  | 49.4  | 50.6  | 1.8 | 2.2 | 3.2 | 3.8
+iii)  | 63  | 63.0  | 63.3  | 62.2  | 63.8  | 1.8 | 2.2 | 3.2 | 3.8
+iv)   | 75  | 75.0  | 75.3  | 74.1  | 75.9  | 1.8 | 2.2 | 3.2 | 3.8
+v)    | 90  | 90.0  | 90.3  | 88.9  | 91.2  | 1.9 | 2.3 | 3.2 | 3.8
+vi)   | 110 | 110.0 | 110.4 | 108.6 | 111.4 | 2.2 | 2.7 | 3.2 | 3.8
+vii)  | 125 | 125.0 | 125.4 | 123.5 | 126.5 | 2.5 | 3.0 | 3.2 | 3.8
+viii) | 140 | 140.0 | 140.5 | 138.3 | 141.7 | 2.9 | 3.4 | 3.6 | 4.2
+ix)   | 160 | 160.0 | 160.5 | 158.0 | 162.0 | 3.2 | 3.8 | 4.0 | 4.6
+x)    | 180 | 180.0 | 180.6 | 177.8 | 182.2 | —   | —   | 4.6 | 5.5
+xi)   | 200 | 200.0 | 200.6 | 197.6 | 202.4 | —   | —   | 4.9 | 5.6
+xii)  | 250 | 250.0 | 250.8 | 247.0 | 253.0 | —   | —   | 6.2 | 7.1
+xiii) | 315 | 315.0 | 316.0 | 311.2 | 318.8 | —   | —   | 7.7 | 8.7
+
+7.2 Length of Pipe
+Pipes shall be supplied in nominal lengths of 2, 3, 4 or 6 metres either plain or with socket for solvent
+cementing/grooved socket. Tolerances on specified length shall be + 10 mm and – 0 mm.
+7.2.1 The nominal length of the pipe with socket for solvent cementing/grooved socket shall be as given in Fig. 1.
+
+7.3 Socket of Pipe
+7.3.1 Minimum wall thickness of socket on pipes shall be as given in Table 2 read with Fig. 2 and Fig. 3.
+7.3.2 Dimensions of sockets for solvent cementing and grooved sockets of pipes shall be as given in Tables 3
+and 4 respectively, read with Fig. 2 and 3.
+
+Table 2 Minimum Wall Thickness of Sockets on Pipes (Clause 7.3.1)
+All dimensions in millimetres.
+Sl No. | DN | S2 Min Type A | S2 Min Type B | S3 Min Type A | S3 Min Type B
+i)    | 40  | 1.6 | 2.9 | 1.0 | 2.4
+ii)   | 50  | 1.6 | 2.9 | 1.0 | 2.4
+iii)  | 63  | 1.6 | 2.9 | 1.0 | 2.4
+iv)   | 75  | 1.6 | 2.9 | 1.0 | 2.4
+v)    | 90  | 1.7 | 2.9 | 1.1 | 2.4
+vi)   | 110 | 2.0 | 2.9 | 1.2 | 2.4
+vii)  | 125 | 2.3 | 2.9 | 1.4 | 2.4
+viii) | 140 | 2.6 | 3.2 | 1.6 | 2.7
+ix)   | 160 | 2.9 | 3.6 | 1.8 | 3.0
+x)    | 180 | —   | 4.1 | —   | 3.4
+xi)   | 200 | —   | 4.4 | —   | 3.7
+xii)  | 250 | —   | 5.5 | —   | 4.7
+xiii) | 315 | —   | 6.9 | —   | 5.8
+
+Table 3 Dimensions for Sockets for Solvent Cementing (Clause 7.3.2)
+All dimensions in millimetres.
+Sl No. | DN | Socket Depth C Min | Mean Inside Dia of Socket at Midpoint D1 Min | D1 Max
+i)    | 40  | 26.0 | 40.1  | 40.3
+ii)   | 50  | 30.0 | 50.1  | 50.3
+iii)  | 63  | 36.0 | 63.1  | 63.3
+iv)   | 75  | 40.0 | 75.1  | 75.3
+v)    | 90  | 46.0 | 90.1  | 90.3
+vi)   | 110 | 48.0 | 110.1 | 110.4
+vii)  | 125 | 51.0 | 125.1 | 125.4
+viii) | 140 | 54.0 | 140.2 | 140.5
+ix)   | 160 | 58.0 | 160.2 | 160.5
+x)    | 180 | 60.0 | 180.2 | 180.5
+xi)   | 200 | 60.0 | 200.3 | 200.6
+xii)  | 250 | 60.0 | 250.4 | 250.8
+xiii) | 315 | 60.0 | 315.4 | 316.0
+
+8 PHYSICAL TEST REQUIREMENTS
+8.1 Visual Appearance
+The internal and external surface of the pipes shall be smooth and clean, and free from grooving and other
+defects. The end shall be clearly cut and shall be square with the axis of the pipe.
+8.2 Reversion Test
+When tested by the method described in IS 12235 (Part 5), a length of pipe sample of 200 ± 20 mm shall
+not alter in length by more than 5 percent.
+
+Table 4 Dimensions of Grooved Socket (Clause 7.3.2)
+All dimensions in millimetres
+Sl No. | DN | Inside Dia of Socket D1 Min | D1 Max | Inside Dia of Beading D2 Min | D2 Max | Length of Beading and Neck A Max | Neck of Socket B Min | Length Beyond Beading C Min
+i)    | 40  | 40.3  | 41.1  | 49.6  | 50.6  | 18 | 5  | 18
+ii)   | 50  | 50.3  | 51.1  | 59.6  | 60.6  | 18 | 5  | 20
+iii)  | 63  | 63.3  | 64.1  | 72.9  | 73.9  | 18 | 5  | 23
+iv)   | 75  | 75.3  | 76.4  | 84.5  | 85.5  | 20 | 5  | 25
+v)    | 90  | 90.3  | 91.4  | 99.5  | 100.5 | 23 | 5  | 28
+vi)   | 110 | 110.4 | 111.6 | 120.3 | 121.3 | 26 | 6  | 32
+vii)  | 125 | 125.4 | 126.4 | 137.1 | 138.2 | 28 | 7  | 35
+viii) | 140 | 140.5 | 141.4 | 152.1 | 153.2 | 30 | 8  | 38
+ix)   | 160 | 160.5 | 161.5 | 173.8 | 175.0 | 32 | 9  | 42
+x)    | 180 | 180.6 | 181.5 | 193.8 | 195.0 | 36 | 10 | 46
+xi)   | 200 | 200.6 | 201.8 | 214.0 | 215.4 | 40 | 15 | 50
+xii)  | 250 | 250.8 | 252.0 | 264.0 | 265.4 | 70 | 15 | 55
+xiii) | 315 | 316.0 | 317.2 | 329.0 | 330.4 | 70 | 15 | 62
+
+8.3 Stress Relief Test
+This test shall be carried out for socket end pipes only. When tested by the method described in IS 12235
+(Part 6), the test specimens shall not show blisters, excessive delamination or cracking or signs of weld
+line splitting.
+8.4 Vicat Softening Temperature
+When determined in accordance with IS 12235 (Part 2), the vicat softening temperature of the specimen
+shall not be less than 79°C.
+8.5 Effect of Sunlight
+Two samples each 300 mm long from different length of pipes shall be prepared. One sample shall be kept
+covered and the other exposed to sun for not less than 1 600 h at ambient temperature. After the required
+period of exposure, the tensile strengths of two samples when tested as per IS 12235 (Part 13) shall not show
+difference of more than 20 percent of their initial tensile strengths.
+
+9 RESISTANCE TO SULPHURIC ACID
+When tested by the method described in IS 12235 (Part 7), the mass of specimen shall neither increase by
+more than 0.32 g nor decrease by more than 0.13 g. The effect of the acid on the surface appearance of the
+specimen (roughening, bleaching, or blacking) shall be ignored.
+
+10 MECHANICAL PROPERTIES
+10.1 Resistance to External Blows at 0°C (Impact Test)
+When tested by method prescribed in IS 12235 (Part 9), the pipe shall have a true impact rate of not more
+than 10 percent. Mass of striker and height of fall shall be as per Annex A. In case of socket end pipes, this
+test shall be carried out on the plain portion of the pipes taken at least 100 mm away from the root of the socket.
+10.2 Tensile Strength
+When determined in accordance with the method described in IS 12235 (Part 13), the tensile strength at
+break shall not be less than 45 MPa.
+10.3 Axial Shrinkage (for Type B Pipes Only)
+The axial shrinkage shall not exceed 2 percent when determined in accordance with Annex B.
+
+11 WATER TIGHTNESS OF JOINT
+The assembly of pipe and fitting shall be tested for water tightness. Apply a pressure of 0.05 MPa for a
+period of 15 min and there should be no leakage at any joint. Jointing of solvent cementing joints is to be
+carried out using solvent conforming to IS 14182.
+
+12 RESISTANCE TO DICHLOROMETHANE AT SPECIFIED TEMPERATURE
+When tested in accordance with the method described in IS 12235 (Part 11), there shall be no attack observed
+on any part of the surface of the test piece.
+
+13 SAMPLING AND CRITERIA FOR CONFORMITY
+13.1 Acceptance Test — The scale of sampling and criteria for conformity as a lot for acceptance tests
+specified in Table 5 shall be as given in Annex C.
+13.2 Type Tests — Type test given in Table 5 shall be conducted whenever a change is made in the material
+composition; method of manufacture or a new size of pipe is to be introduced.
+
+14 MARKING
+14.1 Each pipe shall be clearly and indelibly marked with: a) Manufacturer's name or trade-mark; b) Nominal
+outside diameter of pipe; c) Type A or Type B; d) Batch No.
+14.1.1 Class of Pipe — Type A: Blue; Type B: White.
+14.2 BIS Certification Marking.
+
+Table 5 Acceptance and Type Tests (Clauses 13.1 and 13.2)
+Sl No. | Test | Clause | Acceptance Test | Type Test
+i)    | Colour | 5 | √ |
+ii)   | Dimensional | 7.1, 7.2, 7.3 | √ |
+iii)  | Visual | 8.1 | √ |
+iv)   | Reversion | 8.2 | √ |
+v)    | Stress relief test | 8.3 | √ |
+vi)   | Impact strength | 10.1 | √ |
+vii)  | Tensile strength | 10.2 | √ |
+viii) | Axial shrinkage | 10.3 | √ |
+ix)   | Water tightness of joint | 11 | √ |
+x)    | Vicat softening temperature | 8.4 | | √
+xi)   | Effect of sunlight | 8.5 | | √
+xii)  | Resistance to H2SO4 | 9 | | √
+xiii) | Resistance to dichloromethane at specified temperature | 12 | √ |
+
+ANNEX A (Clause 10.1) MASS OF STRIKER AND HEIGHT OF FALL FOR IMPACT TEST
+Table 6 Classified Striker Mass and Drop Height Conditions for the Falling Weight Impact Test
+Sl No. | Nominal Outside Diameter of Pipes da mm | Mass of Falling Weight kg | Fall Height mm
+i)   | 40 to 50    | 0.25 ± 0.5% | 1 000 ± 10
+ii)  | 63 to 75    | 0.25 ± 0.5% | 2 000 ± 10
+iii) | 90 to 110   | 0.50 ± 0.5% | 2 000 ± 10
+iv)  | 125 and above | 1.00 ± 0.5% | 2 000 ± 10
+
+ANNEX B (Clause 10.3) DETERMINATION OF AXIAL SHRINKAGE OF PIPES
+Test method for determining permanent axial shrinkage at 90°C. T = (ΔL/L) × 100.
+
+ANNEX C (Clause 13.1) SCALE OF SAMPLING AND CRITERIA FOR CONFORMITY FOR ACCEPTANCE TEST
+(Sampling tables 7, 8, 9, 10, 11, 12 — EXCLUDED from template per instructions.)

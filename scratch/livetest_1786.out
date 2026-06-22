@@ -1,0 +1,31 @@
+◇ injected env (10) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+
+======================================================================
+▶  AGENT LIVE TEST — IS 1786:2008
+   PDF: /Users/saurabh/Downloads/IS 1786 _ 2008.pdf
+======================================================================
+I'll start by reading the entire PDF.
+Good, found the project. Now let me read the PDF. SLUG = "IS_1786_2008". Let me start reading the PDF pages.
+Now let me read the remaining pages.
+I now have the full PDF. Let me read the completeness check script and the reference template.
+Now let me read the reference template to match its shape.
+I have everything I need. Let me create the scratch directory and write the transcript.
+Now let me build the template JSON.
+Now let me run the completeness check.
+Completeness passes. Let me confirm the final parameter count.
+IS 1786:2008: 21 parameters, 15 dimension sizes, completeness=ok
+IS 1786:2008: 21 parameters, 15 dimension sizes, completeness=ok
+
+✓ 1786: agent finished in 364s
+   isNumber:  IS 1786:2008
+   template:  public/is_templates/IS_1786_2008.json
+   cost:      $1.73   (turns: 17)   running total: $1.73
+   summary:   IS 1786:2008: 21 parameters, 15 dimension sizes, completeness=ok
+   completeness (independent re-check): PASS ✅
+     DN expected: 11 | grid: 15 | missing: []
+
+======================================================================
+SUMMARY   (total spend: $1.73 of $5 trial)
+  ✓ 1786    $1.73  364s  IS 1786:2008  completeness=PASS
+======================================================================
+

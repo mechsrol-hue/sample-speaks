@@ -1,0 +1,119 @@
+{
+  "isNumber": "IS 2347:2023",
+  "title": "Domestic Pressure Cooker — Specification",
+  "revision": "Seventh Revision",
+  "parameterizationDims": ["cookerType", "heatingType"],
+  "dimensionOptions": {
+    "cookerType": ["Outer Lid", "Inner Lid", "Screw Clamp / Other Locking Device"],
+    "heatingType": ["Gas / External Heat", "Electric / Integral Heating"]
+  },
+  "defaults": { "cookerType": "Outer Lid", "heatingType": "Gas / External Heat" },
+  "notes": "IS 2347 limits are not indexed by size/grade tables; most acceptance values are constant or expressed as a multiple of the manufacturer-declared (greatest) nominal cooking pressure (NCP). The only genuinely option-dependent values are the gross-capacity range (depends on heating type) and which lid-removal annex applies (depends on cooker/lid type). Table 1 (Scale of Sampling) is excluded by design.",
+  "parameters": [
+    { "clauseRef": "Cl 4", "section": "Capacity", "parameterName": "Gross nominal capacity range", "unit": "litre", "limitType": "range", "acceptanceOrType": "acceptance", "variesBy": ["heatingType"], "sourceTable": "Cl 4 prose",
+      "valueTable": {
+        "Gas / External Heat": { "min": 1, "max": 24 },
+        "Electric / Integral Heating": { "min": 1, "max": 10 }
+      },
+      "specText": "Gross capacity expressed only in complete or half litre units." },
+
+    { "clauseRef": "Cl 4", "section": "Capacity", "parameterName": "Tolerance on gross capacity", "unit": "ml (deviation from nominal)", "limitType": "range", "acceptanceOrType": "acceptance", "variesBy": [], "min": 0, "max": 499, "specText": "Tolerance on gross capacity = +499 ml, -0 ml (tested per Annex B)." },
+
+    { "clauseRef": "Cl 3.9.1", "section": "Capacity", "parameterName": "Body capacity, Min", "unit": "fraction of gross nominal capacity", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": [], "min": 0.667, "specText": "Body capacity shall be more than 2/3 (0.667) of the gross nominal capacity (see Cl 4.2 / Annex B)." },
+
+    { "clauseRef": "Cl 8.1", "section": "Pressure / Leakage", "parameterName": "Air pressure test", "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "expected": "No sign of leakage or deformation when air pressure of 40% of nominal cooking steam pressure is slowly raised to nominal cooking steam pressure." },
+
+    { "clauseRef": "Cl 8.2", "section": "Pressure / Leakage", "parameterName": "Proof pressure test", "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Annex F", "expected": "Apply pressure not less than 2 × greatest nominal cooking pressure; no leakage or other forms of failure during or after the test." },
+
+    { "clauseRef": "Cl 8.3.1", "section": "Pressure Regulating Device", "parameterName": "PRD operating pressure", "unit": "% of declared NCP", "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Annex G", "expected": "PRD shall operate within ± 20% of the declared nominal cooking steam pressure (average of five readings)." },
+
+    { "clauseRef": "Cl 8.3.1", "section": "Pressure Regulating Device", "parameterName": "Pressure drop after PRD operation, Max", "unit": "% of average measured cooking steam pressure", "limitType": "max", "acceptanceOrType": "acceptance", "variesBy": [], "max": 40, "sourceTable": "Annex G (G-2)" },
+
+    { "clauseRef": "Cl 8.4.1", "section": "Safety Relief Device", "parameterName": "Destructible safety relief device functioning pressure", "unit": "× greatest NCP", "limitType": "range", "acceptanceOrType": "acceptance", "variesBy": [], "min": 1.25, "max": 3, "sourceTable": "Annex H (H-1.1)", "specText": "Device shall function when steam reaches a gauge pressure between 1.25 and 3 times the greatest nominal cooking pressure." },
+
+    { "clauseRef": "Cl 8.4.2", "section": "Safety Relief Device", "parameterName": "Destructible SRD 5-sample consistency", "unit": "% of mean", "limitType": "range", "acceptanceOrType": "acceptance", "variesBy": [], "min": -20, "max": 20, "specText": "Result of 5 samples shall be within a range of ± 20% of the mean value." },
+
+    { "clauseRef": "Cl 5.12", "section": "Safety Relief Device", "parameterName": "Gasket release system (GRS) functioning pressure", "unit": "× greatest NCP", "limitType": "range", "acceptanceOrType": "acceptance", "variesBy": [], "min": 1.25, "max": 2.5, "sourceTable": "Annex H (H-1.2)", "specText": "GRS shall function when steam reaches a gauge pressure between 1.25 and 2.5 times the greatest nominal cooking pressure." },
+
+    { "clauseRef": "Cl 6.2", "section": "Safety Relief Device", "parameterName": "Resettable safety relief device functioning pressure", "unit": "× greatest NCP", "limitType": "range", "acceptanceOrType": "type", "variesBy": [], "min": 1.25, "max": 3, "sourceTable": "Annex H (H-1.3)", "specText": "Resettable device shall function between 1.25 and 3 times the greatest NCP; tested 25 times (type test, H-1.3.2)." },
+
+    { "clauseRef": "Cl 6.3.1", "section": "Safety Relief Device", "parameterName": "Temperature responsive SRD release pressure, Max", "unit": "kgf/cm2", "limitType": "max", "acceptanceOrType": "type", "variesBy": [], "max": 3, "sourceTable": "Annex C", "specText": "Temperature responsive device shall release before a gauge pressure not greater than 3 kgf/cm2 (300 kN/m2 approx.)." },
+
+    { "clauseRef": "Cl 6.3.3", "section": "Safety Relief Device", "parameterName": "Thermal fuse functioning pressure (electric cooker)", "unit": "× greatest NCP", "limitType": "range", "acceptanceOrType": "type", "variesBy": [], "min": 1.25, "max": 3, "specText": "Electric cooker thermal fuse shall function when steam reaches a gauge pressure between 1.25 and 3 times the greatest NCP." },
+
+    { "clauseRef": "Cl 5.2.1", "section": "Safety Relief Device", "parameterName": "Fusible plug melting/ejection pressure, Max", "unit": "kgf/cm2", "limitType": "max", "acceptanceOrType": "acceptance", "variesBy": [], "max": 3, "specText": "Fusible plug shall melt/eject before a gauge pressure greater than 3 kgf/cm2 (300 kN/m2 approx.) is reached." },
+
+    { "clauseRef": "Cl 5.2.1", "section": "Chemical", "parameterName": "Lead content in fusible plug pellet, Max", "unit": "% by mass", "limitType": "max", "acceptanceOrType": "acceptance", "variesBy": [], "max": 0.05 },
+
+    { "clauseRef": "Cl 8.5", "section": "Pressure / Strength", "parameterName": "Bursting pressure, Min", "unit": "kgf/cm2", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": [], "min": 6, "sourceTable": "Annex J", "specText": "Bursting pressure not less than 6 kgf/cm2; no incipient fracture or crack (separation of composite base acceptable)." },
+
+    { "clauseRef": "Cl 8.6", "section": "Lid Safety", "parameterName": "Removal of lid under pressure", "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["cookerType"],
+      "valueTable": {
+        "Outer Lid": { "expected": "Per Annex K: a force of 12 kgf (120 N) shall not release the lid/cover unless steam pressure inside has fallen below 0.18 kgf/cm2 (18 kN/m2) gauge." },
+        "Inner Lid": { "expected": "Per Annex L: a force of 12 kgf (120 N) shall not release the lid/cover unless steam pressure inside has fallen below 0.18 kgf/cm2 (18 kN/m2) gauge." },
+        "Screw Clamp / Other Locking Device": { "expected": "Per Annex T (Cl 8.6.3.1): a force of 12 kgf (120 N) applied to the opening device; lid/cover shall not open until steam pressure inside has fallen below 0.18 kgf/cm2 (18 kN/m2) gauge." }
+      } },
+
+    { "clauseRef": "Cl 8.7", "section": "Mechanical", "parameterName": "Spring loaded mechanism permanent set, Max", "unit": "% of length", "limitType": "max", "acceptanceOrType": "acceptance", "variesBy": [], "max": 3, "specText": "After 24 h compression then 3 000 compress/release cycles, spring permanent set shall not exceed 3% of length." },
+
+    { "clauseRef": "Cl 6.1.1", "section": "Dimensions", "parameterName": "Vent pipe minimum inside diameter, Min", "unit": "mm", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": [], "min": 2.5 },
+
+    { "clauseRef": "Cl 5.10", "section": "Dimensions", "parameterName": "Tempered glass lid thickness, Min", "unit": "mm", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": [], "min": 3.5 },
+
+    { "clauseRef": "Cl 5.10", "section": "Dimensions", "parameterName": "Stainless steel rim thickness on glass lid, Min", "unit": "mm", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": [], "min": 0.25 },
+
+    { "clauseRef": "Cl 5.11", "section": "Functional", "parameterName": "Visual pressure indicator actuation", "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "expected": "Indicator shall show that there is pressure inside the cooker (more than 0.04 kgf/cm2 or 4 kPa)." },
+
+    { "clauseRef": "Annex Q (Q-1.1)", "section": "Chemical", "parameterName": "Carbon (C), Max — stainless steel per Annex Q", "unit": "%", "limitType": "max", "acceptanceOrType": "acceptance", "variesBy": [], "max": 0.15, "testMethod": "IS 228" },
+    { "clauseRef": "Annex Q (Q-1.1)", "section": "Chemical", "parameterName": "Silicon (Si), Max — stainless steel per Annex Q", "unit": "%", "limitType": "max", "acceptanceOrType": "acceptance", "variesBy": [], "max": 1.00, "testMethod": "IS 228" },
+    { "clauseRef": "Annex Q (Q-1.1)", "section": "Chemical", "parameterName": "Manganese (Mn), Max — stainless steel per Annex Q", "unit": "%", "limitType": "max", "acceptanceOrType": "acceptance", "variesBy": [], "max": 2.00, "testMethod": "IS 228" },
+    { "clauseRef": "Annex Q (Q-1.1)", "section": "Chemical", "parameterName": "Sulphur (S) — stainless steel per Annex Q", "unit": "%", "limitType": "range", "acceptanceOrType": "acceptance", "variesBy": [], "min": 0.15, "max": 0.25, "testMethod": "IS 228" },
+    { "clauseRef": "Annex Q (Q-1.1)", "section": "Chemical", "parameterName": "Phosphorus (P), Max — stainless steel per Annex Q", "unit": "%", "limitType": "max", "acceptanceOrType": "acceptance", "variesBy": [], "max": 0.20, "testMethod": "IS 228" },
+    { "clauseRef": "Annex Q (Q-1.1)", "section": "Chemical", "parameterName": "Chromium (Cr) — stainless steel per Annex Q", "unit": "%", "limitType": "range", "acceptanceOrType": "acceptance", "variesBy": [], "min": 17.0, "max": 19.0, "testMethod": "IS 228" },
+    { "clauseRef": "Annex Q (Q-1.1)", "section": "Chemical", "parameterName": "Nickel (Ni) — stainless steel per Annex Q", "unit": "%", "limitType": "range", "acceptanceOrType": "acceptance", "variesBy": [], "min": 8.0, "max": 10.0, "testMethod": "IS 228" },
+
+    { "clauseRef": "Cl 8.11.1", "section": "Coating", "parameterName": "External coating thickness", "limitType": "text", "acceptanceOrType": "acceptance", "variesBy": [], "specText": "Not less than the minimum thickness declared by the manufacturer; thickness and adhesion tested per IS 9730, coating compliance per IS 9806.", "testMethod": "IS 9730" },
+
+    { "clauseRef": "Cl 8.11.1.1", "section": "Coating", "parameterName": "External coating thermal shock", "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "expected": "No blistering of coating during or on completion of 25 gas heat cycles (dry heat to 220 +5/-0 °C then quench in ambient water)." },
+
+    { "clauseRef": "Cl 8.12", "section": "Coating", "parameterName": "Internal non-stick coating", "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "expected": "Non-stick coating shall conform to IS 9730.", "testMethod": "IS 9730" },
+
+    { "clauseRef": "Cl 7.3", "section": "Coating", "parameterName": "Brass parts plating / corrosion", "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "expected": "Brass parts (except screws/studs/nuts) plated chromium over nickel; plating per service condition 2 of IS 1068 (adhesion and thickness); corrosion test (type test).", "testMethod": "IS 1068" },
+
+    { "clauseRef": "Cl 7.4 (E-2)", "section": "Anodized Surface", "parameterName": "Anodized layer thickness, Min", "unit": "µm", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": [], "min": 25, "specText": "Applicable only to hard anodized portions (Annex E)." },
+
+    { "clauseRef": "Cl 7.4 (E-4.1)", "section": "Anodized Surface", "parameterName": "Anodized coating hardness, Min", "unit": "HV", "limitType": "min", "acceptanceOrType": "type", "variesBy": [], "min": 350, "specText": "Micro-indentation hardness > 350 HV (type test)." },
+
+    { "clauseRef": "Cl 7.4 (E-5)", "section": "Anodized Surface", "parameterName": "Anodized coating resistance to staining", "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "expected": "No staining visible on any surface intended to come in contact with food (tested per Annex N)." },
+
+    { "clauseRef": "Cl 7.4 (E-6)", "section": "Anodized Surface", "parameterName": "Anodized coating resistance to alkali", "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "expected": "No loss of insulating properties of the coating on any food-contact surface (tested per Annex P)." },
+
+    { "clauseRef": "Cl 8.8", "section": "Construction Durability", "parameterName": "Stainless steel composite base/bottom test", "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "expected": "Composite base/bottom SS cooker tested per IS 15960.", "testMethod": "IS 15960" },
+
+    { "clauseRef": "Cl 8.9", "section": "Construction Durability", "parameterName": "Induction compatible base / 3-ply thermal cycling", "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "expected": "Per Annex M: dry heat to 250 +25/-0 °C and quench, 25 gas + 25 induction cycles (50 total); induction steel base shall not peel off/separate; 3-ply shall not show separation (delamination) nor blisters." },
+
+    { "clauseRef": "Cl 8.14", "section": "Construction Durability", "parameterName": "3-ply construction body adhesion", "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "expected": "Per Annex R: heat to 250 +25/-0 °C and quench, repeated 50 cycles; body shall not show separation (delamination) of the 3 ply nor blisters." },
+
+    { "clauseRef": "Cl 8.17", "section": "Construction Durability", "parameterName": "Effectiveness for induction bottom", "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "expected": "Per Annex S: time to first PRD operation after test shall not be more than 25% greater than initial; cooker stable; induction plate shall not detach (else fails)." },
+
+    { "clauseRef": "Cl 8.15.1", "section": "Tempered Glass Lid", "parameterName": "Fragmentation test particle count, Min", "unit": "particles per 50 mm × 50 mm", "limitType": "min", "acceptanceOrType": "type", "variesBy": [], "min": 60, "specText": "Not less than 60 particles in a square of side 50 mm; count completed within 3 min of fracture." },
+
+    { "clauseRef": "Cl 8.15.2", "section": "Tempered Glass Lid", "parameterName": "Ball drop test", "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "expected": "Smooth steel ball of 225 (+0/-5) g free-fall from minimum height of 1 000 mm on three points; no crack seen by naked eye under normal light." },
+
+    { "clauseRef": "Cl 8.15.3", "section": "Tempered Glass Lid", "parameterName": "Thermal shock test (glass lid)", "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "expected": "Air-circulating oven at (120 ± 5) °C, soak 30 min, remove at ambient; lid shall not shatter (applicable for cooking-use glass lids; optional otherwise)." },
+
+    { "clauseRef": "Cl 8.15.4", "section": "Tempered Glass Lid", "parameterName": "Free fall test (glass lid)", "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "expected": "Drop lid from 900 mm onto vitrified tile/level concrete (with rim facing down, or without rim facing down); glass shall not break/crack." },
+
+    { "clauseRef": "Cl 8.10", "section": "Handles", "parameterName": "Handle and handle assembly tests", "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "expected": "Handles shall pass: resistance to burning, heat resistance, torque strength, bending strength, fatigue resistance, and thermal insulation tests per IS 13395 (at least once a year).", "testMethod": "IS 13395" },
+
+    { "clauseRef": "Cl 8.16.1", "section": "Mechanical", "parameterName": "PRD chain test", "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "expected": "Hang a weight of three times the weight of the PRD (weight valve) for 4 h; no deformation or breakage of chain or its locating area." },
+
+    { "clauseRef": "Cl 8.13", "section": "Electrical", "parameterName": "Integral electrical heating compliance", "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "expected": "Pressure cooker with integral electrical heating device shall conform to IS 302 (Part 2/Sec 15).", "testMethod": "IS 302 (Part 2/Sec 15)" },
+
+    { "clauseRef": "Cl 7.1", "section": "Workmanship", "parameterName": "Surface workmanship (body and lid)", "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "expected": "Body and lid free from wrinkles, scratches and other surface defects (checked with naked eye or corrected vision)." },
+
+    { "clauseRef": "Cl 7.2", "section": "Workmanship", "parameterName": "Cleanliness (body and lid)", "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "expected": "Body and lid neat and clean (checked with naked eye or corrected vision)." },
+
+    { "clauseRef": "Cl 11.1", "section": "Marking", "parameterName": "Marking on body", "limitType": "text", "acceptanceOrType": "acceptance", "variesBy": [], "specText": "Each cooker permanently marked on body with: (a) nominal cooking pressure (NCP), (b) gross capacity, (c) grade of material of body and lid, (d) batch number; lid marked with manufacturer name/trade-mark; BIS Standard Mark per IS 2347." }
+  ]
+}

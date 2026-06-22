@@ -1,0 +1,258 @@
+IS 4985 : 2021
+Indian Standard
+UNPLASTICIZED PVC PIPES FOR WATER SUPPLIES — SPECIFICATION
+(Fourth Revision)
+ICS 23.040.20; 91.140.60
+
+1 SCOPE
+1.1 This standard covers requirements for plain as well as socket-ended pipes, including those for use with elastomeric sealing rings, for potable water supplies.
+1.1.1 The standard also covers pipes for agricultural use.
+1.2 This standard does not cover unplasticized PVC pipes for use in suction and delivery lines of agricultural pumps, which have been covered in IS 12231.
+1.3 The pipes covered in this standard are not suitable for use as casing pipes in tube wells. Such pipes are covered in IS 12818.
+
+2 REFERENCES
+The standards listed in Annex A contain provisions which, through reference in this text, constitute provision of this standard.
+
+3 TERMINOLOGY
+3.1 Nominal Size (DN) — The numerical designation for the size of a pipe, other than a pipe designated by thread size, which is a convenient round number approximately equal to the manufacturing dimension in millimetres (mm).
+3.2 Nominal Outside Diameter (dn) — The specified outside diameter, in millimetres assigned to a nominal size.
+3.3 Outside Diameter at any Point (de) — The value of the measurement of the outside diameter of a pipe through its cross-section at any point of the pipe, rounded off to the next higher 0.1 mm.
+3.4 Mean Outside Diameter (dem) — The quotient of the outer circumference of a pipe and 3.142 (π) in any cross-section, rounded off to the next higher 0.1 mm.
+3.5 Minimum Mean Outside Diameter (dem, Min) — The minimum value for the mean outside diameter as specified for a given nominal size.
+3.6 Maximum Mean Outside Diameter (dem, Max) — The maximum value for the mean outside diameter as specified for a given nominal size.
+3.7 Mean Inside Diameter at Mid Point of Socket Length (dim) — The arithmetical mean of two measured inside diameters perpendicular to each other at the mid-point of the socket length.
+3.8 Out-of-Roundness (Ovality) — The difference between the measured maximum and the measured minimum outside diameter in the same cross-section of the pipe.
+3.9 Nominal Wall Thickness (en) — A numerical designation of the wall thickness of a component which is a convenient round number, approximately equal to the manufacturing dimension in millimetres (mm).
+3.10 Wall Thickness at any Point (e) — The value of the measurement of the wall thickness at any point around the circumference of a pipe, rounded off to the next higher 0.1 mm.
+3.11 Minimum Wall Thickness at any Point (emin) — The minimum value for the wall thickness at any point around the circumference of a pipe, rounded off to the next higher 0.1 mm.
+3.12 Maximum Wall Thickness at any Point (emax) — The maximum value for the wall thickness at any point around the circumference of a pipe, rounded off to the next higher 0.1 mm.
+3.13 Mean Wall Thickness (em) — The arithmetical mean of at least four measurements regularly spaced around the circumference and in the same cross-section of a pipe, including the measured minimum and the measured maximum values of the wall thickness in that cross-section and rounded off to the next higher 0.1 mm.
+3.14 Tolerance — The permitted variation of the specified value of a quantity, expressed as the difference between the permitted maximum and the permitted minimum value.
+3.15 Working Pressure (PN) — The numerical designation of a pipe related to the mechanical characteristics of that pipe used for reference purposes. It corresponds to the allowable operating pressure, in bar, conveying water at 27 °C.
+3.16 Allowable Operating Pressure (PFA) — PFA = fT × PN.
+3.17 Hydrostatic Stress (σ) — σ = P(dem − e)/2e.
+3.18 Long-Term Hydrostatic Stress.
+3.19 Socket-Ended Pipe.
+3.20 Tests. 3.20.1 Type Tests. 3.20.2 Acceptance Tests.
+3.21 Virgin Material. 3.22 Own Rework Material.
+
+4 NOTATION
+dn = Nominal outside diameter; de = Outside diameter at any point; dem = Mean outside diameter; dem,Max; dem,Min; dim = Mean inside socket diameter at midpoint of socket length; DN = Nominal size; e = Wall thickness at any point; em = Mean wall thickness; emax; emin; en = Nominal wall thickness; Lo = Overall length; Le = Effective length; Ls = Minimum socket length; PN = Nominal pressure (working pressure); fA; fT; ρ; G; σs.
+
+5 CLASSIFICATION OF PIPES
+5.1 The pipes shall be classified by pressure ratings (working pressures) at 27 °C as follows:
+  Class 1 — 0.25 MPa (2.5 kg/cm2)
+  Class 2 — 0.4 MPa (4.0 kg/cm2)
+  Class 3 — 0.6 MPa (6.0 kg/cm2)
+  Class 4 — 0.8 MPa (8.0 kg/cm2)
+  Class 5 — 1.0 MPa (10.0 kg/cm2)
+  Class 6 — 1.25 MPa (12.5 kg/cm2)
+5.2 The pipes shall be classified based on their application as follows:
+  a) Type A — Pipes for water supply; and
+  b) Type B — Pipes for agricultural use.
+
+6 COMPOSITION
+6.1 The material shall consist substantially of unplasticized polyvinyl chloride; additives selected from IS 10148, uniformly dispersed.
+6.1.1 The monomer content (VCM content) in the resin shall be within the limits specified in 4.4.1 of IS 10151, when tested as per Annex A of IS 10151.
+6.1.2 The composition shall be based on PVC resin having a K value of 64 or greater when tested in accordance with IS 4669.
+6.2 The addition of the manufacturer's own rework material is permissible.
+6.3 Conformity of pipes to this standard is tested by carrying out the tests specified in this standard.
+
+7 DIMENSIONS
+7.1 Dimensions of Pipes
+7.1.1 Diameters — The mean outside diameter, outside diameter at any point and their tolerances shall be as given in Table 1, measured according to IS 12235 (Part 1).
+The nominal sizes (DN) covered are 20, 25, 32, 40, 50, 63, 75, 90, 110, 125, 140, 160, 180, 200, 225, 250, 280, 315, 355, 400, 450, 500, 560 and 630 mm.
+7.1.1.1 Mean outside diameters — permissible variation (dem − dn) positive in form +x, where x ≤ greater of 0.3 mm and 0.003 dn.
+7.1.1.2 Diameter at any point — permissible variation between de and dn (ovality) shall not exceed greater of 0.5 mm and 0.012 dn.
+7.1.2 Wall Thickness — The wall thickness of plain pipe (both for solvent cementing and elastomeric sealing ring joints) and the plain portion of socket ended pipe shall be as given in Table 1.
+7.1.2.1 Tolerance on wall thickness — (a) For minimum wall thickness 6 mm or less, (e − emin) positive +y, y = 0.1 emin + 0.2 mm. (b)-(e) for greater than 6 mm.
+7.1.3 The mean outside diameter, outside diameter at any point, and wall thickness of plumbing pipes when measured in accordance with IS 12235 (Part 1), shall be as given in Table 2.
+7.1.4 Length — 7.1.4.1 Effective length (Le). Preferred effective length of pipes shall be 4, 5, or 6 m.
+7.2 Dimensions of Sockets
+7.2.1 Sockets formed on the ends of the pipes shall be reasonably parallel to the axis of the pipe.
+7.2.1.1 Sockets for solvent cement jointing — socket dimensions shall conform to dimensions given in Table 3 read along with Fig. 3. Minimum socket length Ls = 0.5 dn + 6 mm.
+7.2.1.2 Sockets for elastomeric sealing ring joints — shall conform to the dimensions given in Table 4 read along with Fig. 4. (a) Minimum depth of engagement for sockets shall conform to Table 5: for dn < 280 mm, m > 50 + 0.22 dn; for dn ≥ 280 mm, m > 70 + 0.15 dn. (b) Maximum inner diameter of groove shall ensure joint conforms to required pressure rating as given in Table 7.
+
+==================== TABLE 1 ====================
+Table 1 Dimensions of Unplasticized PVC Pipes (Clauses 7.1.1 and 7.1.2). All dimensions in millimetres.
+Columns: Nominal Size (DN) | Mean Outside Diameter Min,Max | Outside Diameter at Any Point Min,Max | Wall Thickness per Class (Avg Max, Min, Max) for Class 1 (0.25 MPa), Class 2 (0.40 MPa), Class 3 (0.60 MPa), Class 4 (0.80 MPa), Class 5 (1.00 MPa), Class 6 (1.25 MPa).
+
+DN | MeanOD(Min,Max) | OD@any(Min,Max) | C1(AvgMax,Min,Max) | C2 | C3 | C4 | C5 | C6
+20  | 20.0,20.3   | 19.5,20.5   | -,-,-        | -,-,-        | -,-,-           | -,-,-             | 1.5,1.1,1.5   | 1.8,1.4,1.8
+25  | 25.0,25.3   | 24.5,25.5   | -,-,-        | -,-,-        | -,-,-           | 1.6,1.2,1.6       | 1.8,1.4,1.8   | 2.1,1.7,2.1
+32  | 32.0,32.3   | 31.5,32.5   | -,-,-        | -,-,-        | -,-,-           | 1.9,1.5,1.9       | 2.2,1.8,2.2   | 2.7,2.2,2.7
+40  | 40.0,40.3   | 39.5,40.5   | -,-,-        | -,-,-        | 1.8,1.4,1.8     | 2.2,1.8,2.2       | 2.7,2.2,2.7   | 3.3,2.8,3.3
+50  | 50.0,50.3   | 49.4,50.6   | -,-,-        | -,-,-        | 2.1,1.7,2.1     | 2.8,2.3,2.8       | 3.3,2.8,3.3   | 4.0,3.4,4.0
+63  | 63.0,63.3   | 62.2,63.8   | -,-,-        | 1.9,1.5,1.9  | 2.7,2.2,2.7     | 3.3,2.8,3.3       | 4.1,3.5,4.1   | 5.0,4.3,5.0
+75  | 75.0,75.3   | 74.1,75.9   | 1.7,1.3,1.7  | 2.2,1.8,2.2  | 3.1,2.6,3.1     | 4.0,3.4,4.0       | 4.9,4.2,4.9   | 5.9,5.1,5.9
+90  | 90.0,90.3   | 88.9,91.1   | 1.7,1.3,1.7  | 2.6,2.1,2.6  | 3.7,3.1,3.7     | 4.6,4.0,4.6       | 5.7,5.0,5.7   | 7.0,6.1,7.1
+110 | 110.0,110.4 | 108.6,111.4 | 2.0,1.6,2.0  | 3.0,2.5,3.0  | 4.3,3.7,4.3     | 5.6,4.9,5.6       | 7.0,6.1,7.1   | 8.5,7.5,8.7
+125 | 125.0,125.4 | 123.5,126.5 | 2.2,1.8,2.2  | 3.4,2.9,3.4  | 5.0,4.3,5.0     | 6.4,5.6,6.4       | 7.8,6.9,8.0   | 9.6,8.5,9.8
+140 | 140.0,140.5 | 138.3,141.7 | 2.4,2.0,2.4  | 3.8,3.2,3.8  | 5.5,4.8,5.5     | 7.2,6.3,7.3       | 8.7,7.7,8.9   | 10.7,9.5,11.0
+160 | 160.0,160.5 | 158.0,162.0 | 2.8,2.3,2.8  | 4.3,3.7,4.3  | 6.2,5.4,6.2     | 8.2,7.2,8.3       | 9.9,8.8,10.2  | 12.2,10.9,12.6
+180 | 180.0,180.6 | 177.8,182.2 | 3.1,2.6,3.1  | 4.9,4.2,4.9  | 7.0,6.1,7.1     | 9.0,8.0,9.2       | 11.1,9.9,11.4 | 13.7,12.2,14.1
+200 | 200.0,200.6 | 197.6,202.4 | 3.4,2.9,3.4  | 5.3,4.6,5.3  | 7.7,6.8,7.9     | 10.0,8.9,10.3     | 12.3,11.0,12.7| 15.2,13.6,15.7
+225 | 225.0,225.7 | 222.3,227.7 | 3.9,3.3,3.9  | 6.0,5.2,6.0  | 8.6,7.6,8.8     | 11.2,10.0,11.5    | 13.9,12.4,14.3| 17.1,15.3,17.6
+250 | 250.0,250.8 | 247.0,253.0 | 4.2,3.6,4.2  | 6.5,5.7,6.5  | 9.6,8.5,9.8     | 12.6,11.2,12.9    | 15.4,13.8,15.9| 18.9,17.0,19.6
+280 | 280.0,280.9 | 276.6,283.4 | 4.8,4.1,4.8  | 7.3,6.4,7.4  | 10.7,9.5,11.0   | 14.0,12.5,14.4    | 17.2,15.4,17.8| 21.1,19.0,21.9
+315 | 315.0,316.0 | 311.2,318.8 | 5.3,4.6,5.3  | 8.2,7.2,8.3  | 12.0,10.7,12.4  | 15.6,14.0,16.1    | 19.3,17.3,19.9| 23.8,21.4,24.7
+355 | 355.0,356.1 | 350.7,359.3 | 5.9,5.1,5.9  | 9.2,8.1,9.4  | 13.4,12.0,13.8  | 17.6,15.8,18.2    | 21.8,19.6,22.6| 26.8,24.1,27.8
+400 | 400.0,401.2 | 395.2,404.8 | 6.6,5.8,6.7  | 10.3,9.1,10.5| 15.1,13.5,15.6  | 19.8,17.8,20.5    | 24.4,22.0,25.3| 30.2,27.2,31.3
+450 | 450.0,451.4 | 444.6,455.4 | 7.4,6.5,7.5  | 11.6,10.3,11.9| 17.0,15.2,17.5 | 22.2,20.0,23.0    | 27.5,24.8,28.6| 33.8,30.5,35.1
+500 | 500.0,501.5 | 494.0,506.0 | 8.2,7.2,8.3  | 12.8,11.4,13.2| 18.8,16.9,19.5 | 24.8,22.3,25.7    | 30.5,27.5,31.7| 37.5,33.9,39.0
+560 | 560.0,561.7 | 553.2,566.8 | 9.2,8.1,9.4  | 14.3,12.8,14.8| 21.0,18.9,21.8 | 27.6,24.9,28.7    | 34.1,30.8,35.5| 42.0,38.0,43.7
+630 | 630.0,631.9 | 622.4,637.6 | 10.3,9.1,10.5| 16.1,14.4,16.6| 23.7,21.3,24.5 | 31.0,28.0,32.2    | 38.4,34.7,40.0| 47.2,42.7,49.2
+NOTE 1 — Based on metric series given in ISO 161-1 and ISO/DIS 4422.
+NOTE 2 — Wall thickness based on safe working stress of 8.6 MPa at 27 °C.
+
+==================== TABLE 2 ====================
+Table 2 Dimensions of UPVC Plain Ended Pipe for Plumbing in Buildings (Clause 7.1.3). All dimensions in millimetres.
+Columns: Nominal Outside Diameter dn | Mean Outside Diameter dem (Min,Max) | Outside Diameter at Any Point de (Min,Max) | Wall Thickness e (Min,Max)
+20 | 20.0,20.3 | 19.5,20.5 | 2.8,3.3
+25 | 25.0,25.3 | 24.5,25.5 | 2.9,3.4
+32 | 32.0,32.3 | 31.5,32.5 | 3.4,3.9
+40 | 40.0,40.3 | 39.5,40.5 | 3.6,4.2
+50 | 50.0,50.3 | 49.4,50.6 | 3.7,4.3
+
+==================== TABLE 3 ====================
+Table 3 Dimensions of Sockets for Solvent Cement Jointing (Clause 7.2.1.1; Based on ISO 727). All dimensions in millimetres.
+Columns: Nominal Size DN | Socket Length Ls (Min) | Mean Socket Internal Diameter at Mid-Point of Socket Length dim (Min, Max)
+20 | 16.0 | 20.1,20.3
+25 | 19.0 | 25.1,25.3
+32 | 22.0 | 32.1,32.3
+40 | 26.0 | 40.1,40.3
+50 | 31.0 | 50.1,50.3
+63 | 37.5 | 63.1,63.3
+75 | 43.5 | 75.1,75.3
+90 | 51.0 | 90.1,90.3
+110 | 61.0 | 110.1,110.4
+125 | 68.5 | 125.1,125.4
+140 | 76.0 | 140.2,140.5
+160 | 86.0 | 160.2,160.5
+180 | 96.0 | 180.2,180.5
+200 | 106.0 | 200.3,200.6
+225 | 118.5 | 225.3,225.7
+250 | 131.0 | 250.4,250.8
+280 | 146.0 | 280.4,280.9
+315 | 163.5 | 315.4,316.0
+355 | 183.5 | 355.4,356.0
+400 | 206.0 | 400.4,401.0
+450 | 231.0 | 450.4,451.0
+500 | 256.0 | 500.4,501.0
+560 | 286.0 | 560.4,561.0
+630 | 321.0 | 630.4,631.0
+NOTE — For nominal sizes 20 mm to 225 mm, the dimensions are based on ISO 727-1985 (E).
+
+==================== TABLE 4 ====================
+Table 4 Inner Diameters of Sockets for Use with Elastomeric Sealing Rings (Clause 7.2.1.2). All dimensions in millimetres.
+Columns: Nominal Outer Diameter dn | Socket Inner Diameter dim (with tolerance)
+63 | 63.6 +0.7/-0.0
+75 | 75.6 +0.7/-0.0
+90 | 90.7 +0.8/-0.0
+110 | 110.8 +0.9/-0.0
+125 | 125.9 +1.0/-0.0
+140 | 140.9 +1.0/-0.0
+160 | 161.0 +1.1/-0.0
+180 | 181.1 +1.1/-0.0
+200 | 201.2 +1.1/-0.0
+225 | 226.4 +1.1/-0.0
+250 | 251.5 +1.1/-0.0
+280 | 281.6 +1.4/-0.0
+315 | 316.8 +1.5/-0.0
+355 | 357.0 +1.7/-0.0
+400 | 402.2 +1.9/-0.0
+450 | 452.5 +2.0/-0.0
+500 | 502.6 +2.0/-0.0
+560 | 562.8 +2.4/-0.0
+630 | 633.1 +2.6/-0.0
+
+==================== TABLE 5 ====================
+Table 5 Minimum Depth of Engagement [Clause 7.2.1.2 (a)] for sockets. All dimensions in millimetres.
+Columns: Nominal Outer Diameter of Pipe dn | Minimum Depth of Engagement m
+63 | 64
+75 | 67
+90 | 70
+110 | 75
+125 | 78
+140 | 81
+160 | 86
+180 | 90
+200 | 94
+225 | 100
+250 | 105
+280 | 112
+315 | 118
+355 | 124
+400 | 130
+450 | 138
+500 | 145
+560 | 154
+630 | 165
+
+8 SEALING RINGS
+Sealing rings shall be of any of the six hardness clauses as per IS 5382.
+
+9 PIPE ENDS
+9.1 The ends of the pipes meant for solvent cementing shall be cleanly cut and reasonably square to the axis.
+9.2 Pipes with plain end(s) for elastomeric sealing ring type joints shall be chamfered at approximately 15° to the axis (Fig. 6).
+
+10 PHYSICAL AND CHEMICAL CHARACTERISTICS
+10.1 Visual Appearance — The colour of the pipes shall be light grey. Internal and external surfaces shall be smooth, clean and free from grooving and other defects.
+10.2 Opacity — The wall of the plain pipe shall not transmit more than 0.2 percent of the visible light falling on it when tested in accordance with IS 12235 (Part 3).
+10.3 Effect on Water — Quantities extracted from internal walls shall not exceed:
+  Lead (first extraction): 1.0 mg/l (1.0 ppm by mass)
+  Lead (third extraction): 0.05 mg/l (0.05 ppm by mass)
+  Dialkyl tin C4 and higher homologues measured as tin (third extraction): 0.02 mg/l (0.02 ppm by mass)
+  Cadmium (all three extracts): 0.01 mg/l (0.01 ppm by mass)
+  Mercury (all three extracts): 0.001 mg/l (0.001 ppm by mass)
+  Other toxic substances (third extraction): 0.01 mg/l (0.01 ppm by mass)
+  Tested per IS 12235 (Part 4) and IS 12235 (Part 10).
+10.3.1 The limit of all the 'other toxic substances' shall not exceed 0.01 mg/l.
+10.4 Reversion Test — When tested by the immersion method in IS 12235 (Part 5/Sec 1) and (Part 5/Sec 2), a length of pipe 200 ± 20 mm long shall not alter in length by more than 5 percent.
+10.5 Vicat Softening Temperature — When tested by IS 12235 (Part 2), the Vicat Softening temperature shall not be less than 80 °C.
+10.6 Density — When determined in accordance with IS 12235 (Part 14), the density of the pipe shall be between 1.40 and 1.46 g/cm3.
+10.7 Sulphated Ash Content Test — When tested as per Annex B, the sulphated ash content shall not exceed 11 percent.
+
+11 MECHANICAL PROPERTIES
+11.1 Hydrostatic Characteristics — When subjected to internal hydrostatic pressure test in accordance with IS 12235 (Part 8/Sec 1), the pipe shall not fail during the prescribed test duration per Table 6. Joints with elastomeric sealing ring sockets tested per IS 12235 (Part 8/Sec 4) shall fulfil Table 7. Requirements for integral sealing ring sockets are in Table 7.
+11.1.1 Acceptance test at 27 °C as given in Table 6 shall not apply to plumbing pipes. For plumbing pipes the test pressure for acceptance test at 27 °C shall be 3.6 MPa for 1 h.
+11.2 Resistance to External Blows at 0 °C — When tested by the method prescribed in Annex C, the pipe shall have a true impact rate (TIR) of not more than 10 percent.
+
+==================== TABLE 6 ====================
+Table 6 Requirements of Pipes for Internal Hydrostatic Pressure Test (Clauses 11.1 and 11.1.1).
+Columns: Test | Test Temperature Min (°C) | Test Duration Minimum Holding Time (h) | Test Pressure Min (MPa)
+Type test | 60 | 1 000 | 1.16 × PN
+Acceptance test | 27 | 1 | 4.19 × PN
+
+==================== TABLE 7 ====================
+Table 7 Requirements of Integral Sealing Ring Sockets for Internal Hydrostatic Pressure Test [Clauses 7.2.1.2 (b) and 11.1].
+Columns: Diameter Range (mm) | Test | Test Temperature Min (°C) | Time (h) | Test Pressure Min (MPa)
+dn < 90 | Acceptance test | 27 | 1 | 2.88 × PN
+dn < 90 | Type test | 27 | 1 000 | 2.20 × PN
+dn ≥ 90 | Acceptance test | 27 | 1 | 3.60 × PN
+dn ≥ 90 | Type test | 27 | 1 000 | 2.74 × PN
+
+12 SAMPLING AND CRITERIA FOR CONFORMITY — as given in Annex D.
+
+13 MARKING
+13.1 Each pipe shall be clearly and indelibly marked: manufacturer's name/trade-mark, outside diameter, class of pipe and pressure rating, batch/lot number, word 'plumbing' for plumbing pipes.
+13.1.1 Class colour code: Class 1 Red, Class 2 Blue, Class 3 Green, Class 4 Brown, Class 5 Yellow, Class 6 Black, Plumbing pipes Pink.
+13.1.2 Type A pipes for water supply shall additionally bear continuous longitudinal blue colour strip.
+13.2 BIS Certification Marking.
+
+ANNEX A — LIST OF REFERRED INDIAN STANDARDS
+IS 4669:1968; IS 4905:2015; IS 5382:2018; IS 10148:1982; IS 10151:2019; IS 12231:1987; IS 12235 (Parts 1, 2, 3, 4, 5/Sec 1, 5/Sec 2, 8/Sec 1, 8/Sec 4, 10, 14); IS 12818:2010.
+
+ANNEX B — SULPHATED ASH CONTENT TEST (Clause 10.7). Calcination with sulphuric acid at 850 °C; sulphated ash content = (M3−M1)/(M2−M1) × 100.
+
+ANNEX C — METHOD OF TEST FOR RESISTANCE TO EXTERNAL BLOWS AT 0 °C (Clause 11.2).
+C-2.1 True Impact Rate (TIR). Maximum acceptable TIR = 10 percent.
+Table 8 Dimensions for the Nose of the Striker (striker nose): Type d25 Rs 50 d 25±1; Type d90 Rs 50 d 90±1.
+Table 9 Classified Striker Mass and Drop Height (striker): DN up to 25: 0.25 kg, 500 mm fall; 32/40/50: 0.25 kg, 1000 mm; 63: 0.25 kg, 2000 mm; 75: 0.25 kg, 2000 mm; 90: 0.50 kg, 2000 mm; 110: 0.50 kg, 2000 mm; 125 and above: 1.00 kg, 2000 mm.
+Table 10 Number of Equidistant Lines to be drawn on Test Pieces: 50:3, 63:3, 75:4, 90:4, 110:6, 125:6, 140:8, 160:8, 180:8, 200:12, 225:12, 250:12, 280 and above:16.
+C-7 Conditioning: test pieces conditioned at 0 ± 1 °C.
+Table 11 Number of Blows and Failures (Clause C-6.5) — sampling/acceptance accept/reject regions.
+Table 12 Conditioning Period (Clause C-7.1): up to 8.6: liquid 15 / air 60 min; 8.6 to 14.1: 30/120; above 14.1: 60/240 min.
+
+ANNEX D — SAMPLING AND CRITERIA FOR CONFORMITY (Clause 12). [EXCLUDED sampling/acceptance tables: Table 13, Table 14, Table 15, Table 16, Table 17.]
+D-2 TYPE TESTS — Type tests for compliance with 10.2, 10.3 and 11.1 shall be carried out.

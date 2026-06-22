@@ -1,0 +1,42 @@
+◇ injected env (10) from .env // tip: ⌘ override existing { override: true }
+
+======================================================================
+▶  AGENT LIVE TEST — IS 4985:2021
+   PDF: /Users/saurabh/Desktop/Antigravity/SampleSpeaks_MacTransfer/scratch/isp_362a81a3d8efc1f4.pdf
+======================================================================
+I'll start by reading the entire PDF.
+Let me read the rest of the PDF.
+Let me read the remaining pages.
+Let me check for remaining pages (Annex D sampling).
+I have read the entire standard. Now let me look at the reference template.
+The document is fully read. Table 1 is dense (6 classes × 3 sub-columns). Let me try extracting the PDF text directly for accuracy.
+pdftotext works. Let me extract Table 1 pages with layout.
+Excellent, accurate Table 1. Now let me extract Tables 3, 4, 5, 6, 7.
+Let me check the completeness script to understand what it expects.
+I now have all data accurately. Let me write the complete transcript file.
+Now let me build the template JSON.
+Now let me run the completeness check.
+All DN sizes present. Tables 6 & 7 (hydrostatic test requirement tables) are flagged as referenced — I'll tag the hydrostatic parameters with their sourceTable, since their data comes from those tables.
+Completeness passes. Let me verify the JSON is valid and count parameters.
+Completeness check passes (`complete: true`), JSON is valid.
+
+IS 4985:2021: 35 parameters, 24 dimension sizes, completeness=ok
+Completeness check passes (`complete: true`), JSON is valid.
+
+IS 4985:2021: 35 parameters, 24 dimension sizes, completeness=ok
+
+✓ 4985: agent finished in 538s
+   isNumber:  IS 4985:2021
+   template:  public/is_templates/IS_4985_2021.json
+   cost:      $3.18   (turns: 35)   running total: $3.18
+   summary:   Completeness check passes (`complete: true`), JSON is valid.
+
+IS 4985:2021: 35 parameters, 24 dimension sizes, completeness=ok
+   completeness (independent re-check): PASS ✅
+     DN expected: 24 | grid: 24 | missing: []
+
+======================================================================
+SUMMARY   (total spend: $3.18 of $5 trial)
+  ✓ 4985    $3.18  538s  IS 4985:2021  completeness=PASS
+======================================================================
+
