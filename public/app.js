@@ -2636,37 +2636,33 @@ function limsEsc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// Populate the IS dropdown from the vault (standards uploaded in IS Intelligence) + the built-in 4985.
+// Populate the IS dropdown from the vault only — IS Intelligence is the single source of truth.
 async function populateLimsISSelector() {
     const sel = document.getElementById('lims-is-no');
     if (!sel) return;
-    const current = sel.value || 'IS 4985 (2021)';
+    const current = sel.value;
     let vault = [];
     try { const r = await fetch('/api/is-intelligence/vault'); const d = await r.json(); vault = d.vault || []; } catch (e) {}
-    const opts = ['IS 4985 (2021)'];
-    vault.forEach(v => { if (v.isNumber && !/4985/.test(v.isNumber) && !opts.includes(v.isNumber)) opts.push(v.isNumber); });
-    sel.innerHTML = opts.map(o => `<option value="${limsEsc(o)}"${o === current ? ' selected' : ''}>${limsEsc(o)}</option>`).join('');
+    const opts = vault.map(v => v.isNumber).filter(Boolean);
+    if (!opts.length) opts.push('— Upload an IS standard in IS Intelligence —');
+    const selected = current && opts.includes(current) ? current : opts[0];
+    sel.innerHTML = opts.map(o => `<option value="${limsEsc(o)}"${o === selected ? ' selected' : ''}>${limsEsc(o)}</option>`).join('');
 }
 
 // Set the IS value programmatically (e.g. from a matched sample), adding the option if missing.
 function setLimsISValue(val) {
     const sel = document.getElementById('lims-is-no');
     if (!sel) return;
-    if (/4985/.test(val)) val = 'IS 4985 (2021)';
     if (![...sel.options].some(o => o.value === val)) sel.add(new Option(val, val));
     sel.value = val;
     onLimsISChange();
 }
 
-// IS changed → 4985 uses the verified specs_db generator; any other IS renders from the vault.
+// IS changed → always read from IS Intelligence vault (single source of truth).
 function onLimsISChange() {
     const sel = document.getElementById('lims-is-no');
-    const is = sel ? sel.value : 'IS 4985 (2021)';
-    if (/4985/.test(is)) {
-        renderTestParametersTable();
-    } else {
-        renderVaultReport(is);
-    }
+    const is = sel ? sel.value : '';
+    if (is && !is.startsWith('—')) renderVaultReport(is);
 }
 
 // Render the report rows from saved IS Intelligence data (the "change IS → report appears" flow).
@@ -4913,32 +4909,445 @@ async function selectISDocument(docId) {
         isActiveDocument = doc;
         isUncertainItems = doc.uncertainItems || [];
         isParsedClauses = doc.clauses || [];
-        
+
         renderISVault();
-        renderISAnalysis();
-        renderISChatWelcome();
+        renderISSimpleResults();
 
-        // Update scope badge
-        const scopeEl = document.getElementById('is-rag-scope-text');
-        if (scopeEl) scopeEl.textContent = doc.isNumber;
-
-        // Update parse status
+        // Update parse status bar — wording + colour reflect actual confidence so a low
+        // score never reads as a confident "Fully Parsed" with a half-empty loading bar.
         const statusEl = document.getElementById('is-parse-status-bar');
         if (statusEl) {
+            const conf = doc.confidenceScore || 0;
+            const confPct = Math.round(conf * 100);
+            const tier = conf >= 0.85
+                ? { label: 'Fully Parsed', color: 'var(--success)', icon: '✅', cls: 'success' }
+                : conf >= 0.6
+                    ? { label: 'Parsed — review recommended', color: 'var(--warning)', icon: '⚠️', cls: 'warning' }
+                    : { label: 'Parsed — low confidence, please review', color: 'var(--danger)', icon: '⚠️', cls: 'warning' };
+            const nClauses = doc.clauses.length, nTables = doc.tables.length;
             statusEl.style.display = 'flex';
-            statusEl.className = 'is-parse-status success';
+            statusEl.className = `is-parse-status ${tier.cls}`;
             statusEl.innerHTML = `
-                <span style="font-size:1.2rem;">✅</span>
+                <span style="font-size:1.2rem;">${tier.icon}</span>
                 <div class="is-parse-progress">
-                    <div style="font-size:0.88rem; font-weight:600; color:var(--success);">${escapeHtml(doc.isNumber)} — Fully Parsed</div>
-                    <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">${doc.clauses.length} clauses · ${doc.tables.length} tables · Parse Confidence: ${Math.round(doc.confidenceScore * 100)}%</div>
-                    <div class="is-parse-progress-bar" style="margin-top:6px;"><div class="is-parse-progress-fill" style="width:${doc.confidenceScore * 100}%;"></div></div>
+                    <div style="font-size:0.88rem; font-weight:600; color:${tier.color};">${escapeHtml(doc.isNumber)} — ${tier.label}</div>
+                    <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">${nClauses} clause${nClauses === 1 ? '' : 's'} · ${nTables} table${nTables === 1 ? '' : 's'} extracted</div>
+                    <div class="is-parse-progress-bar" style="margin-top:6px;" title="Extraction confidence ${confPct}%"><div class="is-parse-progress-fill" style="width:${confPct}%; background:${tier.color};"></div></div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-top:3px;">Extraction confidence: ${confPct}%</div>
                 </div>
             `;
         }
     } catch(e) {
         showToast('Error loading document details.', 'error');
     }
+}
+
+// --- Render Simple Results (demo UI: header + OD table + clauses) ---
+function renderISSimpleResults() {
+    const doc = isActiveDocument;
+    if (!doc) return;
+
+    const emptyEl = document.getElementById('is-empty-state');
+    const resultsEl = document.getElementById('is-results-panel');
+    if (emptyEl) emptyEl.style.display = 'none';
+    if (resultsEl) resultsEl.style.display = 'block';
+
+    // Header card — title + actions only. Counts/confidence live in the status bar above,
+    // so they're not repeated here.
+    const headerEl = document.getElementById('is-results-header');
+    if (headerEl) {
+        headerEl.innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:16px 20px; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:10px;">
+                <div>
+                    <div style="font-size:1.1rem; font-weight:700; color:var(--text-main);">${escapeHtml(doc.isNumber)}</div>
+                    <div style="font-size:0.85rem; color:var(--text-muted); margin-top:3px;">${escapeHtml(doc.title || '')}</div>
+                </div>
+                <button onclick="openISReport()" class="btn-premium" style="background:rgba(59,130,246,0.15); color:#93c5fd; border:1px solid rgba(59,130,246,0.3); padding:9px 16px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.88rem; white-space:nowrap;">📋 Generate Report</button>
+            </div>
+        `;
+    }
+
+    // Dimension/OD table
+    const odEl = document.getElementById('is-od-table-section');
+    if (odEl) {
+        const dimData = doc.dimensionData;
+        if (dimData && dimData.tables && dimData.tables.length > 0) {
+            odEl.style.display = 'block';
+            odEl.innerHTML = dimData.tables.map(tbl => {
+                const headers = tbl.columns || tbl.headers || [];
+                const rows = tbl.rows || [];
+                if (!rows.length) return '';
+                return `
+                    <div style="margin-bottom:16px;">
+                        <div style="font-weight:700; font-size:0.9rem; color:var(--text-main); margin-bottom:8px;">📐 ${escapeHtml(tbl.description || tbl.tableId || 'Dimension Data')}</div>
+                        <div class="table-container premium-table-container custom-scrollbar" style="max-height:300px; overflow:auto;">
+                            <table class="premium-table glass-table" style="font-size:0.8rem; width:100%;">
+                                <thead><tr>
+                                    <th style="white-space:nowrap;">${tbl.type === 'dimensional' ? 'DN' : '#'}</th>
+                                    ${headers.map(h => `<th style="white-space:nowrap;">${escapeHtml(h)}</th>`).join('')}
+                                </tr></thead>
+                                <tbody>
+                                    ${rows.map(r => `<tr>
+                                        <td style="font-weight:600;">${escapeHtml(String(r.key))}</td>
+                                        ${headers.map(h => `<td>${escapeHtml(String(r.values[h] ?? '—'))}</td>`).join('')}
+                                    </tr>`).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            odEl.style.display = 'none';
+        }
+    }
+
+    // Clauses accordion
+    const clausesSection = document.getElementById('is-clauses-section');
+    if (clausesSection) {
+        clausesSection.style.display = isParsedClauses.length > 0 ? 'block' : 'none';
+        renderISClauses();
+    }
+}
+
+// --- Test Report (opened from the vault screen's "Generate Report" button) ---
+// For IS 4985 this replicates the LIMS auto-uploader report: Size/Class/Type/Plumbing
+// selectors drive the 31 computed rows from specs_db.generateTestParameters, with the same
+// type-aware observed-value inputs and green/red glow validation (validateObservation).
+// Other standards fall back to the pipeline's extracted parameters in the same 5-column shape.
+function isVaultReport4985() {
+    return !!(isActiveDocument && /4985/.test(String(isActiveDocument.isNumber || '')));
+}
+
+async function openISReport() {
+    const doc = isActiveDocument;
+    if (!doc) { showToast('Select a standard first.', 'error'); return; }
+    const modal = document.getElementById('is-report-modal');
+    const tbody = document.getElementById('is-report-tbody');
+    const titleEl = document.getElementById('is-report-title');
+    const subEl = document.getElementById('is-report-subtitle');
+    const toolbar = document.getElementById('is-report-toolbar');
+    if (!modal || !tbody) return;
+
+    const dynToolbar = document.getElementById('is-report-toolbar-dyn');
+    if (titleEl) titleEl.textContent = `${doc.isNumber} — Test Report`;
+    if (subEl) subEl.textContent = doc.title || '';
+    modal.classList.add('active');
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:14px; color:var(--text-muted);">Loading…</td></tr>';
+
+    // 1) Structured template (new path) — clause-by-clause, per-standard dropdowns.
+    const tpl = await loadVaultTemplate(doc.isNumber);
+    if (tpl) {
+        if (toolbar) toolbar.style.display = 'none';
+        vaultTemplate = tpl;
+        renderVaultISReportFromTemplate(tpl);
+        return;
+    }
+    if (dynToolbar) dynToolbar.style.display = 'none';
+    vaultTemplate = null;
+
+    // 2) IS 4985 (hardcoded specs_db, until its extracted template supersedes it).
+    const is4985 = isVaultReport4985() && typeof IS_4985_SPECS !== 'undefined';
+    if (toolbar) toolbar.style.display = is4985 ? 'flex' : 'none';
+    setReportThead(false);
+
+    if (is4985) {
+        // Populate the size dropdown from sizes_db (kept in sync with the spec)
+        const sizeSel = document.getElementById('is-report-size');
+        if (sizeSel && !sizeSel.options.length) {
+            const sizes = Object.keys(IS_4985_SPECS.sizes_db).map(Number).sort((a, b) => a - b);
+            sizeSel.innerHTML = sizes.map(s => `<option value="${s}"${s === 75 ? ' selected' : ''}>${s}</option>`).join('');
+        }
+        renderVaultISReport();
+    } else {
+        await renderVaultISReportFallback(doc);
+    }
+}
+
+// Load a structured per-IS report template (JSON) if one exists for this standard.
+let vaultTemplate = null;
+async function loadVaultTemplate(isNumber) {
+    const slug = String(isNumber || '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    if (!slug) return null;
+    try {
+        const r = await fetch(`/is_templates/${slug}.json`);
+        if (!r.ok) return null;
+        return await r.json();
+    } catch (e) { return null; }
+}
+
+// Switch the report table header between the template format (4 cols) and the 4985 format (5 cols w/ Type).
+function setReportThead(template) {
+    const tr = document.getElementById('is-report-thead-row');
+    if (!tr) return;
+    const th = (t, w) => `<th style="padding:8px 10px;${w ? ` width:${w};` : ''}">${t}</th>`;
+    tr.innerHTML = template
+        ? th('Clause') + th('Test Parameter') + th('Specified value') + th('Observed value', '210px')
+        : th('Clause') + th('Test Parameter') + th('Specified Value') + th('Type', '90px') + th('Observed Value', '190px');
+}
+
+// ── Template-driven renderer (clause-by-clause, per-standard dropdowns + conditional NA) ──
+function renderVaultISReportFromTemplate(tpl) {
+    setReportThead(true);
+    const dyn = document.getElementById('is-report-toolbar-dyn');
+    if (!dyn) return;
+    const dims = tpl.parameterizationDims || [];
+    const labels = { size: 'Nominal Size (DN)', type: 'Type', class: 'Class', socket: 'Socket' };
+    const defaults = tpl.defaults || {};
+    const selStyle = 'border-radius:6px; padding:8px; background:rgba(0,0,0,0.25); border:1px solid var(--glass-border); color:white; font-size:0.85rem;';
+    let html = `<div><label style="display:block; font-size:0.72rem; color:var(--text-muted); margin-bottom:5px; font-weight:600;">Sample Code</label><input type="text" id="tpl-sample" placeholder="optional" style="width:140px; ${selStyle}"></div>`;
+    dims.forEach(d => {
+        const opts = (tpl.dimensionOptions && tpl.dimensionOptions[d]) || [];
+        const def = defaults[d];
+        html += `<div><label style="display:block; font-size:0.72rem; color:var(--text-muted); margin-bottom:5px; font-weight:600;">${labels[d] || d}</label>`
+            + `<select id="tpl-dim-${d}" onchange="renderVaultISReportRows()" style="min-width:110px; ${selStyle}">`
+            + opts.map(o => `<option value="${escapeHtml(String(o))}"${String(o) === String(def) ? ' selected' : ''}>${escapeHtml(String(o))}</option>`).join('')
+            + `</select></div>`;
+    });
+    html += `<button onclick="printVaultISReport()" class="btn-premium" style="margin-left:auto; background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); padding:9px 14px; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">🖨️ Print / Save as PDF</button>`;
+    dyn.innerHTML = html;
+    dyn.style.display = 'flex';
+    renderVaultISReportRows();
+}
+
+function tplCondMet(cond, sel) {
+    return Object.entries(cond || {}).every(([k, v]) => String(sel[k]) === String(v));
+}
+
+function tplResolvePath(gridForSize, path, sel) {
+    let cur = gridForSize;
+    for (let seg of path) {
+        if (typeof seg === 'string' && seg.startsWith('{') && seg.endsWith('}')) seg = sel[seg.slice(1, -1)];
+        if (cur == null) return null;
+        cur = cur[seg];
+    }
+    return (cur === undefined) ? null : cur;
+}
+
+function renderVaultISReportRows() {
+    const tpl = vaultTemplate;
+    if (!tpl) return;
+    const sel = {};
+    (tpl.parameterizationDims || []).forEach(d => {
+        const el = document.getElementById('tpl-dim-' + d);
+        sel[d] = el ? el.value : (tpl.defaults || {})[d];
+    });
+    const grid = (tpl.dimensionGrid || {})[String(sel.size)] || null;
+    const rows = [];
+    let lastSection = null;
+    (tpl.parameters || []).forEach(p => {
+        if (p.section && p.section !== lastSection) { rows.push({ section: p.section }); lastSection = p.section; }
+
+        if (p.conditionalOn && !tplCondMet(p.conditionalOn, sel)) {
+            rows.push({ clause: p.clauseRef, name: p.parameterName, method: p.testMethod, spec: '—', na: true });
+            return;
+        }
+        if (Array.isArray(p.gridRows)) {
+            p.gridRows.forEach(gr => {
+                const val = grid ? tplResolvePath(grid, gr.path, sel) : null;
+                rows.push({
+                    clause: p.clauseRef, name: `${p.parameterName} (${gr.label})`, method: p.testMethod,
+                    spec: (val == null) ? '— (pending re-extract)' : `${gr.label} ${val} ${p.unit || ''}`.trim(),
+                    min: gr.limit === 'min' ? val : '', max: gr.limit === 'max' ? val : '',
+                    type: 'Quantitative', needsReview: val == null,
+                });
+            });
+            return;
+        }
+        // Constant parameter. specText already carries its own units; only synthesize
+        // a spec (and append the unit) when there's no specText.
+        const isQual = p.limitType === 'qualitative' || p.limitType === 'text';
+        let spec;
+        if (p.specText) {
+            spec = p.specText;
+        } else {
+            const mm = [p.min ? `Min ${p.min}` : '', p.max ? `Max ${p.max}` : ''].filter(Boolean).join(' / ');
+            spec = (mm + (p.unit ? ` ${p.unit}` : '')).trim() || (p.expected || '');
+        }
+        rows.push({
+            clause: p.clauseRef, name: p.parameterName, method: p.testMethod, spec: spec,
+            min: p.min || '', max: p.max || '', expected: p.expected || '', qualitative: isQual,
+            type: isQual ? 'Qualitative' : 'Quantitative', needsReview: !!p.needsReview,
+        });
+    });
+    renderTemplateRowsToTbody(rows);
+}
+
+function renderTemplateRowsToTbody(rows) {
+    const tbody = document.getElementById('is-report-tbody');
+    if (!tbody) return;
+    const cell = 'padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.06); vertical-align:top;';
+    tbody.innerHTML = rows.map((r, idx) => {
+        if (r.section) {
+            return `<tr class="tpl-section"><td colspan="4" style="padding:9px 10px; background:rgba(99,102,241,0.10); font-weight:700; font-size:0.8rem; color:var(--text-main); letter-spacing:0.4px;">${escapeHtml(r.section)}</td></tr>`;
+        }
+        const methodSub = r.method ? `<div style="font-size:0.68rem; color:var(--text-muted); margin-top:2px;">method: ${escapeHtml(r.method)}</div>` : '';
+        const flag = r.needsReview ? ` <span style="font-size:0.62rem; background:rgba(245,158,11,0.18); color:var(--warning); padding:1px 6px; border-radius:8px; font-weight:700;">REVIEW</span>` : '';
+        let observed;
+        if (r.na) {
+            observed = `<span style="color:var(--text-muted); font-style:italic;">Not applicable</span>`;
+        } else if (r.qualitative) {
+            const opts = [];
+            if (r.expected) opts.push(r.expected);
+            ['Satisfactory', 'Pass', 'Unsatisfactory', 'Fail', 'Not Done', 'NA'].forEach(o => { if (!opts.includes(o)) opts.push(o); });
+            observed = `<select class="vault-report-input" data-idx="${idx}" data-min="" data-max="" onchange="validateObservation(this)" style="width:100%; border-radius:4px; padding:6px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); color:white;">${opts.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('')}</select>`;
+        } else {
+            observed = `<input type="number" step="0.01" class="vault-report-input" data-idx="${idx}" data-min="${escapeHtml(String(r.min ?? ''))}" data-max="${escapeHtml(String(r.max ?? ''))}" oninput="validateObservation(this)" style="width:100%; border-radius:4px; padding:6px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); color:white;" placeholder="Enter value">`;
+        }
+        return `<tr>
+            <td style="${cell} white-space:nowrap; font-weight:600;">${escapeHtml(String(r.clause || ''))}</td>
+            <td style="${cell}">${escapeHtml(String(r.name || ''))}${flag}${methodSub}</td>
+            <td style="${cell} color:#61afef;">${escapeHtml(String(r.spec || ''))}</td>
+            <td style="${cell}">${observed}</td>
+        </tr>`;
+    }).join('');
+}
+
+// Build the observed-value input for a parameter row — mirrors renderTestParametersTable
+// so the vault report behaves identically to the LIMS table (green/red glow on input).
+function vaultObservedInputHtml(row, idx) {
+    const val = row.expected || '';
+    if (row.type === 'Qualitative') {
+        let opts = [];
+        if (row.expected) opts.push(row.expected);
+        (row.options || []).forEach(o => { if (!opts.includes(o)) opts.push(o); });
+        ['Unsatisfactory', 'Fail', 'Not Done', 'NA'].forEach(o => { if (!opts.includes(o)) opts.push(o); });
+        if (val && !opts.includes(val)) opts.unshift(val);
+        const optionsHtml = opts.map(o => `<option value="${escapeHtml(o)}"${o === val ? ' selected' : ''}>${escapeHtml(o)}</option>`).join('');
+        return `<select class="vault-report-input" data-idx="${idx}" data-min="" data-max="" onchange="validateObservation(this)" style="width:100%; border-radius:4px; padding:6px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); color:white;">${optionsHtml}</select>`;
+    }
+    if (row.type === 'Text') {
+        const dlOpts = (row.options || []).map(o => `<option value="${escapeHtml(o)}">`).join('');
+        return `<input type="text" list="vault-dl-${idx}" ${val ? `value="${escapeHtml(val)}"` : ''} class="vault-report-input" data-idx="${idx}" data-min="${escapeHtml(String(row.min ?? ''))}" data-max="${escapeHtml(String(row.max ?? ''))}" oninput="validateObservation(this)" style="width:100%; border-radius:4px; padding:6px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); color:white;" placeholder="Type or pick"><datalist id="vault-dl-${idx}">${dlOpts}</datalist>`;
+    }
+    return `<input type="number" step="0.01" ${val ? `value="${escapeHtml(val)}"` : ''} class="vault-report-input" data-idx="${idx}" data-min="${escapeHtml(String(row.min ?? ''))}" data-max="${escapeHtml(String(row.max ?? ''))}" oninput="validateObservation(this)" style="width:100%; border-radius:4px; padding:6px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); color:white;" placeholder="Enter value">`;
+}
+
+function renderRowsToVaultReport(rows) {
+    const tbody = document.getElementById('is-report-tbody');
+    if (!tbody) return;
+    const cell = 'padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.06); vertical-align:top;';
+    tbody.innerHTML = rows.map((row, idx) => `
+        <tr>
+            <td style="${cell}">${escapeHtml(String(row.clause || ''))}</td>
+            <td style="${cell}">${escapeHtml(String(row.param || ''))}</td>
+            <td style="${cell} font-weight:600; color:#61afef;">${escapeHtml(String(row.spec_val || ''))}</td>
+            <td style="${cell} color:var(--text-muted);">${escapeHtml(String(row.type || ''))}</td>
+            <td style="${cell}">${vaultObservedInputHtml(row, idx)}</td>
+        </tr>
+    `).join('');
+}
+
+// IS 4985: compute the 31 rows from the spec, driven by the four selectors.
+function renderVaultISReport() {
+    if (typeof IS_4985_SPECS === 'undefined') return;
+    const size = (document.getElementById('is-report-size') || {}).value || '75';
+    const pipeClass = (document.getElementById('is-report-class') || {}).value || '3';
+    const pipeType = (document.getElementById('is-report-type') || {}).value || 'A';
+    const isPlumbing = (document.getElementById('is-report-plumbing') || {}).value || 'No';
+    const rows = IS_4985_SPECS.generateTestParameters(size, pipeClass, pipeType, isPlumbing);
+    renderRowsToVaultReport(rows);
+}
+
+// Non-IS-4985: fall back to the pipeline's extracted parameters in the same 5-column shape.
+async function renderVaultISReportFallback(doc) {
+    const tbody = document.getElementById('is-report-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:14px; color:var(--text-muted);">Loading parameters from IS Intelligence…</td></tr>';
+    try {
+        const res = await fetch(`/api/is-intelligence/params/${encodeURIComponent(doc.isNumber)}`);
+        const data = await res.json().catch(() => ({}));
+        const params = (data && data.test_parameters) || [];
+        if (!params.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="padding:14px; color:var(--text-muted);">No test parameters extracted for this standard yet.</td></tr>';
+            return;
+        }
+        const rows = params.map(p => {
+            const min = (p.min != null && p.min !== '') ? p.min : '';
+            const max = (p.max != null && p.max !== '') ? p.max : '';
+            const spec = p.spec_val || ((min !== '' || max !== '') ? `${min} – ${max}` : (p.expected || ''));
+            return { clause: p.clause || '', param: p.param || '', spec_val: spec, type: p.type || 'Quantitative', expected: p.expected || '', options: [], min, max };
+        });
+        renderRowsToVaultReport(rows);
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:14px; color:#e06c75;">Failed to load report: ${escapeHtml(e.message)}</td></tr>`;
+    }
+}
+
+// Print a clean BIS Test Report document — same layout the LIMS uploader uses (previewLimsPdf).
+function printVaultISReport() {
+    const doc = isActiveDocument || {};
+    const tbody = document.getElementById('is-report-tbody');
+    const rows = tbody ? [...tbody.querySelectorAll('tr')] : [];
+    if (!rows.length) { showToast('Nothing to print yet.', 'error'); return; }
+
+    const esc = (typeof limsEsc === 'function') ? limsEsc : escapeHtml;
+    const showMeta = isVaultReport4985();
+    const meta = {
+        sampleCode: (document.getElementById('is-report-sample') || {}).value || '',
+        isNo: doc.isNumber || '',
+        size: (document.getElementById('is-report-size') || {}).value || '',
+        pipeClass: (document.getElementById('is-report-class') || {}).value || '',
+        type: (document.getElementById('is-report-type') || {}).value || '',
+    };
+
+    let bodyRows = '';
+    rows.forEach(tr => {
+        if (tr.classList.contains('tpl-section')) return; // section header — not a data row
+        const c = tr.children;
+        const clause = c[0] ? c[0].textContent.trim() : '';
+        const param = c[1] ? ((c[1].childNodes[0] && c[1].childNodes[0].textContent) || c[1].textContent).trim() : '';
+        const spec = c[2] ? c[2].textContent.trim() : '';
+        const input = tr.querySelector('.vault-report-input');
+        const observed = input ? (input.value || '') : (c[c.length - 1] ? c[c.length - 1].textContent.trim() : '');
+        let result = '—', color = '#64748b';
+        if (observed !== '') {
+            if (input && input.tagName.toLowerCase() === 'select') {
+                const bad = /unsatisfactory|fail/i.test(observed);
+                result = bad ? 'Fail' : 'Pass'; color = bad ? '#dc2626' : '#16a34a';
+            } else {
+                const v = parseFloat(observed);
+                const mn = input ? parseFloat(input.getAttribute('data-min')) : NaN;
+                const mx = input ? parseFloat(input.getAttribute('data-max')) : NaN;
+                let ok = true;
+                if (!isNaN(mn) && v < mn) ok = false;
+                if (!isNaN(mx) && v > mx) ok = false;
+                result = ok ? 'Pass' : 'Fail'; color = ok ? '#16a34a' : '#dc2626';
+            }
+        }
+        bodyRows += `<tr><td>${esc(clause)}</td><td>${esc(param)}</td><td>${esc(spec)}</td><td>${esc(observed) || '<span style="color:#94a3b8">—</span>'}</td><td style="color:${color};font-weight:700;">${result}</td></tr>`;
+    });
+
+    const metaBar = showMeta
+        ? `<div class="meta"><span><b>Sample Code:</b> ${esc(meta.sampleCode || '—')}</span><span><b>Size (DN):</b> ${esc(meta.size)}</span><span><b>Class:</b> ${esc(meta.pipeClass)}</span><span><b>Type:</b> ${esc(meta.type)}</span></div>`
+        : `<div class="meta"><span><b>Sample Code:</b> ${esc(meta.sampleCode || '—')}</span></div>`;
+
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>Test Report ${esc(meta.isNo)}</title>
+<style>
+  body{font-family:-apple-system,'Segoe UI',sans-serif;color:#1a1a2e;padding:28px;}
+  h2{margin:0 0 4px;color:#2957A3;font-size:20px;}
+  .sub{color:#64748b;font-size:13px;margin-bottom:14px;}
+  .meta{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;margin:12px 0 18px;padding:12px 14px;background:#f1f5f9;border-radius:8px;}
+  .meta b{color:#0f172a;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th,td{border:1px solid #cbd5e1;padding:7px 9px;text-align:left;}
+  th{background:#2957A3;color:#fff;}
+  tr:nth-child(even) td{background:#f8fafc;}
+</style></head><body>
+  <h2>Bureau of Indian Standards — Test Report</h2>
+  <div class="sub">${esc(meta.isNo)} — ${esc(doc.title || '')}</div>
+  ${metaBar}
+  <table><thead><tr><th>Clause</th><th>Test Parameter</th><th>Specified Value</th><th>Observed</th><th>Result</th></tr></thead><tbody>${bodyRows}</tbody></table>
+</body></html>`;
+
+    const w = window.open('', '_blank');
+    if (w) { w.document.write(html); w.document.close(); w.focus(); setTimeout(() => { try { w.print(); } catch (e) {} }, 300); }
+    else showToast('Pop-up blocked — allow pop-ups to print this report.', 'error');
+}
+
+function closeISReport() {
+    const modal = document.getElementById('is-report-modal');
+    if (modal) modal.classList.remove('active');
 }
 
 // --- Render Analysis: Uncertainties + Clauses ---
@@ -5464,8 +5873,8 @@ async function uploadISStandard() {
     const PHASE_LABELS = [
         '📄 Phase 0 — Ingesting document…',
         '🧠 Phase 1 — Claude Opus reading structure…',
-        '👁 Phase 2 — Gemini + Qwen extracting tables…',
-        '🔗 Phase 3 — Building consensus cell-by-cell…',
+        '👁 Phase 2 — Gemini Flash extracting tables…',
+        '✅ Phase 3 — Validating & normalising cells…',
         '✅ Phase 4 — Finalizing trusted output…',
         '💾 Phase 5 — Saving to vault…',
         '📊 Phase 6 — Calibrating against baseline…',
@@ -5670,25 +6079,34 @@ function closeTemplatesModal() {
     if (modal) modal.classList.remove('active');
 }
 
-function populateISDropdown() {
+async function populateISDropdown() {
     const isSelect = document.getElementById('template-is-select');
-    if (isSelect && typeof EXTRACTED_STANDARDS_DB !== 'undefined') {
-        // Only populate if empty
-        if (isSelect.options.length === 0) {
-            Object.keys(EXTRACTED_STANDARDS_DB).forEach(standard => {
-                const opt = document.createElement('option');
-                opt.value = standard;
-                opt.textContent = standard;
-                isSelect.appendChild(opt);
-            });
-            isSelect.selectedIndex = 0; // Force value update in DOM
+    if (!isSelect) return;
+    // Only populate if empty
+    if (isSelect.options.length > 0) return;
+    try {
+        const r = await fetch('/api/is-intelligence/vault');
+        const d = await r.json();
+        const standards = (d.vault || []).map(v => v.isNumber).filter(Boolean);
+        standards.forEach(standard => {
+            const opt = document.createElement('option');
+            opt.value = standard;
+            opt.textContent = standard;
+            isSelect.appendChild(opt);
+        });
+        if (!standards.length) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = '— Upload an IS standard in IS Intelligence first —';
+            isSelect.appendChild(opt);
         }
-    }
+        isSelect.selectedIndex = 0;
+    } catch (e) { console.error('Failed to load vault standards for template dropdown:', e); }
 }
 
 async function fetchTemplates() {
-    populateISDropdown(); // Ensure dropdown is populated immediately
-    loadTemplateForIS(); // Load immediately with default data so UI doesn't hang!
+    await populateISDropdown(); // Ensure dropdown is populated from vault first
+    loadTemplateForIS(); // Load clause list from vault for selected IS
 
     try {
         const res = await fetch('/api/admin/templates');
@@ -5703,23 +6121,39 @@ async function fetchTemplates() {
     }
 }
 
-function loadTemplateForIS() {
+async function loadTemplateForIS() {
     const tbody = document.getElementById('template-params-tbody');
     if (!tbody) return;
 
+    const isSelect = document.getElementById('template-is-select');
+    if (!isSelect) return;
+    const isNumber = isSelect.value;
+    if (!isNumber) return;
+
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Loading from IS Intelligence vault…</td></tr>';
+
+    let clauses = [];
     try {
-        const isSelect = document.getElementById('template-is-select');
-        if (!isSelect) throw new Error("Select dropdown not found.");
-        
-        const isNumber = isSelect.value;
-        if (!isNumber) throw new Error("Dropdown value is empty.");
-        
-        let clauses = [];
-        if (typeof EXTRACTED_STANDARDS_DB !== 'undefined' && EXTRACTED_STANDARDS_DB[isNumber]) {
-            clauses = EXTRACTED_STANDARDS_DB[isNumber];
-        } else {
-            throw new Error(`Standard ${isNumber} not found in EXTRACTED_STANDARDS_DB. typeof DB: ${typeof EXTRACTED_STANDARDS_DB}`);
+        const res = await fetch(`/api/is-intelligence/params/${encodeURIComponent(isNumber)}`);
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.found && data.test_parameters && data.test_parameters.length) {
+            // Deduplicate by clause — one row per clause in the template
+            const seen = new Set();
+            data.test_parameters.forEach(p => {
+                if (!seen.has(p.clause)) {
+                    seen.add(p.clause);
+                    clauses.push({ clause: p.clause, param: p.param, hours: 1.0 });
+                }
+            });
         }
+    } catch (e) { console.error('Failed to load params from vault:', e); }
+
+    if (!clauses.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#e06c75;">No parameters found for <strong>${isNumber}</strong> in IS Intelligence vault. Upload the IS standard PDF in IS Intelligence first.</td></tr>`;
+        return;
+    }
+
+    try {
 
         tbody.innerHTML = '';
         

@@ -1932,9 +1932,12 @@ app.get('/api/admin/templates', async (req, res) => {
             const today = new Date();
             const recommendationsToInsert = [];
 
-            // --- STRICT FIFO within priority buckets ---
-            // Split into two queues, sort each oldest-first by pendencyDays (direct from file)
-            // then fall back to receivedOn date. Priority queue is processed first.
+            // --- Ordering: priority buckets, then earliest-deadline-first (EDF) ---
+            // Priority samples are processed first (req g). Within each bucket we sort by
+            // days-to-expiry ascending, so the most overdue / soonest-to-breach-TAT samples
+            // claim competent TAs before capacity runs out (req e). Strict FIFO — oldest
+            // receivedOn first — is the tiebreaker, so when TATs are equal (the common case)
+            // the order is exactly FIFO (req d).
             const parsePendency = (s) => {
                 if (s.pendencyDays && !isNaN(parseInt(s.pendencyDays))) return parseInt(s.pendencyDays);
                 if (s.receivedOn) {
@@ -1947,10 +1950,25 @@ app.get('/api/admin/templates', async (req, res) => {
                 return 0;
             };
 
+            // TAT (shelf-life) for a sample's IS — drives the "days before expiry" signal.
+            // Samples carry no explicit expiry column, so the deadline is receivedOn + TAT,
+            // i.e. daysToExpiry = tatDays - pendencyDays (negative = already past TAT).
+            const getTatDays = (s) => {
+                const tmpl = templates[s.isNumber] || templates[normalizeISNumber(s.isNumber)];
+                return (tmpl && tmpl.tatDays) || 7;
+            };
+            const daysToExpiry = (s) => getTatDays(s) - parsePendency(s);
+
             const isPrioritySample = (s) => (s.priorityLevel || '').toLowerCase() === 'priority' || (s.encodedCode || '').toLowerCase().endsWith('p');
 
-            const priorityQueue    = unassignedSamples.filter(s =>  isPrioritySample(s)).sort((a, b) => parsePendency(b) - parsePendency(a));
-            const nonPriorityQueue = unassignedSamples.filter(s => !isPrioritySample(s)).sort((a, b) => parsePendency(b) - parsePendency(a));
+            // Earliest deadline first; strict FIFO (oldest received first) breaks ties.
+            const byDeadlineThenFifo = (a, b) => {
+                const da = daysToExpiry(a), db = daysToExpiry(b);
+                if (da !== db) return da - db;
+                return parsePendency(b) - parsePendency(a);
+            };
+            const priorityQueue    = unassignedSamples.filter(s =>  isPrioritySample(s)).sort(byDeadlineThenFifo);
+            const nonPriorityQueue = unassignedSamples.filter(s => !isPrioritySample(s)).sort(byDeadlineThenFifo);
             const orderedSamples   = [...priorityQueue, ...nonPriorityQueue];
 
             for (const sample of orderedSamples) {
@@ -1994,24 +2012,41 @@ app.get('/api/admin/templates', async (req, res) => {
                 const pendencyDays = parsePendency(sample);
                 const isPriority = isPrioritySample(sample);
 
-                // Urgency scoring based on actual pendency days
-                let urgencyBoost = 0;
-                let urgencyTag = '';
-                if (pendencyDays > 60) {
-                    urgencyBoost = 500;
-                    urgencyTag = '🔴 CRITICAL — PENDING 60+ DAYS';
-                } else if (pendencyDays > 30) {
-                    urgencyBoost = 200;
-                    urgencyTag = '⚠️ OVERDUE — PENDING 30+ DAYS';
-                } else if (pendencyDays > 14) {
-                    urgencyBoost = 80;
-                    urgencyTag = '🔥 DUE SOON';
-                } else {
-                    urgencyBoost = Math.max(0, pendencyDays * 2);
+                // Urgency = the worse of two signals, so neither expiry nor raw age is ignored:
+                //   (e) days-before-expiry: how close the sample is to (or past) its TAT deadline
+                //   (d) FIFO age: a long-waiting sample is bad regardless of a generous TAT
+                const daysLeft = tatDays - pendencyDays; // <0 = already past the TAT deadline
+                let deadlineBoost = 0, deadlineTag = '';
+                if (daysLeft < 0) {
+                    deadlineBoost = 300 + Math.min(300, (-daysLeft) * 20);
+                    deadlineTag = `🔴 PAST TAT by ${-daysLeft}d (TAT ${tatDays}d)`;
+                } else if (daysLeft <= 2) {
+                    deadlineBoost = 200;
+                    deadlineTag = `⚠️ EXPIRES in ${daysLeft}d (TAT ${tatDays}d)`;
+                } else if (daysLeft <= 5) {
+                    deadlineBoost = 80;
+                    deadlineTag = `🔥 DUE SOON — ${daysLeft}d to TAT`;
                 }
 
+                let ageBoost = 0, ageTag = '';
+                if (pendencyDays > 60) {
+                    ageBoost = 500;
+                    ageTag = '🔴 PENDING 60+ DAYS';
+                } else if (pendencyDays > 30) {
+                    ageBoost = 200;
+                    ageTag = '⚠️ PENDING 30+ DAYS';
+                } else if (pendencyDays > 14) {
+                    ageBoost = 80;
+                    ageTag = '🔥 PENDING 14+ DAYS';
+                } else {
+                    ageBoost = Math.max(0, pendencyDays * 2);
+                }
+
+                const urgencyBoost = Math.max(deadlineBoost, ageBoost);
+                const urgencyTag = deadlineBoost >= ageBoost ? deadlineTag : ageTag;
+
                 const priorityBoost = (priorityRankingMode === 'prioritize' && isPriority) ? 100 : 0;
-                // FIFO within bucket is enforced by queue order above; score reflects age for tie-breaking
+                // FIFO within bucket is enforced by the EDF queue order above; score reflects age for tie-breaking
                 const fifoBoost = Math.min(pendencyDays, 30);
 
                 const matchingComps = compMap[sample.isNumber] || compMap[sampleNorm] || [];
@@ -2802,12 +2837,16 @@ function findRelevantPages(pages, query, topN = 3) {
 // 1. Vault List
 app.get('/api/is-intelligence/vault', async (req, res) => {
     try {
-        const { data: rows, error } = await supabase.from('is_standards_vault').select('id, isNumber, title, pdfFileName, uncertainItems, confidenceScore, uploadedAt').order('id', { ascending: false });
+        const { data: rows, error } = await supabase.from('is_standards_vault').select('id, isNumber, title, pdfFileName, uncertainItems, extractedClauses, extractedTables, confidenceScore, uploadedAt').order('id', { ascending: false });
         if (error) throw error;
+        const parseLen = (v) => {
+            try { const a = typeof v === 'string' ? JSON.parse(v || '[]') : (v || []); return Array.isArray(a) ? a.length : 0; }
+            catch (e) { return 0; }
+        };
         const formatted = (rows || []).map(r => {
             let uncertain = [];
-            try { 
-                uncertain = typeof r.uncertainItems === 'string' ? JSON.parse(r.uncertainItems || '[]') : (r.uncertainItems || []); 
+            try {
+                uncertain = typeof r.uncertainItems === 'string' ? JSON.parse(r.uncertainItems || '[]') : (r.uncertainItems || []);
             } catch(e){}
             const hasUncertainties = uncertain.some(item => !item.resolved);
             return {
@@ -2818,8 +2857,8 @@ app.get('/api/is-intelligence/vault', async (req, res) => {
                 uploadedAt: r.uploadedAt,
                 confidenceScore: r.confidenceScore,
                 status: hasUncertainties ? 'has_uncertainties' : 'parsed',
-                clauseCount: 12, // Mock count placeholder
-                tableCount: 6 // Mock count placeholder
+                clauseCount: parseLen(r.extractedClauses),
+                tableCount: parseLen(r.extractedTables)
             };
         });
         res.json({ vault: formatted });
@@ -2843,6 +2882,7 @@ app.get('/api/is-intelligence/vault/:id', async (req, res) => {
             clauses: typeof row.extractedClauses === 'string' ? JSON.parse(row.extractedClauses || '[]') : (row.extractedClauses || []),
             tables: typeof row.extractedTables === 'string' ? JSON.parse(row.extractedTables || '[]') : (row.extractedTables || []),
             uncertainItems: typeof row.uncertainItems === 'string' ? JSON.parse(row.uncertainItems || '[]') : (row.uncertainItems || []),
+            dimensionData: typeof row.dimensionData === 'string' ? JSON.parse(row.dimensionData || 'null') : (row.dimensionData || null),
             isFullyResolved: row.isFullyResolved === 1 || row.isFullyResolved === true,
             confidenceScore: row.confidenceScore,
             uploadedAt: row.uploadedAt
@@ -3064,6 +3104,45 @@ app.get('/api/is-intelligence/pipeline/:jobId', (req, res) => {
     const job = isPipeline.getJob(req.params.jobId);
     if (!job) return res.status(404).json({ error: 'Job not found' });
     res.json(job);
+});
+
+// ── Agent SDK extraction: upload PDF → Claude Agent reads it & writes the template ──
+// Runs the SAME agent loop Claude Code uses, in-process. Needs ANTHROPIC_API_KEY.
+const agentJobs = new Map();
+app.post('/api/is-intelligence/agent-extract', upload.single('pdf'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No PDF file uploaded' });
+    if (!req.file.originalname.toLowerCase().endsWith('.pdf')) return res.status(400).json({ error: 'Only PDF files are accepted' });
+    if (!process.env.ANTHROPIC_API_KEY) {
+        return res.status(503).json({ error: 'Agent extraction needs ANTHROPIC_API_KEY in .env (get one at console.anthropic.com). The Agent SDK does not accept OpenRouter/Gemini keys.' });
+    }
+    const { runReportAgent } = require('./server/agent/is-report-agent');
+    const dir = path.join(__dirname, 'scratch');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const pdfPath = path.join(dir, `agent_${crypto.randomBytes(6).toString('hex')}.pdf`);
+    fs.writeFileSync(pdfPath, req.file.buffer);
+
+    const jobId = crypto.randomBytes(8).toString('hex');
+    const job = { status: 'running', log: [], result: null, error: null, startedAt: Date.now() };
+    agentJobs.set(jobId, job);
+
+    (async () => {
+        const out = await runReportAgent(pdfPath, {
+            isHint: (req.body && req.body.isNumber) || '',
+            onEvent: (line) => { job.log.push(line); if (job.log.length > 200) job.log.shift(); },
+        });
+        job.status = out.ok ? 'done' : 'error';
+        job.result = out;
+        job.error = out.ok ? null : out.error;
+        try { fs.unlinkSync(pdfPath); } catch (_) {}
+    })().catch(e => { job.status = 'error'; job.error = e.message; });
+
+    res.json({ jobId, message: 'Agent extraction started — poll /api/is-intelligence/agent-extract/' + jobId });
+});
+
+app.get('/api/is-intelligence/agent-extract/:jobId', (req, res) => {
+    const job = agentJobs.get(req.params.jobId);
+    if (!job) return res.status(404).json({ error: 'Job not found' });
+    res.json({ status: job.status, log: job.log.slice(-40), result: job.result, error: job.error, elapsedMs: Date.now() - job.startedAt });
 });
 
 // ── On-demand page image for the confirm grid ─────────────────────────────────
@@ -3327,7 +3406,6 @@ app.post('/api/copilot/chat', async (req, res) => {
         if (!message) return res.status(400).json({ error: 'Message is required' });
 
         const geminiApiKey = process.env.GEMINI_API_KEY; // Only use if explicitly set
-        const sarvamApiKey = process.env.SARVAM_API_KEY;
 
         const { normalizeTaName, normalizeIS: _normIS, getOicPreferences } = require('./server/agent/disha-utils');
         const dishaTools = require('./server/agent/disha-tools');
@@ -3663,65 +3741,12 @@ The OIC will see one row per move in the UI and approve each.`;
                     console.log(`[Copilot] Gemini succeeded in ${Date.now() - tAi}ms.`);
                 }
             } catch (geminiErr) {
-                console.warn('[Copilot] Gemini failed, falling back to Sarvam:', geminiErr.message || 'Unknown error');
-            }
-        }
-
-        // Use Sarvam if no reply yet
-        if (!aiReply && sarvamApiKey) {
-            console.log('[Copilot] Calling Sarvam AI (sarvam-30b)...');
-            const tSarvam = Date.now();
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
-            
-            try {
-                const sarvamRes = await fetch('https://api.sarvam.ai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${sarvamApiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: 'sarvam-30b',
-                        messages: messages,
-                        temperature: 0.3
-                    }),
-                    signal: controller.signal
-                });
-                clearTimeout(timeout);
-                
-                const sarvamData = await sarvamRes.json();
-                if (sarvamRes.ok && sarvamData.choices && sarvamData.choices[0]?.message) {
-                    const msg = sarvamData.choices[0].message;
-                    // sarvam-30b may put reply in content or reasoning_content
-                    aiReply = msg.content || msg.reasoning_content || '';
-                    // If reasoning_content, extract just the final answer part (last paragraph)
-                    if (!msg.content && msg.reasoning_content) {
-                        // Extract final answer from reasoning (everything after last blank line or summary)
-                        const parts = msg.reasoning_content.split('\n\n');
-                        aiReply = parts[parts.length - 1].trim() || msg.reasoning_content.trim();
-                    }
-                    if (aiReply) {
-                        console.log(`[Copilot] Sarvam-30b succeeded in ${Date.now() - tSarvam}ms, reply length:`, aiReply.length);
-                    } else {
-                        console.warn('[Copilot] Sarvam-30b returned empty content, using fallback');
-                        aiReply = `The lab currently has ${allPending ? allPending.length : 0} pending samples. How can I help you?`;
-                    }
-                } else {
-                    const errMsg = sarvamData.error?.message || JSON.stringify(sarvamData) || 'Unknown Sarvam error';
-                    throw new Error(`Sarvam AI error: ${errMsg}`);
-                }
-            } catch (sarvamErr) {
-                clearTimeout(timeout);
-                if (sarvamErr.name === 'AbortError') {
-                    throw new Error('AI response timed out. Please try again in a moment.');
-                }
-                throw new Error('AI service error: ' + (sarvamErr.message || 'Unknown error'));
+                throw new Error('Gemini AI error: ' + (geminiErr.message || 'Unknown error'));
             }
         }
 
         if (!aiReply) {
-            throw new Error('No AI service available. Please check your API keys.');
+            throw new Error('Gemini API key not configured. Please set GEMINI_API_KEY in .env');
         }
 
         // 5. Parse action cards (JSON block)

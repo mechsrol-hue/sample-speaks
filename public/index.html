@@ -1428,279 +1428,63 @@ window.addEventListener('unhandledrejection', function(e) {
 
         <!-- Tab: IS Intelligence -->
         <div id="tab-is-intelligence" class="tab-content">
-            <div class="is-safety-banner" style="margin-bottom:15px;">
-                <span class="lock-icon">🔒</span>
-                <span><strong>Strict Grounding Enforced:</strong> The AI will only provide answers derived from the active document. It cannot use external web data.</span>
-            </div>
-            
             <div class="is-intel-layout">
-                <!-- Document Vault Sidebar -->
+                <!-- Left: Upload + Vault -->
                 <div class="is-vault-sidebar">
                     <div class="is-vault-header">
-                        <h4>Document Vault</h4>
+                        <h4>IS Standards Vault</h4>
                         <span class="is-vault-count" id="is-vault-count">0</span>
                     </div>
-                    
                     <div class="is-upload-zone" onclick="document.getElementById('is-pdf-input').click()">
                         <span class="upload-icon">📄</span>
                         <h5>Upload IS Standard (PDF)</h5>
-                        <p id="is-upload-filename">Auto-parses clauses &amp; tables</p>
+                        <p id="is-upload-filename">AI reads tables &amp; clauses automatically</p>
                         <input type="file" id="is-pdf-input" accept=".pdf" onchange="handleISFileSelect(event)" style="display:none;">
                     </div>
-                    <button id="is-analyze-btn" class="btn-premium primary" style="display: none; width: 100%; margin-top: 10px; background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="uploadISStandard()">Analyze Document</button>
-                    
-                    <div class="is-vault-list" id="is-vault-list">
-                        <!-- Populated by JS -->
-                    </div>
+                    <button id="is-analyze-btn" class="btn-premium primary" style="display:none; width:100%; margin-top:10px; background:#3b82f6; color:white; border:none; padding:12px; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.95rem;" onclick="uploadISStandard()">▶ Run AI Extraction</button>
+                    <div class="is-vault-list" id="is-vault-list"></div>
                 </div>
 
-                <!-- Analysis & RAG Workspace -->
+                <!-- Right: Results Panel -->
                 <div class="is-analysis-panel">
-                    
-                    <!-- Top Status Bar -->
-                    <div class="is-parse-status" id="is-parse-status-bar" style="display:none;">
-                        <!-- Updated by JS -->
-                    </div>
+                    <!-- Pipeline progress (shown while running) -->
+                    <div class="is-parse-status" id="is-parse-status-bar" style="display:none;"></div>
 
-                    <!-- Inner Tabs -->
-                    <div class="is-inner-tabs">
-                        <button class="is-inner-tab active" data-tab="chat" onclick="switchISInnerTab('chat')">💬 RAG Chat &amp; SOP</button>
-                        <button class="is-inner-tab" data-tab="clauses" onclick="switchISInnerTab('clauses')">📑 Document Clauses</button>
-                        <button class="is-inner-tab" data-tab="tolerance" onclick="switchISInnerTab('tolerance')">📐 Tolerance Lookup</button>
-                        <button class="is-inner-tab" data-tab="amendments" onclick="switchISInnerTab('amendments')">🛠️ Amendments</button>
-                        <button class="is-inner-tab" data-tab="limits" onclick="switchISInnerTab('limits')">⚙️ Limits Editor</button>
-                    </div>
-
-                                        <!-- 1. RAG Chat Console -->
-                    <div id="is-inner-chat" class="is-inner-content">
-                        <div class="is-rag-console">
-                            <div class="is-rag-header">
-                                <h4>Intelligence Console</h4>
-                                <span class="is-rag-scope">Active: <span id="is-rag-scope-text">None</span></span>
-                            </div>
-                            
-                            <div class="is-quick-actions">
-                                <button class="is-quick-btn" onclick="isQuickSOP()">📋 Generate SOP</button>
-                                <button class="is-quick-btn" onclick="isQuickReport()">📊 Test Report Template</button>
-                                <button class="is-quick-btn" onclick="isQuickTolerance()">📐 Ask Tolerances</button>
-                                <button class="is-quick-btn" onclick="isQuickSummarize()">📝 Summarize</button>
-                            </div>
-
-                            <div class="is-rag-messages custom-scrollbar" id="is-rag-messages">
-                                <div class="is-empty-state" style="padding:40px 20px;">
-                                    <span class="is-empty-icon">🤖</span>
-                                    <h5>Select a standard to begin</h5>
-                                    <p>The AI is waiting to analyze the document.</p>
-                                </div>
-                            </div>
-
-                            <div class="is-rag-input-bar">
-                                <input type="text" id="is-rag-input" placeholder="Ask a question about the active document...">
-                                <button class="is-rag-send-btn" onclick="sendISQuery()">➤</button>
-                            </div>
+                    <!-- Results (shown after pipeline / on doc select) -->
+                    <div id="is-results-panel" style="display:none;">
+                        <!-- Header -->
+                        <div id="is-results-header" style="margin-bottom:18px;"></div>
+                        <!-- Extracted OD table -->
+                        <div id="is-od-table-section" style="display:none; margin-bottom:20px;"></div>
+                        <!-- Clauses accordion -->
+                        <div id="is-clauses-section" style="display:none;">
+                            <div style="font-weight:700; font-size:0.95rem; margin-bottom:10px; color:var(--text-main);">📑 Parsed Clauses</div>
+                            <div id="is-clauses-list"></div>
                         </div>
                     </div>
 
-                    <!-- 2. Clauses & Uncertainties -->
-                    <div id="is-inner-clauses" class="is-inner-content" style="display:none;">
-                        
-                        <!-- Uncertainty Flags -->
-                        <div class="is-uncertainty-panel" id="is-uncertainty-container" style="display:none; margin-bottom:20px;">
-                            <div class="is-uncertainty-header">
-                                <h4>⚠️ Needs Human Clarification</h4>
-                                <span class="is-badge is-badge-medium" id="is-uncertainty-count">0</span>
-                            </div>
-                            <div class="is-uncertainty-list" id="is-uncertainty-list">
-                                <!-- Populated by JS -->
-                            </div>
-                        </div>
-
-                        <!-- Parsed Clauses -->
-                        <div class="is-clauses-panel">
-                            <div class="is-clauses-header">
-                                <h4>✅ Parsed Clauses</h4>
-                            </div>
-                            <div id="is-clauses-list">
-                                <!-- Populated by JS -->
-                            </div>
-                        </div>
+                    <!-- Empty state -->
+                    <div id="is-empty-state" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:300px; color:var(--text-muted); text-align:center; gap:12px;">
+                        <span style="font-size:3rem;">📋</span>
+                        <div style="font-size:1.1rem; font-weight:600; color:var(--text-main);">Upload an IS Standard to begin</div>
+                        <div style="font-size:0.88rem;">AI extracts tolerance tables and clauses automatically</div>
                     </div>
 
-                    <!-- 3. Tolerance Lookup -->
-                    <div id="is-inner-tolerance" class="is-inner-content" style="display:none;">
-                        <div class="is-tolerance-widget">
-                            <div class="is-tolerance-header">
-                                <h4>📐 Auto-Extracted Tolerances</h4>
-                                <span class="is-badge is-badge-high">Synched with LIMS</span>
-                            </div>
-                            <div class="is-tolerance-controls">
-                                <div class="is-tolerance-field">
-                                    <label>Standard</label>
-                                    <select disabled><option>IS 4985:2021</option></select>
-                                </div>
-                                <div class="is-tolerance-field">
-                                    <label>Nominal Size (mm)</label>
-                                    <select id="is-tol-size" onchange="lookupISTolerance()">
-                                        <option value="20">20</option>
-                                        <option value="75" selected>75</option>
-                                        <option value="110">110</option>
-                                        <option value="280">280</option>
-                                    </select>
-                                </div>
-                                <div class="is-tolerance-field">
-                                    <label>Pipe Class</label>
-                                    <select id="is-tol-class" onchange="lookupISTolerance()">
-                                        <option value="1">Class 1</option>
-                                        <option value="2">Class 2</option>
-                                        <option value="3" selected>Class 3</option>
-                                        <option value="6">Class 6</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="is-tolerance-results">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Test Parameter</th>
-                                            <th>Value</th>
-                                            <th>Citation Source</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="is-tolerance-results-body">
-                                        <!-- Populated by JS -->
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="is-tolerance-action-bar">
-                                <button class="primary" onclick="showToast('Tolerance loaded to LIMS Automator', 'success')" style="font-size:0.85rem; padding:8px 14px;">Import to LIMS Queue</button>
-                            </div>
-                        </div>
+                    <!-- Keep hidden divs for JS compatibility -->
+                    <div style="display:none;">
+                        <div id="is-inner-chat"></div>
+                        <div id="is-inner-clauses"><div id="is-uncertainty-container"><div id="is-uncertainty-count"></div><div id="is-uncertainty-list"></div></div></div>
+                        <div id="is-inner-tolerance"><div id="is-tolerance-results-body"></div><select id="is-tol-size"><option value="75">75</option></select><select id="is-tol-class"><option value="3">3</option></select></div>
+                        <div id="is-inner-amendments"><div id="is-amendments-list"></div><span id="is-amendments-badge-count"></span><div id="is-amendments-admin-form"></div></div>
+                        <div id="is-inner-limits"></div>
+                        <div id="is-rag-messages"></div><input id="is-rag-input"><span id="is-rag-scope-text"></span>
                     </div>
-
-                    <!-- 4. Amendments Panel -->
-                    <div id="is-inner-amendments" class="is-inner-content" style="display:none; padding:20px 0;">
-                        <div class="is-amendments-widget">
-                            <div class="is-amendments-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                                <h4 style="margin:0; font-size:1.1rem; color:var(--text-main);">🛠 ... Amendments Directory</h4>
-                                <span class="is-badge is-badge-high" id="is-amendments-badge-count" style="font-weight:700;">0 Amendments</span>
-                            </div>
-                            
-                            <!-- Display list of amendments for active standard -->
-                            <div id="is-amendments-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:24px;">
-                                <!-- Rendered dynamically by JS -->
-                            </div>
-
-                            <!-- Admin form to add amendment -->
-                            <div id="is-amendments-admin-form" class="glass-panel" style="padding:20px; border:1px solid var(--glass-border); border-radius:8px; display:none;">
-                                <h5 style="margin-top:0; margin-bottom:15px; font-size:0.95rem; color:var(--text-main); font-weight:700;">➕ Add New Amendment</h5>
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-                                    <div>
-                                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px; font-weight:600;">Amendment Number</label>
-                                        <input type="text" id="add-amd-num" placeholder="e.g. Amd 1" style="width:100%; border-radius:6px; padding:8px 10px;">
-                                    </div>
-                                    <div>
-                                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px; font-weight:600;">Publish Date</label>
-                                        <input type="date" id="add-amd-date" style="width:100%; border-radius:6px; padding:8px 10px;">
-                                    </div>
-                                </div>
-                                <div style="margin-bottom:12px;">
-                                    <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px; font-weight:600;">Amendment Title</label>
-                                    <input type="text" id="add-amd-title" placeholder="e.g. Amendment No. 1 to IS 4985:2021" style="width:100%; border-radius:6px; padding:8px 10px;">
-                                </div>
-                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:15px;">
-                                    <input type="checkbox" id="add-amd-is-new" checked style="cursor:pointer; width:16px; height:16px;">
-                                    <label for="add-amd-is-new" style="font-size:0.85rem; color:var(--text-main); cursor:pointer; font-weight:500;">Highlight as "New Amendment"</label>
-                                </div>
-                                <button class="btn-premium primary" onclick="addNewAmendment()" style="width:100%; padding:10px; font-size:0.9rem; font-weight:700; border-radius:6px;">Save Amendment</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 5. Conformance Limits Editor -->
-                    <div id="is-inner-limits" class="is-inner-content" style="display:none; padding:20px 0;">
-                        <div class="is-amendments-widget">
-                            <div class="is-amendments-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                                <h4 style="margin:0; font-size:1.1rem; color:var(--text-main);">⚙️ Conformance Limits Editor</h4>
-                                <div style="display:flex; gap:10px;">
-                                    <button class="btn-premium" onclick="loadAdminLimits()">🔄 Refresh</button>
-                                    <button class="btn-premium primary action-pulse" onclick="document.getElementById('add-limit-form').style.display='block'">➕ Add Limit</button>
-                                </div>
-                            </div>
-
-                            <div id="add-limit-form" class="glass-panel" style="padding:20px; border:1px solid var(--glass-border); border-radius:8px; display:none; margin-bottom: 20px;">
-                                <h5 style="margin-top:0; margin-bottom:15px; font-size:0.95rem; color:var(--text-main); font-weight:700;">Add New Limit</h5>
-                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
-                                    <div>
-                                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">IS Number</label>
-                                        <input type="text" id="admin-limit-is" class="premium-input" placeholder="e.g. IS 4985">
-                                    </div>
-                                    <div>
-                                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Variety / Class</label>
-                                        <input type="text" id="admin-limit-variety" class="premium-input" placeholder="e.g. Class 3 / 75mm">
-                                    </div>
-                                    <div>
-                                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Clause Ref</label>
-                                        <input type="text" id="admin-limit-clause" class="premium-input" placeholder="e.g. 7.1.1">
-                                    </div>
-                                </div>
-                                <div style="display:grid; grid-template-columns:2fr 1fr; gap:12px; margin-bottom:12px;">
-                                    <div>
-                                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Parameter</label>
-                                        <input type="text" id="admin-limit-parameter" class="premium-input" placeholder="e.g. Outside Diameter">
-                                    </div>
-                                    <div>
-                                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Unit</label>
-                                        <input type="text" id="admin-limit-unit" class="premium-input" placeholder="e.g. mm">
-                                    </div>
-                                </div>
-                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
-                                    <div>
-                                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Limit Type</label>
-                                        <select id="admin-limit-type" class="premium-input">
-                                            <option value="range">Range (Min - Max)</option>
-                                            <option value="min">Minimum Only</option>
-                                            <option value="max">Maximum Only</option>
-                                            <option value="nominal">Nominal / Exact</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Min Value</label>
-                                        <input type="number" step="any" id="admin-limit-min" class="premium-input">
-                                    </div>
-                                    <div>
-                                        <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Max Value</label>
-                                        <input type="number" step="any" id="admin-limit-max" class="premium-input">
-                                    </div>
-                                </div>
-                                <div style="display:flex; justify-content:flex-end; gap:10px;">
-                                    <button class="btn-premium" onclick="document.getElementById('add-limit-form').style.display='none'">Cancel</button>
-                                    <button class="btn-premium btn-success-premium" onclick="saveAdminLimit()">Save Limit</button>
-                                </div>
-                            </div>
-
-                            <div class="table-container premium-table-container custom-scrollbar" style="max-height: 400px;">
-                                <table class="premium-table glass-table">
-                                    <thead>
-                                        <tr>
-                                            <th>IS Number</th>
-                                            <th>Variety</th>
-                                            <th>Clause</th>
-                                            <th>Parameter</th>
-                                            <th>Type</th>
-                                            <th>Min</th>
-                                            <th>Max</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="admin-limits-tbody">
-                                        <!-- JS -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
+            </div>
+
+            <!-- Hidden inner-content divs required by existing switchISInnerTab() calls -->
+            <div style="display:none;">
+                <div id="is-uncertainty-count-hidden"></div>
             </div>
         </div>
 
@@ -3152,6 +2936,77 @@ window.addEventListener('unhandledrejection', function(e) {
             </div>
             <input type="hidden" id="report-sample-id">
             <input type="hidden" id="report-is-number">
+        </div>
+    </div>
+
+    <!-- IS Vault Conformance Report Modal (opened from the vault "Generate Report" button) -->
+    <div id="is-report-modal" class="modal">
+        <div class="modal-content large-modal glass-panel" style="max-width: 1040px; padding: 25px; z-index: 10000;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 16px; gap:12px;">
+                <div>
+                    <h3 id="is-report-title" style="color: var(--accent); margin:0; display:flex; align-items:center; gap:10px;">
+                        <span>📋</span> Conformance Report
+                    </h3>
+                    <div id="is-report-subtitle" style="color:var(--text-muted); font-size:0.85rem; margin-top:4px;"></div>
+                </div>
+                <button onclick="closeISReport()" style="background:transparent; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted);">&times;</button>
+            </div>
+
+            <!-- Selectors (IS 4985 only) — drive the 31 computed rows, exactly like the LIMS uploader -->
+            <div id="is-report-toolbar" style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; margin-bottom:16px; padding:12px 14px; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:8px;">
+                <div>
+                    <label style="display:block; font-size:0.72rem; color:var(--text-muted); margin-bottom:5px; font-weight:600;">Sample Code</label>
+                    <input type="text" id="is-report-sample" placeholder="optional" style="width:140px; border-radius:6px; padding:8px; background:rgba(0,0,0,0.25); border:1px solid var(--glass-border); color:white; font-size:0.85rem;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.72rem; color:var(--text-muted); margin-bottom:5px; font-weight:600;">Nominal Size (DN)</label>
+                    <select id="is-report-size" onchange="renderVaultISReport()" style="width:120px; border-radius:6px; padding:8px; background:rgba(0,0,0,0.25); border:1px solid var(--glass-border); color:white; font-size:0.85rem;"></select>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.72rem; color:var(--text-muted); margin-bottom:5px; font-weight:600;">Class</label>
+                    <select id="is-report-class" onchange="renderVaultISReport()" style="width:160px; border-radius:6px; padding:8px; background:rgba(0,0,0,0.25); border:1px solid var(--glass-border); color:white; font-size:0.85rem;">
+                        <option value="1">Class 1 (0.25 MPa)</option>
+                        <option value="2">Class 2 (0.4 MPa)</option>
+                        <option value="3" selected>Class 3 (0.6 MPa)</option>
+                        <option value="4">Class 4 (0.8 MPa)</option>
+                        <option value="5">Class 5 (1.0 MPa)</option>
+                        <option value="6">Class 6 (1.25 MPa)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.72rem; color:var(--text-muted); margin-bottom:5px; font-weight:600;">Type</label>
+                    <select id="is-report-type" onchange="renderVaultISReport()" style="width:110px; border-radius:6px; padding:8px; background:rgba(0,0,0,0.25); border:1px solid var(--glass-border); color:white; font-size:0.85rem;">
+                        <option value="A">Type A</option>
+                        <option value="B">Type B</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.72rem; color:var(--text-muted); margin-bottom:5px; font-weight:600;">Plumbing</label>
+                    <select id="is-report-plumbing" onchange="renderVaultISReport()" style="width:90px; border-radius:6px; padding:8px; background:rgba(0,0,0,0.25); border:1px solid var(--glass-border); color:white; font-size:0.85rem;">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                </div>
+                <button onclick="printVaultISReport()" class="btn-premium" style="margin-left:auto; background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); padding:9px 14px; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">🖨️ Print / Save as PDF</button>
+            </div>
+
+            <!-- Dynamic per-standard selectors (template-driven standards e.g. 13592 = Size/Type/Socket) -->
+            <div id="is-report-toolbar-dyn" style="display:none; flex-wrap:wrap; gap:12px; align-items:flex-end; margin-bottom:16px; padding:12px 14px; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:8px;"></div>
+
+            <div style="max-height: 52vh; overflow-y: auto;" class="custom-scrollbar table-container">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;" class="premium-table">
+                    <thead>
+                        <tr id="is-report-thead-row">
+                            <th style="padding:8px 10px;">Clause</th>
+                            <th style="padding:8px 10px;">Test Parameter</th>
+                            <th style="padding:8px 10px;">Specified Value</th>
+                            <th style="padding:8px 10px; width:90px;">Type</th>
+                            <th style="padding:8px 10px; width:190px;">Observed Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="is-report-tbody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 

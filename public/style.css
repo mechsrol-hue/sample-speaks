@@ -1211,6 +1211,17 @@ tr:hover td {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    /* Grid item defaults to min-width:auto, which lets wide tables blow past the
+       viewport. min-width:0 lets the 1fr track shrink so inner tables scroll instead. */
+    min-width: 0;
+}
+
+/* Keep every results child (header, wide dimension tables, clauses) inside the panel
+   width so they scroll horizontally within their own container, not the whole page. */
+.is-analysis-panel > #is-results-panel,
+.is-analysis-panel > #is-results-panel > * {
+    min-width: 0;
+    max-width: 100%;
 }
 
 /* Parse Status Bar */

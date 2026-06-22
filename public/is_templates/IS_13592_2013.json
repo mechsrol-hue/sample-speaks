@@ -1,0 +1,629 @@
+{
+  "isNumber": "IS 13592:2013",
+  "title": "Unplasticized PVC-U Pipes for Soil and Waste Discharge System for Inside and Outside Buildings — Specification (First Revision)",
+  "parameterizationDims": [
+    "size",
+    "type",
+    "socket"
+  ],
+  "dimensionOptions": {
+    "size": [
+      40,
+      50,
+      63,
+      75,
+      90,
+      110
+    ],
+    "type": [
+      "A",
+      "B"
+    ],
+    "socket": [
+      "Solvent Cementing",
+      "Grooved"
+    ]
+  },
+  "defaults": {
+    "size": 90,
+    "type": "A",
+    "socket": "Grooved"
+  },
+  "_gridNote": "OD + thickness from Table 1 (read complete for DN40-90; 110 OD only). Grooved socket from Table 4. Table 2 (socket min wall thickness) and Table 3 (solvent-cementing socket) were truncated in the read — flagged needsReview.",
+  "dimensionGrid": {
+    "40": {
+      "mean_od": [
+        40,
+        40.3
+      ],
+      "od_any": [
+        39.5,
+        40.5
+      ],
+      "thickness": {
+        "A": [
+          1.8,
+          2.2
+        ],
+        "B": [
+          3.2,
+          3.8
+        ]
+      },
+      "grooved": {
+        "D1": [
+          40.3,
+          41.1
+        ],
+        "D2": [
+          49.6,
+          50.6
+        ],
+        "A_max": 18,
+        "B_min": 5,
+        "C_min": 18
+      }
+    },
+    "50": {
+      "mean_od": [
+        50,
+        50.3
+      ],
+      "od_any": [
+        49.4,
+        50.6
+      ],
+      "thickness": {
+        "A": [
+          1.8,
+          2.2
+        ],
+        "B": [
+          3.2,
+          3.8
+        ]
+      },
+      "grooved": {
+        "D1": [
+          50.3,
+          51.1
+        ],
+        "D2": [
+          59.6,
+          60.6
+        ],
+        "A_max": 18,
+        "B_min": 5,
+        "C_min": 20
+      }
+    },
+    "63": {
+      "mean_od": [
+        63,
+        63.3
+      ],
+      "od_any": [
+        62.2,
+        63.8
+      ],
+      "thickness": {
+        "A": [
+          1.8,
+          2.2
+        ],
+        "B": [
+          3.2,
+          3.8
+        ]
+      },
+      "grooved": {
+        "D1": [
+          63.3,
+          64.1
+        ],
+        "D2": [
+          72.9,
+          73.9
+        ],
+        "A_max": 18,
+        "B_min": 5,
+        "C_min": 23
+      }
+    },
+    "75": {
+      "mean_od": [
+        75,
+        75.3
+      ],
+      "od_any": [
+        74.1,
+        75.9
+      ],
+      "thickness": {
+        "A": [
+          1.8,
+          2.2
+        ],
+        "B": [
+          3.2,
+          3.8
+        ]
+      },
+      "grooved": {
+        "D1": [
+          75.3,
+          76.4
+        ],
+        "D2": [
+          84.5,
+          85.5
+        ],
+        "A_max": 20,
+        "B_min": 5,
+        "C_min": 25
+      }
+    },
+    "90": {
+      "mean_od": [
+        90,
+        90.3
+      ],
+      "od_any": [
+        88.9,
+        91.2
+      ],
+      "thickness": {
+        "A": [
+          1.9,
+          2.3
+        ],
+        "B": [
+          3.2,
+          3.8
+        ]
+      },
+      "grooved": {
+        "D1": [
+          90.3,
+          91.4
+        ],
+        "D2": [
+          99.5,
+          100.5
+        ],
+        "A_max": 23,
+        "B_min": 5,
+        "C_min": 28
+      }
+    },
+    "110": {
+      "mean_od": [
+        110,
+        110.4
+      ],
+      "od_any": [
+        108.6,
+        111.4
+      ],
+      "thickness": {
+        "A": [
+          null,
+          null
+        ],
+        "B": [
+          null,
+          null
+        ]
+      },
+      "grooved": {
+        "D1": [
+          110.4,
+          111.6
+        ],
+        "D2": [
+          120.3,
+          121.3
+        ],
+        "A_max": 26,
+        "B_min": 6,
+        "C_min": 32
+      }
+    }
+  },
+  "parameters": [
+    {
+      "clauseRef": "Cl 4",
+      "section": "General",
+      "parameterName": "Size designation (DN)",
+      "limitType": "text",
+      "variesBy": [
+        "size"
+      ],
+      "specText": "DN as declared",
+      "expected": "",
+      "testMethod": "",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 5",
+      "section": "Appearance",
+      "parameterName": "Colour of pipe",
+      "limitType": "qualitative",
+      "variesBy": [],
+      "specText": "Shall be dark shade of grey",
+      "expected": "Satisfactory",
+      "testMethod": "Visual",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 7.1",
+      "section": "Dimensions",
+      "parameterName": "Mean Outside Diameter",
+      "limitType": "range",
+      "variesBy": [
+        "size"
+      ],
+      "unit": "mm",
+      "testMethod": "IS 12235 (Part 1)",
+      "gridRows": [
+        {
+          "label": "Min",
+          "path": [
+            "mean_od",
+            0
+          ],
+          "limit": "min"
+        },
+        {
+          "label": "Max",
+          "path": [
+            "mean_od",
+            1
+          ],
+          "limit": "max"
+        }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 1"
+    },
+    {
+      "clauseRef": "Cl 7.1",
+      "section": "Dimensions",
+      "parameterName": "Outside Diameter at Any Point",
+      "limitType": "range",
+      "variesBy": [
+        "size"
+      ],
+      "unit": "mm",
+      "testMethod": "IS 12235 (Part 1)",
+      "gridRows": [
+        {
+          "label": "Min",
+          "path": [
+            "od_any",
+            0
+          ],
+          "limit": "min"
+        },
+        {
+          "label": "Max",
+          "path": [
+            "od_any",
+            1
+          ],
+          "limit": "max"
+        }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 1"
+    },
+    {
+      "clauseRef": "Cl 7.1",
+      "section": "Dimensions",
+      "parameterName": "Wall Thickness S",
+      "limitType": "range",
+      "variesBy": [
+        "size",
+        "type"
+      ],
+      "unit": "mm",
+      "testMethod": "IS 12235 (Part 1)",
+      "gridRows": [
+        {
+          "label": "Min",
+          "path": [
+            "thickness",
+            "{type}",
+            0
+          ],
+          "limit": "min"
+        },
+        {
+          "label": "Max",
+          "path": [
+            "thickness",
+            "{type}",
+            1
+          ],
+          "limit": "max"
+        }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 1"
+    },
+    {
+      "clauseRef": "Cl 7.2",
+      "section": "Dimensions",
+      "parameterName": "Length of Pipe",
+      "limitType": "range",
+      "variesBy": [],
+      "min": "-0",
+      "max": "+10",
+      "unit": "mm",
+      "specText": "Nominal 2/3/4/6 m, tolerance +10 / -0 mm",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 7.3.1",
+      "section": "Dimensions",
+      "parameterName": "Minimum wall thickness of socket",
+      "limitType": "min",
+      "variesBy": [
+        "size",
+        "socket"
+      ],
+      "unit": "mm",
+      "testMethod": "IS 12235 (Part 1)",
+      "specText": "Per Table 2 — pending re-extract",
+      "needsReview": true,
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 2"
+    },
+    {
+      "clauseRef": "Cl 7.3.2",
+      "section": "Dimensions",
+      "parameterName": "Solvent-cementing socket dimensions (D1, C)",
+      "limitType": "range",
+      "variesBy": [
+        "size"
+      ],
+      "unit": "mm",
+      "specText": "Per Table 3 — pending re-extract",
+      "needsReview": true,
+      "conditionalOn": {
+        "socket": "Solvent Cementing"
+      },
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 3"
+    },
+    {
+      "clauseRef": "Cl 7.3.2",
+      "section": "Dimensions",
+      "parameterName": "Grooved socket — Inside Dia D1",
+      "limitType": "range",
+      "variesBy": [
+        "size"
+      ],
+      "unit": "mm",
+      "conditionalOn": {
+        "socket": "Grooved"
+      },
+      "gridRows": [
+        {
+          "label": "Min",
+          "path": [
+            "grooved",
+            "D1",
+            0
+          ],
+          "limit": "min"
+        },
+        {
+          "label": "Max",
+          "path": [
+            "grooved",
+            "D1",
+            1
+          ],
+          "limit": "max"
+        }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 4"
+    },
+    {
+      "clauseRef": "Cl 7.3.2",
+      "section": "Dimensions",
+      "parameterName": "Grooved socket — Beading Dia D2",
+      "limitType": "range",
+      "variesBy": [
+        "size"
+      ],
+      "unit": "mm",
+      "conditionalOn": {
+        "socket": "Grooved"
+      },
+      "gridRows": [
+        {
+          "label": "Min",
+          "path": [
+            "grooved",
+            "D2",
+            0
+          ],
+          "limit": "min"
+        },
+        {
+          "label": "Max",
+          "path": [
+            "grooved",
+            "D2",
+            1
+          ],
+          "limit": "max"
+        }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 4"
+    },
+    {
+      "clauseRef": "Cl 7.3.2",
+      "section": "Dimensions",
+      "parameterName": "Grooved socket — Length of Beading/Neck A",
+      "limitType": "max",
+      "variesBy": [
+        "size"
+      ],
+      "unit": "mm",
+      "conditionalOn": {
+        "socket": "Grooved"
+      },
+      "gridRows": [
+        {
+          "label": "Max",
+          "path": [
+            "grooved",
+            "A_max"
+          ],
+          "limit": "max"
+        }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 4"
+    },
+    {
+      "clauseRef": "Cl 8.1",
+      "section": "Physical",
+      "parameterName": "Visual Appearance",
+      "limitType": "qualitative",
+      "variesBy": [],
+      "specText": "Surfaces smooth, clean, free from grooving/defects; ends square",
+      "expected": "Satisfactory",
+      "testMethod": "Visual",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 8.2",
+      "section": "Physical",
+      "parameterName": "Reversion Test",
+      "limitType": "max",
+      "variesBy": [],
+      "max": "5",
+      "unit": "percent",
+      "specText": "Shall not alter in length by more than 5 percent",
+      "testMethod": "IS 12235 (Part 5)",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 8.3",
+      "section": "Physical",
+      "parameterName": "Stress Relief Test (socket-end pipes only)",
+      "limitType": "qualitative",
+      "variesBy": [],
+      "specText": "No blisters, excessive delamination, cracking or weld-line splitting",
+      "expected": "Satisfactory",
+      "testMethod": "IS 12235 (Part 6)",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 8.4",
+      "section": "Physical",
+      "parameterName": "Vicat Softening Temperature",
+      "limitType": "min",
+      "variesBy": [],
+      "min": "79",
+      "unit": "°C",
+      "specText": "Shall not be less than 79 °C",
+      "testMethod": "IS 12235 (Part 2)",
+      "acceptanceOrType": "type"
+    },
+    {
+      "clauseRef": "Cl 8.5",
+      "section": "Physical",
+      "parameterName": "Effect of Sunlight",
+      "limitType": "max",
+      "variesBy": [],
+      "max": "20",
+      "unit": "percent",
+      "specText": "Tensile strength shall not differ by more than 20 percent after exposure",
+      "testMethod": "IS 12235 (Part 13)",
+      "acceptanceOrType": "type"
+    },
+    {
+      "clauseRef": "Cl 9",
+      "section": "Chemical",
+      "parameterName": "Resistance to Sulphuric Acid",
+      "limitType": "range",
+      "variesBy": [],
+      "min": "-0.13",
+      "max": "0.32",
+      "unit": "g",
+      "specText": "Mass shall neither increase by more than 0.32 g nor decrease by more than 0.13 g",
+      "testMethod": "IS 12235 (Part 7)",
+      "acceptanceOrType": "type"
+    },
+    {
+      "clauseRef": "Cl 10.1",
+      "section": "Mechanical",
+      "parameterName": "Resistance to External Blows at 0°C (Impact)",
+      "limitType": "max",
+      "variesBy": [],
+      "max": "10",
+      "unit": "percent TIR",
+      "specText": "True impact rate not more than 10 percent",
+      "testMethod": "IS 12235 (Part 9)",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 10.2",
+      "section": "Mechanical",
+      "parameterName": "Tensile Strength at break",
+      "limitType": "min",
+      "variesBy": [],
+      "min": "45",
+      "unit": "MPa",
+      "specText": "Shall not be less than 45 MPa",
+      "testMethod": "IS 12235 (Part 13)",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 10.3",
+      "section": "Mechanical",
+      "parameterName": "Axial Shrinkage (Type B only)",
+      "limitType": "max",
+      "variesBy": [
+        "type"
+      ],
+      "max": "2",
+      "unit": "percent",
+      "specText": "Shall not exceed 2 percent",
+      "testMethod": "Annex B",
+      "conditionalOn": {
+        "type": "B"
+      },
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 11",
+      "section": "Performance",
+      "parameterName": "Water Tightness of Joint",
+      "limitType": "qualitative",
+      "variesBy": [],
+      "specText": "Withstand 0.05 MPa for 15 min, no leakage",
+      "expected": "Pass",
+      "testMethod": "IS 14182",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 12",
+      "section": "Chemical",
+      "parameterName": "Resistance to Dichloromethane",
+      "limitType": "qualitative",
+      "variesBy": [],
+      "specText": "No attack on any part of test-piece surface",
+      "expected": "Satisfactory",
+      "testMethod": "IS 12235 (Part 11)",
+      "acceptanceOrType": "acceptance"
+    }
+  ]
+}

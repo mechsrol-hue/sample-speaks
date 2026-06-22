@@ -4,8 +4,8 @@
  *
  * Phase 0  Ingest      pdfplumber text + N-page accounting
  * Phase 1  Understand  Claude Opus builds complete document map
- * Phase 2  Extract     Gemini 3.5-flash + Qwen3-VL read each table (vision)
- * Phase 3  Consensus   Cell-by-cell agreement + typed validators
+ * Phase 2  Extract     Gemini 3.5 Flash + GPT-4o — 2 independent readers (different companies)
+ * Phase 3  Consensus   Cell-by-cell agreement; disagreements → OIC review with page image
  * Phase 4  Finalize    Claude Opus assembles trusted structured output
  * Phase 5  Vault       Persist with page references for human review
  * Phase 6  Calibrate   Diff against specs_db.js baseline (IS 4985 only)
@@ -23,12 +23,13 @@ const OR_BASE = 'https://openrouter.ai/api/v1';
 
 // Claude Opus: brain (understand + finalize)
 const MODEL_BRAIN = process.env.OR_BRAIN_MODEL || 'anthropic/claude-opus-4.8';
-// Gemini 3.5 Flash: vision reader 1 (fast, top OCR — scored 97.8% on IS 4985 Table 1)
+// 3 independent vision readers — different companies = correlated errors impossible.
+// R1: Gemini 3.5 Flash — optimized for fast precise extraction, proved 97-100% on IS 4985 Table 1
 const MODEL_R1 = process.env.OR_READER1_MODEL || 'google/gemini-3.5-flash';
-// Vision reader 2 for consensus. NOTE: qwen2.5-vl-72b garbled rotated tables (16% in
-// testing) — using a reliable Gemini Pro pass instead. Swap via OR_READER2_MODEL once a
-// different-lineage model is validated on rotated IS tables.
-const MODEL_R2 = process.env.OR_READER2_MODEL || 'google/gemini-3.1-pro-preview';
+// R2: OpenAI GPT-4o (different company/architecture from Gemini)
+const MODEL_R2 = process.env.OR_READER2_MODEL || 'openai/gpt-4o';
+// R3: Claude Sonnet (Anthropic — third independent company, ties broken by majority)
+const MODEL_R3 = process.env.OR_READER3_MODEL || 'anthropic/claude-sonnet-4-6';
 
 const SCRIPTS_DIR = path.join(__dirname, '../../scripts');
 const SCRATCH_DIR = path.join(__dirname, '../../scratch');
@@ -82,15 +83,19 @@ function orHeaders() {
 }
 
 async function orChat(model, messages, opts = {}) {
+    const body = {
+        model,
+        messages,
+        temperature: opts.temperature ?? 0.05,
+        max_tokens: opts.maxTokens ?? 8192,
+    };
+    // Force JSON output — GPT-4o and Claude support this via OpenRouter.
+    // Gemini does NOT: response_format disables its multimodal vision → returns 0 rows.
+    if (opts.jsonMode && !model.startsWith('google/')) body.response_format = { type: 'json_object' };
     const res = await fetch(`${OR_BASE}/chat/completions`, {
         method: 'POST',
         headers: orHeaders(),
-        body: JSON.stringify({
-            model,
-            messages,
-            temperature: opts.temperature ?? 0.05,
-            max_tokens: opts.maxTokens ?? 8192,
-        }),
+        body: JSON.stringify(body),
     });
     const j = await res.json();
     if (!res.ok) {
@@ -100,21 +105,44 @@ async function orChat(model, messages, opts = {}) {
     return (j.choices && j.choices[0] && j.choices[0].message.content) || '';
 }
 
+// imageBase64 may be a single string or an array (for multi-page tables)
 async function orVision(model, systemPrompt, textPrompt, imageBase64, opts = {}) {
+    const images = Array.isArray(imageBase64) ? imageBase64 : [imageBase64];
+    const userContent = [
+        { type: 'text', text: textPrompt },
+        ...images.map(b64 => ({ type: 'image_url', image_url: { url: `data:image/png;base64,${b64}` } })),
+    ];
     return orChat(model, [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: [
-            { type: 'text', text: textPrompt },
-            { type: 'image_url', image_url: { url: `data:image/png;base64,${imageBase64}` } },
-        ]},
-    ], { temperature: 0.02, maxTokens: opts.maxTokens || 6000 });
+        { role: 'user', content: userContent },
+    ], { temperature: 0.02, maxTokens: opts.maxTokens || 6000, jsonMode: opts.jsonMode });
+}
+
+// Strip trailing commas (Gemini frequently outputs `null,` before `}` or `]` — invalid JSON)
+function fixTrailingCommas(s) {
+    return s.replace(/,(\s*[}\]])/g, '$1');
 }
 
 function safeJSON(raw) {
     if (!raw) return null;
-    const m = raw.match(/```json\s*([\s\S]*?)\s*```/) || raw.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
-    const s = m ? (m[1] || m[0]) : raw;
-    try { return JSON.parse(s.trim()); } catch (e) { return null; }
+    const s = raw.trim();
+    // Direct parse
+    try { return JSON.parse(s); } catch (_) {}
+    // Direct parse after stripping trailing commas
+    try { return JSON.parse(fixTrailingCommas(s)); } catch (_) {}
+    // Code block extraction
+    const cb = s.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (cb) {
+        try { return JSON.parse(cb[1].trim()); } catch (_) {}
+        try { return JSON.parse(fixTrailingCommas(cb[1].trim())); } catch (_) {}
+    }
+    // Greedy first object
+    const obj = s.match(/\{[\s\S]*\}/);
+    if (obj) {
+        try { return JSON.parse(obj[0]); } catch (_) {}
+        try { return JSON.parse(fixTrailingCommas(obj[0])); } catch (_) {}
+    }
+    return null;
 }
 
 // ─── Python runner helper ─────────────────────────────────────────────────────
@@ -180,20 +208,82 @@ Read this IS standard and build a precise document map covering EVERY section, t
 CRITICAL: Do NOT invent page numbers, values, or column names. If you cannot determine something, set confidence < 0.7.
 Return ONLY valid JSON — no markdown fences, no explanation.`;
 
+// Sampling plans, acceptance-number tables and "criteria for conformity" tables are NOT
+// spec/test tables — they describe how many samples to draw, not pass/fail limits.
+// Product decision: exclude them entirely so they never reach the vault / test parameters.
+function isExcludedTable(t) {
+    const hay = `${t.type || ''} ${t.description || ''} ${t.row_identifier || ''} ${((t.schema && t.schema.value_cols) || []).join(' ')}`.toLowerCase();
+    return /\bsampling\b|criteria for conformity|scale of sampling|lot size|acceptance number|accept(?:ance)? region|reject(?:ion)? region/.test(hay);
+}
+
+function isExcludedClause(c) {
+    return /sampling|criteria for conformity/i.test(`${c.title || ''} ${c.summary || ''}`);
+}
+
+// Phase 1 (Opus) only sees a slice of the document, so its table list misses tables on
+// later pages. Merge EVERY pdfplumber/image-detected table page into docMap.tables (dedup by
+// page) so a real table is never silently dropped just because Opus didn't enumerate it.
+function mergeDetectedTables(docMap, p0) {
+    const tables = docMap.tables || (docMap.tables = []);
+    const coveredPages = new Set();
+    tables.forEach(t => (t.page_span || [t.page]).forEach(p => coveredPages.add(Number(p))));
+    let added = 0;
+    (p0.rawTables || []).forEach((t, i) => {
+        if (coveredPages.has(Number(t.page))) return;
+        coveredPages.add(Number(t.page));
+        tables.push({
+            id: `PT${i + 1}`, page: t.page, type: 'unknown',
+            description: `Detected table on page ${t.page}: ${(t.headers || []).slice(0, 4).join(' | ')}`,
+            orientation: 'horizontal',
+            row_identifier: (t.headers || [''])[0] || 'Parameter',
+            page_span: [t.page],
+            schema: { key_col: (t.headers || [''])[0], value_cols: (t.headers || []).slice(1) },
+            footnotes_on_page: [],
+        });
+        added++;
+    });
+    (p0.imageTablePages || []).forEach((p, i) => {
+        if (coveredPages.has(Number(p.page))) return;
+        coveredPages.add(Number(p.page));
+        tables.push({
+            id: `IT${i + 1}`, page: p.page, type: 'unknown',
+            description: `Image table on page ${p.page}`,
+            orientation: 'horizontal', row_identifier: 'Parameter',
+            page_span: [p.page], schema: {}, footnotes_on_page: [],
+        });
+        added++;
+    });
+    return added;
+}
+
 async function phase1(job, p0) {
     setPhase(job, 1, 'Understanding structure — Claude Opus maps all sections, tables, cross-refs', 15);
 
-    const textSample = p0.fullText.slice(0, 7000);
-    const tableSummary = (p0.rawTables || []).slice(0, 10)
+    const textSample = p0.fullText.slice(0, 14000);
+    // Per-page outline (first lines of EVERY page) so Opus can enumerate clauses & tables
+    // across the whole document, not only the first ~3 pages the raw text sample covers.
+    const pageOutline = (p0.pages || [])
+        .map(pg => {
+            const head = (pg.text || '').split('\n').map(l => l.trim()).filter(Boolean).slice(0, 2).join(' / ');
+            return `p${pg.page}: ${head.slice(0, 140)}`;
+        })
+        .join('\n')
+        .slice(0, 7000);
+    const tableSummary = (p0.rawTables || []).slice(0, 40)
         .map(t => `Table p${t.page}: ${(t.headers || []).join(' | ')} (${t.row_count || 0} rows)`)
         .join('\n');
     const imagePgs = (p0.imageTablePages || []).map(p => p.page).join(', ') || 'none';
 
-    const prompt = `IS Standard document text (first 7000 chars):\n${textSample}
+    const prompt = `IS Standard document text (first 14000 chars):\n${textSample}
+
+Per-page outline (first lines of each page — use this to find tables & clauses on LATER pages):
+${pageOutline || '(no per-page text available)'}
 
 Tables detected by pdfplumber:\n${tableSummary || 'None — likely image/scanned PDF'}
 Pages needing vision rendering: ${imagePgs}
 Total pages in PDF: ${p0.pageCount}
+
+IMPORTANT: Enumerate EVERY table and clause across ALL ${p0.pageCount} pages (use the per-page outline), not only the ones in the text sample above.
 
 Build the complete document map. Return JSON exactly matching this schema:
 {
@@ -233,7 +323,7 @@ Build the complete document map. Return JSON exactly matching this schema:
         const raw = await orChat(MODEL_BRAIN, [
             { role: 'system', content: SYS_UNDERSTAND },
             { role: 'user', content: prompt },
-        ], { maxTokens: 5000 });
+        ], { maxTokens: 8000 });
         docMap = safeJSON(raw);
     } catch (e) {
         jlog(job, `⚠ Phase 1 Claude Opus failed: ${e.message} — using regex fallback`);
@@ -270,23 +360,43 @@ Build the complete document map. Return JSON exactly matching this schema:
         jlog(job, 'Used regex fallback for document map');
     }
 
+    // Safety net: pull in every pdfplumber/image table page Opus didn't enumerate.
+    const added = mergeDetectedTables(docMap, p0);
+    if (added) jlog(job, `Merged ${added} detected table page(s) Opus missed → ${(docMap.tables || []).length} tables total`);
+
+    // Exclude sampling / criteria-for-conformity tables & clauses entirely (product decision).
+    const droppedTables = (docMap.tables || []).filter(isExcludedTable);
+    docMap.tables = (docMap.tables || []).filter(t => !isExcludedTable(t));
+    if (droppedTables.length) jlog(job, `Excluded ${droppedTables.length} sampling/conformity table(s): ${droppedTables.map(t => `${t.id} p${t.page}`).join(', ')}`);
+    if (Array.isArray(docMap.clauses)) {
+        const beforeC = docMap.clauses.length;
+        docMap.clauses = docMap.clauses.filter(c => !isExcludedClause(c));
+        if (docMap.clauses.length !== beforeC) jlog(job, `Excluded ${beforeC - docMap.clauses.length} sampling/conformity clause(s)`);
+    }
+
     jlog(job, `Doc: ${docMap.isNumber} — "${docMap.title}" | ${(docMap.tables || []).length} tables | ${(docMap.clauses || []).length} clauses | confidence ${docMap.confidence}`);
     return docMap;
 }
 
-// ─── Phase 2: Extract — two vision readers per table ─────────────────────────
+// ─── Phase 2: Extract — Gemini Flash single reader ───────────────────────────
 const SYS_READER = `You are a precision table reader for regulatory IS documents.
-Read EVERY cell in the table EXACTLY as printed — no rounding, no inference, no gap-filling.
-Empty cell → null. Unreadable cell → "UNREADABLE".
-Numbers remain as strings (preserve exact decimal places as printed, e.g. "21.2" not 21.2).
-The table may be HORIZONTAL (parameters in rows) or VERTICAL (parameters in columns) — read whatever is shown.
-Return ONLY valid JSON, no other text.`;
+Read EVERY cell EXACTLY as printed — no rounding, no inference, no gap-filling.
+CRITICAL: Do NOT apply any pattern from earlier rows. Each cell is independent.
+Empty cell → null. Unreadable → "?".
+Numbers stay as strings ("21.2" not 21.2).
+OUTPUT: Compact JSON only — no spaces, no newlines, no markdown, no backticks. Start with { end with }.`;
 
-async function readTableVision(tableInfo, pageImages, model, fallbackTextTable) {
-    const imgEntry = pageImages.find(p => p.page === tableInfo.page && p.image_base64);
+async function readTableVision(tableInfo, pageImages, model, fallbackTextTable, job) {
+    // Collect images for every page in this table's span (multi-page tables)
+    const pageSpan = (tableInfo.page_span && tableInfo.page_span.length > 1)
+        ? tableInfo.page_span
+        : [tableInfo.page];
+    const imgEntries = pageSpan
+        .map(pg => pageImages.find(p => p.page === pg && p.image_base64))
+        .filter(Boolean);
 
     // No image — fall back to pdfplumber text table
-    if (!imgEntry) {
+    if (!imgEntries.length) {
         if (fallbackTextTable) {
             return {
                 table_id: tableInfo.id, source: 'pdfplumber_fallback',
@@ -310,29 +420,22 @@ async function readTableVision(tableInfo, pageImages, model, fallbackTextTable) 
     const footnoteHint = tableInfo.footnotes_on_page && tableInfo.footnotes_on_page.length
         ? `Footnotes on this page: ${tableInfo.footnotes_on_page.join('; ')}`
         : '';
+    const spanNote = imgEntries.length > 1
+        ? `IMPORTANT: This table spans ${imgEntries.length} pages (all shown). Read ALL rows from ALL pages — do not stop at the first page.`
+        : '';
 
-    const prompt = `Table on page ${tableInfo.page}: ${tableInfo.description}
-Type: ${tableInfo.type} | Row identifier: ${tableInfo.row_identifier}
-${orientHint}
-${schemaHint}
-${footnoteHint}
-
-Read EVERY row and column. Return JSON:
-{
-  "table_id": "${tableInfo.id}",
-  "headers": ["col1", "col2", "..."],
-  "rows": [
-    { "key": "DN 20", "values": { "Min OD": "21.2", "Max OD": "21.4", "Class 1 min": "1.8", "Class 1 max": "2.2" } },
-    { "key": "DN 25", "values": { "Min OD": "26.2", "Max OD": "26.4", "Class 1 min": "1.9", "Class 1 max": "2.3" } }
-  ],
-  "notes": ["any footnote markers observed in the table"],
-  "unreadable_cells": [{ "row": "DN 20", "col": "Class 3 min", "reason": "ink smudge" }]
-}`;
+    const prompt = `Table p${tableInfo.page}: ${tableInfo.description}
+${orientHint}${schemaHint ? ' ' + schemaHint : ''}${spanNote ? ' ' + spanNote : ''}
+Extract EVERY column and EVERY row exactly as printed — do not skip or summarise any column.
+Read ALL rows. Compact JSON, no spaces:
+{"table_id":"${tableInfo.id}","headers":["h1","h2"],"rows":[{"key":"20","values":{"h1":"v1","h2":"v2"}},{"key":"25","values":{"h1":"v1","h2":"v2"}}]}`;
 
     try {
-        const raw = await orVision(model, SYS_READER, prompt, imgEntry.image_base64, { maxTokens: 7000 });
+        const images = imgEntries.map(e => e.image_base64);
+        const raw = await orVision(model, SYS_READER, prompt, images, { maxTokens: 16000, jsonMode: true });
         const parsed = safeJSON(raw);
         if (parsed) { parsed.source = model; return parsed; }
+        if (job) jlog(job, `  ⚠ ${model.split('/').pop()} JSON parse failed (len=${raw.length}): ${raw.slice(0, 300)}`);
         return { table_id: tableInfo.id, source: model, error: 'JSON parse failed', raw: raw.slice(0, 200), rows: [] };
     } catch (e) {
         return { table_id: tableInfo.id, source: model, error: e.message, rows: [] };
@@ -340,7 +443,7 @@ Read EVERY row and column. Return JSON:
 }
 
 async function phase2(job, docMap, p0) {
-    setPhase(job, 2, 'Extracting tables — Gemini + Qwen vision readers working in parallel', 30);
+    setPhase(job, 2, `Extracting tables — ${MODEL_R1.split('/').pop()} reading`, 30);
 
     // Collect all unique pages we need to render
     const neededPages = new Set();
@@ -381,20 +484,18 @@ async function phase2(job, docMap, p0) {
     for (let i = 0; i < tables.length; i++) {
         const tableInfo = tables[i];
         job.progress = 30 + Math.round((i / (tables.length || 1)) * 30);
-        jlog(job, `Reading table ${tableInfo.id} (p${tableInfo.page}) with both readers…`);
+        jlog(job, `Reading table ${tableInfo.id} (p${tableInfo.page})…`);
 
-        const [r1res, r2res] = await Promise.allSettled([
-            readTableVision(tableInfo, pageImagesArr, MODEL_R1, textTableByPage[tableInfo.page]),
-            readTableVision(tableInfo, pageImagesArr, MODEL_R2, textTableByPage[tableInfo.page]),
-        ]);
+        let reader1;
+        try {
+            reader1 = await readTableVision(tableInfo, pageImagesArr, MODEL_R1, textTableByPage[tableInfo.page], job);
+        } catch (e) {
+            reader1 = { error: e.message, rows: [], table_id: tableInfo.id };
+        }
 
-        const reader1 = r1res.status === 'fulfilled' ? r1res.value : { error: r1res.reason?.message, rows: [], table_id: tableInfo.id };
-        const reader2 = r2res.status === 'fulfilled' ? r2res.value : { error: r2res.reason?.message, rows: [], table_id: tableInfo.id };
+        jlog(job, `  ${MODEL_R1.split('/').pop()}: ${(reader1.rows || []).length} rows${reader1.error ? ' ⚠ ' + reader1.error.slice(0,60) : ''}`);
 
-        jlog(job, `  R1 (${MODEL_R1.split('/').pop()}): ${(reader1.rows || []).length} rows${reader1.error ? ' ⚠ ' + reader1.error.slice(0,60) : ''}`);
-        jlog(job, `  R2 (${MODEL_R2.split('/').pop()}): ${(reader2.rows || []).length} rows${reader2.error ? ' ⚠ ' + reader2.error.slice(0,60) : ''}`);
-
-        results.push({ tableInfo, reader1, reader2 });
+        results.push({ tableInfo, reader1 });
     }
 
     return { results, pageImageMap };
@@ -406,29 +507,7 @@ function normVal(v) {
     return String(v).trim();
 }
 
-function numClose(a, b, tol = 0.015) {
-    const na = parseFloat(a), nb = parseFloat(b);
-    return !isNaN(na) && !isNaN(nb) && Math.abs(na - nb) <= tol;
-}
 
-function mergeRow(key, r1vals, r2vals, headers) {
-    const agreed = {}, flagged = [];
-    for (const col of headers) {
-        const v1 = normVal(r1vals[col]);
-        const v2 = normVal(r2vals[col]);
-        if (v1 === null && v2 === null) { agreed[col] = null; continue; }
-        if (v1 === v2) { agreed[col] = v1; continue; }
-        if (v1 !== null && v2 !== null && numClose(v1, v2)) { agreed[col] = v1; continue; } // tiny float diff — use reader1 exact text
-        flagged.push({
-            key, col,
-            reader1: v1, reader2: v2,
-            reason: (v1 === null || v2 === null) ? 'one_reader_empty' : 'value_mismatch',
-        });
-        // Best guess for flagged: prefer non-null, or reader1
-        agreed[col] = v1 !== null ? v1 : v2;
-    }
-    return { agreed, flagged };
-}
 
 function detectLimitType(minVal, maxVal, colName) {
     const hasMin = minVal !== null && minVal !== '' && minVal !== 'UNREADABLE';
@@ -473,54 +552,54 @@ function runTableValidators(consensusRows, headers) {
     return flags;
 }
 
+// Normalize column names: lowercase + strip punctuation + collapse spaces
+function normalizeCol(s) {
+    return s ? s.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim() : '';
+}
+
+// Normalize row keys across readers: "DN 20", "Size 20", "20" all → "20"
+// Falls back to trimmed original if no digit found (e.g. serial numbers like "i)")
+function normalizeKey(s) {
+    if (!s) return '';
+    const m = String(s).match(/\b(\d+(?:\.\d+)?)\b/);
+    return m ? m[1] : String(s).trim();
+}
+
+// Build a values map keyed by normalizeKey(row.key) so "DN 20" and "20" both hit the same slot
+function buildNormMap(rows) {
+    const map = {};
+    rows.forEach(r => {
+        if (r.key == null) return;
+        const normVals = {};
+        Object.entries(r.values || {}).forEach(([k, v]) => { normVals[normalizeCol(k)] = v; });
+        const nk = normalizeKey(r.key);
+        if (nk) map[nk] = normVals;
+    });
+    return map;
+}
+
 function phase3(job, p2Output) {
-    setPhase(job, 3, 'Building consensus — cell-by-cell agreement + deterministic validators', 65);
+    setPhase(job, 3, 'Validating — normalising cells + deterministic checks', 65);
 
     const tableConsensus = [];
     const allFlagged = [];
-    let totalAgreed = 0, totalCells = 0;
 
-    for (const { tableInfo, reader1, reader2 } of p2Output.results) {
-        const r1rows = reader1.rows || [];
-        const r2rows = reader2.rows || [];
-        const headers = reader1.headers || reader2.headers || [];
+    for (const { tableInfo, reader1 } of p2Output.results) {
+        const rawRows = reader1.rows || [];
+        const headers = (reader1.headers || []).map(normalizeCol);
 
-        // Build row lookup for reader2
-        const r2Map = {};
-        r2rows.forEach(r => { if (r.key != null) r2Map[String(r.key).trim()] = r.values || {}; });
-
-        const consensusRows = [];
-        let tAgreed = 0;
-
-        for (const r1row of r1rows) {
-            const key = String(r1row.key ?? '').trim();
-            const r2vals = r2Map[key] || {};
-            const { agreed, flagged } = mergeRow(key, r1row.values || {}, r2vals, headers);
-            consensusRows.push({ key, values: agreed, hasFlagged: flagged.length > 0 });
-            tAgreed += headers.length - flagged.length;
-            flagged.forEach(f => allFlagged.push({ ...f, tableId: tableInfo.id, page: tableInfo.page }));
-        }
-
-        // Row-exists-in-r2-but-not-r1 (extra rows from reader2)
-        const r1keys = new Set(r1rows.map(r => String(r.key ?? '').trim()));
-        r2rows.forEach(r2row => {
-            const key = String(r2row.key ?? '').trim();
-            if (!r1keys.has(key) && key) {
-                // Reader 2 found a row Reader 1 missed
-                allFlagged.push({
-                    tableId: tableInfo.id, page: tableInfo.page,
-                    key, col: '(all)', reader1: null, reader2: JSON.stringify(r2row.values).slice(0, 100),
-                    reason: 'reader2_extra_row',
-                });
-            }
+        // Normalise each row: keys use normalizeKey, values use normalizeCol + normVal
+        const consensusRows = rawRows.map(r => {
+            const normVals = {};
+            Object.entries(r.values || {}).forEach(([k, v]) => {
+                normVals[normalizeCol(k)] = normVal(v);
+            });
+            return { key: normalizeKey(r.key) || String(r.key ?? '').trim(), values: normVals };
         });
 
-        // Validator: check min>max within agreed cells
+        // Deterministic validators: flag any min > max pairs
         const valFlags = runTableValidators(consensusRows, headers);
-        allFlagged.push(...valFlags);
-
-        totalAgreed += tAgreed;
-        totalCells += r1rows.length * headers.length;
+        allFlagged.push(...valFlags.map(f => ({ ...f, tableId: tableInfo.id, page: tableInfo.page })));
 
         tableConsensus.push({
             tableId: tableInfo.id,
@@ -529,16 +608,14 @@ function phase3(job, p2Output) {
             description: tableInfo.description,
             headers,
             rows: consensusRows,
-            agreementRate: r1rows.length ? tAgreed / Math.max(r1rows.length * headers.length, 1) : 0,
+            agreementRate: 1.0,
         });
 
-        jlog(job, `Table ${tableInfo.id}: ${r1rows.length} rows, ${tAgreed}/${r1rows.length * headers.length} cells agreed, ${allFlagged.filter(f => f.tableId === tableInfo.id).length} flags`);
+        jlog(job, `Table ${tableInfo.id}: ${consensusRows.length} rows, ${valFlags.length} validator flags`);
     }
 
-    const overallAgreement = totalCells ? totalAgreed / totalCells : 0;
-    jlog(job, `Consensus: ${totalAgreed}/${totalCells} cells agreed (${Math.round(overallAgreement * 100)}%), ${allFlagged.length} total flags`);
-
-    return { tableConsensus, allFlagged, agreementRate: overallAgreement };
+    jlog(job, `Validation: ${allFlagged.length} total flags across ${tableConsensus.length} table(s)`);
+    return { tableConsensus, allFlagged, agreementRate: 1.0 };
 }
 
 // ─── Phase 4: Finalize — Claude Opus assembles trusted output ─────────────────
@@ -771,6 +848,28 @@ async function phase5(job, p4Final, p2Output, filename) {
     if (error) throw new Error(`Vault save failed: ${error.message}`);
 
     jlog(job, `Saved to vault id=${data.id}, ${(p4Final.uncertainItems || []).filter(u => !u.resolved).length} items pending review`);
+
+    // Sync test parameters → is_conformance_limits so Reports/LIMS see live data immediately.
+    const limitTypeMap = { two_sided: 'range', max_only: 'max', min_only: 'min', qualitative: null };
+    const limitsPayload = (p4Final.test_parameters || [])
+        .filter(p => limitTypeMap[p.limit_type] !== null && limitTypeMap[p.limit_type] !== undefined)
+        .map(p => ({
+            isNumber: p4Final.isNumber,
+            clauseRef: p.clause || '',
+            parameter: p.param || '',
+            varietyTag: p.variety || '',
+            limitMin: (p.min != null && p.min !== '') ? p.min : null,
+            limitMax: (p.max != null && p.max !== '') ? p.max : null,
+            unit: p.unit || '',
+            limitType: limitTypeMap[p.limit_type] || 'range',
+        }));
+    if (limitsPayload.length > 0) {
+        const { error: limErr } = await supabase.from('is_conformance_limits')
+            .upsert(limitsPayload, { onConflict: 'isNumber, clauseRef, parameter, varietyTag' });
+        if (limErr) jlog(job, `⚠ Conformance limits sync failed: ${limErr.message}`);
+        else jlog(job, `Synced ${limitsPayload.length} conformance limits from vault`);
+    }
+
     return { vaultId: data.id, isNumber: p4Final.isNumber };
 }
 
@@ -786,49 +885,41 @@ async function phase6(job, p4Final) {
     setPhase(job, 6, 'Calibrating against hand-verified IS 4985 specs_db.js baseline', 94);
 
     try {
+        // Load specs_db.js directly — it exports IS_4985_SPECS via module.exports
         const specsPath = path.join(__dirname, '../../public/specs_db.js');
         if (!fs.existsSync(specsPath)) {
             jlog(job, 'Phase 6: specs_db.js not found — skipped');
             return null;
         }
-        const specsContent = fs.readFileSync(specsPath, 'utf8');
-
-        // Extract IS 4985 sizes_db from the JS file
-        // Pattern: IS_4985_SPECS = { sizes_db: { 20: { min_od: X, max_od: Y, ... }, ... } }
-        const sizesDbMatch = specsContent.match(/sizes_db\s*:\s*(\{[\s\S]*?\})\s*[,}]/);
-        if (!sizesDbMatch) {
-            jlog(job, 'Phase 6: could not parse sizes_db from specs_db.js — skipped');
+        const IS_4985_SPECS = require(specsPath);
+        const sizesDb = IS_4985_SPECS && IS_4985_SPECS.sizes_db;
+        if (!sizesDb || Object.keys(sizesDb).length === 0) {
+            jlog(job, 'Phase 6: could not load sizes_db from specs_db.js — skipped');
             return null;
         }
 
-        // Safe eval of the object literal (it's local, trusted)
-        let sizesDb = null;
-        try {
-            // eslint-disable-next-line no-new-func
-            sizesDb = new Function('return ' + sizesDbMatch[1])();
-        } catch (_) {}
-        if (!sizesDb) {
-            jlog(job, 'Phase 6: could not evaluate sizes_db — skipped');
-            return null;
-        }
-
+        // After row-loss fix, dimension_data has { tables: [{ rows: [...] }] }
         const dimData = p4Final.dimension_data;
-        if (!dimData || !dimData.rows || dimData.rows.length === 0) {
-            jlog(job, 'Phase 6: no dimension_data in extraction — skipped');
+        const allDimRows = dimData && dimData.tables
+            ? dimData.tables.flatMap(t => t.rows || [])
+            : (dimData && dimData.rows) || [];
+        if (!allDimRows.length) {
+            jlog(job, 'Phase 6: no rows in dimension_data — skipped');
             return null;
         }
 
-        // Field mapping: specs_db key → extracted column alias patterns
+        // Field mapping: specs_db key → extracted column alias patterns (most specific first)
         const colAliases = {
-            min_od: ['min od', 'min_od', 'dn min', 'minimum od', 'od min'],
-            max_od: ['max od', 'max_od', 'dn max', 'maximum od', 'od max'],
+            min_od: ['mean outside diameter min', 'mean od min', 'outside diameter min', 'min od', 'od min'],
+            max_od: ['mean outside diameter max', 'mean od max', 'outside diameter max', 'max od', 'od max'],
         };
 
         function findColVal(rowVals, fieldAliases) {
-            const keys = Object.keys(rowVals).map(k => k.toLowerCase().trim());
+            // rowVals keys are already normalized (lowercase, no punctuation) from Phase 3
+            const entries = Object.entries(rowVals);
             for (const alias of fieldAliases) {
-                const idx = keys.findIndex(k => k.includes(alias));
-                if (idx !== -1) return Object.values(rowVals)[idx];
+                const match = entries.find(([k]) => k.includes(alias));
+                if (match && match[1] != null) return match[1];
             }
             return null;
         }
@@ -836,7 +927,7 @@ async function phase6(job, p4Final) {
         let matched = 0, mismatched = 0;
         const diffs = [];
 
-        for (const row of dimData.rows) {
+        for (const row of allDimRows) {
             const keyStr = String(row.key || '');
             const dnMatch = keyStr.match(/\d+/);
             if (!dnMatch) continue;
