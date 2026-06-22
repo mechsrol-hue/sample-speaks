@@ -1932,12 +1932,12 @@ app.get('/api/admin/templates', async (req, res) => {
             const today = new Date();
             const recommendationsToInsert = [];
 
-            // --- Ordering: priority buckets, then earliest-deadline-first (EDF) ---
-            // Priority samples are processed first (req g). Within each bucket we sort by
-            // days-to-expiry ascending, so the most overdue / soonest-to-breach-TAT samples
-            // claim competent TAs before capacity runs out (req e). Strict FIFO — oldest
-            // receivedOn first — is the tiebreaker, so when TATs are equal (the common case)
-            // the order is exactly FIFO (req d).
+            // --- Ordering: priority buckets, then HYBRID overdue-first / strict FIFO ---
+            // Priority samples are processed first (req g). Within each bucket, any sample
+            // already PAST its TAT deadline jumps the queue, most-overdue first (req e);
+            // everything still within TAT is processed strict oldest-received-first (req d).
+            // So expiry only pre-empts the queue when a sample is genuinely overdue —
+            // otherwise the discipline is strict FIFO.
             const parsePendency = (s) => {
                 if (s.pendencyDays && !isNaN(parseInt(s.pendencyDays))) return parseInt(s.pendencyDays);
                 if (s.receivedOn) {
@@ -1961,14 +1961,16 @@ app.get('/api/admin/templates', async (req, res) => {
 
             const isPrioritySample = (s) => (s.priorityLevel || '').toLowerCase() === 'priority' || (s.encodedCode || '').toLowerCase().endsWith('p');
 
-            // Earliest deadline first; strict FIFO (oldest received first) breaks ties.
-            const byDeadlineThenFifo = (a, b) => {
+            // Overdue samples first (most overdue first); everything else strict FIFO (oldest first).
+            const byOverdueThenFifo = (a, b) => {
                 const da = daysToExpiry(a), db = daysToExpiry(b);
-                if (da !== db) return da - db;
-                return parsePendency(b) - parsePendency(a);
+                const aOver = da < 0, bOver = db < 0;
+                if (aOver !== bOver) return aOver ? -1 : 1;       // overdue jumps the queue
+                if (aOver && bOver && da !== db) return da - db;  // most overdue first
+                return parsePendency(b) - parsePendency(a);       // else strict FIFO (oldest first)
             };
-            const priorityQueue    = unassignedSamples.filter(s =>  isPrioritySample(s)).sort(byDeadlineThenFifo);
-            const nonPriorityQueue = unassignedSamples.filter(s => !isPrioritySample(s)).sort(byDeadlineThenFifo);
+            const priorityQueue    = unassignedSamples.filter(s =>  isPrioritySample(s)).sort(byOverdueThenFifo);
+            const nonPriorityQueue = unassignedSamples.filter(s => !isPrioritySample(s)).sort(byOverdueThenFifo);
             const orderedSamples   = [...priorityQueue, ...nonPriorityQueue];
 
             for (const sample of orderedSamples) {
@@ -3125,13 +3127,48 @@ app.post('/api/is-intelligence/agent-extract', upload.single('pdf'), async (req,
     const job = { status: 'running', log: [], result: null, error: null, startedAt: Date.now() };
     agentJobs.set(jobId, job);
 
+    const uploadedName = req.file.originalname;
     (async () => {
         const out = await runReportAgent(pdfPath, {
             isHint: (req.body && req.body.isNumber) || '',
             onEvent: (line) => { job.log.push(line); if (job.log.length > 200) job.log.shift(); },
         });
-        job.status = out.ok ? 'done' : 'error';
+        // Register the standard in the IS vault so it appears in the list (like pipeline-scanned ones).
+        // The clause-by-clause data lives in the template file; this row just makes the standard
+        // discoverable + openable. MUST finish BEFORE status flips to 'done', else the frontend
+        // refreshes the vault list before the row exists and the new standard won't appear / auto-open.
+        if (out.ok && out.templatePath) {
+            try {
+                const tpl = JSON.parse(fs.readFileSync(path.join(__dirname, out.templatePath), 'utf8'));
+                const isNumber = out.isNumber || tpl.isNumber || '';
+                const vaultRow = {
+                    isNumber,
+                    title: tpl.title || '',
+                    pdfFileName: uploadedName,
+                    confidenceScore: 1.0,
+                    isFullyResolved: true,
+                    uploadedAt: new Date().toISOString(),
+                };
+                const { data: existing, error: selErr } = await supabase.from('is_standards_vault').select('id').eq('isNumber', isNumber).limit(1);
+                if (selErr) throw selErr;
+                if (existing && existing.length) {
+                    const { error } = await supabase.from('is_standards_vault').update(vaultRow).eq('id', existing[0].id);
+                    if (error) throw error;
+                    out.vaultId = existing[0].id;
+                } else {
+                    const { data: ins, error } = await supabase.from('is_standards_vault').insert(vaultRow).select('id');
+                    if (error) throw error;
+                    out.vaultId = ins && ins[0] ? ins[0].id : null;
+                }
+                console.log(`[agent] IS vault row upserted: ${isNumber} (id ${out.vaultId})`);
+            } catch (e) {
+                console.error('[agent] IS vault upsert FAILED (template still usable):', e.message);
+            }
+        }
+
+        // Flip status LAST — only now is the vault row present for the frontend to find + auto-open.
         job.result = out;
+        job.status = out.ok ? 'done' : 'error';
         job.error = out.ok ? null : out.error;
         try { fs.unlinkSync(pdfPath); } catch (_) {}
     })().catch(e => { job.status = 'error'; job.error = e.message; });
@@ -3203,6 +3240,105 @@ app.get('/api/is-intelligence/params/:isNumber', async (req, res) => {
         });
     } catch(e) {
         res.status(500).json({ error: e.message });
+    }
+});
+
+// Make IS Intelligence the SINGLE SOURCE OF TRUTH for a standard's parameters —
+// by LINKING, not copying. IS Intelligence (the vault) is only READ here, never
+// modified. This endpoint:
+//   (a) refreshes is_conformance_limits — a derived pass/fail projection sourced
+//       FROM IS Intelligence (so the report's limits always trace back to it), and
+//   (b) marks the auto-assigner's Master Template (template_<IS>) as linked to IS
+//       Intelligence (params read live from the vault, not embedded) and MATCHES
+//       the testing-charges man-hours to the IS-Intelligence clauses.
+// Man-hours/equipment are NOT in IS Intelligence (they come from the BIS testing-
+// charges PDF) and are preserved untouched — IS Intelligence is the source for
+// WHAT is tested + the limits; testing-charges stays the source for HOW LONG.
+app.post('/api/is-intelligence/sync-to-master/:isNumber', async (req, res) => {
+    try {
+        const isNum = decodeURIComponent(req.params.isNumber).trim();
+        const { data: row, error } = await supabase
+            .from('is_standards_vault')
+            .select('isNumber, testParameters')
+            .ilike('isNumber', `%${isNum.replace(/[^a-zA-Z0-9 ]/g, '%')}%`)
+            .order('uploadedAt', { ascending: false })
+            .limit(1)
+            .single();
+        if (error || !row) return res.status(404).json({ error: `No IS Intelligence data found for ${isNum}. Extract it first.` });
+
+        let tpRaw = null;
+        try { tpRaw = typeof row.testParameters === 'string' ? JSON.parse(row.testParameters || 'null') : row.testParameters; } catch (_) {}
+        const flat = Array.isArray(tpRaw) ? tpRaw : ((tpRaw && tpRaw.flat) || []);
+        const canonicalIS = row.isNumber || isNum;
+        if (!flat.length) return res.status(400).json({ error: `${canonicalIS} has no extracted parameters in IS Intelligence yet.` });
+
+        // (a) Conformance limits — same mapping as the pipeline phase-5 sync.
+        const limitTypeMap = { two_sided: 'range', max_only: 'max', min_only: 'min', qualitative: null };
+        const limitsPayload = flat
+            .filter(p => limitTypeMap[p.limit_type] !== null && limitTypeMap[p.limit_type] !== undefined)
+            .map(p => ({
+                isNumber: canonicalIS,
+                clauseRef: p.clause || '',
+                parameter: p.param || '',
+                varietyTag: p.variety || '',
+                limitMin: (p.min != null && p.min !== '') ? p.min : null,
+                limitMax: (p.max != null && p.max !== '') ? p.max : null,
+                unit: p.unit || '',
+                limitType: limitTypeMap[p.limit_type] || 'range',
+            }));
+        let limitsSynced = 0;
+        if (limitsPayload.length) {
+            const { error: limErr } = await supabase.from('is_conformance_limits')
+                .upsert(limitsPayload, { onConflict: 'isNumber, clauseRef, parameter, varietyTag' });
+            if (!limErr) limitsSynced = limitsPayload.length;
+        }
+
+        // (b) Master Template — attach IS-Intelligence parameters, preserve hours.
+        // Key by the NORMALIZED IS ("IS 4985:2021" -> "IS 4985") so we merge into the
+        // existing testing-charges template the auto-assigner already uses, instead of
+        // creating a year-suffixed orphan that would lose the man-hours/clauses.
+        const templateKey = `template_${normalizeISNumber(canonicalIS)}`;
+        const { data: prefRow } = await supabase.from('system_preferences').select('value').eq('key', templateKey).maybeSingle();
+        let template = {};
+        if (prefRow && prefRow.value) { try { template = JSON.parse(prefRow.value); } catch (_) { template = {}; } }
+        template.tatDays = template.tatDays || 7;
+        template.totalHours = template.totalHours || 0;
+        template.activeClauses = template.activeClauses || {};
+
+        // LINK, don't copy: the template does NOT embed the parameter list — IS
+        // Intelligence stays the single, untouched source (params are read live from
+        // the vault). We only record a link marker and MATCH the testing-charges
+        // man-hours (activeClauses) to the IS-Intelligence clauses, so each parameter
+        // can be associated with its testing time by clause number.
+        const clauseNum = (s) => { const m = String(s || '').match(/\d+(?:\.\d+)*/); return m ? m[0] : null; };
+        const hoursByClauseNum = {};
+        for (const [k, v] of Object.entries(template.activeClauses)) {
+            const n = clauseNum(k); if (n) hoursByClauseNum[n] = (v && v.activeHours) || 0;
+        }
+        let matchedToHours = 0;
+        for (const p of flat) {
+            const n = clauseNum(p.clause);
+            if (n && hoursByClauseNum[n] != null) matchedToHours++;
+        }
+        delete template.parameters;                 // remove any copy left by earlier syncs
+        template.paramsSource = 'is_intelligence';  // link marker: params read live from the vault
+        template.linkedISNumber = canonicalIS;
+        template.hoursMatch = { totalParams: flat.length, matchedToHours, syncedAt: new Date().toISOString() };
+
+        const { error: tErr } = await supabase.from('system_preferences')
+            .upsert({ key: templateKey, value: JSON.stringify(template) }, { onConflict: 'key' });
+        if (tErr) return res.status(500).json({ error: `Master Template link failed: ${tErr.message}` });
+
+        res.json({
+            message: `Linked ${canonicalIS}: IS Intelligence is the live parameter source; testing-charges hours matched by clause.`,
+            isNumber: canonicalIS,
+            paramsInIntelligence: flat.length,
+            paramsMatchedToHours: matchedToHours,
+            limitsSynced,
+            clausesWithHours: Object.keys(template.activeClauses).length,
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -3405,7 +3541,7 @@ app.post('/api/copilot/chat', async (req, res) => {
         const { message, history } = req.body;
         if (!message) return res.status(400).json({ error: 'Message is required' });
 
-        const geminiApiKey = process.env.GEMINI_API_KEY; // Only use if explicitly set
+        const anthropicApiKey = process.env.ANTHROPIC_API_KEY; // Claude (Sonnet 4.6) powers Nigrani
 
         const { normalizeTaName, normalizeIS: _normIS, getOicPreferences } = require('./server/agent/disha-utils');
         const dishaTools = require('./server/agent/disha-tools');
@@ -3675,78 +3811,82 @@ The OIC will see one row per move in the UI and approve each.`;
         });
         messages.push({ role: 'user', content: message });
 
-        // 4. Call AI with tool-calling loop (Gemini), falling back to Sarvam (no tools)
+        // 4. Call AI with tool-use loop (Claude — Sonnet 4.6 via the Anthropic SDK)
         let aiReply = '';
         let toolTrace = [];
 
-        const useGemini = geminiApiKey && geminiApiKey.length > 10 && !geminiApiKey.startsWith('sk_');
+        const useAnthropic = anthropicApiKey && anthropicApiKey.startsWith('sk-ant-');
 
-        if (useGemini) {
+        if (useAnthropic) {
             try {
-                console.log('[Copilot] Trying Gemini with function-calling…');
+                console.log('[Copilot] Calling Claude (Sonnet 4.6) with tool-use…');
                 const tAi = Date.now();
-                const { GoogleGenAI } = require('@google/genai');
-                const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+                const { Anthropic } = require('@anthropic-ai/sdk');
+                const anthropic = new Anthropic({ apiKey: anthropicApiKey });
 
-                const buildContents = () => messages
+                const CLAUDE_MODEL = 'claude-sonnet-4-6'; // best speed/quality balance for a tool-calling chat; thinking off for snappy latency
+
+                // Anthropic tool defs: TOOLS already carry a clean JSON-schema inputSchema — just rename the key.
+                const anthropicTools = dishaTools.TOOLS.map(t => ({
+                    name: t.name,
+                    description: t.description,
+                    input_schema: t.inputSchema,
+                }));
+
+                // System prompt is a top-level param on Anthropic — strip it out of the messages array.
+                const claudeMessages = messages
                     .filter(m => m.role !== 'system')
-                    .map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
+                    .map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content }));
 
-                const GEMINI_MODEL = 'gemini-3.5-flash'; // pinned; ~1s/round with thinking off, supports all 9 tools
-                const contents = buildContents();
-                const sharedConfig = {
-                    systemInstruction: systemPrompt,
-                    temperature: 0.2,
-                    maxOutputTokens: 2000,
-                    tools: [{ functionDeclarations: dishaTools.functionDeclarations }],
-                    thinkingConfig: { thinkingBudget: 0 },
-                };
-
-                // Round 1: let Gemini decide whether to call any tools.
-                let response = await ai.models.generateContent({
-                    model: GEMINI_MODEL,
-                    contents,
-                    config: sharedConfig,
+                const callClaude = () => anthropic.messages.create({
+                    model: CLAUDE_MODEL,
+                    max_tokens: 2000,
+                    system: systemPrompt,
+                    tools: anthropicTools,
+                    messages: claudeMessages,
                 });
 
-                const calls = response.functionCalls || [];
-                if (calls.length) {
-                    console.log(`[Copilot] Gemini requested ${calls.length} tool call(s):`, calls.map(c => c.name).join(', '));
-                    // Echo the model's turn verbatim — Gemini 3.x rejects rebuilt parts missing thoughtSignature.
-                    contents.push(response.candidates?.[0]?.content || {
-                        role: 'model',
-                        parts: calls.map(c => ({ functionCall: { name: c.name, args: c.args || {} } })),
-                    });
+                // Tool-use loop: keep going until Claude stops requesting tools (cap rounds so we never recurse forever).
+                let response = await callClaude();
+                let rounds = 0;
+                while (response.stop_reason === 'tool_use' && rounds < 5) {
+                    rounds++;
+                    const toolUses = response.content.filter(b => b.type === 'tool_use');
+                    console.log(`[Copilot] Claude requested ${toolUses.length} tool call(s):`, toolUses.map(b => b.name).join(', '));
 
-                    const results = await Promise.all(calls.map(async c => {
-                        const out = await dishaTools.callTool(c.name, c.args || {});
-                        toolTrace.push({ name: c.name, args: c.args || {}, ok: !out || !out.error });
-                        return { name: c.name, response: out };
+                    // Echo the assistant turn (incl. tool_use blocks) verbatim before sending results.
+                    claudeMessages.push({ role: 'assistant', content: response.content });
+
+                    const toolResults = await Promise.all(toolUses.map(async b => {
+                        let out;
+                        try {
+                            out = await dishaTools.callTool(b.name, b.input || {});
+                            toolTrace.push({ name: b.name, args: b.input || {}, ok: !out || !out.error });
+                        } catch (e) {
+                            out = { error: e.message };
+                            toolTrace.push({ name: b.name, args: b.input || {}, ok: false });
+                        }
+                        return { type: 'tool_result', tool_use_id: b.id, content: JSON.stringify(out ?? {}) };
                     }));
-                    contents.push({
-                        role: 'user',
-                        parts: results.map(r => ({ functionResponse: { name: r.name, response: r.response || {} } })),
-                    });
+                    claudeMessages.push({ role: 'user', content: toolResults });
 
-                    // Round 2: final answer, tools off so we don't recurse.
-                    response = await ai.models.generateContent({
-                        model: GEMINI_MODEL,
-                        contents,
-                        config: { ...sharedConfig, tools: undefined },
-                    });
+                    response = await callClaude();
                 }
 
-                if (response && response.text) {
-                    aiReply = response.text;
-                    console.log(`[Copilot] Gemini succeeded in ${Date.now() - tAi}ms.`);
-                }
-            } catch (geminiErr) {
-                throw new Error('Gemini AI error: ' + (geminiErr.message || 'Unknown error'));
+                aiReply = (response.content || [])
+                    .filter(b => b.type === 'text')
+                    .map(b => b.text)
+                    .join('')
+                    .trim();
+                console.log(`[Copilot] Claude succeeded in ${Date.now() - tAi}ms (${rounds} tool round(s)).`);
+            } catch (anthropicErr) {
+                console.error('[Copilot] Claude error:', anthropicErr.message || anthropicErr);
+                throw new Error('Claude AI error: ' + (anthropicErr.message || 'Unknown error'));
             }
         }
 
         if (!aiReply) {
-            throw new Error('Gemini API key not configured. Please set GEMINI_API_KEY in .env');
+            throw new Error('Claude API key not configured. Please set ANTHROPIC_API_KEY in .env');
         }
 
         // 5. Parse action cards (JSON block)
@@ -3780,13 +3920,28 @@ app.post('/api/copilot/action', async (req, res) => {
         }
 
         const moves = pendingCopilotActions.get(actionId);
-        
+
+        // Resolve a TA's fullName to the USERNAME convention samples.assignedTo uses
+        // everywhere else (fullName -> employee_profiles.userId -> users.username).
+        // Without this the copilot accept path would write a raw fullName, breaking
+        // every assignedTo-by-username query (TP sample list, load maps, etc.).
+        const resolveAssignee = async (name) => {
+            if (!name) return name;
+            const { data: emp } = await supabase.from('employee_profiles').select('userId').eq('fullName', name).maybeSingle();
+            if (emp && emp.userId) {
+                const { data: user } = await supabase.from('users').select('username').eq('id', emp.userId).maybeSingle();
+                if (user && user.username) return user.username;
+            }
+            return name;
+        };
+
         // Execute the moves
         for (const move of moves) {
             // Validate and update DB
             const { data: sample } = await supabase.from('samples').select('id, assignedTo').eq('encodedCode', move.sampleId).single();
             if (sample) {
-                await supabase.from('samples').update({ assignedTo: move.to }).eq('id', sample.id);
+                const assignedUsername = await resolveAssignee(move.to);
+                await supabase.from('samples').update({ assignedTo: assignedUsername }).eq('id', sample.id);
             }
         }
 
@@ -4493,18 +4648,49 @@ app.post('/api/attendance/bulk', async (req, res) => {
 });
 
 // --- CONFORMANCE LIMITS API ---
+
+// Latest amendment for an IS (req 2a.iii). "Latest" = max publishDate. Reads the
+// is_amendments table, falling back to the in-memory seed list if the table is
+// unavailable. Returned alongside conformance limits so the test report can
+// highlight the most recent amendment against the standard.
+async function getLatestAmendment(isNumber) {
+    const norm = normalizeISNumber(isNumber);
+    let rows = [];
+    try {
+        const { data } = await supabase.from('is_amendments').select('*');
+        if (data && data.length) rows = data;
+    } catch (_) { /* fall back below */ }
+    if (!rows.length) rows = inMemoryAmendments;
+    const matches = (rows || []).filter(a => normalizeISNumber(a.isNumber) === norm);
+    if (!matches.length) return null;
+    matches.sort((a, b) => (Date.parse(b.publishDate || '') || 0) - (Date.parse(a.publishDate || '') || 0));
+    const latest = matches[0];
+    return {
+        amendmentNumber: latest.amendmentNumber,
+        title: latest.title,
+        publishDate: latest.publishDate,
+        isNew: !!latest.isNew,
+        pdfFileName: latest.pdfFileName || null,
+        count: matches.length,
+    };
+}
+
 app.get('/api/conformance-limits/:isNumber', async (req, res) => {
     const { isNumber } = req.params;
     const variety = req.query.variety;
     try {
-        let q = supabase.from('is_conformance_limits').select('*').eq('isNumber', isNumber);
+        // 'ALL' = the admin editor wants every limit across all standards (no IS filter).
+        const all = isNumber === 'ALL';
+        const latestAmendment = all ? null : await getLatestAmendment(isNumber);
+        let q = supabase.from('is_conformance_limits').select('*');
+        if (!all) q = q.eq('isNumber', isNumber);
         if (variety) q = q.eq('varietyTag', variety);
         const { data, error } = await q;
         if (error) {
             // Table might not exist yet
-            return res.json({ limits: [] });
+            return res.json({ limits: [], latestAmendment });
         }
-        res.json({ limits: data || [] });
+        res.json({ limits: data || [], latestAmendment });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

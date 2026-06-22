@@ -1,0 +1,306 @@
+{
+  "isNumber": "IS 303:2024",
+  "title": "Plywood for General Purposes — Specification",
+  "revision": "Fourth Revision",
+  "parameterizationDims": ["grade", "class", "type", "thickness"],
+  "dimensionOptions": {
+    "grade": ["MR", "BWR", "BWP"],
+    "class": ["E1", "E2"],
+    "type": ["AA", "AB", "BB"],
+    "thickness": [3, 4, 5, 6, 9, 12, 15, 19, 22, 25]
+  },
+  "defaults": { "grade": "MR", "class": "E1", "type": "AA", "thickness": 6 },
+  "parameters": [
+    {
+      "clauseRef": "Cl 8.2", "section": "Dimensions", "parameterName": "Nominal thickness designation",
+      "unit": "mm", "limitType": "text", "acceptanceOrType": "acceptance", "variesBy": [],
+      "sourceTable": "Cl 8.2",
+      "specText": "3, 4, 5, 6, 9, 12, 15, 19, 22 or 25 mm (any other thickness as agreed between manufacturer and purchaser)"
+    },
+    {
+      "clauseRef": "Cl 8.1", "section": "Dimensions", "parameterName": "Prevailing board dimensions (length × width)",
+      "unit": "mm", "limitType": "text", "acceptanceOrType": "acceptance", "variesBy": [],
+      "sourceTable": "Cl 8.1",
+      "specText": "2 440 × 1 220; 2 135 × 1 220; 2 135 × 915; 1 830 × 1 220; or 1 830 × 915 (or as agreed and declared by manufacturer)"
+    },
+    {
+      "clauseRef": "Cl 8.4", "section": "Dimensions", "parameterName": "Length tolerance",
+      "unit": "mm", "limitType": "text", "acceptanceOrType": "acceptance", "variesBy": [],
+      "sourceTable": "Table 3", "specText": "+6 mm / −3 mm on nominal length"
+    },
+    {
+      "clauseRef": "Cl 8.4", "section": "Dimensions", "parameterName": "Width tolerance",
+      "unit": "mm", "limitType": "text", "acceptanceOrType": "acceptance", "variesBy": [],
+      "sourceTable": "Table 3", "specText": "+3 mm / −1 mm on nominal width"
+    },
+    {
+      "clauseRef": "Cl 8.4", "section": "Dimensions", "parameterName": "Thickness tolerance",
+      "unit": "%", "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["thickness"],
+      "sourceTable": "Table 3",
+      "valueTable": {
+        "3": { "expected": "± 10 percent (thickness less than 6 mm)" },
+        "4": { "expected": "± 10 percent (thickness less than 6 mm)" },
+        "5": { "expected": "± 10 percent (thickness less than 6 mm)" },
+        "6": { "expected": "± 5 percent (thickness 6 mm and above)" },
+        "9": { "expected": "± 5 percent (thickness 6 mm and above)" },
+        "12": { "expected": "± 5 percent (thickness 6 mm and above)" },
+        "15": { "expected": "± 5 percent (thickness 6 mm and above)" },
+        "19": { "expected": "± 5 percent (thickness 6 mm and above)" },
+        "22": { "expected": "± 5 percent (thickness 6 mm and above)" },
+        "25": { "expected": "± 5 percent (thickness 6 mm and above)" }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.4", "section": "Dimensions", "parameterName": "Squareness, Max",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [],
+      "sourceTable": "Table 3", "testMethod": "Annex C",
+      "expected": "2 mm/1 000 mm or 0.2 percent, Max"
+    },
+    {
+      "clauseRef": "Cl 8.4", "section": "Dimensions", "parameterName": "Edge straightness, Max",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [],
+      "sourceTable": "Table 3", "testMethod": "Annex C",
+      "expected": "2 mm/1 000 mm or 0.2 percent, Max"
+    },
+    {
+      "clauseRef": "Cl 9.2", "section": "Workmanship", "parameterName": "Finish of faces",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [],
+      "expected": "Faces of finished plywood reasonably smooth (slight sanding permitted)"
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Blister",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 1",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): Nil" },
+        "AB": { "expected": "Face (A): Nil; Back (B): Nil" },
+        "BB": { "expected": "Both faces (B): Nil" }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Checks",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 1",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): individual check ≤ 50 mm, total ≤ 300 mm per m²" },
+        "AB": { "expected": "Face (A): individual ≤ 50 mm, total ≤ 300 mm per m²; Back (B): individual ≤ 100 mm, total ≤ 1 000 mm per m²" },
+        "BB": { "expected": "Both faces (B): individual check ≤ 100 mm, total ≤ 1 000 mm per m²" }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Discolouration",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 1",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): Nil" },
+        "AB": { "expected": "Face (A): Nil; Back (B): 5 percent" },
+        "BB": { "expected": "Both faces (B): 5 percent" }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Dote",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 1",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): 5 cm per m²" },
+        "AB": { "expected": "Face (A): 5 cm per m²; Back (B): 15 cm per m²" },
+        "BB": { "expected": "Both faces (B): 15 cm per m²" }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Insect hole",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 1",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): scattered up to 12 holes per m²" },
+        "AB": { "expected": "Face (A): up to 12 holes per m²; Back (B): up to 24 holes per m²" },
+        "BB": { "expected": "Both faces (B): scattered up to 24 holes per m²" }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Joints",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 1",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): one joint for every multiple of 200 mm, no individual piece < 100 mm width" },
+        "AB": { "expected": "Face (A): one joint per 200 mm multiple, no piece < 100 mm; Back (B): no restriction" },
+        "BB": { "expected": "Both faces (B): no restriction" }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Knots (dead)",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 1",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): 2 up to 12 mm dia per m²" },
+        "AB": { "expected": "Face (A): 2 up to 12 mm dia per m²; Back (B): 4 up to 20 mm dia per m²" },
+        "BB": { "expected": "Both faces (B): 4 up to 20 mm dia per m²" }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Pin knots (dead)",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 1",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): 2 per m²" },
+        "AB": { "expected": "Face (A): 2 per m²; Back (B): 6 per m²" },
+        "BB": { "expected": "Both faces (B): 6 per m²" }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Pin knots (live)",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 1",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): no restriction" },
+        "AB": { "expected": "Face (A): no restriction; Back (B): no restriction" },
+        "BB": { "expected": "Both faces (B): no restriction" }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Knots (tight)",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 1",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): 6 up to 25 mm dia per m²" },
+        "AB": { "expected": "Face (A): 6 up to 25 mm dia per m²; Back (B): no restriction" },
+        "BB": { "expected": "Both faces (B): no restriction" }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Patches",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 1",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): 4 tight patches per m² that do not mar appearance" },
+        "AB": { "expected": "Face (A): 4 tight patches per m²; Back (B): any number of tight patches not marring appearance" },
+        "BB": { "expected": "Both faces (B): any number of tight patches that do not mar appearance" }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Splits",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 1",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): 2 splits, each ≤ 1 mm wide and ≤ 100 mm long, filled with suitable filler" },
+        "AB": { "expected": "Face (A): 2 splits ≤ 1 mm wide, ≤ 100 mm long, filled; Back (B): 3 splits ≤ 4 mm wide, ≤ 150 mm long, filled with veneer inserts (splits ≤ 25 mm long, ≤ 0.8 mm wide may be ignored if filled)" },
+        "BB": { "expected": "Both faces (B): 3 splits, each ≤ 4 mm wide and ≤ 150 mm long, filled with suitable veneer inserts (splits ≤ 25 mm long, ≤ 0.8 mm wide may be ignored if filled)" }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Swirl",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 1",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): unlimited provided they do not mar appearance" },
+        "AB": { "expected": "Face (A): unlimited if not marring appearance; Back (B): no restriction" },
+        "BB": { "expected": "Both faces (B): no restriction" }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.2", "section": "Appearance", "parameterName": "Maximum number of categories of permissible defects per m²",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["type"],
+      "sourceTable": "Table 2",
+      "valueTable": {
+        "AA": { "expected": "Both faces (A): 3" },
+        "AB": { "expected": "Face (A): 3; Back (B): 5" },
+        "BB": { "expected": "Both faces (B): 5" }
+      }
+    },
+    {
+      "clauseRef": "Cl 11.3.1", "section": "Glue Adhesion", "parameterName": "Glue adhesion — water resistance test",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["grade"],
+      "testMethod": "IS 1734 (Part 5)",
+      "valueTable": {
+        "MR": { "expected": "After 3 cycles of submergence in water at 60 ± 2 °C for 3 h then drying 8 h at 65 ± 2 °C: satisfy minimum pass standard for adhesion of plies per IS 1734 (Part 5)" },
+        "BWR": { "expected": "After 3 cycles of submergence in boiling water for 8 h then drying 16 h at 65 ± 2 °C: satisfy minimum pass standard for adhesion of plies per IS 1734 (Part 5)" },
+        "BWP": { "expected": "After submergence in boiling water for 72 h: satisfy minimum pass standard for adhesion of plies per IS 1734 (Part 5)" }
+      }
+    },
+    {
+      "clauseRef": "Cl 11.3.2", "section": "Glue Adhesion", "parameterName": "Mycological test",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [],
+      "testMethod": "IS 1734 (Part 7)",
+      "expected": "Satisfy minimum pass standard for test for adhesion of plies as given in IS 1734 (Part 5)"
+    },
+    {
+      "clauseRef": "Cl 11.4", "section": "Physical", "parameterName": "Moisture content",
+      "unit": "%", "limitType": "range", "acceptanceOrType": "acceptance", "variesBy": [],
+      "testMethod": "IS 1734 (Part 1)", "min": 5, "max": 15
+    },
+    {
+      "clauseRef": "Cl 11.5", "section": "Mechanical", "parameterName": "MOE (Modulus of Elasticity), Average — Along grain of face veneer",
+      "unit": "N/mm²", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": ["grade"],
+      "sourceTable": "Table 4", "testMethod": "IS 1734 (Part 11)",
+      "note": "Applicable only for plywood of thickness 6 mm and above",
+      "valueTable": { "MR": { "min": 3400 }, "BWR": { "min": 4300 }, "BWP": { "min": 4300 } }
+    },
+    {
+      "clauseRef": "Cl 11.5", "section": "Mechanical", "parameterName": "MOE (Modulus of Elasticity), Min individual — Along grain of face veneer",
+      "unit": "N/mm²", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": ["grade"],
+      "sourceTable": "Table 4", "testMethod": "IS 1734 (Part 11)",
+      "note": "Applicable only for plywood of thickness 6 mm and above",
+      "valueTable": { "MR": { "min": 3100 }, "BWR": { "min": 3800 }, "BWP": { "min": 3800 } }
+    },
+    {
+      "clauseRef": "Cl 11.5", "section": "Mechanical", "parameterName": "MOE (Modulus of Elasticity), Average — Across grain of face veneer",
+      "unit": "N/mm²", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": ["grade"],
+      "sourceTable": "Table 4", "testMethod": "IS 1734 (Part 11)",
+      "note": "Applicable only for plywood of thickness 6 mm and above",
+      "valueTable": { "MR": { "min": 2300 }, "BWR": { "min": 2900 }, "BWP": { "min": 2900 } }
+    },
+    {
+      "clauseRef": "Cl 11.5", "section": "Mechanical", "parameterName": "MOE (Modulus of Elasticity), Min individual — Across grain of face veneer",
+      "unit": "N/mm²", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": ["grade"],
+      "sourceTable": "Table 4", "testMethod": "IS 1734 (Part 11)",
+      "note": "Applicable only for plywood of thickness 6 mm and above",
+      "valueTable": { "MR": { "min": 2100 }, "BWR": { "min": 2500 }, "BWP": { "min": 2500 } }
+    },
+    {
+      "clauseRef": "Cl 11.5", "section": "Mechanical", "parameterName": "MOR (Modulus of Rupture), Average — Along grain of face veneer",
+      "unit": "N/mm²", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": ["grade"],
+      "sourceTable": "Table 4", "testMethod": "IS 1734 (Part 11)",
+      "note": "Applicable only for plywood of thickness 6 mm and above",
+      "valueTable": { "MR": { "min": 26 }, "BWR": { "min": 34 }, "BWP": { "min": 34 } }
+    },
+    {
+      "clauseRef": "Cl 11.5", "section": "Mechanical", "parameterName": "MOR (Modulus of Rupture), Min individual — Along grain of face veneer",
+      "unit": "N/mm²", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": ["grade"],
+      "sourceTable": "Table 4", "testMethod": "IS 1734 (Part 11)",
+      "note": "Applicable only for plywood of thickness 6 mm and above",
+      "valueTable": { "MR": { "min": 23 }, "BWR": { "min": 31 }, "BWP": { "min": 31 } }
+    },
+    {
+      "clauseRef": "Cl 11.5", "section": "Mechanical", "parameterName": "MOR (Modulus of Rupture), Average — Across grain of face veneer",
+      "unit": "N/mm²", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": ["grade"],
+      "sourceTable": "Table 4", "testMethod": "IS 1734 (Part 11)",
+      "note": "Applicable only for plywood of thickness 6 mm and above",
+      "valueTable": { "MR": { "min": 17 }, "BWR": { "min": 23 }, "BWP": { "min": 23 } }
+    },
+    {
+      "clauseRef": "Cl 11.5", "section": "Mechanical", "parameterName": "MOR (Modulus of Rupture), Min individual — Across grain of face veneer",
+      "unit": "N/mm²", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": ["grade"],
+      "sourceTable": "Table 4", "testMethod": "IS 1734 (Part 11)",
+      "note": "Applicable only for plywood of thickness 6 mm and above",
+      "valueTable": { "MR": { "min": 15 }, "BWR": { "min": 21 }, "BWP": { "min": 21 } }
+    },
+    {
+      "clauseRef": "Cl 11.6", "section": "Chemical", "parameterName": "Free formaldehyde content (oven dry sample)",
+      "unit": "mg/100 g", "limitType": "range", "acceptanceOrType": "acceptance", "variesBy": ["class"],
+      "testMethod": "IS 13745",
+      "valueTable": {
+        "E1": { "max": 8 },
+        "E2": { "min": 8, "max": 30 }
+      }
+    },
+    {
+      "clauseRef": "Cl 11.7", "section": "Chemical", "parameterName": "Steady-state formaldehyde emission (optional test)",
+      "unit": "mg/m³", "limitType": "range", "acceptanceOrType": "type", "variesBy": ["class"],
+      "testMethod": "IS/ISO 12460 (Part 1)",
+      "valueTable": {
+        "E1": { "max": 0.124 },
+        "E2": { "min": 0.124 }
+      }
+    }
+  ]
+}

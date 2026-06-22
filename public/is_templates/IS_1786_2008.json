@@ -1,0 +1,351 @@
+{
+  "isNumber": "IS 1786:2008",
+  "title": "High Strength Deformed Steel Bars and Wires for Concrete Reinforcement — Specification",
+  "revision": "Fourth Revision (incorporating Amendment No. 1, November 2012)",
+  "parameterizationDims": ["size", "grade"],
+  "dimensionOptions": {
+    "size": [4, 5, 6, 8, 10, 12, 16, 20, 25, 28, 32, 36, 40, 45, 50],
+    "grade": ["Fe 415", "Fe 415D", "Fe 415S", "Fe 500", "Fe 500D", "Fe 500S", "Fe 550", "Fe 550D", "Fe 600"]
+  },
+  "defaults": { "size": 16, "grade": "Fe 500" },
+  "parameters": [
+    {
+      "clauseRef": "Cl 4.2",
+      "section": "Chemical",
+      "parameterName": "Carbon, Max",
+      "unit": "%",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["grade"],
+      "sourceTable": "Table (Cl 4.2, Chemical Composition)",
+      "testMethod": "IS 228",
+      "valueTable": {
+        "Fe 415": { "max": 0.30 }, "Fe 415D": { "max": 0.25 }, "Fe 415S": { "max": 0.25 },
+        "Fe 500": { "max": 0.30 }, "Fe 500D": { "max": 0.25 }, "Fe 500S": { "max": 0.25 },
+        "Fe 550": { "max": 0.30 }, "Fe 550D": { "max": 0.25 }, "Fe 600": { "max": 0.30 }
+      }
+    },
+    {
+      "clauseRef": "Cl 4.2",
+      "section": "Chemical",
+      "parameterName": "Sulphur, Max",
+      "unit": "%",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["grade"],
+      "sourceTable": "Table (Cl 4.2, Chemical Composition)",
+      "testMethod": "IS 228",
+      "valueTable": {
+        "Fe 415": { "max": 0.060 }, "Fe 415D": { "max": 0.045 }, "Fe 415S": { "max": 0.045 },
+        "Fe 500": { "max": 0.055 }, "Fe 500D": { "max": 0.040 }, "Fe 500S": { "max": 0.040 },
+        "Fe 550": { "max": 0.055 }, "Fe 550D": { "max": 0.040 }, "Fe 600": { "max": 0.040 }
+      }
+    },
+    {
+      "clauseRef": "Cl 4.2",
+      "section": "Chemical",
+      "parameterName": "Phosphorus, Max",
+      "unit": "%",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["grade"],
+      "sourceTable": "Table (Cl 4.2, Chemical Composition)",
+      "testMethod": "IS 228",
+      "valueTable": {
+        "Fe 415": { "max": 0.060 }, "Fe 415D": { "max": 0.045 }, "Fe 415S": { "max": 0.045 },
+        "Fe 500": { "max": 0.055 }, "Fe 500D": { "max": 0.040 }, "Fe 500S": { "max": 0.040 },
+        "Fe 550": { "max": 0.050 }, "Fe 550D": { "max": 0.040 }, "Fe 600": { "max": 0.040 }
+      }
+    },
+    {
+      "clauseRef": "Cl 4.2",
+      "section": "Chemical",
+      "parameterName": "Sulphur and Phosphorus (combined), Max",
+      "unit": "%",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["grade"],
+      "sourceTable": "Table (Cl 4.2, Chemical Composition)",
+      "testMethod": "IS 228",
+      "valueTable": {
+        "Fe 415": { "max": 0.110 }, "Fe 415D": { "max": 0.085 }, "Fe 415S": { "max": 0.085 },
+        "Fe 500": { "max": 0.105 }, "Fe 500D": { "max": 0.075 }, "Fe 500S": { "max": 0.075 },
+        "Fe 550": { "max": 0.100 }, "Fe 550D": { "max": 0.075 }, "Fe 600": { "max": 0.075 }
+      }
+    },
+    {
+      "clauseRef": "Cl 4.2",
+      "section": "Chemical",
+      "parameterName": "Carbon Equivalent (CE), Max",
+      "unit": "%",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "sourceTable": "Cl 4.2 Note 1",
+      "max": 0.53,
+      "specText": "CE = C + Mn/6 + (Cr+Mo+V)/5 + (Ni+Cu)/15 shall not exceed 0.53% when micro-alloy/low alloys are used; CE = C + Mn/6 shall not exceed 0.42% when micro-alloy/low alloys are not used."
+    },
+    {
+      "clauseRef": "Cl 4.2",
+      "section": "Chemical",
+      "parameterName": "Nitrogen, Max",
+      "unit": "%",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "sourceTable": "Cl 4.2 Note 4",
+      "max": 0.012,
+      "specText": "Nitrogen should not exceed 0.012% (120 ppm); up to 0.025% (250 ppm) permissible if sufficient nitrogen-binding elements present per the Cl 4.2 Note 4 formula."
+    },
+    {
+      "clauseRef": "Cl 5.2",
+      "section": "Bond / Deformation",
+      "parameterName": "Mean projected area of ribs per unit length, Min",
+      "unit": "mm²/mm",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["size"],
+      "sourceTable": "Cl 5.2 (a/b/c)",
+      "valueTable": {
+        "4": { "min": 0.48 }, "5": { "min": 0.60 }, "6": { "min": 0.72 }, "8": { "min": 0.96 },
+        "10": { "min": 1.20 }, "12": { "min": 1.80 }, "16": { "min": 2.40 }, "20": { "min": 3.40 },
+        "25": { "min": 4.25 }, "28": { "min": 4.76 }, "32": { "min": 5.44 }, "36": { "min": 6.12 },
+        "40": { "min": 6.80 }, "45": { "min": 7.65 }, "50": { "min": 8.50 }
+      }
+    },
+    {
+      "clauseRef": "Cl 5.7",
+      "section": "Bond",
+      "parameterName": "Pull-out bond strength (approval of new/amended rib geometry)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": [],
+      "sourceTable": "Cl 5.7",
+      "testMethod": "IS 2770 (Part 1)",
+      "expected": "Bond strength from load at measured slip of 0.025 mm shall exceed a plain round bar of same nominal size by ≥40%, and at 0.25 mm slip by ≥80%."
+    },
+    {
+      "clauseRef": "Cl 6.2",
+      "section": "Dimensions",
+      "parameterName": "Mass per metre (nominal, with batch tolerance)",
+      "unit": "kg/m",
+      "limitType": "range",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["size"],
+      "sourceTable": "Table 1 & Table 2",
+      "valueTable": {
+        "4": { "min": 0.092, "max": 0.106 },
+        "5": { "min": 0.143, "max": 0.165 },
+        "6": { "min": 0.206, "max": 0.238 },
+        "8": { "min": 0.367, "max": 0.423 },
+        "10": { "min": 0.574, "max": 0.660 },
+        "12": { "min": 0.844, "max": 0.932 },
+        "16": { "min": 1.501, "max": 1.659 },
+        "20": { "min": 2.396, "max": 2.544 },
+        "25": { "min": 3.735, "max": 3.966 },
+        "28": { "min": 4.685, "max": 4.975 },
+        "32": { "min": 6.121, "max": 6.499 },
+        "36": { "min": 7.750, "max": 8.230 },
+        "40": { "min": 9.564, "max": 10.156 },
+        "45": { "min": 12.115, "max": 12.865 },
+        "50": { "min": 14.957, "max": 15.883 }
+      },
+      "specText": "Nominal mass per metre from Table 1; batch tolerance per Table 2 (±7% ≤10 mm, ±5% >10–16 mm, ±3% >16 mm). Individual-sample negative tolerance is larger (−8/−6/−4%)."
+    },
+    {
+      "clauseRef": "Cl 6.2",
+      "section": "Dimensions",
+      "parameterName": "Nominal cross-sectional area (reference)",
+      "unit": "mm²",
+      "limitType": "range",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["size"],
+      "sourceTable": "Table 1",
+      "needsReview": true,
+      "valueTable": {
+        "4": { "min": 12.6, "max": 12.6 },
+        "5": { "min": 19.6, "max": 19.6 },
+        "6": { "min": 28.3, "max": 28.3 },
+        "8": { "min": 50.3, "max": 50.3 },
+        "10": { "min": 78.6, "max": 78.6 },
+        "12": { "min": 113.1, "max": 113.1 },
+        "16": { "min": 201.2, "max": 201.2 },
+        "20": { "min": 314.3, "max": 314.3 },
+        "25": { "min": 491.1, "max": 491.1 },
+        "28": { "min": 615.8, "max": 615.8 },
+        "32": { "min": 804.6, "max": 804.6 },
+        "36": { "min": 1018.3, "max": 1018.3 },
+        "40": { "min": 1257.2, "max": 1257.2 },
+        "45": { "min": 1591.1, "max": 1591.1 },
+        "50": { "min": 1964.4, "max": 1964.4 }
+      },
+      "specText": "Nominal cross-sectional area per Table 1 (reference value used to compute mechanical properties on effective cross-section)."
+    },
+    {
+      "clauseRef": "Cl 7.1",
+      "section": "Dimensions",
+      "parameterName": "Cut length tolerance on specified length",
+      "unit": "mm",
+      "limitType": "text",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "sourceTable": "Cl 7.1",
+      "specText": "+75 / −25 mm on specified length; +50 / −0 mm where minimum lengths are specified."
+    },
+    {
+      "clauseRef": "Cl 8.1",
+      "section": "Mechanical",
+      "parameterName": "0.2% proof stress / yield stress, Min",
+      "unit": "MPa",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["grade"],
+      "sourceTable": "Table 3 (i)",
+      "testMethod": "IS 1608",
+      "valueTable": {
+        "Fe 415": { "min": 415.0 }, "Fe 415D": { "min": 415.0 }, "Fe 415S": { "min": 415.0 },
+        "Fe 500": { "min": 500.0 }, "Fe 500D": { "min": 500.0 }, "Fe 500S": { "min": 500.0 },
+        "Fe 550": { "min": 550.0 }, "Fe 550D": { "min": 550.0 }, "Fe 600": { "min": 600.0 }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.1",
+      "section": "Mechanical",
+      "parameterName": "0.2% proof stress / yield stress, Max",
+      "unit": "MPa",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["grade"],
+      "sourceTable": "Table 3 (ii)",
+      "testMethod": "IS 1608",
+      "valueTable": {
+        "Fe 415": { "expected": "No maximum specified" },
+        "Fe 415D": { "expected": "No maximum specified" },
+        "Fe 415S": { "expected": "≤ 540.0 MPa" },
+        "Fe 500": { "expected": "No maximum specified" },
+        "Fe 500D": { "expected": "No maximum specified" },
+        "Fe 500S": { "expected": "≤ 625.0 MPa" },
+        "Fe 550": { "expected": "No maximum specified" },
+        "Fe 550D": { "expected": "No maximum specified" },
+        "Fe 600": { "expected": "No maximum specified" }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.1",
+      "section": "Mechanical",
+      "parameterName": "TS/YS ratio (tensile strength to 0.2% proof/yield stress), Min",
+      "unit": "ratio",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["grade"],
+      "sourceTable": "Table 3 (iii)",
+      "testMethod": "IS 1608",
+      "valueTable": {
+        "Fe 415": { "min": 1.10 }, "Fe 415D": { "min": 1.12 }, "Fe 415S": { "min": 1.25 },
+        "Fe 500": { "min": 1.08 }, "Fe 500D": { "min": 1.10 }, "Fe 500S": { "min": 1.25 },
+        "Fe 550": { "min": 1.06 }, "Fe 550D": { "min": 1.08 }, "Fe 600": { "min": 1.06 }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.1",
+      "section": "Mechanical",
+      "parameterName": "Tensile strength absolute floor (with TS/YS ratio rule)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["grade"],
+      "sourceTable": "Table 3 (iii)",
+      "testMethod": "IS 1608",
+      "valueTable": {
+        "Fe 415": { "expected": "TS/YS ≥ 1.10 and TS ≥ 485.0 MPa" },
+        "Fe 415D": { "expected": "TS/YS ≥ 1.12 and TS ≥ 500.0 MPa" },
+        "Fe 415S": { "expected": "TS/YS ≥ 1.25 (no absolute TS floor specified)" },
+        "Fe 500": { "expected": "TS/YS ≥ 1.08 and TS ≥ 545.0 MPa" },
+        "Fe 500D": { "expected": "TS/YS ≥ 1.10 and TS ≥ 565.0 MPa" },
+        "Fe 500S": { "expected": "TS/YS ≥ 1.25 (no absolute TS floor specified)" },
+        "Fe 550": { "expected": "TS/YS ≥ 1.06 and TS ≥ 585.0 MPa" },
+        "Fe 550D": { "expected": "TS/YS ≥ 1.08 and TS ≥ 600.0 MPa" },
+        "Fe 600": { "expected": "TS/YS ≥ 1.06 and TS ≥ 660.0 MPa" }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.1",
+      "section": "Mechanical",
+      "parameterName": "Elongation on gauge length 5.65√A, Min",
+      "unit": "%",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["grade"],
+      "sourceTable": "Table 3 (iv)",
+      "testMethod": "IS 1608",
+      "valueTable": {
+        "Fe 415": { "min": 14.5 }, "Fe 415D": { "min": 18.0 }, "Fe 415S": { "min": 20.0 },
+        "Fe 500": { "min": 12.0 }, "Fe 500D": { "min": 16.0 }, "Fe 500S": { "min": 18.0 },
+        "Fe 550": { "min": 10.0 }, "Fe 550D": { "min": 14.5 }, "Fe 600": { "min": 10.0 }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.1",
+      "section": "Mechanical",
+      "parameterName": "Total elongation at maximum force on gauge length 5.65√A, Min",
+      "unit": "%",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": ["grade"],
+      "sourceTable": "Table 3 (v)",
+      "testMethod": "IS 1608",
+      "valueTable": {
+        "Fe 415": { "expected": "Not specified" },
+        "Fe 415D": { "expected": "≥ 5%" },
+        "Fe 415S": { "expected": "≥ 10%" },
+        "Fe 500": { "expected": "Not specified" },
+        "Fe 500D": { "expected": "≥ 5%" },
+        "Fe 500S": { "expected": "≥ 8%" },
+        "Fe 550": { "expected": "Not specified" },
+        "Fe 550D": { "expected": "≥ 5%" },
+        "Fe 600": { "expected": "Not specified" }
+      }
+    },
+    {
+      "clauseRef": "Cl 9.3",
+      "section": "Bend",
+      "parameterName": "Bend test (mandrel diameter per grade; size-conditional)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["grade"],
+      "sourceTable": "Table 4",
+      "testMethod": "IS 1599",
+      "valueTable": {
+        "Fe 415": { "expected": "Max mandrel dia 3φ (size ≤20 mm), 4φ (size >20 mm); no rupture/visible cracks on bent portion (φ = nominal size)" },
+        "Fe 415D": { "expected": "Max mandrel dia 2φ (size ≤20 mm), 3φ (size >20 mm); no rupture/visible cracks" },
+        "Fe 415S": { "expected": "Max mandrel dia 2φ (size ≤20 mm), 3φ (size >20 mm); no rupture/visible cracks" },
+        "Fe 500": { "expected": "Max mandrel dia 4φ (size ≤20 mm), 5φ (size >20 mm); no rupture/visible cracks" },
+        "Fe 500D": { "expected": "Max mandrel dia 3φ (size ≤20 mm), 4φ (size >20 mm); no rupture/visible cracks" },
+        "Fe 500S": { "expected": "Max mandrel dia 3φ (size ≤20 mm), 4φ (size >20 mm); no rupture/visible cracks" },
+        "Fe 550": { "expected": "Max mandrel dia 5φ (size ≤20 mm), 6φ (size >20 mm); no rupture/visible cracks" },
+        "Fe 550D": { "expected": "Max mandrel dia 4φ (size ≤20 mm), 5φ (size >20 mm); no rupture/visible cracks" },
+        "Fe 600": { "expected": "Max mandrel dia 5φ (size ≤20 mm), 6φ (size >20 mm); no rupture/visible cracks" }
+      }
+    },
+    {
+      "clauseRef": "Cl 9.4",
+      "section": "Rebend",
+      "parameterName": "Rebend test (mandrel diameter per grade; size-conditional)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": ["grade"],
+      "sourceTable": "Table (Cl 9.4.1)",
+      "testMethod": "IS 1599",
+      "valueTable": {
+        "Fe 415": { "expected": "Bend to 135°, age in boiling water 100°C/30 min, rebend to 157.5°; max mandrel dia 5φ (size ≤10 mm), 7φ (>10 mm); no rupture/visible cracks (φ = nominal size)" },
+        "Fe 415D": { "expected": "Rebend per 9.4; max mandrel dia 4φ (≤10 mm), 6φ (>10 mm); no rupture/visible cracks" },
+        "Fe 415S": { "expected": "Rebend per 9.4; max mandrel dia 4φ (≤10 mm), 6φ (>10 mm); no rupture/visible cracks" },
+        "Fe 500": { "expected": "Rebend per 9.4; max mandrel dia 5φ (≤10 mm), 7φ (>10 mm); no rupture/visible cracks" },
+        "Fe 500D": { "expected": "Rebend per 9.4; max mandrel dia 4φ (≤10 mm), 6φ (>10 mm); no rupture/visible cracks" },
+        "Fe 500S": { "expected": "Rebend per 9.4; max mandrel dia 4φ (≤10 mm), 6φ (>10 mm); no rupture/visible cracks" },
+        "Fe 550": { "expected": "Rebend per 9.4; max mandrel dia 7φ (≤10 mm), 8φ (>10 mm); no rupture/visible cracks" },
+        "Fe 550D": { "expected": "Rebend per 9.4; max mandrel dia 6φ (≤10 mm), 7φ (>10 mm); no rupture/visible cracks" },
+        "Fe 600": { "expected": "Rebend per 9.4; max mandrel dia 7φ (≤10 mm), 8φ (>10 mm); no rupture/visible cracks" }
+      }
+    }
+  ]
+}

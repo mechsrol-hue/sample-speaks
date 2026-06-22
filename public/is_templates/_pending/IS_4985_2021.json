@@ -1,0 +1,513 @@
+{
+  "isNumber": "IS 4985:2021",
+  "title": "Unplasticized PVC Pipes for Water Supplies — Specification (Fourth Revision)",
+  "parameterizationDims": [
+    "size",
+    "class",
+    "type",
+    "socket"
+  ],
+  "dimensionOptions": {
+    "size": [20, 25, 32, 40, 50, 63, 75, 90, 110, 125, 140, 160, 180, 200, 225, 250, 280, 315, 355, 400, 450, 500, 560, 630],
+    "class": ["1", "2", "3", "4", "5", "6"],
+    "type": ["A", "B"],
+    "socket": ["Solvent Cementing", "Elastomeric Sealing Ring"]
+  },
+  "defaults": {
+    "size": 110,
+    "class": "4",
+    "type": "A",
+    "socket": "Elastomeric Sealing Ring"
+  },
+  "_gridNote": "Mean OD, OD at any point and wall thickness (per Class 1-6) from Table 1; each class entry is [avg_max, min, max] of wall thickness (avg_max = max mean wall thickness, min = min wall thickness at any point, max = max wall thickness at any point); null where that class is not made for the size. Plumbing-pipe dims (Table 2) under 'plumbing' for DN 20-50. Solvent-cement socket length Ls(min) and mean socket internal dia D1[min,max] (Table 3). Elastomeric socket inner dia base + tol (Table 4) and minimum depth of engagement m (Table 5) for DN 63 and above (null below).",
+  "dimensionGrid": {
+    "20": { "mean_od": [20.0, 20.3], "od_any": [19.5, 20.5], "thickness": { "1": null, "2": null, "3": null, "4": null, "5": [1.5, 1.1, 1.5], "6": [1.8, 1.4, 1.8] }, "plumbing": { "mean_od": [20.0, 20.3], "od_any": [19.5, 20.5], "wall": [2.8, 3.3] }, "solvent": { "Ls": 16.0, "D1": [20.1, 20.3] }, "elastomeric": null },
+    "25": { "mean_od": [25.0, 25.3], "od_any": [24.5, 25.5], "thickness": { "1": null, "2": null, "3": null, "4": [1.6, 1.2, 1.6], "5": [1.8, 1.4, 1.8], "6": [2.1, 1.7, 2.1] }, "plumbing": { "mean_od": [25.0, 25.3], "od_any": [24.5, 25.5], "wall": [2.9, 3.4] }, "solvent": { "Ls": 19.0, "D1": [25.1, 25.3] }, "elastomeric": null },
+    "32": { "mean_od": [32.0, 32.3], "od_any": [31.5, 32.5], "thickness": { "1": null, "2": null, "3": null, "4": [1.9, 1.5, 1.9], "5": [2.2, 1.8, 2.2], "6": [2.7, 2.2, 2.7] }, "plumbing": { "mean_od": [32.0, 32.3], "od_any": [31.5, 32.5], "wall": [3.4, 3.9] }, "solvent": { "Ls": 22.0, "D1": [32.1, 32.3] }, "elastomeric": null },
+    "40": { "mean_od": [40.0, 40.3], "od_any": [39.5, 40.5], "thickness": { "1": null, "2": null, "3": [1.8, 1.4, 1.8], "4": [2.2, 1.8, 2.2], "5": [2.7, 2.2, 2.7], "6": [3.3, 2.8, 3.3] }, "plumbing": { "mean_od": [40.0, 40.3], "od_any": [39.5, 40.5], "wall": [3.6, 4.2] }, "solvent": { "Ls": 26.0, "D1": [40.1, 40.3] }, "elastomeric": null },
+    "50": { "mean_od": [50.0, 50.3], "od_any": [49.4, 50.6], "thickness": { "1": null, "2": null, "3": [2.1, 1.7, 2.1], "4": [2.8, 2.3, 2.8], "5": [3.3, 2.8, 3.3], "6": [4.0, 3.4, 4.0] }, "plumbing": { "mean_od": [50.0, 50.3], "od_any": [49.4, 50.6], "wall": [3.7, 4.3] }, "solvent": { "Ls": 31.0, "D1": [50.1, 50.3] }, "elastomeric": null },
+    "63": { "mean_od": [63.0, 63.3], "od_any": [62.2, 63.8], "thickness": { "1": null, "2": [1.9, 1.5, 1.9], "3": [2.7, 2.2, 2.7], "4": [3.3, 2.8, 3.3], "5": [4.1, 3.5, 4.1], "6": [5.0, 4.3, 5.0] }, "solvent": { "Ls": 37.5, "D1": [63.1, 63.3] }, "elastomeric": { "id": 63.6, "tol_plus": 0.7, "tol_minus": 0.0, "m": 64 } },
+    "75": { "mean_od": [75.0, 75.3], "od_any": [74.1, 75.9], "thickness": { "1": [1.7, 1.3, 1.7], "2": [2.2, 1.8, 2.2], "3": [3.1, 2.6, 3.1], "4": [4.0, 3.4, 4.0], "5": [4.9, 4.2, 4.9], "6": [5.9, 5.1, 5.9] }, "solvent": { "Ls": 43.5, "D1": [75.1, 75.3] }, "elastomeric": { "id": 75.6, "tol_plus": 0.7, "tol_minus": 0.0, "m": 67 } },
+    "90": { "mean_od": [90.0, 90.3], "od_any": [88.9, 91.1], "thickness": { "1": [1.7, 1.3, 1.7], "2": [2.6, 2.1, 2.6], "3": [3.7, 3.1, 3.7], "4": [4.6, 4.0, 4.6], "5": [5.7, 5.0, 5.7], "6": [7.0, 6.1, 7.1] }, "solvent": { "Ls": 51.0, "D1": [90.1, 90.3] }, "elastomeric": { "id": 90.7, "tol_plus": 0.8, "tol_minus": 0.0, "m": 70 } },
+    "110": { "mean_od": [110.0, 110.4], "od_any": [108.6, 111.4], "thickness": { "1": [2.0, 1.6, 2.0], "2": [3.0, 2.5, 3.0], "3": [4.3, 3.7, 4.3], "4": [5.6, 4.9, 5.6], "5": [7.0, 6.1, 7.1], "6": [8.5, 7.5, 8.7] }, "solvent": { "Ls": 61.0, "D1": [110.1, 110.4] }, "elastomeric": { "id": 110.8, "tol_plus": 0.9, "tol_minus": 0.0, "m": 75 } },
+    "125": { "mean_od": [125.0, 125.4], "od_any": [123.5, 126.5], "thickness": { "1": [2.2, 1.8, 2.2], "2": [3.4, 2.9, 3.4], "3": [5.0, 4.3, 5.0], "4": [6.4, 5.6, 6.4], "5": [7.8, 6.9, 8.0], "6": [9.6, 8.5, 9.8] }, "solvent": { "Ls": 68.5, "D1": [125.1, 125.4] }, "elastomeric": { "id": 125.9, "tol_plus": 1.0, "tol_minus": 0.0, "m": 78 } },
+    "140": { "mean_od": [140.0, 140.5], "od_any": [138.3, 141.7], "thickness": { "1": [2.4, 2.0, 2.4], "2": [3.8, 3.2, 3.8], "3": [5.5, 4.8, 5.5], "4": [7.2, 6.3, 7.3], "5": [8.7, 7.7, 8.9], "6": [10.7, 9.5, 11.0] }, "solvent": { "Ls": 76.0, "D1": [140.2, 140.5] }, "elastomeric": { "id": 140.9, "tol_plus": 1.0, "tol_minus": 0.0, "m": 81 } },
+    "160": { "mean_od": [160.0, 160.5], "od_any": [158.0, 162.0], "thickness": { "1": [2.8, 2.3, 2.8], "2": [4.3, 3.7, 4.3], "3": [6.2, 5.4, 6.2], "4": [8.2, 7.2, 8.3], "5": [9.9, 8.8, 10.2], "6": [12.2, 10.9, 12.6] }, "solvent": { "Ls": 86.0, "D1": [160.2, 160.5] }, "elastomeric": { "id": 161.0, "tol_plus": 1.1, "tol_minus": 0.0, "m": 86 } },
+    "180": { "mean_od": [180.0, 180.6], "od_any": [177.8, 182.2], "thickness": { "1": [3.1, 2.6, 3.1], "2": [4.9, 4.2, 4.9], "3": [7.0, 6.1, 7.1], "4": [9.0, 8.0, 9.2], "5": [11.1, 9.9, 11.4], "6": [13.7, 12.2, 14.1] }, "solvent": { "Ls": 96.0, "D1": [180.2, 180.5] }, "elastomeric": { "id": 181.1, "tol_plus": 1.1, "tol_minus": 0.0, "m": 90 } },
+    "200": { "mean_od": [200.0, 200.6], "od_any": [197.6, 202.4], "thickness": { "1": [3.4, 2.9, 3.4], "2": [5.3, 4.6, 5.3], "3": [7.7, 6.8, 7.9], "4": [10.0, 8.9, 10.3], "5": [12.3, 11.0, 12.7], "6": [15.2, 13.6, 15.7] }, "solvent": { "Ls": 106.0, "D1": [200.3, 200.6] }, "elastomeric": { "id": 201.2, "tol_plus": 1.1, "tol_minus": 0.0, "m": 94 } },
+    "225": { "mean_od": [225.0, 225.7], "od_any": [222.3, 227.7], "thickness": { "1": [3.9, 3.3, 3.9], "2": [6.0, 5.2, 6.0], "3": [8.6, 7.6, 8.8], "4": [11.2, 10.0, 11.5], "5": [13.9, 12.4, 14.3], "6": [17.1, 15.3, 17.6] }, "solvent": { "Ls": 118.5, "D1": [225.3, 225.7] }, "elastomeric": { "id": 226.4, "tol_plus": 1.1, "tol_minus": 0.0, "m": 100 } },
+    "250": { "mean_od": [250.0, 250.8], "od_any": [247.0, 253.0], "thickness": { "1": [4.2, 3.6, 4.2], "2": [6.5, 5.7, 6.5], "3": [9.6, 8.5, 9.8], "4": [12.6, 11.2, 12.9], "5": [15.4, 13.8, 15.9], "6": [18.9, 17.0, 19.6] }, "solvent": { "Ls": 131.0, "D1": [250.4, 250.8] }, "elastomeric": { "id": 251.5, "tol_plus": 1.1, "tol_minus": 0.0, "m": 105 } },
+    "280": { "mean_od": [280.0, 280.9], "od_any": [276.6, 283.4], "thickness": { "1": [4.8, 4.1, 4.8], "2": [7.3, 6.4, 7.4], "3": [10.7, 9.5, 11.0], "4": [14.0, 12.5, 14.4], "5": [17.2, 15.4, 17.8], "6": [21.1, 19.0, 21.9] }, "solvent": { "Ls": 146.0, "D1": [280.4, 280.9] }, "elastomeric": { "id": 281.6, "tol_plus": 1.4, "tol_minus": 0.0, "m": 112 } },
+    "315": { "mean_od": [315.0, 316.0], "od_any": [311.2, 318.8], "thickness": { "1": [5.3, 4.6, 5.3], "2": [8.2, 7.2, 8.3], "3": [12.0, 10.7, 12.4], "4": [15.6, 14.0, 16.1], "5": [19.3, 17.3, 19.9], "6": [23.8, 21.4, 24.7] }, "solvent": { "Ls": 163.5, "D1": [315.4, 316.0] }, "elastomeric": { "id": 316.8, "tol_plus": 1.5, "tol_minus": 0.0, "m": 118 } },
+    "355": { "mean_od": [355.0, 356.1], "od_any": [350.7, 359.3], "thickness": { "1": [5.9, 5.1, 5.9], "2": [9.2, 8.1, 9.4], "3": [13.4, 12.0, 13.8], "4": [17.6, 15.8, 18.2], "5": [21.8, 19.6, 22.6], "6": [26.8, 24.1, 27.8] }, "solvent": { "Ls": 183.5, "D1": [355.4, 356.0] }, "elastomeric": { "id": 357.0, "tol_plus": 1.7, "tol_minus": 0.0, "m": 124 } },
+    "400": { "mean_od": [400.0, 401.2], "od_any": [395.2, 404.8], "thickness": { "1": [6.6, 5.8, 6.7], "2": [10.3, 9.1, 10.5], "3": [15.1, 13.5, 15.6], "4": [19.8, 17.8, 20.5], "5": [24.4, 22.0, 25.3], "6": [30.2, 27.2, 31.3] }, "solvent": { "Ls": 206.0, "D1": [400.4, 401.0] }, "elastomeric": { "id": 402.2, "tol_plus": 1.9, "tol_minus": 0.0, "m": 130 } },
+    "450": { "mean_od": [450.0, 451.4], "od_any": [444.6, 455.4], "thickness": { "1": [7.4, 6.5, 7.5], "2": [11.6, 10.3, 11.9], "3": [17.0, 15.2, 17.5], "4": [22.2, 20.0, 23.0], "5": [27.5, 24.8, 28.6], "6": [33.8, 30.5, 35.1] }, "solvent": { "Ls": 231.0, "D1": [450.4, 451.0] }, "elastomeric": { "id": 452.5, "tol_plus": 2.0, "tol_minus": 0.0, "m": 138 } },
+    "500": { "mean_od": [500.0, 501.5], "od_any": [494.0, 506.0], "thickness": { "1": [8.2, 7.2, 8.3], "2": [12.8, 11.4, 13.2], "3": [18.8, 16.9, 19.5], "4": [24.8, 22.3, 25.7], "5": [30.5, 27.5, 31.7], "6": [37.5, 33.9, 39.0] }, "solvent": { "Ls": 256.0, "D1": [500.4, 501.0] }, "elastomeric": { "id": 502.6, "tol_plus": 2.0, "tol_minus": 0.0, "m": 145 } },
+    "560": { "mean_od": [560.0, 561.7], "od_any": [553.2, 566.8], "thickness": { "1": [9.2, 8.1, 9.4], "2": [14.3, 12.8, 14.8], "3": [21.0, 18.9, 21.8], "4": [27.6, 24.9, 28.7], "5": [34.1, 30.8, 35.5], "6": [42.0, 38.0, 43.7] }, "solvent": { "Ls": 286.0, "D1": [560.4, 561.0] }, "elastomeric": { "id": 562.8, "tol_plus": 2.4, "tol_minus": 0.0, "m": 154 } },
+    "630": { "mean_od": [630.0, 631.9], "od_any": [622.4, 637.6], "thickness": { "1": [10.3, 9.1, 10.5], "2": [16.1, 14.4, 16.6], "3": [23.7, 21.3, 24.5], "4": [31.0, 28.0, 32.2], "5": [38.4, 34.7, 40.0], "6": [47.2, 42.7, 49.2] }, "solvent": { "Ls": 321.0, "D1": [630.4, 631.0] }, "elastomeric": { "id": 633.1, "tol_plus": 2.6, "tol_minus": 0.0, "m": 165 } }
+  },
+  "parameters": [
+    {
+      "clauseRef": "Cl 3.1",
+      "section": "General",
+      "parameterName": "Size designation (DN)",
+      "limitType": "text",
+      "variesBy": ["size"],
+      "specText": "Pipes designated by nominal size DN; nominal sizes are 20, 25, 32, 40, 50, 63, 75, 90, 110, 125, 140, 160, 180, 200, 225, 250, 280, 315, 355, 400, 450, 500, 560 and 630 mm",
+      "expected": "As declared",
+      "testMethod": "",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 5.1",
+      "section": "General",
+      "parameterName": "Class / Pressure rating (PN)",
+      "limitType": "text",
+      "variesBy": ["class"],
+      "specText": "Classes by working pressure at 27 °C: Class 1 = 0.25 MPa, Class 2 = 0.40 MPa, Class 3 = 0.60 MPa, Class 4 = 0.80 MPa, Class 5 = 1.00 MPa, Class 6 = 1.25 MPa",
+      "expected": "As declared",
+      "testMethod": "",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 6.1.1",
+      "section": "Material",
+      "parameterName": "Monomer content (VCM content) in resin",
+      "limitType": "text",
+      "variesBy": [],
+      "specText": "VCM content of resin shall be within the limits specified in 4.4.1 of IS 10151",
+      "expected": "Within IS 10151 limit",
+      "testMethod": "Annex A of IS 10151",
+      "acceptanceOrType": "type",
+      "needsReview": true
+    },
+    {
+      "clauseRef": "Cl 6.1.2",
+      "section": "Material",
+      "parameterName": "K-value of PVC resin",
+      "limitType": "min",
+      "variesBy": [],
+      "min": "64",
+      "unit": "",
+      "specText": "Composition shall be based on PVC resin having a K value of 64 or greater",
+      "testMethod": "IS 4669",
+      "acceptanceOrType": "type",
+      "needsReview": true
+    },
+    {
+      "clauseRef": "Cl 7.1.1",
+      "section": "Dimensions",
+      "parameterName": "Mean Outside Diameter",
+      "limitType": "range",
+      "variesBy": ["size"],
+      "unit": "mm",
+      "testMethod": "IS 12235 (Part 1)",
+      "gridRows": [
+        { "label": "Min", "path": ["mean_od", 0], "limit": "min" },
+        { "label": "Max", "path": ["mean_od", 1], "limit": "max" }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 1"
+    },
+    {
+      "clauseRef": "Cl 7.1.1",
+      "section": "Dimensions",
+      "parameterName": "Outside Diameter at Any Point",
+      "limitType": "range",
+      "variesBy": ["size"],
+      "unit": "mm",
+      "testMethod": "IS 12235 (Part 1)",
+      "gridRows": [
+        { "label": "Min", "path": ["od_any", 0], "limit": "min" },
+        { "label": "Max", "path": ["od_any", 1], "limit": "max" }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 1"
+    },
+    {
+      "clauseRef": "Cl 7.1.2",
+      "section": "Dimensions",
+      "parameterName": "Wall Thickness at Any Point",
+      "limitType": "range",
+      "variesBy": ["size", "class"],
+      "unit": "mm",
+      "testMethod": "IS 12235 (Part 1)",
+      "gridRows": [
+        { "label": "Min", "path": ["thickness", "{class}", 1], "limit": "min" },
+        { "label": "Max", "path": ["thickness", "{class}", 2], "limit": "max" }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 1"
+    },
+    {
+      "clauseRef": "Cl 7.1.2",
+      "section": "Dimensions",
+      "parameterName": "Mean (Average) Wall Thickness",
+      "limitType": "max",
+      "variesBy": ["size", "class"],
+      "unit": "mm",
+      "specText": "Maximum permissible mean wall thickness (average of measurements) per Table 1",
+      "testMethod": "IS 12235 (Part 1)",
+      "gridRows": [
+        { "label": "Avg Max", "path": ["thickness", "{class}", 0], "limit": "max" }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 1"
+    },
+    {
+      "clauseRef": "Cl 7.1.3",
+      "section": "Dimensions",
+      "parameterName": "Plumbing Pipe — Mean Outside Diameter",
+      "limitType": "range",
+      "variesBy": ["size"],
+      "unit": "mm",
+      "specText": "Applies to UPVC plain ended plumbing pipes (DN 20-50)",
+      "testMethod": "IS 12235 (Part 1)",
+      "conditionalOn": { "type": "plumbing" },
+      "gridRows": [
+        { "label": "Min", "path": ["plumbing", "mean_od", 0], "limit": "min" },
+        { "label": "Max", "path": ["plumbing", "mean_od", 1], "limit": "max" }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 2"
+    },
+    {
+      "clauseRef": "Cl 7.1.3",
+      "section": "Dimensions",
+      "parameterName": "Plumbing Pipe — Outside Diameter at Any Point",
+      "limitType": "range",
+      "variesBy": ["size"],
+      "unit": "mm",
+      "testMethod": "IS 12235 (Part 1)",
+      "conditionalOn": { "type": "plumbing" },
+      "gridRows": [
+        { "label": "Min", "path": ["plumbing", "od_any", 0], "limit": "min" },
+        { "label": "Max", "path": ["plumbing", "od_any", 1], "limit": "max" }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 2"
+    },
+    {
+      "clauseRef": "Cl 7.1.3",
+      "section": "Dimensions",
+      "parameterName": "Plumbing Pipe — Wall Thickness",
+      "limitType": "range",
+      "variesBy": ["size"],
+      "unit": "mm",
+      "testMethod": "IS 12235 (Part 1)",
+      "conditionalOn": { "type": "plumbing" },
+      "gridRows": [
+        { "label": "Min", "path": ["plumbing", "wall", 0], "limit": "min" },
+        { "label": "Max", "path": ["plumbing", "wall", 1], "limit": "max" }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 2"
+    },
+    {
+      "clauseRef": "Cl 7.1.4.1",
+      "section": "Dimensions",
+      "parameterName": "Effective Length of Pipe",
+      "limitType": "text",
+      "variesBy": [],
+      "specText": "Preferred effective length 4, 5 or 6 m; effective length shall not be less than that specified",
+      "expected": "Not less than specified",
+      "testMethod": "IS 12235 (Part 1)",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 7.2.1.1",
+      "section": "Dimensions",
+      "parameterName": "Solvent-cement socket — Minimum Socket Length Ls",
+      "limitType": "min",
+      "variesBy": ["size"],
+      "unit": "mm",
+      "specText": "Minimum socket length Ls = 0.5 dn + 6 mm",
+      "testMethod": "IS 12235 (Part 1)",
+      "conditionalOn": { "socket": "Solvent Cementing" },
+      "gridRows": [
+        { "label": "Ls Min", "path": ["solvent", "Ls"], "limit": "min" }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 3"
+    },
+    {
+      "clauseRef": "Cl 7.2.1.1",
+      "section": "Dimensions",
+      "parameterName": "Solvent-cement socket — Mean Internal Diameter at Mid-Point dim",
+      "limitType": "range",
+      "variesBy": ["size"],
+      "unit": "mm",
+      "testMethod": "IS 12235 (Part 1)",
+      "conditionalOn": { "socket": "Solvent Cementing" },
+      "gridRows": [
+        { "label": "Min", "path": ["solvent", "D1", 0], "limit": "min" },
+        { "label": "Max", "path": ["solvent", "D1", 1], "limit": "max" }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 3"
+    },
+    {
+      "clauseRef": "Cl 7.2.1.2",
+      "section": "Dimensions",
+      "parameterName": "Elastomeric socket — Inner Diameter of Socket dim",
+      "limitType": "range",
+      "variesBy": ["size"],
+      "unit": "mm",
+      "specText": "Socket inner diameter at mid-point with tolerance per Table 4 (DN 63 and above)",
+      "testMethod": "IS 12235 (Part 1)",
+      "conditionalOn": { "socket": "Elastomeric Sealing Ring" },
+      "gridRows": [
+        { "label": "Base", "path": ["elastomeric", "id"], "limit": "min" },
+        { "label": "Tol +", "path": ["elastomeric", "tol_plus"], "limit": "max" },
+        { "label": "Tol -", "path": ["elastomeric", "tol_minus"], "limit": "min" }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 4"
+    },
+    {
+      "clauseRef": "Cl 7.2.1.2",
+      "section": "Dimensions",
+      "parameterName": "Elastomeric socket — Minimum Depth of Engagement m",
+      "limitType": "min",
+      "variesBy": ["size"],
+      "unit": "mm",
+      "specText": "For dn < 280 mm: m > 50 + 0.22 dn; for dn ≥ 280 mm: m > 70 + 0.15 dn (DN 63 and above)",
+      "testMethod": "IS 12235 (Part 1)",
+      "conditionalOn": { "socket": "Elastomeric Sealing Ring" },
+      "gridRows": [
+        { "label": "m Min", "path": ["elastomeric", "m"], "limit": "min" }
+      ],
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 5"
+    },
+    {
+      "clauseRef": "Cl 9.2",
+      "section": "Physical",
+      "parameterName": "Chamfer of plain ends for elastomeric joints",
+      "limitType": "qualitative",
+      "variesBy": [],
+      "specText": "Plain ends for elastomeric sealing ring joints chamfered at approximately 15° to axis; approx. two-thirds of full wall thickness chamfered",
+      "expected": "Satisfactory",
+      "testMethod": "Visual",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 10.1",
+      "section": "Physical",
+      "parameterName": "Visual Appearance / Colour",
+      "limitType": "qualitative",
+      "variesBy": [],
+      "specText": "Colour light grey (or as agreed); internal and external surfaces smooth, clean and free from grooving and other defects",
+      "expected": "Light grey, smooth and clean",
+      "testMethod": "Visual",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 10.2",
+      "section": "Physical",
+      "parameterName": "Opacity",
+      "limitType": "max",
+      "variesBy": [],
+      "max": "0.2",
+      "unit": "percent",
+      "specText": "Wall of plain pipe shall not transmit more than 0.2 percent of the visible light falling on it",
+      "testMethod": "IS 12235 (Part 3)",
+      "acceptanceOrType": "type"
+    },
+    {
+      "clauseRef": "Cl 10.3",
+      "section": "Chemical",
+      "parameterName": "Effect on Water — Lead (first extraction)",
+      "limitType": "max",
+      "variesBy": [],
+      "max": "1.0",
+      "unit": "mg/l",
+      "specText": "Lead in first extraction shall not exceed 1.0 mg/l (1.0 ppm by mass)",
+      "testMethod": "IS 12235 (Part 4)",
+      "acceptanceOrType": "type"
+    },
+    {
+      "clauseRef": "Cl 10.3",
+      "section": "Chemical",
+      "parameterName": "Effect on Water — Lead (third extraction)",
+      "limitType": "max",
+      "variesBy": [],
+      "max": "0.05",
+      "unit": "mg/l",
+      "specText": "Lead in third extraction shall not exceed 0.05 mg/l (0.05 ppm by mass)",
+      "testMethod": "IS 12235 (Part 4)",
+      "acceptanceOrType": "type"
+    },
+    {
+      "clauseRef": "Cl 10.3",
+      "section": "Chemical",
+      "parameterName": "Effect on Water — Dialkyl tin C4 and higher (as tin, third extraction)",
+      "limitType": "max",
+      "variesBy": [],
+      "max": "0.02",
+      "unit": "mg/l",
+      "specText": "Dialkyl tin C4 and higher homologues measured as tin (third extraction) shall not exceed 0.02 mg/l",
+      "testMethod": "IS 12235 (Part 10)",
+      "acceptanceOrType": "type"
+    },
+    {
+      "clauseRef": "Cl 10.3",
+      "section": "Chemical",
+      "parameterName": "Effect on Water — Cadmium (all three extracts)",
+      "limitType": "max",
+      "variesBy": [],
+      "max": "0.01",
+      "unit": "mg/l",
+      "specText": "Cadmium (for all three extracts) shall not exceed 0.01 mg/l",
+      "testMethod": "IS 12235 (Part 4)",
+      "acceptanceOrType": "type"
+    },
+    {
+      "clauseRef": "Cl 10.3",
+      "section": "Chemical",
+      "parameterName": "Effect on Water — Mercury (all three extracts)",
+      "limitType": "max",
+      "variesBy": [],
+      "max": "0.001",
+      "unit": "mg/l",
+      "specText": "Mercury (for all three extracts) shall not exceed 0.001 mg/l",
+      "testMethod": "IS 12235 (Part 4)",
+      "acceptanceOrType": "type"
+    },
+    {
+      "clauseRef": "Cl 10.3",
+      "section": "Chemical",
+      "parameterName": "Effect on Water — Other toxic substances (third extraction)",
+      "limitType": "max",
+      "variesBy": [],
+      "max": "0.01",
+      "unit": "mg/l",
+      "specText": "Other toxic substances such as 'di-n-octyl-tin-', 's-s bis iso-octyl mercapto acetate' and 'butyl stearate' (third extraction) shall not exceed 0.01 mg/l",
+      "testMethod": "IS 12235 (Part 4)",
+      "acceptanceOrType": "type"
+    },
+    {
+      "clauseRef": "Cl 10.4",
+      "section": "Physical",
+      "parameterName": "Reversion Test (longitudinal)",
+      "limitType": "max",
+      "variesBy": [],
+      "max": "5",
+      "unit": "percent",
+      "specText": "Length of pipe 200 ± 20 mm shall not alter in length by more than 5 percent",
+      "testMethod": "IS 12235 (Part 5/Sec 1) and (Part 5/Sec 2)",
+      "acceptanceOrType": "type"
+    },
+    {
+      "clauseRef": "Cl 10.5",
+      "section": "Physical",
+      "parameterName": "Vicat Softening Temperature",
+      "limitType": "min",
+      "variesBy": [],
+      "min": "80",
+      "unit": "°C",
+      "specText": "Vicat Softening temperature shall not be less than 80 °C",
+      "testMethod": "IS 12235 (Part 2)",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 10.6",
+      "section": "Physical",
+      "parameterName": "Density",
+      "limitType": "range",
+      "variesBy": [],
+      "min": "1.40",
+      "max": "1.46",
+      "unit": "g/cm3",
+      "specText": "Density of the pipe shall be between 1.40 and 1.46 g/cm3",
+      "testMethod": "IS 12235 (Part 14)",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 10.7",
+      "section": "Chemical",
+      "parameterName": "Sulphated Ash Content",
+      "limitType": "max",
+      "variesBy": [],
+      "max": "11",
+      "unit": "percent",
+      "specText": "Sulphated ash content shall not exceed 11 percent",
+      "testMethod": "Annex B",
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 11.1",
+      "section": "Mechanical",
+      "parameterName": "Internal Hydrostatic Pressure — Acceptance Test",
+      "limitType": "qualitative",
+      "variesBy": ["class"],
+      "specText": "Pipe shall not fail at 27 °C for 1 h holding time at test pressure 4.19 × PN (MPa) (PN per class)",
+      "expected": "No failure",
+      "testMethod": "IS 12235 (Part 8/Sec 1)",
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 6"
+    },
+    {
+      "clauseRef": "Cl 11.1",
+      "section": "Mechanical",
+      "parameterName": "Internal Hydrostatic Pressure — Type Test",
+      "limitType": "qualitative",
+      "variesBy": ["class"],
+      "specText": "Pipe shall not fail at 60 °C for 1 000 h holding time at test pressure 1.16 × PN (MPa) (PN per class)",
+      "expected": "No failure",
+      "testMethod": "IS 12235 (Part 8/Sec 1)",
+      "acceptanceOrType": "type",
+      "sourceTable": "Table 6"
+    },
+    {
+      "clauseRef": "Cl 11.1.1",
+      "section": "Mechanical",
+      "parameterName": "Internal Hydrostatic Pressure — Plumbing Pipes (Acceptance)",
+      "limitType": "qualitative",
+      "variesBy": [],
+      "specText": "For plumbing pipes, acceptance test pressure at 27 °C shall be 3.6 MPa for 1 h",
+      "expected": "No failure",
+      "testMethod": "IS 12235 (Part 8/Sec 1)",
+      "conditionalOn": { "type": "plumbing" },
+      "acceptanceOrType": "acceptance"
+    },
+    {
+      "clauseRef": "Cl 11.1",
+      "section": "Mechanical",
+      "parameterName": "Integral Sealing Ring Socket Hydrostatic — Acceptance Test",
+      "limitType": "qualitative",
+      "variesBy": ["size"],
+      "specText": "Elastomeric sealing ring socket joint shall not fail at 27 °C for 1 h: dn < 90 mm at 2.88 × PN MPa; dn ≥ 90 mm at 3.60 × PN MPa",
+      "expected": "No failure / leak-tight",
+      "testMethod": "IS 12235 (Part 8/Sec 4)",
+      "conditionalOn": { "socket": "Elastomeric Sealing Ring" },
+      "acceptanceOrType": "acceptance",
+      "sourceTable": "Table 7"
+    },
+    {
+      "clauseRef": "Cl 11.1",
+      "section": "Mechanical",
+      "parameterName": "Integral Sealing Ring Socket Hydrostatic — Type Test",
+      "limitType": "qualitative",
+      "variesBy": ["size"],
+      "specText": "Elastomeric sealing ring socket joint shall not fail at 27 °C for 1 000 h: dn < 90 mm at 2.20 × PN MPa; dn ≥ 90 mm at 2.74 × PN MPa",
+      "expected": "No failure / leak-tight",
+      "testMethod": "IS 12235 (Part 8/Sec 4)",
+      "conditionalOn": { "socket": "Elastomeric Sealing Ring" },
+      "acceptanceOrType": "type",
+      "sourceTable": "Table 7"
+    },
+    {
+      "clauseRef": "Cl 11.2",
+      "section": "Mechanical",
+      "parameterName": "Resistance to External Blows at 0 °C (Impact, TIR)",
+      "limitType": "max",
+      "variesBy": ["size"],
+      "max": "10",
+      "unit": "percent",
+      "specText": "True impact rate (TIR) shall not be more than 10 percent; striker mass and fall height per Annex C (Table 9)",
+      "testMethod": "Annex C",
+      "acceptanceOrType": "acceptance"
+    }
+  ]
+}

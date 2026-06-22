@@ -148,36 +148,82 @@ function checkCompleteness(tables, fullText, opts = {}) {
   return { complete, expectedDn, perTable, missingTables, actions, summary };
 }
 
+// Cartesian product of arrays → array of combos (each combo is an array of option strings).
+function cartesian(lists) {
+  return (lists || []).reduce((acc, list) => {
+    const out = [];
+    acc.forEach(prefix => (list || []).forEach(v => out.push(prefix.concat([String(v)]))));
+    return out;
+  }, [[]]);
+}
+
 // ── 5. Template-centric completeness — the check the agent actually runs ────────
-// Runs against the agent's OWN vision transcript (clean text — pdfplumber mangles the
-// size-designation clause) + the draft template. Verifies the dimensionGrid covers every DN the
-// standard specifies, and that every referenced dimension table is represented (via sourceTable).
+// Runs against the agent's OWN vision transcript (clean text) + the draft template. This is the
+// GENERAL "no-partial-success" gate: it is dimension-agnostic, so it works for size-keyed pipe
+// standards AND grade/class-keyed standards (steel, etc.). Three guarantees:
+//   (A) anti-truncation — if 'size' is a dim and the prose enumerates DN sizes, the size dropdown
+//       must list them all (a truncated size set is the classic vision failure).
+//   (B) no-partial-success — EVERY parameter that varies must resolve a value for EVERY combination
+//       of its variesBy options (numeric limits need a numeric bound; qualitative need an expected).
+//       This is what forces grade/class tables — not just size — to be fully populated so the report
+//       auto-fills the exact value AND drives green/red. A param with only descriptive specText for a
+//       varying limit (the IS 1786 failure mode) is flagged here.
+//   (C) legacy dimensionGrid DN coverage — only checked when a (legacy size-keyed) grid is present,
+//       so the older 13592/4985 gridRows templates still validate.
 function checkTemplateCompleteness(template, fullText) {
   template = template || {};
+  const dims = Array.isArray(template.parameterizationDims) ? template.parameterizationDims : [];
+  const options = template.dimensionOptions || {};
   const expectedDn = expectedDnSet(fullText);
-  const gridKeys = Object.keys(template.dimensionGrid || {}).map(Number).filter(n => !isNaN(n)).sort((a, b) => a - b);
-  const missingDn = expectedDn.filter(dn => !gridKeys.some(g => Math.abs(g - dn) < 0.5));
-
-  // Which dimension tables did the agent actually capture? Tracked via each param's sourceTable.
-  const refTables = referencedDimensionalTables(fullText);
-  const gotTables = new Set();
-  (template.parameters || []).forEach(p => {
-    const m = String(p.sourceTable || '').match(/\d+/);
-    if (m) gotTables.add(+m[0]);
-  });
-  const missingTables = refTables.filter(n => !gotTables.has(n));
-
   const actions = [];
-  if (missingDn.length) actions.push({ type: 'reread', reason: `dimensionGrid missing DN sizes: ${missingDn.join(', ')}`, demandKeys: missingDn });
-  missingTables.forEach(n => actions.push({ type: 'reread_table', tableNum: n, reason: `dimension Table ${n} is referenced but no parameter carries sourceTable "Table ${n}" — extract it` }));
+
+  // (A) size-dropdown anti-truncation
+  let missingDn = [];
+  if (dims.includes('size') && expectedDn.length) {
+    const sizeOpts = (options.size || []).map(Number).filter(n => !isNaN(n));
+    missingDn = expectedDn.filter(dn => !sizeOpts.some(g => Math.abs(g - dn) < 0.5));
+    if (missingDn.length) actions.push({ type: 'reread', reason: `size options missing DN sizes: ${missingDn.join(', ')}`, demandKeys: missingDn });
+  }
+
+  // (B) value coverage for every varying parameter
+  const numericTypes = new Set(['min', 'max', 'range']);
+  const valueGaps = [];
+  (template.parameters || []).forEach(p => {
+    if (Array.isArray(p.gridRows) && p.gridRows.length) return;       // legacy size-grid param → checked by (C)
+    const vb = Array.isArray(p.variesBy) ? p.variesBy.filter(d => dims.includes(d) && (options[d] || []).length) : [];
+    if (!vb.length) return;                                            // constant param — carries its own min/max/specText
+    const combos = cartesian(vb.map(d => (options[d] || []).map(String)));
+    const vt = (p.valueTable && typeof p.valueTable === 'object') ? p.valueTable : null;
+    if (!vt) { valueGaps.push(`${p.clauseRef || '?'} "${p.parameterName}" varies by [${vb.join('·')}] but has no valueTable`); return; }
+    const numeric = numericTypes.has(p.limitType);
+    const missing = [];
+    for (const combo of combos) {
+      const e = vt[combo.join('|')];
+      const ok = e && (numeric
+        ? (e.min != null || e.max != null || e.value != null)
+        : (e.expected != null || e.value != null || e.min != null || e.max != null));
+      if (!ok) missing.push(combo.join('|'));
+    }
+    if (missing.length) valueGaps.push(`${p.clauseRef || '?'} "${p.parameterName}": ${missing.length}/${combos.length} ${vb.join('·')} value(s) missing (e.g. ${missing.slice(0, 6).join(', ')})`);
+  });
+  if (valueGaps.length) actions.push({ type: 'fill_values', reason: `value gaps — ${valueGaps.join(' | ')}`, gaps: valueGaps });
+
+  // (C) legacy dimensionGrid DN coverage (only when a grid is present)
+  let gridKeys = [];
+  const grid = template.dimensionGrid || {};
+  if (Object.keys(grid).length) {
+    gridKeys = Object.keys(grid).map(Number).filter(n => !isNaN(n)).sort((a, b) => a - b);
+    const gm = expectedDn.filter(dn => !gridKeys.some(g => Math.abs(g - dn) < 0.5));
+    if (gm.length) actions.push({ type: 'reread', reason: `dimensionGrid missing DN sizes: ${gm.join(', ')}`, demandKeys: gm });
+  }
 
   const complete = actions.length === 0;
   return {
-    complete, expectedDn, gridKeys, missingDn, refTables, missingTables, actions,
+    complete, expectedDn, dims, sizeOptions: (options.size || []).length, missingDn, gridKeys, valueGaps, actions,
     summary: complete
-      ? `✅ complete — grid covers all ${expectedDn.length || gridKeys.length} DN sizes; dimension tables [${refTables.join(', ')}] all present`
+      ? `✅ complete — ${dims.length ? `dims [${dims.join(', ')}]; ` : ''}every varying parameter resolves a value for all option combinations${expectedDn.length ? `; size covers all ${expectedDn.length} DN` : ''}`
       : `⚠ incomplete — ${actions.map(a => a.reason).join('; ')}`,
   };
 }
 
-module.exports = { expectedDnSet, referencedTables, referencedDimensionalTables, tableDnKeys, sanityFlags, checkCompleteness, checkTemplateCompleteness };
+module.exports = { expectedDnSet, referencedTables, referencedDimensionalTables, tableDnKeys, sanityFlags, cartesian, checkCompleteness, checkTemplateCompleteness };

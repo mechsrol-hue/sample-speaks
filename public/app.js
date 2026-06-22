@@ -3904,7 +3904,21 @@ async function directAssignSample(sampleId, tpName) {
     } catch (err) { showToast('Network error.', 'error'); }
 }
 
-async function approveAllRecommendations() {
+async function approveAllRecommendations(btn) {
+    // Visual feedback so the user can see the action is in progress.
+    // The server processes every recommendation sequentially, so this can take
+    // several seconds — without feedback the button looks unresponsive/broken.
+    const buttons = (btn ? [btn] : Array.from(document.querySelectorAll('button[data-action="approve-all"]')));
+    const original = buttons.map(b => b.innerHTML);
+    if (buttons.some(b => b.disabled)) return; // already running — ignore double-click
+    buttons.forEach(b => {
+        b.disabled = true;
+        b.style.opacity = '0.7';
+        b.style.cursor = 'wait';
+        b.innerHTML = '⏳ Approving…';
+    });
+    showToast('Approving all recommendations…', 'info');
+
     try {
         const res = await fetch('/api/admin/approve-all-recommendations', { method: 'POST' });
         const data = await res.json();
@@ -3916,13 +3930,23 @@ async function approveAllRecommendations() {
             loadRecommendations();
             loadUnassignedPool();
             fetchSamples(); // Sync with Master List
-            if (data.sampleIds && data.sampleIds.length > 0) {
-                triggerExcelDownloadAndPrint(data.sampleIds);
-            }
+            // NOTE: bulk approve intentionally does NOT auto-download/print slips —
+            // printing 40+ allotment slips on one click is disruptive. Per-sample
+            // approval (the ✓ buttons) still prints its single slip.
         } else {
-            showToast(data.error, 'error');
+            showToast(data.error || 'Approval failed', 'error');
         }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+        console.error(err);
+        showToast('Network error while approving: ' + err.message, 'error');
+    } finally {
+        buttons.forEach((b, i) => {
+            b.disabled = false;
+            b.style.opacity = '';
+            b.style.cursor = '';
+            b.innerHTML = original[i];
+        });
+    }
 }
 
 async function generateMockData() {
@@ -4890,13 +4914,31 @@ function renderISVault() {
                     <div class="is-vault-item-title">${getISNumberHtml(doc.isNumber)}</div>
                     <div class="is-vault-item-meta">${escapeHtml(doc.title)} · ${date}</div>
                 </div>
-                <div class="is-vault-item-status">${statusBadge}</div>
+                <div class="is-vault-item-status">${statusBadge}
+                    <button onclick="event.stopPropagation(); syncISToMaster('${escapeHtml(doc.isNumber)}')" title="Link this standard as the live source: match testing-charges hours to its parameters and refresh conformance limits. IS Intelligence itself is never modified." style="margin-left:6px; background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; border-radius:6px; font-size:0.65rem; padding:3px 7px; cursor:pointer; font-weight:600;">↪ Link</button>
+                </div>
             </div>
         `;
     }).join('');
 }
 
+// Link a standard so IS Intelligence is its live source: match testing-charges
+// hours to its parameters and refresh the derived conformance limits. IS
+// Intelligence (the vault) is read-only here — never modified or duplicated.
+async function syncISToMaster(isNumber) {
+    if (!isNumber) return;
+    try {
+        const res = await fetch(`/api/is-intelligence/sync-to-master/${encodeURIComponent(isNumber)}`, { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Link failed');
+        showToast(`${data.isNumber}: ${data.paramsMatchedToHours}/${data.paramsInIntelligence} params matched to hours · ${data.limitsSynced} limits`, 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
 // --- Select a Document ---
+let isActiveTemplate = null; // structured agent template for the active standard, if one exists
 async function selectISDocument(docId) {
     try {
         const res = await fetch(`/api/is-intelligence/vault/${docId}`);
@@ -4905,18 +4947,35 @@ async function selectISDocument(docId) {
             showToast(doc.error, 'error');
             return;
         }
-        
+
         isActiveDocument = doc;
         isUncertainItems = doc.uncertainItems || [];
         isParsedClauses = doc.clauses || [];
+        // Since the pipeline switch, a clause-by-clause agent template (if present) is the source of
+        // truth — the vault detail reflects THAT, not the old pipeline's clause/table counts.
+        isActiveTemplate = await loadVaultTemplate(doc.isNumber);
 
         renderISVault();
         renderISSimpleResults();
 
-        // Update parse status bar — wording + colour reflect actual confidence so a low
-        // score never reads as a confident "Fully Parsed" with a half-empty loading bar.
+        // Status bar: prefer the agent template's summary; fall back to the old pipeline counts.
         const statusEl = document.getElementById('is-parse-status-bar');
-        if (statusEl) {
+        if (statusEl && isActiveTemplate) {
+            const tpl = isActiveTemplate;
+            const nParams = (tpl.parameters || []).length;
+            const dimsTxt = (tpl.parameterizationDims || []).join(' · ') || 'no variable dimensions';
+            statusEl.style.display = 'flex';
+            statusEl.className = 'is-parse-status success';
+            statusEl.innerHTML = `
+                <span style="font-size:1.2rem;">🤖</span>
+                <div class="is-parse-progress">
+                    <div style="font-size:0.88rem; font-weight:600; color:var(--success);">${escapeHtml(doc.isNumber)} — Extracted by Claude Agent</div>
+                    <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">${nParams} testing parameter${nParams === 1 ? '' : 's'} · dropdowns: ${escapeHtml(dimsTxt)} · completeness ✓</div>
+                    <div class="is-parse-progress-bar" style="margin-top:6px;"><div class="is-parse-progress-fill" style="width:100%; background:var(--success);"></div></div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-top:3px;">Clause-by-clause template — open "Generate Report" for the live testing report.</div>
+                </div>
+            `;
+        } else if (statusEl) {
             const conf = doc.confidenceScore || 0;
             const confPct = Math.round(conf * 100);
             const tier = conf >= 0.85
@@ -4967,9 +5026,36 @@ function renderISSimpleResults() {
         `;
     }
 
-    // Dimension/OD table
+    // Dimension/OD table — or, when an agent template exists, a clause-by-clause parameter overview.
     const odEl = document.getElementById('is-od-table-section');
-    if (odEl) {
+    if (odEl && isActiveTemplate) {
+        const params = isActiveTemplate.parameters || [];
+        const esc = s => escapeHtml(String(s == null ? '' : s));
+        odEl.style.display = 'block';
+        odEl.innerHTML = `
+            <div style="margin-bottom:16px;">
+                <div style="font-weight:700; font-size:0.9rem; color:var(--text-main); margin-bottom:8px;">🧪 Testing parameters — clause-by-clause (agent-extracted)</div>
+                <div class="table-container premium-table-container custom-scrollbar" style="max-height:380px; overflow:auto;">
+                    <table class="premium-table glass-table" style="font-size:0.8rem; width:100%;">
+                        <thead><tr>
+                            <th style="white-space:nowrap;">Clause</th><th>Parameter</th><th>Section</th>
+                            <th style="white-space:nowrap;">Varies by</th><th style="white-space:nowrap;">Limit</th>
+                        </tr></thead>
+                        <tbody>
+                            ${params.map(p => `<tr>
+                                <td style="font-weight:600; white-space:nowrap;">${esc(p.clauseRef)}</td>
+                                <td>${esc(p.parameterName)}${p.needsReview ? ' <span style="color:var(--warning); font-size:0.7rem;">⚠ review</span>' : ''}</td>
+                                <td>${esc(p.section)}</td>
+                                <td>${esc((p.variesBy || []).join(', ') || 'constant')}</td>
+                                <td>${esc(p.limitType)}${p.unit ? ' (' + esc(p.unit) + ')' : ''}</td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div style="font-size:0.72rem; color:var(--text-muted); margin-top:6px;">Values resolve per dropdown selection in the testing report — click "Generate Report".</div>
+            </div>
+        `;
+    } else if (odEl) {
         const dimData = doc.dimensionData;
         if (dimData && dimData.tables && dimData.tables.length > 0) {
             odEl.style.display = 'block';
@@ -5002,11 +5088,11 @@ function renderISSimpleResults() {
         }
     }
 
-    // Clauses accordion
+    // Clauses accordion — hide the old pipeline clauses when an agent template is the source of truth.
     const clausesSection = document.getElementById('is-clauses-section');
     if (clausesSection) {
-        clausesSection.style.display = isParsedClauses.length > 0 ? 'block' : 'none';
-        renderISClauses();
+        clausesSection.style.display = (!isActiveTemplate && isParsedClauses.length > 0) ? 'block' : 'none';
+        if (!isActiveTemplate) renderISClauses();
     }
 }
 
@@ -5124,6 +5210,17 @@ function tplResolvePath(gridForSize, path, sel) {
     return (cur === undefined) ? null : cur;
 }
 
+// Render a spec string for a resolved value-table entry (range / one-sided / single value / qualitative).
+function specFromEntry(e, unit, specText) {
+    const u = unit ? ` ${unit}` : '';
+    if (e.min != null && e.max != null) return `${e.min}–${e.max}${u}`.trim();
+    if (e.min != null) return `Min ${e.min}${u}`.trim();
+    if (e.max != null) return `Max ${e.max}${u}`.trim();
+    if (e.value != null) return `${e.value}${u}`.trim();
+    if (e.expected != null) return String(e.expected);
+    return specText || '';
+}
+
 function renderVaultISReportRows() {
     const tpl = vaultTemplate;
     if (!tpl) return;
@@ -5140,6 +5237,26 @@ function renderVaultISReportRows() {
 
         if (p.conditionalOn && !tplCondMet(p.conditionalOn, sel)) {
             rows.push({ clause: p.clauseRef, name: p.parameterName, method: p.testMethod, spec: '—', na: true });
+            return;
+        }
+        // General per-parameter value table — keyed by the selected option values of variesBy
+        // ("16" for ["size"], "16|Fe 500" for ["size","grade"]). Works for ANY dimension, so
+        // grade/class/type limits auto-fill the exact value and drive green/red, not just size.
+        if (p.valueTable && Array.isArray(p.variesBy) && p.variesBy.length) {
+            const e = p.valueTable[p.variesBy.map(d => sel[d]).join('|')];
+            const isQ = p.limitType === 'qualitative' || p.limitType === 'text';
+            if (!e) {
+                rows.push({ clause: p.clauseRef, name: p.parameterName, method: p.testMethod,
+                    spec: '— (pending re-extract)', type: isQ ? 'Qualitative' : 'Quantitative', needsReview: true });
+            } else {
+                rows.push({
+                    clause: p.clauseRef, name: p.parameterName, method: p.testMethod,
+                    spec: specFromEntry(e, p.unit, p.specText),
+                    min: e.min != null ? e.min : '', max: e.max != null ? e.max : '',
+                    expected: e.expected != null ? e.expected : (p.expected || ''),
+                    qualitative: isQ, type: isQ ? 'Qualitative' : 'Quantitative', needsReview: !!p.needsReview,
+                });
+            }
             return;
         }
         if (Array.isArray(p.gridRows)) {
@@ -5870,28 +5987,20 @@ async function uploadISStandard() {
         return;
     }
 
-    const PHASE_LABELS = [
-        '📄 Phase 0 — Ingesting document…',
-        '🧠 Phase 1 — Claude Opus reading structure…',
-        '👁 Phase 2 — Gemini Flash extracting tables…',
-        '✅ Phase 3 — Validating & normalising cells…',
-        '✅ Phase 4 — Finalizing trusted output…',
-        '💾 Phase 5 — Saving to vault…',
-        '📊 Phase 6 — Calibrating against baseline…',
-    ];
     const statusEl = document.getElementById('is-parse-status-bar');
 
-    function setStatus(phaseName, pct, isError) {
+    function setStatus(line, pct, isError, done) {
         if (!statusEl) return;
         statusEl.style.display = 'flex';
-        statusEl.className = 'is-parse-status ' + (isError ? 'error' : 'parsing');
+        statusEl.className = 'is-parse-status ' + (isError ? 'error' : (done ? 'success' : 'parsing'));
+        const accent = isError ? 'var(--danger)' : (done ? 'var(--success)' : 'var(--accent)');
         statusEl.innerHTML = `
-            <div class="is-parse-spinner" style="${isError ? 'display:none' : ''}"></div>
+            <div class="is-parse-spinner" style="${isError || done ? 'display:none' : ''}"></div>
             <div class="is-parse-progress">
-                <div style="font-size:0.88rem; font-weight:600; color:var(--accent);">
-                    ${isError ? '❌ ' : ''}${escapeHtml(file.name)}
+                <div style="font-size:0.88rem; font-weight:600; color:${accent};">
+                    ${isError ? '❌ ' : (done ? '✅ ' : '')}${escapeHtml(file.name)}
                 </div>
-                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">${escapeHtml(phaseName)}</div>
+                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">${escapeHtml(line)}</div>
                 <div class="is-parse-progress-bar" style="margin-top:6px;">
                     <div class="is-parse-progress-fill" style="width:${pct}%; ${isError ? 'background:var(--danger)' : ''};"></div>
                 </div>
@@ -5899,25 +6008,28 @@ async function uploadISStandard() {
         `;
     }
 
-    setStatus(PHASE_LABELS[0], 3, false);
+    setStatus('🤖 Starting Claude agent — reading the whole PDF…', 5, false);
 
     const formData = new FormData();
     formData.append('pdf', file);
 
     let jobId = null;
     try {
-        const startRes = await fetch('/api/is-intelligence/upload', { method: 'POST', body: formData });
+        // Agent SDK path (replaces the old multi-model pipeline): Claude reads the whole PDF,
+        // builds the clause-by-clause template, runs the completeness gate, and writes
+        // public/is_templates/<slug>.json — the same agent loop validated in development.
+        const startRes = await fetch('/api/is-intelligence/agent-extract', { method: 'POST', body: formData });
         const startData = await startRes.json();
         if (!startRes.ok || startData.error) {
-            setStatus(startData.error || 'Upload failed', 0, true);
-            showToast(startData.error || 'Upload failed', 'error');
+            setStatus(startData.error || 'Agent extraction failed to start', 0, true);
+            showToast(startData.error || 'Agent extraction failed to start', 'error');
             return;
         }
         jobId = startData.jobId;
-        showToast(`Pipeline started for ${file.name} — extracting all ${PHASE_LABELS.length} phases…`, 'info');
+        showToast(`Claude agent extracting ${file.name} — reading every clause & table…`, 'info');
     } catch (e) {
-        setStatus('Upload failed: ' + e.message, 0, true);
-        showToast('Upload failed: ' + e.message, 'error');
+        setStatus('Failed to start: ' + e.message, 0, true);
+        showToast('Failed to start: ' + e.message, 'error');
         return;
     }
 
@@ -5925,10 +6037,67 @@ async function uploadISStandard() {
     const analyzeBtn = document.getElementById('is-analyze-btn');
     if (analyzeBtn) analyzeBtn.style.display = 'none';
     const filenameLabel = document.getElementById('is-upload-filename');
-    if (filenameLabel) { filenameLabel.textContent = 'Auto-parses clauses & tables'; filenameLabel.style.color = ''; }
+    if (filenameLabel) { filenameLabel.textContent = 'Claude agent reads clauses & tables'; filenameLabel.style.color = ''; }
 
-    // Poll until done
-    await pollPipelineJob(jobId, setStatus, PHASE_LABELS);
+    await pollAgentJob(jobId, setStatus);
+}
+
+// Poll the in-app Claude Agent extraction job and stream its progress into the status bar.
+async function pollAgentJob(jobId, setStatus) {
+    const POLL_INTERVAL = 3000;
+    const MAX_POLLS = 600; // ~30 min ceiling — dense/large standards (e.g. IS 4984, 14 MB rotated tables) take ~13 min; 11 min was too short and showed a false "timed out"
+    let polls = 0;
+    const slug = s => String(s || '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    return new Promise(resolve => {
+        async function poll() {
+            polls++;
+            if (polls > MAX_POLLS) {
+                // The backend keeps running even after we stop polling — it writes the template and
+                // registers the vault row when done. So this is NOT a failure; tell the user to refresh.
+                setStatus('Still processing on the server — large standards can take a while. The report will appear in the IS Vault automatically; refresh in a minute or two.', 95, false);
+                showToast('Still running on the server — check the IS Vault shortly (do not re-upload)', 'success');
+                if (typeof fetchISVault === 'function') { try { await fetchISVault(); } catch (_) {} }
+                return resolve(null);
+            }
+            let job;
+            try {
+                const res = await fetch('/api/is-intelligence/agent-extract/' + jobId);
+                job = await res.json();
+            } catch (e) { setTimeout(poll, POLL_INTERVAL); return; }
+
+            const lastLine = (job.log && job.log.length) ? String(job.log[job.log.length - 1]) : 'working…';
+            const pct = Math.min(94, 6 + polls * 3);
+
+            if (job.status === 'running') {
+                setStatus('🤖 ' + lastLine.slice(0, 150), pct, false);
+                setTimeout(poll, POLL_INTERVAL);
+                return;
+            }
+            if (job.status === 'error' || (job.result && job.result.ok === false)) {
+                const err = job.error || (job.result && job.result.error) || 'unknown error';
+                setStatus('Agent failed: ' + err, pct, true);
+                showToast('Agent failed: ' + err, 'error');
+                return resolve(null);
+            }
+            if (job.status === 'done' && job.result && job.result.ok) {
+                const r = job.result;
+                const cost = (typeof r.costUsd === 'number') ? ` · $${r.costUsd.toFixed(2)}` : '';
+                setStatus(`${r.isNumber || 'Standard'} — ${r.summary || 'template written'}${cost}`, 100, false, true);
+                showToast(`✅ ${r.isNumber || 'Standard'} extracted by the Claude agent${cost}`, 'success');
+                if (typeof fetchISVault === 'function') await fetchISVault();
+                // Auto-open the report if this standard is already in the vault.
+                try {
+                    if (r.isNumber && typeof isVaultData !== 'undefined' && Array.isArray(isVaultData)) {
+                        const doc = isVaultData.find(d => slug(d.isNumber) === slug(r.isNumber));
+                        if (doc && typeof selectISDocument === 'function') await selectISDocument(doc.id);
+                    }
+                } catch (_) {}
+                return resolve(r);
+            }
+            setTimeout(poll, POLL_INTERVAL);
+        }
+        setTimeout(poll, 1500);
+    });
 }
 
 async function pollPipelineJob(jobId, setStatus, phaseLabels) {
@@ -8207,6 +8376,18 @@ function closeTestReportModal() {
     document.getElementById('test-report-modal').style.display = 'none';
 }
 
+// --- Per-sample row action buttons (jobcard / clarifications / logs) ---
+// Not part of Phase-1. The buttons exist in the sample table but had no handlers,
+// so clicking threw a ReferenceError. These graceful placeholders make the buttons
+// respond with clear feedback instead of erroring. Replace with real features later.
+function _todoFeature(name) {
+    if (typeof showToast === 'function') showToast(`${name} is not available yet.`, 'info');
+    else alert(`${name} is not available yet.`);
+}
+function openJobcard(id) { _todoFeature('Jobcard printing'); }
+function openClarifications(id) { _todoFeature('Clarifications'); }
+function openSampleLogs(id) { _todoFeature('Sample logs'); }
+
 async function loadTestReportLimits() {
     const isNumber = document.getElementById('report-is-number').value;
     const variety = document.getElementById('report-variety-select').value;
@@ -8221,11 +8402,33 @@ async function loadTestReportLimits() {
         const data = await res.json();
         
         currentReportLimits = data.limits || [];
+        window.currentReportAmendment = data.latestAmendment || null;
         renderTestReportTable();
     } catch (err) {
         console.error(err);
         document.getElementById('test-report-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Error loading limits</td></tr>';
     }
+}
+
+// Latest-amendment highlight (req 2a.iii): show the most recent amendment for the
+// standard above the conformance table in the test report.
+function renderAmendmentBanner() {
+    const tbody = document.getElementById('test-report-tbody');
+    if (!tbody) return;
+    const table = tbody.closest('table');
+    let banner = document.getElementById('report-amendment-banner');
+    const amd = window.currentReportAmendment;
+    if (!amd) { if (banner) banner.style.display = 'none'; return; }
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'report-amendment-banner';
+        if (table && table.parentNode) table.parentNode.insertBefore(banner, table);
+    }
+    banner.style.cssText = 'display:block; margin:8px 0; padding:10px 14px; border-left:4px solid #f59e0b; background:#fffbeb; color:#92400e; border-radius:6px; font-size:0.85rem;';
+    banner.innerHTML = `🔔 <strong>Latest amendment:</strong> ${amd.amendmentNumber || ''} — ${amd.title || ''}`
+        + (amd.publishDate ? ` <span style="color:#b45309;">(${amd.publishDate})</span>` : '')
+        + (amd.isNew ? ' <span style="background:#f59e0b;color:#fff;padding:1px 6px;border-radius:8px;font-size:0.7rem;">NEW</span>' : '')
+        + (amd.count > 1 ? ` <span style="color:#b45309;">· ${amd.count} amendments on record</span>` : '');
 }
 
 function computeVerdict(valueStr, min, max, limitType) {
@@ -8300,7 +8503,9 @@ function updateOverallVerdict() {
 function renderTestReportTable() {
     const tbody = document.getElementById('test-report-tbody');
     tbody.innerHTML = '';
-    
+
+    renderAmendmentBanner();
+
     if (currentReportLimits.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">No conformance limits configured for this IS/Variety. Please configure them in IS Intelligence tab.</td></tr>`;
         return;

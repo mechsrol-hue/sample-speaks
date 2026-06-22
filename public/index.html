@@ -1823,7 +1823,7 @@ window.addEventListener('unhandledrejection', function(e) {
                 <div style="display:flex; gap:15px; flex-wrap: wrap;">
                     <button class="btn-premium glass-btn" onclick="openTemplatesModal()">📑 Master Templates</button>
                     <button class="btn-premium primary action-pulse" onclick="runAutoAssigner()">🤖 Run AI Assigner</button>
-                    <button class="btn-premium btn-success-premium success-scale" onclick="approveAllRecommendations()">✅ Approve All</button>
+                    <button class="btn-premium btn-success-premium success-scale" data-action="approve-all" onclick="approveAllRecommendations(this)">✅ Approve All</button>
                 </div>
             </div>
 
@@ -3283,7 +3283,7 @@ window.addEventListener('unhandledrejection', function(e) {
                 <div style="display:flex; justify-content: flex-end; gap:15px; margin-bottom: 20px;">
                     <button class="btn-premium" onclick="openTemplatesModal()" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); font-size:0.95rem; padding:10px 24px;">📑 Master Templates</button>
                     <button class="btn-premium primary" onclick="runAutoAssigner()" style="background: linear-gradient(135deg, var(--primary), #818cf8); border: none; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); font-size:0.95rem; padding:10px 24px;">🤖 Run AI Assigner</button>
-                    <button class="btn-premium btn-success-premium" onclick="approveAllRecommendations()" style="background: linear-gradient(135deg, var(--success), #34d399); border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); font-size:0.95rem; padding:10px 24px;">✅ Approve All Recommendations</button>
+                    <button class="btn-premium btn-success-premium" data-action="approve-all" onclick="approveAllRecommendations(this)" style="background: linear-gradient(135deg, var(--success), #34d399); border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); font-size:0.95rem; padding:10px 24px;">✅ Approve All Recommendations</button>
                 </div>
 
                 <!-- Two Column Layout for Pools -->

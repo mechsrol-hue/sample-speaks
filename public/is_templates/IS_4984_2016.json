@@ -1,0 +1,2151 @@
+{
+  "isNumber": "IS 4984:2016",
+  "title": "Polyethylene Pipes for Water Supply — Specification",
+  "revision": "Fifth Revision",
+  "parameterizationDims": [
+    "size",
+    "grade",
+    "SDR"
+  ],
+  "dimensionOptions": {
+    "size": [
+      16,
+      20,
+      25,
+      32,
+      40,
+      50,
+      63,
+      75,
+      90,
+      110,
+      125,
+      140,
+      160,
+      180,
+      200,
+      225,
+      250,
+      280,
+      315,
+      355,
+      400,
+      450,
+      500,
+      560,
+      630,
+      710,
+      800,
+      900,
+      1000,
+      1200,
+      1400,
+      1600,
+      1800,
+      2000
+    ],
+    "grade": [
+      "PE 63",
+      "PE 80",
+      "PE 100"
+    ],
+    "SDR": [
+      "SDR 41",
+      "SDR 33",
+      "SDR 26",
+      "SDR 21",
+      "SDR 17",
+      "SDR 13.6",
+      "SDR 11",
+      "SDR 9",
+      "SDR 7.4",
+      "SDR 6"
+    ]
+  },
+  "defaults": {
+    "size": 110,
+    "grade": "PE 80",
+    "SDR": "SDR 11"
+  },
+  "parameters": [
+    {
+      "clauseRef": "Cl 7.4",
+      "section": "Dimensions",
+      "parameterName": "Mean outside diameter (dem)",
+      "unit": "mm",
+      "limitType": "range",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "size"
+      ],
+      "sourceTable": "Table 3",
+      "valueTable": {
+        "16": {
+          "min": 16,
+          "max": 16.3
+        },
+        "20": {
+          "min": 20,
+          "max": 20.3
+        },
+        "25": {
+          "min": 25,
+          "max": 25.3
+        },
+        "32": {
+          "min": 32,
+          "max": 32.3
+        },
+        "40": {
+          "min": 40,
+          "max": 40.4
+        },
+        "50": {
+          "min": 50,
+          "max": 50.4
+        },
+        "63": {
+          "min": 63,
+          "max": 63.4
+        },
+        "75": {
+          "min": 75,
+          "max": 75.5
+        },
+        "90": {
+          "min": 90,
+          "max": 90.6
+        },
+        "110": {
+          "min": 110,
+          "max": 110.7
+        },
+        "125": {
+          "min": 125,
+          "max": 125.8
+        },
+        "140": {
+          "min": 140,
+          "max": 140.9
+        },
+        "160": {
+          "min": 160,
+          "max": 161
+        },
+        "180": {
+          "min": 180,
+          "max": 181.1
+        },
+        "200": {
+          "min": 200,
+          "max": 201.2
+        },
+        "225": {
+          "min": 225,
+          "max": 226.4
+        },
+        "250": {
+          "min": 250,
+          "max": 251.5
+        },
+        "280": {
+          "min": 280,
+          "max": 281.7
+        },
+        "315": {
+          "min": 315,
+          "max": 316.9
+        },
+        "355": {
+          "min": 355,
+          "max": 357.2
+        },
+        "400": {
+          "min": 400,
+          "max": 402.4
+        },
+        "450": {
+          "min": 450,
+          "max": 452.7
+        },
+        "500": {
+          "min": 500,
+          "max": 503
+        },
+        "560": {
+          "min": 560,
+          "max": 563.4
+        },
+        "630": {
+          "min": 630,
+          "max": 633.8
+        },
+        "710": {
+          "min": 710,
+          "max": 714.6
+        },
+        "800": {
+          "min": 800,
+          "max": 807.2
+        },
+        "900": {
+          "min": 900,
+          "max": 908.1
+        },
+        "1000": {
+          "min": 1000,
+          "max": 1009
+        },
+        "1200": {
+          "min": 1200,
+          "max": 1210.8
+        },
+        "1400": {
+          "min": 1400,
+          "max": 1412.6
+        },
+        "1600": {
+          "min": 1600,
+          "max": 1614.4
+        },
+        "1800": {
+          "min": 1800,
+          "max": 1816.2
+        },
+        "2000": {
+          "min": 2000,
+          "max": 2018
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 7.4",
+      "section": "Dimensions",
+      "parameterName": "Maximum out-of-roundness (ovality)",
+      "unit": "mm",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "size"
+      ],
+      "sourceTable": "Table 3",
+      "valueTable": {
+        "16": {
+          "max": 1.2
+        },
+        "20": {
+          "max": 1.2
+        },
+        "25": {
+          "max": 1.2
+        },
+        "32": {
+          "max": 1.3
+        },
+        "40": {
+          "max": 1.4
+        },
+        "50": {
+          "max": 1.4
+        },
+        "63": {
+          "max": 1.5
+        },
+        "75": {
+          "max": 1.6
+        },
+        "90": {
+          "max": 1.8
+        },
+        "110": {
+          "max": 2.2
+        },
+        "125": {
+          "max": 2.5
+        },
+        "140": {
+          "max": 2.8
+        },
+        "160": {
+          "max": 3.2
+        },
+        "180": {
+          "max": 3.6
+        },
+        "200": {
+          "max": 4
+        },
+        "225": {
+          "max": 4.5
+        },
+        "250": {
+          "max": 5
+        },
+        "280": {
+          "max": 9.8
+        },
+        "315": {
+          "max": 11.1
+        },
+        "355": {
+          "max": 12.5
+        },
+        "400": {
+          "max": 14
+        },
+        "450": {
+          "max": 15.6
+        },
+        "500": {
+          "max": 17.5
+        },
+        "560": {
+          "max": 19.6
+        },
+        "630": {
+          "max": 22.1
+        },
+        "710": {
+          "value": "As agreed between manufacturer and purchaser"
+        },
+        "800": {
+          "value": "As agreed between manufacturer and purchaser"
+        },
+        "900": {
+          "value": "As agreed between manufacturer and purchaser"
+        },
+        "1000": {
+          "value": "As agreed between manufacturer and purchaser"
+        },
+        "1200": {
+          "value": "As agreed between manufacturer and purchaser"
+        },
+        "1400": {
+          "value": "As agreed between manufacturer and purchaser"
+        },
+        "1600": {
+          "value": "As agreed between manufacturer and purchaser"
+        },
+        "1800": {
+          "value": "As agreed between manufacturer and purchaser"
+        },
+        "2000": {
+          "value": "As agreed between manufacturer and purchaser"
+        }
+      },
+      "note": "For dn >= 710 mm and coiled pipes, ovality is as agreed between manufacturer and purchaser."
+    },
+    {
+      "clauseRef": "Cl 7.4",
+      "section": "Dimensions",
+      "parameterName": "Wall thickness (e)",
+      "unit": "mm",
+      "limitType": "range",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "size",
+        "SDR"
+      ],
+      "sourceTable": "Table 4",
+      "valueTable": {
+        "16|SDR 41": {
+          "min": 0.4,
+          "max": 0.5
+        },
+        "16|SDR 33": {
+          "min": 0.5,
+          "max": 0.7
+        },
+        "16|SDR 26": {
+          "min": 0.7,
+          "max": 0.9
+        },
+        "16|SDR 21": {
+          "min": 0.8,
+          "max": 1
+        },
+        "16|SDR 17": {
+          "min": 1,
+          "max": 1.2
+        },
+        "16|SDR 13.6": {
+          "min": 1.2,
+          "max": 1.4
+        },
+        "16|SDR 11": {
+          "min": 1.5,
+          "max": 1.8
+        },
+        "16|SDR 9": {
+          "min": 1.8,
+          "max": 2.1
+        },
+        "16|SDR 7.4": {
+          "min": 2.2,
+          "max": 2.5
+        },
+        "16|SDR 6": {
+          "min": 2.7,
+          "max": 3.1
+        },
+        "20|SDR 41": {
+          "min": 0.5,
+          "max": 0.7
+        },
+        "20|SDR 33": {
+          "min": 0.7,
+          "max": 0.9
+        },
+        "20|SDR 26": {
+          "min": 0.8,
+          "max": 1
+        },
+        "20|SDR 21": {
+          "min": 1,
+          "max": 1.2
+        },
+        "20|SDR 17": {
+          "min": 1.2,
+          "max": 1.4
+        },
+        "20|SDR 13.6": {
+          "min": 1.5,
+          "max": 1.8
+        },
+        "20|SDR 11": {
+          "min": 1.9,
+          "max": 2.2
+        },
+        "20|SDR 9": {
+          "min": 2.3,
+          "max": 2.6
+        },
+        "20|SDR 7.4": {
+          "min": 2.8,
+          "max": 3.2
+        },
+        "20|SDR 6": {
+          "min": 3.4,
+          "max": 3.8
+        },
+        "25|SDR 41": {
+          "min": 0.7,
+          "max": 0.9
+        },
+        "25|SDR 33": {
+          "min": 0.8,
+          "max": 1
+        },
+        "25|SDR 26": {
+          "min": 1,
+          "max": 1.2
+        },
+        "25|SDR 21": {
+          "min": 1.2,
+          "max": 1.4
+        },
+        "25|SDR 17": {
+          "min": 1.5,
+          "max": 1.8
+        },
+        "25|SDR 13.6": {
+          "min": 1.9,
+          "max": 2.2
+        },
+        "25|SDR 11": {
+          "min": 2.3,
+          "max": 2.6
+        },
+        "25|SDR 9": {
+          "min": 2.8,
+          "max": 3.2
+        },
+        "25|SDR 7.4": {
+          "min": 3.4,
+          "max": 3.8
+        },
+        "25|SDR 6": {
+          "min": 4.2,
+          "max": 4.7
+        },
+        "32|SDR 41": {
+          "min": 0.8,
+          "max": 1
+        },
+        "32|SDR 33": {
+          "min": 1,
+          "max": 1.2
+        },
+        "32|SDR 26": {
+          "min": 1.3,
+          "max": 1.5
+        },
+        "32|SDR 21": {
+          "min": 1.6,
+          "max": 1.9
+        },
+        "32|SDR 17": {
+          "min": 1.9,
+          "max": 2.2
+        },
+        "32|SDR 13.6": {
+          "min": 2.4,
+          "max": 2.7
+        },
+        "32|SDR 11": {
+          "min": 3,
+          "max": 3.4
+        },
+        "32|SDR 9": {
+          "min": 3.6,
+          "max": 4.1
+        },
+        "32|SDR 7.4": {
+          "min": 4.4,
+          "max": 4.9
+        },
+        "32|SDR 6": {
+          "min": 5.4,
+          "max": 6
+        },
+        "40|SDR 41": {
+          "min": 1,
+          "max": 1.2
+        },
+        "40|SDR 33": {
+          "min": 1.3,
+          "max": 1.5
+        },
+        "40|SDR 26": {
+          "min": 1.6,
+          "max": 1.9
+        },
+        "40|SDR 21": {
+          "min": 2,
+          "max": 2.3
+        },
+        "40|SDR 17": {
+          "min": 2.4,
+          "max": 2.7
+        },
+        "40|SDR 13.6": {
+          "min": 3,
+          "max": 3.4
+        },
+        "40|SDR 11": {
+          "min": 3.7,
+          "max": 4.2
+        },
+        "40|SDR 9": {
+          "min": 4.5,
+          "max": 5.1
+        },
+        "40|SDR 7.4": {
+          "min": 5.5,
+          "max": 6.2
+        },
+        "40|SDR 6": {
+          "min": 6.7,
+          "max": 7.5
+        },
+        "50|SDR 41": {
+          "min": 1.3,
+          "max": 1.5
+        },
+        "50|SDR 33": {
+          "min": 1.6,
+          "max": 1.9
+        },
+        "50|SDR 26": {
+          "min": 2,
+          "max": 2.3
+        },
+        "50|SDR 21": {
+          "min": 2.4,
+          "max": 2.7
+        },
+        "50|SDR 17": {
+          "min": 3,
+          "max": 3.4
+        },
+        "50|SDR 13.6": {
+          "min": 3.7,
+          "max": 4.2
+        },
+        "50|SDR 11": {
+          "min": 4.6,
+          "max": 5.2
+        },
+        "50|SDR 9": {
+          "min": 5.6,
+          "max": 6.3
+        },
+        "50|SDR 7.4": {
+          "min": 6.8,
+          "max": 7.6
+        },
+        "50|SDR 6": {
+          "min": 8.4,
+          "max": 9.3
+        },
+        "63|SDR 41": {
+          "min": 1.6,
+          "max": 1.9
+        },
+        "63|SDR 33": {
+          "min": 2,
+          "max": 2.3
+        },
+        "63|SDR 26": {
+          "min": 2.5,
+          "max": 2.9
+        },
+        "63|SDR 21": {
+          "min": 3,
+          "max": 3.4
+        },
+        "63|SDR 17": {
+          "min": 3.8,
+          "max": 4.3
+        },
+        "63|SDR 13.6": {
+          "min": 4.7,
+          "max": 5.3
+        },
+        "63|SDR 11": {
+          "min": 5.8,
+          "max": 6.5
+        },
+        "63|SDR 9": {
+          "min": 7,
+          "max": 7.8
+        },
+        "63|SDR 7.4": {
+          "min": 8.6,
+          "max": 9.6
+        },
+        "63|SDR 6": {
+          "min": 10.5,
+          "max": 11.7
+        },
+        "75|SDR 41": {
+          "min": 1.9,
+          "max": 2.2
+        },
+        "75|SDR 33": {
+          "min": 2.3,
+          "max": 2.6
+        },
+        "75|SDR 26": {
+          "min": 2.9,
+          "max": 3.3
+        },
+        "75|SDR 21": {
+          "min": 3.6,
+          "max": 4.1
+        },
+        "75|SDR 17": {
+          "min": 4.5,
+          "max": 5.1
+        },
+        "75|SDR 13.6": {
+          "min": 5.6,
+          "max": 6.3
+        },
+        "75|SDR 11": {
+          "min": 6.9,
+          "max": 7.7
+        },
+        "75|SDR 9": {
+          "min": 8.4,
+          "max": 9.3
+        },
+        "75|SDR 7.4": {
+          "min": 10.2,
+          "max": 11.3
+        },
+        "75|SDR 6": {
+          "min": 12.5,
+          "max": 13.9
+        },
+        "90|SDR 41": {
+          "min": 2.2,
+          "max": 2.5
+        },
+        "90|SDR 33": {
+          "min": 2.8,
+          "max": 3.2
+        },
+        "90|SDR 26": {
+          "min": 3.5,
+          "max": 4
+        },
+        "90|SDR 21": {
+          "min": 4.3,
+          "max": 4.8
+        },
+        "90|SDR 17": {
+          "min": 5.3,
+          "max": 5.9
+        },
+        "90|SDR 13.6": {
+          "min": 6.7,
+          "max": 7.5
+        },
+        "90|SDR 11": {
+          "min": 8.2,
+          "max": 9.1
+        },
+        "90|SDR 9": {
+          "min": 10,
+          "max": 11.1
+        },
+        "90|SDR 7.4": {
+          "min": 12.2,
+          "max": 13.5
+        },
+        "90|SDR 6": {
+          "min": 15,
+          "max": 16.6
+        },
+        "110|SDR 41": {
+          "min": 2.7,
+          "max": 3.1
+        },
+        "110|SDR 33": {
+          "min": 3.4,
+          "max": 3.8
+        },
+        "110|SDR 26": {
+          "min": 4.3,
+          "max": 4.8
+        },
+        "110|SDR 21": {
+          "min": 5.3,
+          "max": 5.9
+        },
+        "110|SDR 17": {
+          "min": 6.5,
+          "max": 7.3
+        },
+        "110|SDR 13.6": {
+          "min": 8.1,
+          "max": 9
+        },
+        "110|SDR 11": {
+          "min": 10,
+          "max": 11.1
+        },
+        "110|SDR 9": {
+          "min": 12.3,
+          "max": 13.6
+        },
+        "110|SDR 7.4": {
+          "min": 14.9,
+          "max": 16.5
+        },
+        "110|SDR 6": {
+          "min": 18.4,
+          "max": 20.3
+        },
+        "125|SDR 41": {
+          "min": 3.1,
+          "max": 3.5
+        },
+        "125|SDR 33": {
+          "min": 3.8,
+          "max": 4.3
+        },
+        "125|SDR 26": {
+          "min": 4.9,
+          "max": 5.5
+        },
+        "125|SDR 21": {
+          "min": 6,
+          "max": 6.7
+        },
+        "125|SDR 17": {
+          "min": 7.4,
+          "max": 8.2
+        },
+        "125|SDR 13.6": {
+          "min": 9.2,
+          "max": 10.2
+        },
+        "125|SDR 11": {
+          "min": 11.4,
+          "max": 12.6
+        },
+        "125|SDR 9": {
+          "min": 13.9,
+          "max": 15.4
+        },
+        "125|SDR 7.4": {
+          "min": 16.9,
+          "max": 18.7
+        },
+        "125|SDR 6": {
+          "min": 20.9,
+          "max": 23.1
+        },
+        "140|SDR 41": {
+          "min": 3.5,
+          "max": 4
+        },
+        "140|SDR 33": {
+          "min": 4.3,
+          "max": 4.8
+        },
+        "140|SDR 26": {
+          "min": 5.4,
+          "max": 6
+        },
+        "140|SDR 21": {
+          "min": 6.7,
+          "max": 7.5
+        },
+        "140|SDR 17": {
+          "min": 8.3,
+          "max": 9.2
+        },
+        "140|SDR 13.6": {
+          "min": 10.3,
+          "max": 11.4
+        },
+        "140|SDR 11": {
+          "min": 12.8,
+          "max": 14.2
+        },
+        "140|SDR 9": {
+          "min": 15.6,
+          "max": 17.3
+        },
+        "140|SDR 7.4": {
+          "min": 19,
+          "max": 21
+        },
+        "140|SDR 6": {
+          "min": 23.4,
+          "max": 25.8
+        },
+        "160|SDR 41": {
+          "min": 4,
+          "max": 4.5
+        },
+        "160|SDR 33": {
+          "min": 4.9,
+          "max": 5.5
+        },
+        "160|SDR 26": {
+          "min": 6.2,
+          "max": 6.9
+        },
+        "160|SDR 21": {
+          "min": 7.7,
+          "max": 8.6
+        },
+        "160|SDR 17": {
+          "min": 9.5,
+          "max": 10.6
+        },
+        "160|SDR 13.6": {
+          "min": 11.8,
+          "max": 13.1
+        },
+        "160|SDR 11": {
+          "min": 14.6,
+          "max": 16.2
+        },
+        "160|SDR 9": {
+          "min": 17.8,
+          "max": 19.7
+        },
+        "160|SDR 7.4": {
+          "min": 21.7,
+          "max": 24
+        },
+        "160|SDR 6": {
+          "min": 26.7,
+          "max": 29.5
+        },
+        "180|SDR 41": {
+          "min": 4.4,
+          "max": 4.9
+        },
+        "180|SDR 33": {
+          "min": 5.5,
+          "max": 6.2
+        },
+        "180|SDR 26": {
+          "min": 7,
+          "max": 7.8
+        },
+        "180|SDR 21": {
+          "min": 8.6,
+          "max": 9.6
+        },
+        "180|SDR 17": {
+          "min": 10.6,
+          "max": 11.8
+        },
+        "180|SDR 13.6": {
+          "min": 13.3,
+          "max": 14.7
+        },
+        "180|SDR 11": {
+          "min": 16.4,
+          "max": 18.1
+        },
+        "180|SDR 9": {
+          "min": 20,
+          "max": 22.1
+        },
+        "180|SDR 7.4": {
+          "min": 24.4,
+          "max": 26.9
+        },
+        "180|SDR 6": {
+          "min": 30,
+          "max": 33.1
+        },
+        "200|SDR 41": {
+          "min": 4.9,
+          "max": 5.5
+        },
+        "200|SDR 33": {
+          "min": 6.1,
+          "max": 6.8
+        },
+        "200|SDR 26": {
+          "min": 7.7,
+          "max": 8.6
+        },
+        "200|SDR 21": {
+          "min": 9.6,
+          "max": 10.7
+        },
+        "200|SDR 17": {
+          "min": 11.8,
+          "max": 13.1
+        },
+        "200|SDR 13.6": {
+          "min": 14.8,
+          "max": 16.4
+        },
+        "200|SDR 11": {
+          "min": 18.2,
+          "max": 20.1
+        },
+        "200|SDR 9": {
+          "min": 22.3,
+          "max": 24.6
+        },
+        "200|SDR 7.4": {
+          "min": 27.1,
+          "max": 29.9
+        },
+        "200|SDR 6": {
+          "min": 33.4,
+          "max": 36.8
+        },
+        "225|SDR 41": {
+          "min": 5.5,
+          "max": 6.2
+        },
+        "225|SDR 33": {
+          "min": 6.9,
+          "max": 7.7
+        },
+        "225|SDR 26": {
+          "min": 8.7,
+          "max": 9.7
+        },
+        "225|SDR 21": {
+          "min": 10.8,
+          "max": 12
+        },
+        "225|SDR 17": {
+          "min": 13.3,
+          "max": 14.7
+        },
+        "225|SDR 13.6": {
+          "min": 16.6,
+          "max": 18.4
+        },
+        "225|SDR 11": {
+          "min": 20.5,
+          "max": 22.7
+        },
+        "225|SDR 9": {
+          "min": 25,
+          "max": 27.6
+        },
+        "225|SDR 7.4": {
+          "min": 30.5,
+          "max": 33.7
+        },
+        "225|SDR 6": {
+          "min": 37.5,
+          "max": 41.4
+        },
+        "250|SDR 41": {
+          "min": 6.1,
+          "max": 6.8
+        },
+        "250|SDR 33": {
+          "min": 7.6,
+          "max": 8.5
+        },
+        "250|SDR 26": {
+          "min": 9.7,
+          "max": 10.8
+        },
+        "250|SDR 21": {
+          "min": 12,
+          "max": 13.3
+        },
+        "250|SDR 17": {
+          "min": 14.8,
+          "max": 16.4
+        },
+        "250|SDR 13.6": {
+          "min": 18.4,
+          "max": 20.3
+        },
+        "250|SDR 11": {
+          "min": 22.8,
+          "max": 25.2
+        },
+        "250|SDR 9": {
+          "min": 27.8,
+          "max": 30.7
+        },
+        "250|SDR 7.4": {
+          "min": 33.8,
+          "max": 37.3
+        },
+        "250|SDR 6": {
+          "min": 41.7,
+          "max": 46
+        },
+        "280|SDR 41": {
+          "min": 6.9,
+          "max": 7.7
+        },
+        "280|SDR 33": {
+          "min": 8.5,
+          "max": 9.5
+        },
+        "280|SDR 26": {
+          "min": 10.8,
+          "max": 12
+        },
+        "280|SDR 21": {
+          "min": 13.4,
+          "max": 14.8
+        },
+        "280|SDR 17": {
+          "min": 16.5,
+          "max": 18.3
+        },
+        "280|SDR 13.6": {
+          "min": 20.6,
+          "max": 22.8
+        },
+        "280|SDR 11": {
+          "min": 25.5,
+          "max": 28.2
+        },
+        "280|SDR 9": {
+          "min": 31.2,
+          "max": 34.4
+        },
+        "280|SDR 7.4": {
+          "min": 37.9,
+          "max": 41.8
+        },
+        "280|SDR 6": {
+          "min": 46.7,
+          "max": 51.5
+        },
+        "315|SDR 41": {
+          "min": 7.7,
+          "max": 8.6
+        },
+        "315|SDR 33": {
+          "min": 9.6,
+          "max": 10.7
+        },
+        "315|SDR 26": {
+          "min": 12.2,
+          "max": 13.5
+        },
+        "315|SDR 21": {
+          "min": 15,
+          "max": 16.6
+        },
+        "315|SDR 17": {
+          "min": 18.6,
+          "max": 20.6
+        },
+        "315|SDR 13.6": {
+          "min": 23.2,
+          "max": 25.6
+        },
+        "315|SDR 11": {
+          "min": 28.7,
+          "max": 31.7
+        },
+        "315|SDR 9": {
+          "min": 35,
+          "max": 38.6
+        },
+        "315|SDR 7.4": {
+          "min": 42.6,
+          "max": 47
+        },
+        "315|SDR 6": {
+          "min": 52.5,
+          "max": 57.9
+        },
+        "355|SDR 41": {
+          "min": 8.7,
+          "max": 9.7
+        },
+        "355|SDR 33": {
+          "min": 10.8,
+          "max": 12
+        },
+        "355|SDR 26": {
+          "min": 13.7,
+          "max": 15.2
+        },
+        "355|SDR 21": {
+          "min": 17,
+          "max": 18.8
+        },
+        "355|SDR 17": {
+          "min": 20.9,
+          "max": 23.1
+        },
+        "355|SDR 13.6": {
+          "min": 26.2,
+          "max": 28.9
+        },
+        "355|SDR 11": {
+          "min": 32.3,
+          "max": 35.6
+        },
+        "355|SDR 9": {
+          "min": 39.5,
+          "max": 43.6
+        },
+        "355|SDR 7.4": {
+          "min": 48,
+          "max": 52.9
+        },
+        "355|SDR 6": {
+          "min": 59.2,
+          "max": 65.2
+        },
+        "400|SDR 41": {
+          "min": 9.8,
+          "max": 10.9
+        },
+        "400|SDR 33": {
+          "min": 12.2,
+          "max": 13.5
+        },
+        "400|SDR 26": {
+          "min": 15.4,
+          "max": 17
+        },
+        "400|SDR 21": {
+          "min": 19.1,
+          "max": 21.1
+        },
+        "400|SDR 17": {
+          "min": 23.6,
+          "max": 26.1
+        },
+        "400|SDR 13.6": {
+          "min": 29.5,
+          "max": 32.6
+        },
+        "400|SDR 11": {
+          "min": 36.4,
+          "max": 40.1
+        },
+        "400|SDR 9": {
+          "min": 44.5,
+          "max": 49.1
+        },
+        "400|SDR 7.4": {
+          "min": 54.1,
+          "max": 59.6
+        },
+        "400|SDR 6": {
+          "min": 66.7,
+          "max": 73.5
+        },
+        "450|SDR 41": {
+          "min": 11,
+          "max": 12.2
+        },
+        "450|SDR 33": {
+          "min": 13.7,
+          "max": 15.2
+        },
+        "450|SDR 26": {
+          "min": 17.4,
+          "max": 19.2
+        },
+        "450|SDR 21": {
+          "min": 21.5,
+          "max": 23.8
+        },
+        "450|SDR 17": {
+          "min": 26.5,
+          "max": 29.3
+        },
+        "450|SDR 13.6": {
+          "min": 33.1,
+          "max": 36.5
+        },
+        "450|SDR 11": {
+          "min": 41,
+          "max": 45.2
+        },
+        "450|SDR 9": {
+          "min": 50,
+          "max": 55.1
+        },
+        "450|SDR 7.4": {
+          "min": 60.9,
+          "max": 67.1
+        },
+        "450|SDR 6": {
+          "min": 75,
+          "max": 82.6
+        },
+        "500|SDR 41": {
+          "min": 12.2,
+          "max": 13.5
+        },
+        "500|SDR 33": {
+          "min": 15.2,
+          "max": 16.8
+        },
+        "500|SDR 26": {
+          "min": 19.3,
+          "max": 21.3
+        },
+        "500|SDR 21": {
+          "min": 23.9,
+          "max": 26.4
+        },
+        "500|SDR 17": {
+          "min": 29.5,
+          "max": 32.6
+        },
+        "500|SDR 13.6": {
+          "min": 36.8,
+          "max": 40.6
+        },
+        "500|SDR 11": {
+          "min": 45.5,
+          "max": 50.2
+        },
+        "500|SDR 9": {
+          "min": 55.6,
+          "max": 61.3
+        },
+        "500|SDR 7.4": {
+          "min": 67.6,
+          "max": 74.5
+        },
+        "500|SDR 6": {
+          "min": 83.4,
+          "max": 91.8
+        },
+        "560|SDR 41": {
+          "min": 13.7,
+          "max": 15.2
+        },
+        "560|SDR 33": {
+          "min": 17,
+          "max": 18.8
+        },
+        "560|SDR 26": {
+          "min": 21.6,
+          "max": 23.9
+        },
+        "560|SDR 21": {
+          "min": 26.7,
+          "max": 29.5
+        },
+        "560|SDR 17": {
+          "min": 33,
+          "max": 36.4
+        },
+        "560|SDR 13.6": {
+          "min": 41.2,
+          "max": 45.4
+        },
+        "560|SDR 11": {
+          "min": 51,
+          "max": 56.2
+        },
+        "560|SDR 9": {
+          "min": 62.3,
+          "max": 68.6
+        },
+        "560|SDR 7.4": {
+          "min": 75.7,
+          "max": 83.4
+        },
+        "560|SDR 6": {
+          "min": 93.4,
+          "max": 102.8
+        },
+        "630|SDR 41": {
+          "min": 15.4,
+          "max": 17
+        },
+        "630|SDR 33": {
+          "min": 19.1,
+          "max": 21.1
+        },
+        "630|SDR 26": {
+          "min": 24.3,
+          "max": 26.8
+        },
+        "630|SDR 21": {
+          "min": 30,
+          "max": 33.1
+        },
+        "630|SDR 17": {
+          "min": 37.1,
+          "max": 40.9
+        },
+        "630|SDR 13.6": {
+          "min": 46.4,
+          "max": 51.1
+        },
+        "630|SDR 11": {
+          "min": 57.3,
+          "max": 63.1
+        },
+        "630|SDR 9": {
+          "min": 70,
+          "max": 77.1
+        },
+        "630|SDR 7.4": {
+          "min": 85.2,
+          "max": 93.8
+        },
+        "630|SDR 6": {
+          "min": 105,
+          "max": 115.6
+        },
+        "710|SDR 41": {
+          "min": 17.4,
+          "max": 19.2
+        },
+        "710|SDR 33": {
+          "min": 21.6,
+          "max": 23.9
+        },
+        "710|SDR 26": {
+          "min": 27.4,
+          "max": 30.2
+        },
+        "710|SDR 21": {
+          "min": 33.9,
+          "max": 37.4
+        },
+        "710|SDR 17": {
+          "min": 41.8,
+          "max": 46.1
+        },
+        "710|SDR 13.6": {
+          "min": 52.3,
+          "max": 57.6
+        },
+        "710|SDR 11": {
+          "min": 64.6,
+          "max": 71.2
+        },
+        "710|SDR 9": {
+          "min": 78.9,
+          "max": 86.9
+        },
+        "710|SDR 7.4": {
+          "min": 96,
+          "max": 105.7
+        },
+        "710|SDR 6": {
+          "min": 118.4,
+          "max": 130.3
+        },
+        "800|SDR 41": {
+          "min": 19.6,
+          "max": 21.7
+        },
+        "800|SDR 33": {
+          "min": 24.3,
+          "max": 26.8
+        },
+        "800|SDR 26": {
+          "min": 30.8,
+          "max": 34
+        },
+        "800|SDR 21": {
+          "min": 38.1,
+          "max": 42
+        },
+        "800|SDR 17": {
+          "min": 47.1,
+          "max": 51.9
+        },
+        "800|SDR 13.6": {
+          "min": 58.9,
+          "max": 64.9
+        },
+        "800|SDR 11": {
+          "min": 72.8,
+          "max": 80.2
+        },
+        "800|SDR 9": {
+          "min": 88.9,
+          "max": 97.9
+        },
+        "800|SDR 7.4": {
+          "min": 108.2,
+          "max": 119.1
+        },
+        "800|SDR 6": {
+          "min": 133.4,
+          "max": 146.8
+        },
+        "900|SDR 41": {
+          "min": 22,
+          "max": 24.3
+        },
+        "900|SDR 33": {
+          "min": 27.3,
+          "max": 30.1
+        },
+        "900|SDR 26": {
+          "min": 34.7,
+          "max": 38.3
+        },
+        "900|SDR 21": {
+          "min": 42.9,
+          "max": 47.3
+        },
+        "900|SDR 17": {
+          "min": 53,
+          "max": 58.4
+        },
+        "900|SDR 13.6": {
+          "min": 66.2,
+          "max": 72.9
+        },
+        "900|SDR 11": {
+          "min": 81.9,
+          "max": 90.2
+        },
+        "900|SDR 9": {
+          "min": 100,
+          "max": 110.1
+        },
+        "900|SDR 7.4": {
+          "min": 121.7,
+          "max": 134
+        },
+        "900|SDR 6": {
+          "min": 150,
+          "max": 165.1
+        },
+        "1000|SDR 41": {
+          "min": 24.4,
+          "max": 26.9
+        },
+        "1000|SDR 33": {
+          "min": 30.4,
+          "max": 33.5
+        },
+        "1000|SDR 26": {
+          "min": 38.5,
+          "max": 42.5
+        },
+        "1000|SDR 21": {
+          "min": 47.7,
+          "max": 52.6
+        },
+        "1000|SDR 17": {
+          "min": 58.9,
+          "max": 64.9
+        },
+        "1000|SDR 13.6": {
+          "min": 73.6,
+          "max": 81.1
+        },
+        "1000|SDR 11": {
+          "min": 91,
+          "max": 100.2
+        },
+        "1000|SDR 9": {
+          "min": 111.2,
+          "max": 122.4
+        },
+        "1000|SDR 7.4": {
+          "min": 135.2,
+          "max": 148.8
+        },
+        "1000|SDR 6": {
+          "min": 166.7,
+          "max": 183.5
+        },
+        "1200|SDR 41": {
+          "min": 29.3,
+          "max": 32.3
+        },
+        "1200|SDR 33": {
+          "min": 36.4,
+          "max": 40.1
+        },
+        "1200|SDR 26": {
+          "min": 46.2,
+          "max": 50.9
+        },
+        "1200|SDR 21": {
+          "min": 57.2,
+          "max": 63
+        },
+        "1200|SDR 17": {
+          "min": 70.6,
+          "max": 77.8
+        },
+        "1200|SDR 13.6": {
+          "min": 88.3,
+          "max": 97.2
+        },
+        "1200|SDR 11": {
+          "min": 109.1,
+          "max": 120.1
+        },
+        "1200|SDR 9": {
+          "min": 133.4,
+          "max": 146.8
+        },
+        "1200|SDR 7.4": {
+          "min": 162.2,
+          "max": 178.5
+        },
+        "1200|SDR 6": {
+          "min": 200,
+          "max": 220.1
+        },
+        "1400|SDR 41": {
+          "min": 34.2,
+          "max": 37.7
+        },
+        "1400|SDR 33": {
+          "min": 42.5,
+          "max": 46.9
+        },
+        "1400|SDR 26": {
+          "min": 53.9,
+          "max": 59.4
+        },
+        "1400|SDR 21": {
+          "min": 66.7,
+          "max": 73.5
+        },
+        "1400|SDR 17": {
+          "min": 82.4,
+          "max": 90.7
+        },
+        "1400|SDR 13.6": {
+          "min": 103,
+          "max": 113.4
+        },
+        "1400|SDR 11": {
+          "min": 127.3,
+          "max": 140.1
+        },
+        "1400|SDR 9": {
+          "min": 155.6,
+          "max": 171.3
+        },
+        "1400|SDR 7.4": {
+          "min": 189.2,
+          "max": 208.2
+        },
+        "1400|SDR 6": {
+          "min": 233.4,
+          "max": 256.8
+        },
+        "1600|SDR 41": {
+          "min": 39.1,
+          "max": 43.1
+        },
+        "1600|SDR 33": {
+          "min": 48.5,
+          "max": 53.5
+        },
+        "1600|SDR 26": {
+          "min": 61.6,
+          "max": 67.9
+        },
+        "1600|SDR 21": {
+          "min": 76.2,
+          "max": 83.9
+        },
+        "1600|SDR 17": {
+          "min": 94.2,
+          "max": 103.7
+        },
+        "1600|SDR 13.6": {
+          "min": 117.7,
+          "max": 129.6
+        },
+        "1600|SDR 11": {
+          "min": 145.5,
+          "max": 160.2
+        },
+        "1600|SDR 9": {
+          "min": 177.8,
+          "max": 195.7
+        },
+        "1600|SDR 7.4": {
+          "min": 216.3,
+          "max": 238
+        },
+        "1600|SDR 6": {
+          "min": 266.7,
+          "max": 293.5
+        },
+        "1800|SDR 41": {
+          "min": 44,
+          "max": 48.5
+        },
+        "1800|SDR 33": {
+          "min": 54.6,
+          "max": 60.2
+        },
+        "1800|SDR 26": {
+          "min": 69.3,
+          "max": 76.3
+        },
+        "1800|SDR 21": {
+          "min": 85.8,
+          "max": 94.5
+        },
+        "1800|SDR 17": {
+          "min": 105.9,
+          "max": 116.6
+        },
+        "1800|SDR 13.6": {
+          "min": 132.4,
+          "max": 145.7
+        },
+        "1800|SDR 11": {
+          "min": 163.7,
+          "max": 180.2
+        },
+        "1800|SDR 9": {
+          "min": 200,
+          "max": 220.1
+        },
+        "1800|SDR 7.4": {
+          "min": 243.3,
+          "max": 267.7
+        },
+        "1800|SDR 6": {
+          "min": 300,
+          "max": 330.1
+        },
+        "2000|SDR 41": {
+          "min": 48.8,
+          "max": 53.8
+        },
+        "2000|SDR 33": {
+          "min": 60.7,
+          "max": 66.9
+        },
+        "2000|SDR 26": {
+          "min": 77,
+          "max": 84.8
+        },
+        "2000|SDR 21": {
+          "min": 95.3,
+          "max": 104.9
+        },
+        "2000|SDR 17": {
+          "min": 117.7,
+          "max": 129.6
+        },
+        "2000|SDR 13.6": {
+          "min": 147.1,
+          "max": 161.9
+        },
+        "2000|SDR 11": {
+          "min": 181.9,
+          "max": 200.2
+        },
+        "2000|SDR 9": {
+          "min": 222.3,
+          "max": 244.6
+        },
+        "2000|SDR 7.4": {
+          "min": 270.3,
+          "max": 297.4
+        },
+        "2000|SDR 6": {
+          "min": 333.4,
+          "max": 366.8
+        }
+      },
+      "note": "Computed per Table 4 Note 1: eMin = dn/SDR rounded up to next 0.1 mm; tolerance = (0.1*eMin + 0.1) rounded to nearest 0.1 mm; eMax = eMin + tolerance. Validated against readable cells."
+    },
+    {
+      "clauseRef": "Cl 7.1",
+      "section": "Dimensions",
+      "parameterName": "Out of square of pipe end, Max",
+      "unit": "mm",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "size"
+      ],
+      "sourceTable": "Cl 7.1",
+      "valueTable": {
+        "16": {
+          "max": 2
+        },
+        "20": {
+          "max": 2
+        },
+        "25": {
+          "max": 2
+        },
+        "32": {
+          "max": 2
+        },
+        "40": {
+          "max": 2
+        },
+        "50": {
+          "max": 2
+        },
+        "63": {
+          "max": 2
+        },
+        "75": {
+          "max": 2
+        },
+        "90": {
+          "max": 3
+        },
+        "110": {
+          "max": 3
+        },
+        "125": {
+          "max": 3
+        },
+        "140": {
+          "max": 4
+        },
+        "160": {
+          "max": 4
+        },
+        "180": {
+          "max": 4
+        },
+        "200": {
+          "max": 5
+        },
+        "225": {
+          "max": 5
+        },
+        "250": {
+          "max": 5
+        },
+        "280": {
+          "max": 5
+        },
+        "315": {
+          "max": 7
+        },
+        "355": {
+          "max": 7
+        },
+        "400": {
+          "max": 7
+        },
+        "450": {
+          "max": 7
+        },
+        "500": {
+          "max": 7
+        },
+        "560": {
+          "max": 7
+        },
+        "630": {
+          "max": 7
+        },
+        "710": {
+          "max": 7
+        },
+        "800": {
+          "max": 7
+        },
+        "900": {
+          "max": 7
+        },
+        "1000": {
+          "max": 7
+        },
+        "1200": {
+          "max": 7
+        },
+        "1400": {
+          "max": 7
+        },
+        "1600": {
+          "max": 7
+        },
+        "1800": {
+          "max": 7
+        },
+        "2000": {
+          "max": 7
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 7.1",
+      "section": "Dimensions",
+      "parameterName": "Visual appearance",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Internal and external surface smooth, clean and free from grooving and other defects; ends cleanly cut square"
+    },
+    {
+      "clauseRef": "Cl 7.2",
+      "section": "Dimensions",
+      "parameterName": "Length of straight pipe",
+      "unit": "m",
+      "limitType": "range",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 5,
+      "max": 20,
+      "specText": "5 m to 20 m as agreed; short lengths of 3 m (min) up to 10 percent of supply permitted"
+    },
+    {
+      "clauseRef": "Cl 8.1.1",
+      "section": "Hydraulic",
+      "parameterName": "Internal pressure creep rupture test at 27°C for 100 h",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": [
+        "grade"
+      ],
+      "sourceTable": "Table 5",
+      "testMethod": "Annex E (IS 4984)",
+      "valueTable": {
+        "PE 63": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 6.9 MPa"
+        },
+        "PE 80": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 8.6 MPa"
+        },
+        "PE 100": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 10.7 MPa"
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.1.1",
+      "section": "Hydraulic",
+      "parameterName": "Internal pressure creep rupture test at 80°C for 48 h",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "grade"
+      ],
+      "sourceTable": "Table 5",
+      "testMethod": "Annex E (IS 4984)",
+      "valueTable": {
+        "PE 63": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 3.8 MPa"
+        },
+        "PE 80": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 4.9 MPa"
+        },
+        "PE 100": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 5.7 MPa"
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.1.1",
+      "section": "Hydraulic",
+      "parameterName": "Internal pressure creep rupture test at 80°C for 165 h",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": [
+        "grade"
+      ],
+      "sourceTable": "Table 5",
+      "testMethod": "Annex E (IS 4984)",
+      "valueTable": {
+        "PE 63": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 3.5 MPa"
+        },
+        "PE 80": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 4.5 MPa"
+        },
+        "PE 100": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 5.4 MPa"
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.1.1",
+      "section": "Hydraulic",
+      "parameterName": "Internal pressure creep rupture test at 80°C for 1000 h",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": [
+        "grade"
+      ],
+      "sourceTable": "Table 5",
+      "testMethod": "Annex E (IS 4984)",
+      "valueTable": {
+        "PE 63": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 3.2 MPa"
+        },
+        "PE 80": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 4 MPa"
+        },
+        "PE 100": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 5 MPa"
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.1.2",
+      "section": "Hydraulic",
+      "parameterName": "Internal pressure creep rupture test of pipe joints at 80°C for 48 h",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "grade"
+      ],
+      "sourceTable": "Table 5",
+      "testMethod": "Annex E (IS 4984)",
+      "valueTable": {
+        "PE 63": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 3.8 MPa"
+        },
+        "PE 80": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 4.9 MPa"
+        },
+        "PE 100": {
+          "expected": "No localized swelling, leakage, weeping or burst at induced hoop stress 5.7 MPa"
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.10",
+      "section": "Mechanical",
+      "parameterName": "Slow crack growth rate (notched test) at 80°C for 500 h",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": [
+        "grade"
+      ],
+      "testMethod": "Annex E and Annex J (IS 4984)",
+      "valueTable": {
+        "PE 63": {
+          "expected": "No localized swelling, leakage, weeping or burst at internal test pressure 0.64 MPa"
+        },
+        "PE 80": {
+          "expected": "No localized swelling, leakage, weeping or burst at internal test pressure 0.8 MPa"
+        },
+        "PE 100": {
+          "expected": "No localized swelling, leakage, weeping or burst at internal test pressure 0.92 MPa"
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 8.8",
+      "section": "Mechanical",
+      "parameterName": "Tensile strength for butt-fusion (failure mode)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": [],
+      "testMethod": "Annex G (IS 4984)",
+      "expected": "Ductile failure (brittle failure shall be considered a failure)"
+    },
+    {
+      "clauseRef": "Cl 8.9",
+      "section": "Mechanical",
+      "parameterName": "Elongation at break, Min",
+      "unit": "percent",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 350,
+      "sourceTable": "Table 6",
+      "testMethod": "Annex H (IS 4984)",
+      "specText": ">= 350 percent for all wall thicknesses"
+    },
+    {
+      "clauseRef": "Cl 8.2",
+      "section": "Mechanical",
+      "parameterName": "Longitudinal reversion, Max",
+      "unit": "percent",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "max": 3,
+      "testMethod": "Annex F (IS 4984)"
+    },
+    {
+      "clauseRef": "Cl 8.3",
+      "section": "Chemical",
+      "parameterName": "Carbon black content",
+      "unit": "percent",
+      "limitType": "range",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 2,
+      "max": 3,
+      "testMethod": "IS 2530",
+      "specText": "2.5 ± 0.5 percent"
+    },
+    {
+      "clauseRef": "Cl 8.3",
+      "section": "Chemical",
+      "parameterName": "Carbon black dispersion",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "testMethod": "IS 2530",
+      "expected": "Satisfactory"
+    },
+    {
+      "clauseRef": "Cl 8.4",
+      "section": "Physical",
+      "parameterName": "Melt flow rate (pipe vs resin deviation)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "testMethod": "IS 2530 (190°C, 5 kgf)",
+      "expected": "Shall not deviate from the MFR of the resin by more than 30 percent"
+    },
+    {
+      "clauseRef": "Cl 8.5",
+      "section": "Physical",
+      "parameterName": "Oxidation induction time, Min",
+      "unit": "min",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 20,
+      "testMethod": "Annex B (IS 4984)"
+    },
+    {
+      "clauseRef": "Cl 8.6",
+      "section": "Chemical",
+      "parameterName": "Overall migration",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": [],
+      "testMethod": "IS 9845",
+      "expected": "Within the limits stipulated in IS 10146"
+    },
+    {
+      "clauseRef": "Cl 8.7",
+      "section": "Physical",
+      "parameterName": "Density of pipe",
+      "unit": "kg/m3",
+      "limitType": "range",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 930,
+      "max": 960,
+      "testMethod": "IS 7328"
+    },
+    {
+      "clauseRef": "Cl 5.2",
+      "section": "Resin",
+      "parameterName": "Base density of PE resin",
+      "unit": "kg/m3",
+      "limitType": "range",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 930,
+      "max": 960,
+      "sourceTable": "Table 2",
+      "testMethod": "IS 7328"
+    },
+    {
+      "clauseRef": "Cl 5.2",
+      "section": "Resin",
+      "parameterName": "Melt flow rate of PE resin",
+      "unit": "g/10 min",
+      "limitType": "range",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 0.2,
+      "max": 1.1,
+      "sourceTable": "Table 2",
+      "testMethod": "IS 2530 (190°C, 5 kg)"
+    },
+    {
+      "clauseRef": "Cl 5.2",
+      "section": "Resin",
+      "parameterName": "Volatile matter of PE resin, Max",
+      "unit": "mg/kg",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "max": 350,
+      "sourceTable": "Table 2",
+      "testMethod": "Annex C (IS 4984)"
+    },
+    {
+      "clauseRef": "Cl 5.2",
+      "section": "Resin",
+      "parameterName": "Water content of PE resin, Max",
+      "unit": "mg/kg",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "max": 300,
+      "sourceTable": "Table 2",
+      "testMethod": "Annex D (IS 2362)",
+      "note": "Applicable only if measured volatile content is not in conformity."
+    },
+    {
+      "clauseRef": "Cl 5.4",
+      "section": "Chemical",
+      "parameterName": "Anti-oxidant content, Max",
+      "unit": "percent",
+      "limitType": "max",
+      "acceptanceOrType": "type",
+      "variesBy": [],
+      "max": 0.3,
+      "specText": "Not more than 0.3 percent by mass of finished resin"
+    }
+  ]
+}
