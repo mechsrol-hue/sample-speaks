@@ -8,6 +8,26 @@
       "port": 3030,
       "autoPort": false,
       "env": { "PORT": "3030" }
+    },
+    {
+      "name": "samplespeaks-verify",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["server.js"],
+      "port": 3031,
+      "autoPort": false,
+      "env": { "PORT": "3031" }
+    },
+    {
+      "name": "is-intelligence",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["/Users/saurabh/Desktop/Antigravity/is-intelligence-app/server.js"],
+      "port": 3040
+    },
+    {
+      "name": "bis-clone",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4545", "--directory", "/Users/saurabh/Desktop/bis-clone"],
+      "port": 4545
     }
   ]
 }

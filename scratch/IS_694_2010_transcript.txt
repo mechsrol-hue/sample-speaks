@@ -1,0 +1,525 @@
+IS 694 : 2010
+Indian Standard
+POLYVINYL CHLORIDE INSULATED UNSHEATHED AND SHEATHED CABLES/CORDS WITH RIGID AND
+FLEXIBLE CONDUCTOR FOR RATED VOLTAGES UP TO AND INCLUDING 450/750 V
+( Fourth Revision )
+ICS 621.315.211 [621.315.616.96]
+© BIS 2010 — May 2011 — Price Group 8
+Power Cables Sectional Committee, ETD 09
+[This PDF includes Amendment No. 1 (September 2012) and Amendment No. 2 (July 2014); their changes are
+transcribed at the end and incorporated where they modify requirements.]
+
+FOREWORD
+This Indian Standard (Fourth Revision) was adopted by the Bureau of Indian Standards, after the draft finalized
+by the Power Cables Sectional Committee had been approved by the Electrotechnical Division Council.
+This standard was originally published in 1955 and was subsequently revised in 1964, 1977 and 1990 (per Amd 1).
+Major changes in this revision include: modification of the rated voltage up to and including 450/750 V ac in line
+with IEC; inclusion of heat resistant PVC insulated and sheathed cable up to 85°C and inclusion of Type D insulation
+and ST3 type sheath for flexible cords for 70°C general application; inclusion of flame retardant (FR) and flame
+retardant low smoke and halogen (FR-LSH) PVC cable; introduction of reference number for each type of cable;
+thermal stability test included for both insulation and sheath (per Amd 1); expansion of range of single and multi
+core sheathed and unsheathed cables; division into 3 sections.
+Assistance drawn from IEC 60227 series (Parts 1 to 5 with amendments), IEC 60719, IEC 60228 and BS 6500:1984.
+Rounding off per IS 2 : 1960.
+
+1 GENERAL
+1.1 Scope
+This standard covers general requirements of single and multicore cables/cords with rigid as well as flexible
+annealed bare/tinned copper and aluminium conductor, insulated and sheathed (if any) with polyvinyl chloride
+(PVC) for rated voltages up to and including 450/750 V ac, 50 Hz used in electric power and lighting including
+cables for outdoor and low temperature use. These cables may be used on dc systems for rated voltages
+up to and including 1 125 V to earth (per Amd 1/Amd 2; originally printed 1 500 V). This standard
+also includes cables with fire performance category FR (Flame retardant) and category FR-LSH (Flame
+retardant low smoke and halogen) with conductor temperature not exceeding 70°C or 85°C.
+NOTES
+1 The term cord is used for the flexible cables up to 5 cores covering the sizes up to 2.5 mm².
+2 For cables for outdoor use, the cables shall meet requirements of additional ageing test given in Table 1.
+3 The cables covered are suitable for ac single or three phase (earthed or unearthed) systems for rated voltages Uo/U up to and
+including 450/750 V, 50 Hz; dc up to and including 1 125 V to earth (per Amd 1).
+4 Suitable where combination of ambient temperature and temperature rise due to load results in a continuous conductor
+temperature not exceeding 70°C or 85°C.
+5 Not covered: telephone cables, PVC data transmission cables, instrumentation cables, PVC insulated screened communication
+cables (braid/wires/tapes), flexible power cord other than PVC insulated.
+6 The tests specified in Sections 1, 2 and 3 shall meet the requirements specified in IS 8130 for conductors, IS 5831 for PVC
+insulation and sheath and tested as per test methods given in relevant parts of IS 10810 series.
+7 Categories of cables: 01 Cables for indoor installation; 02 Cables for outdoor installations; FR Flame retardant; FR-LSH Flame
+retardant low smoke and halogen.
+8 This standard does not cover the requirements of flame retardance test for bunched cables.
+9 Sections: Section 1 General requirements; Section 2 Non-sheathed single core cables/cords for fixed and flexible wiring (per
+Amd 1); Section 3 Sheathed single and multicore cables/cords for fixed and flexible wiring.
+
+2 REFERENCES
+IS 1885 (Part 32):1993/IEC 50-461:1984 Electrotechnical vocabulary — Electric cables; IS 4905:1968 Methods for
+random sampling; IS 5831:1984 PVC insulation and sheath of electric cables; IS 8130:1984 Conductors for insulated
+electric cables and flexible cords (8130:2013 per Amd 2); IS 10418:1982 Drums for electric cables; IS 10810 series
+Methods of test for cables: (Part 0) General, (Part 1) Annealing test for wires used in conductors, (Part 2) Tensile test
+for aluminium wires, (Part 3) Wrapping test for aluminium wires, (Part 4) Persulphate test of conductor, (Part 5)
+Conductor resistance test, (Part 6) Thickness of thermoplastic and elastomeric insulation and sheath, (Part 7) Tensile
+strength and elongation at break of thermoplastic and elastomeric insulation and sheath, (Part 10) Loss of mass test,
+(Part 11) Thermal ageing in air, (Part 12) Shrinkage test, (Part 14) Heat shock test, (Part 15) Hot deformation test,
+(Part 20) Cold bend test, (Part 21) Cold impact test, (Part 43) Insulation resistance, (Part 44) Spark test, (Part 45)
+High voltage test, (Part 53) Flammability test, (Part 58) Oxygen index test, (Part 59) Determination of the amount of
+halogen acid gas evolved during combustion of polymeric materials taken from cables, (Part 60) Thermal stability of
+PVC insulation and sheath, (Part 64) Measurement of temperature index; IS 13360 (Part 6/Sec 9):2001 Determination
+of density of smoke from the burning or decomposition of plastics (added by Amd 2).
+
+3 TERMINOLOGY
+Definitions per IS 1885 (Part 32) and IS 10810 (Part 0), plus:
+3.1 Polyvinyl Chloride Compound (PVC); 3.2 Type of Compound; 3.3 Type Tests — tests required before
+supplying a type of cable on a general commercial basis to demonstrate satisfactory performance characteristics;
+need not be repeated unless changes are made in materials, design or manufacturing process. 3.4 Acceptance
+Tests — tests carried out on samples taken from a lot for the purpose of acceptance of lot. 3.5 Routine Tests —
+tests conducted by manufacturer on all finished lengths to demonstrate the integrity of the cable. 3.6 Rated
+Voltage — expressed as Uo/U in volts; ac rated voltage of cable at least equal to nominal system voltage; dc
+nominal system voltage not higher than 1.5 times rated voltage of the cable. 3.7 Nominal Value — value by
+which a quantity is designated, checked by measurement taking into account specified tolerances.
+
+SECTION 1 GENERAL REQUIREMENTS
+
+4 CONDUCTOR
+4.1 Material (as amended by Amd 1)
+The conductor shall be composed of annealed, bare or tinned high conductivity copper wires complying with
+IS 8130 (Class 1 or Class 2 or Class 5). The conductor shall be composed of aluminium wires complying with
+IS 8130. A separator tape made of suitable material may be applied over conductor at the discretion of the
+manufacturer. The aluminium conductors shall be of Class 1 or Class 2 as per IS 8130 for sizes up to and
+including 10 mm² and stranded type as per Class 2 of IS 8130 for the sizes above 10 mm².
+4.2 Electrical Resistance
+The resistance of each conductor at 20°C shall be in accordance with the requirements of IS 8130 for the
+given class of conductor. Compliance checked by the test given in Table 1, Sl No. (i)(a).
+Conductors of cables for fixed installations shall be circular solid, circular stranded or compacted
+circular/shaped stranded conductors.
+In case of tinned copper conductor, the persulphate test shall be conducted as per IS 8130 and IS 10810 (Part 4).
+
+5 INSULATION
+5.1 Material — polyvinyl chloride compound of the type specified for each type of cable:
+a) Type A — Cables for fixed installation; b) Type C — Heat-resistant cables (HR); c) Type D — Flexible
+cords (per Amd 1). The PVC shall conform to IS 5831. For single core unsheathed cables (Section 2) with fire
+performance category FR and FR-LSH, the insulation shall satisfy the relevant special FR/FR-LSH properties;
+for sheathed cables (Section 3) with FR/FR-LSH the insulation need not have FR/FR-LSH properties.
+5.2 Application to the Conductor — insulation shall fit closely on the conductor and be removable without
+damage to insulation, conductor or tin coating. Compliance checked by visual inspection (per Amd 2).
+5.3 Thickness — the mean value of thickness of insulation shall be not less than the specified value for each
+type and size of cable in the relevant tables of Section 2 and Section 3. The smallest of the measured values of
+thickness of insulation (ti) shall not fall below the nominal value (ti) specified in the relevant table by more
+than (0.1 mm + 0.1 ti).
+5.4 Mechanical Properties before and after Ageing — adequate mechanical strength and elasticity; checked
+by tensile strength and elongation test per Table 1 of IS 5831 for the respective type of PVC.
+
+6 FILLER
+Fillers of unvulcanized rubber or plastics compound, natural or synthetic textiles, paper or PVC; no harmful
+interaction with insulation/sheath; suitable for operating temperature; not harder than the PVC used for
+insulation and sheath. Fillers shall fill the spaces between cores giving a practically circular assembly; shall
+not adhere to the cores; assembly may be held by a film or tape.
+
+7 BINDER TAPE
+Plastic or proof textile material; optional, by agreement between purchaser and supplier.
+
+8 SHEATH
+8.1 Material — PVC compound of type: a) Type ST1 — cables for fixed installations; b) Type ST2 — cables
+sheathed with 85°C HR PVC compound; c) Type ST3 — flexible cables and cords (per Amd 2). PVC per
+IS 5831 (test requirements per Table 2 of IS 5831). For FR and FR-LSH cables the sheathing compound shall
+satisfy the relevant special FR/FR-LSH properties.
+8.2 Application — extruded in single layer on the core (single-core) or on the assembly of cores and fillers or
+inner covering (other cables); shall not adhere to cores; separator film/tape or talcum powder permitted; in
+cases per Section 3 the sheath may penetrate spaces between cores forming a filling.
+8.3 Thickness — mean value not less than specified for each type and size in the tables of Section 3; thickness
+of PVC sheath determined by taking average of number of measurements shall be not less than nominal value
+(ts) specified in relevant tables, and smallest of the measured values shall not fall below the nominal value (ts)
+by more than (0.1 mm + 0.15 ts). Compliance per dimensional requirements of Section 3, test per IS 10810 (Part 6).
+8.4 Mechanical Properties Before and After Ageing — per Table 2 of IS 5831 for respective type of PVC.
+
+9 OVERALL DIMENSIONS
+The mean overall dimensions of the cables shall be within the limits specified in the tables given in Section 2
+and Section 3.
+9.1 Ovality — difference between maximum and minimum measured values of overall diameter of sheathed
+circular cables shall not exceed 15 percent of the maximum measured value at the same cross-section.
+
+10 TESTS
+Testing conducted as given in Table 1 for each category of cable listed under scope.
+10.1 High Voltage Test (Water Immersion Test) — core removed from ~3 m sample of finished multicore
+cable (single core: cores selected from the coil); immersed in water bath at 60 ± 3°C with ends protruding at
+least 200 mm; after 24 h, 3 kV (rms) applied between conductors and water, raised to 6 kV (rms) within 10 s,
+held 5 min. If a sample fails, one more sample tested, which should pass. Cores which passed shall subsequently
+withstand dc 1.2 kV in the same water bath at same temperature, conductor to negative pole, water to positive
+pole, for total 240 h without breakdown.
+10.2 High Voltage Test (at Room Temperature) — multicore cables and cords shall withstand without
+breakdown ac 3 kV (rms) or dc 7.2 kV applied 5 min per test connection. Single core cables immersed in water
+at ambient temperature 1 h before testing; voltage applied between conductor and water.
+10.3 Spark Test — may be carried out as alternative to high voltage test per IS 10810 (Part 44) on single core
+unsheathed cables. Test voltage by thickness of insulation: up to and including 1.0 mm — 6 kV (rms); above
+1.0 up to and including 1.5 mm — 10 kV; above 1.5 up to and including 2.0 mm — 15 kV; above 2.0 up to and
+including 2.5 mm — 20 kV; above 2.5 mm — 25 kV.
+10.4 Flammability Test — per IS 10810 (Part 53). Period of burning after removal of flame shall not exceed
+60 s and unaffected portion from the lower edge of the top clamp shall be at least 50 mm.
+10.5 Oxygen Index Test — per IS 10810 (Part 58) at 27 ± 2°C; oxygen index shall not be less than 29 percent.
+10.6 Test for Halogen Acid Gas Evolution — per IS 10810 (Part 59); halogen acid gas evolved shall not
+exceed 20 percent by weight.
+10.7 Test for Temperature Index — per IS 10810 (Part 64). Per Amd 2: the minimum measured value of
+temperature index shall be 250°C at which the oxygen index is 21. (Originally printed: minimum measured
+value of temperature index shall be 21 percent at a temperature of 250°C.)
+10.8 Smoke Density Rating — per Amd 2: test per IS 13360 (Part 6/Sec 9):2001; maximum smoke density
+rating 60 percent. (Originally "under preparation".)
+10.9 Additional Ageing Test (for Cables for Outdoor Use, Category 02) — 10.9.1 sample 6 m long suspended
+in heating chamber at 80 ± 2°C for 168 h; immediately after, boiling water bath 8 h, then water bath at 27 ± 2°C
+for 16 h; repeated on 5 successive days; ends protrude at least 200 mm. 10.9.2 a 5 m conditioned sample tested
+for high voltage per 10.2 on finished cable in water bath at 60 ± 3°C; remaining conditioned sample submitted
+to cold bend or cold impact test as appropriate.
+10.10 Flex Test — under consideration.
+10.11 Persulphate Test — for tinned copper conductor per IS 10810 (Part 4); requirements per 6.1.1 of IS 8130.
+
+11 IDENTIFICATION
+Manufacturer identified throughout the length by name or trade-mark printed, indented or embossed, on
+insulation (unsheathed) or sheath (sheathed); alternatively colour identification threads approved by BIS.
+Distance between consecutive markings not more than 1 m.
+11.1 Durability — printed marking durable; checked by rubbing lightly ten times with cotton wool/cloth soaked in water.
+11.2 Legibility — all markings clear and legible.
+
+12 CORE IDENTIFICATION
+a) Cables for fixed wiring up to and including 4 cores per Table 2; b) flexible cables/cords up to and including
+25 cores per colour scheme of Table 2; c) other colour schemes by agreement.
+12.1 Colours clearly identifiable and durable (durability per 11.1, ref corrected by Amd 2). Skin-type colouring
+allowed if it meets testing.
+12.1.1 Yellow-green combination (earthing cores): for every 15 mm length of core, one colour covers at least
+30 percent and not more than 70 percent of the surface, the other the remainder.
+12.2 Core identification by numbers permitted: same colour insulation numbered sequentially (Arabic numerals,
+contrasting colour), yellow-green core (if any) in outer layer; numbering starts at 1 in inner layer; numbers
+repeated at regular intervals, consecutive numbers inverted; single numeral underlined by dash, two numerals
+one below other with dash below; spacing between consecutive numbers not exceeding 50 mm (Fig. 1).
+
+Table 2 Core Identification (Clause 12) — summary
+1 core: red, black, yellow, blue, white, grey (both fixed wiring/cords and flexible).
+2 cores: red and black.
+3 cores: fixed — red, yellow and blue; flexible — red, black and yellow-green or red, yellow and blue.
+4 cores: fixed — red, yellow, blue and black; flexible — red, yellow, blue and yellow-green or red, yellow, blue and black.
+5 cores (flexible): red, yellow, blue, black and grey or yellow, blue, green, white and yellow-green.
+6 to 12 cores (flexible): standard colour lists per Table 2, or alternatively all cores same colour (black/grey/other by
+agreement) number coded with yellow/green in outermost layer as last core.
+13 to 25 cores (flexible): two adjacent cores in each layer blue and yellow (reference and direction core), remaining
+cores grey; or alternatively same colour number coded with yellow/green outermost as last core.
+NOTES: single-core control-wiring colours by agreement; parallel twin cord cores may be identified by longitudinal rib;
+one or two extruded longitudinal ribs (stripes) permitted over base colours; >5 cores may be all same colour numbered
+sequentially starting '1' innermost, gap between printings ≤ 50 mm.
+
+13 CABLE CODE
+Constituent — Code Letter: Aluminium conductor A; PVC insulation Y; PVC sheath Y; Suitable for outdoor
+use OU; PVC with FR properties FR; PVC with FR-LSH properties FR-LSH; Earth continuity conductor ECC;
+suitable for low temperature SZ (per Amd 1). No code letter when conductor is copper. Copper single core
+unsheathed FR/FR-LSH: e.g. Y (FR), Y (FR-LSH); copper multicore insulated and sheathed: YY (FR), YY (FR-LSH).
+
+14 SAMPLING OF CABLES — See Annex A.
+
+15 PACKING AND MARKING
+15.1 Wound on drums (IS 10418) or reels or supplied in coils packed.
+15.2 Information stenciled on reel/drum or on label: a) reference to IS 694; b) manufacturer's name, brand
+name or trade-mark; c) type of cable and voltage grade; d) 'FR' or 'FR-LSH' where applicable; e) number of
+cores; f) nominal cross-sectional area; g) 'ATC' for tinned copper conductor; h) cable code; j) colour of core
+(single core); k) length; m) number of lengths (if more than one); n) direction of rotation of drum (arrow);
+p) approximate gross mass; q) country of manufacture; r) year of manufacture; s) 'suitable for outdoor use'
+where applicable.
+15.2.1 BIS Certification Marking — Standard Mark under BIS Act.
+
+Table 1 Tests (Clauses 1.1, 4.2 and 10)
+Sl (i) Routine tests: a) Conductor resistance test — 01, 02, FR, FR-LSH — IS 8130 — IS 10810 Part 5;
+b) High voltage test or Spark test — 01, 02, FR, FR-LSH — 10.2 or 10.3 — Part 45 or 44.
+Sl (ii) Acceptance tests: a) Annealing test (copper) — IS 8130 — Part 1; b) Tensile test (aluminium) — IS 8130 —
+Part 2; c) Wrapping test (aluminium) — IS 8130 — Part 3; d) Conductor resistance test — IS 8130 — Part 5;
+e) Test for thickness of insulation and sheath (per Amd 1) — as per relevant Tables 3 to 10 — Part 6; f) Tensile
+strength and elongation at break of insulation and sheath (per Amd 1) — IS 5831 — Part 7; g) Insulation
+resistance test — IS 5831 (per Amd 1) — Part 43; h) High voltage test or spark test — 10.2 or 10.3 — Part 45
+or 44; j) Flammability test — 10.4 — Part 53; k) Oxygen index test — FR and FR-LSH — 10.5 — Part 58;
+m) Test for temperature index — FR and FR-LSH — 10.7 — Part 64; n) Test for halogen acid gas evolution —
+FR-LSH — 10.6 — Part 59; p) Test for smoke density rating — FR-LSH — 10.8; q) Persulphate test (tinned
+copper only) — 10.11 — Part 4.
+Sl (iii) Type tests: a) Tests on conductor: annealing (copper) Part 1; tensile (aluminium) Part 2; wrapping
+(aluminium) Part 3; conductor resistance Part 5; persulphate (tinned copper) 10.11 and 6.1.1 of IS 8130, Part 4.
+b) Test for overall dimensions and thickness of insulation/sheath — Tables 3 to 10 — Part 6.
+c) Physical tests for insulation: tensile strength and elongation at break (IS 5831, Part 7); loss of mass (Part 10);
+ageing in air oven (Part 11); shrinkage (Part 12); heat shock (Part 14); hot deformation (Part 15); thermal
+stability (Part 60); cold bend (02 category; IS 5831, Part 20, per Amd 1); cold impact (02, FR, FR-LSH per
+Amd 1; Part 21); flammability (10.4, Part 53); oxygen index (FR, FR-LSH; 10.5); temperature index (FR,
+FR-LSH; 10.7); halogen acid gas evolution (FR-LSH; 10.6); smoke density rating (FR-LSH; 10.8).
+d) Physical tests for sheath (removed from finished cable): tensile strength and elongation at break; loss of
+mass; ageing in air oven; shrinkage; heat shock; hot deformation; thermal stability; cold bend and cold impact
+(02; per Amd 1); oxygen index (FR, FR-LSH); temperature index (FR, FR-LSH); halogen acid gas evolution
+(FR-LSH); smoke density rating (FR-LSH).
+e) Tests on completed cable: high voltage test (water immersion) 10.1 Part 45; high voltage or spark test 10.2/
+10.3 Part 45/44; insulation resistance IS 5831 Part 43; high voltage test 10.2 Part 45; flammability 10.4 Part 53;
+additional ageing test (OU/02 cables only) 10.9; flex test (flexible cords, sizes limited to 5 cores with
+cross-sectional area of 2.5 mm²) 10.10.
+NOTE — FR/FR-LSH properties/testing applicable only to cables covered in this standard.
+
+SECTION 2 SINGLE CORE NON-SHEATHED (UNSHEATHED per Amd 2) CABLES/CORDS FOR FIXED AND FLEXIBLE WIRING
+
+16 SINGLE CORE UNSHEATHED CABLES WITH RIGID CONDUCTOR (CLASS 1 OR CLASS 2)
+FOR GENERAL PURPOSE / HR (MAXIMUM CONDUCTOR TEMPERATURE 70°C OR 85°C)
+16.1.1 Conductor per IS 8130 Class 1 (solid) or Class 2 (stranded). Sizes: a) 0.5 to 10.0 mm² — Class 1 and 2;
+b) 16 mm² and above — Class 2.
+16.1.2 Insulation: PVC Type A or Type C (HR) per IS 5831 applied around conductor; thickness per col 4 of
+Table 3; FR and FR-LSH categories covered. Smallest measured ti not below nominal by more than (0.1 mm + 0.1 ti).
+16.1.3 Overall Diameter: maximum overall diameter shall not exceed value in col 5 of Table 3.
+16.2 Tests: compliance with 16.1 by inspection and tests of Table 1.
+
+Table 3 Dimensions of Single Core Unsheathed Cables with Rigid Conductor (Class 1 or Class 2) for
+General Purpose / HR (Maximum Conductor Temperature 70°C or 85°C) (Clauses 16.1.2 and 16.1.3)
+Size mm² | Class | Nominal thickness of insulation ti mm | Maximum overall diameter mm
+0.5 | 1 | 0.6 | 2.3
+0.75 | 1 | 0.6 | 2.5
+1.0 | 1 | 0.6 | 2.7
+1.5 | 1 | 0.7 | 3.2
+1.5 | 2 | 0.7 | 3.3
+2.5 | 1 | 0.8 | 3.9
+2.5 | 2 | 0.8 | 4.0
+4.0 | 1 | 0.8 | 4.4
+4.0 | 2 | 0.8 | 4.6
+6.0 | 1 | 0.8 | 5.0
+6.0 | 2 | 0.8 | 5.2
+10.0 | 1 | 1.0 | 6.4
+10.0 | 2 | 1.0 | 6.7
+16.0 | 2 | 1.0 | 7.8
+25.0 | 2 | 1.2 | 9.7
+35.0 | 2 | 1.2 | 10.9
+50.0 | 2 | 1.4 | 12.8
+70.0 | 2 | 1.4 | 14.6
+95.0 | 2 | 1.6 | 17.1
+120.0 | 2 | 1.6 | 18.8
+150.0 | 2 | 1.8 | 20.9
+185.0 | 2 | 2.0 | 23.3
+240.0 | 2 | 2.2 | 26.6
+300.0 | 2 | 2.4 | 29.6
+400.0 | 2 | 2.6 | 33.2
+500.0 | 2 | 2.8 | 37.5
+630.0 | 2 | 3.0 | 42
+
+17 SINGLE CORE UNSHEATHED CABLES WITH FLEXIBLE CONDUCTOR FOR GENERAL
+PURPOSE / HR (MAXIMUM CONDUCTOR TEMPERATURE 70°C OR 85°C)
+17.1.1 Conductor per IS 8130 Class 5. Sizes covered 0.5 to 300 mm².
+17.1.2 Insulation: PVC Type D or Type C (HR) per IS 5831; thickness per col 3 of Table 4; FR/FR-LSH
+properties per Table 1 (ref per Amd 2) wherever applicable. Smallest measured ti not below nominal by more
+than (0.1 mm + 0.1 ti).
+17.1.3 Overall Diameter: maximum shall not exceed value in col 4 of Table 4.
+17.2 Tests: per Table 1.
+
+Table 4 Single Core Unsheathed Cable with Flexible Conductor for General Purpose / HR (for Maximum
+Conductor Temperature 70°C or 85°C) (Clause 17.1.2)
+Size mm² | Nominal thickness of insulation ti mm | Maximum overall diameter mm
+0.5 | 0.6 | 2.6
+0.75 | 0.6 | 2.8
+1.0 | 0.6 | 3.0
+1.5 | 0.7 | 3.4
+2.5 | 0.8 | 4.1
+4.0 | 0.8 | 4.8
+6.0 | 0.8 | 5.3
+10.0 | 1.0 | 7.0
+16.0 | 1.0 | 8.1
+25.0 | 1.2 | 10.2
+35.0 | 1.2 | 11.7
+50.0 | 1.4 | 13.9
+70.0 | 1.4 | 16.0
+95.0 | 1.6 | 18.2
+120.0 | 1.6 | 20.2
+150.0 | 1.8 | 22.5
+185.0 | 2.0 | 24.9
+240.0 | 2.2 | 28.4
+300.0 | 2.4 | 31.0
+
+SECTION 3 SHEATHED SINGLE AND MULTICORE CABLES/CORDS FOR FIXED AND FLEXIBLE WIRING
+
+18 SINGLE AND MULTICORE CIRCULAR PVC INSULATED AND SHEATHED CABLES WITH
+RIGID CONDUCTOR (CLASS 1 OR CLASS 2) FOR GENERAL PURPOSE (70°C OR 85°C)
+18.1.1 Conductor per IS 8130 Class 1 (solid) / Class 2 (stranded). a) No. of cores — 1, 2, 3 or 4; b) Sizes —
+1.0 to 120 mm².
+18.1.2 Insulation: PVC Type A or Type C (HR) per IS 5831; thickness per Table 5; smallest measured ti not
+below nominal by more than (0.1 mm + 0.1 ti).
+18.1.3 Assembly of Cores: 2 cores and above twisted together.
+18.1.4 Sheath: PVC ST1 (70°C) or ST2 (HR 85°C) per IS 5831 around laid up cores; FR/FR-LSH formulations
+where applicable; sheath fits closely, removable without damage to inner core; thickness per Table 5; average
+(ts) not less than nominal; smallest measured not below nominal by more than 0.1 mm + 0.15 ts. Sheath colour
+black or as agreed.
+18.1.5 Ovality: difference between max and min measured overall diameter ≤ 15 percent of maximum
+measured value at same cross-section.
+18.1.6 Overall Dimensions: mean overall dimensions within upper limit of Table 5.
+18.2 Tests: per Table 1.
+
+Table 5 PVC Insulated Circular Sheathed Cables for Fixed Wiring (Circular) (Clauses 18.1.2, 18.1.4 and 18.1.6)
+Size mm² | ti mm | ts single-core mm | ts two-core mm | ts three-core mm | ts four-core mm | OD max single mm | OD max two mm | OD max three mm | OD max four mm
+1.0 (copper conductor only) | 0.6 | 0.8 | 0.9 | 0.9 | 0.9 | 4.7 | 8.2 | 8.6 | 9.2
+1.5 | 0.6 | 0.8 | 0.9 | 0.9 | 0.9 | 5.0 | 8.8 | 9.2 | 10.0
+2.5 | 0.7 | 0.8 | 1.0 | 1.0 | 1.0 | 5.8 | 10.5 | 11.0 | 12.0
+4 | 0.8 | 0.9 | 1.0 | 1.1 | 1.1 | 6.8 | 12.0 | 13.0 | 14.0
+6 | 0.8 | 0.9 | 1.1 | 1.1 | 1.2 | 7.8 | 13.5 | 14.5 | 15.5
+10 | 1.0 | 0.9 | 1.2 | 1.2 | 1.3 | 8.8 | 16.5 | 17.5 | 19.5
+16 | 1.0 | 1.0 | 1.3 | 1.3 | 1.4 | 10.5 | 19.0 | 20.0 | 22.5
+25 | 1.2 | 1.1 | 1.4 | 1.5 | 1.6 | 12.5 | 23.0 | 24.5 | 27.5
+35 | 1.2 | 1.1 | 1.5 | 1.6 | 1.7 | 13.5 | 25.5 | 27.5 | 30.5
+50 | 1.4 | 1.2 | 1.6 | 1.7 | 1.8 | 15.5 | 29.5 | 31.5 | 35.0
+70 | 1.4 | 2.4 | 2.4 | 2.5 | 2.8 | 17.5 | 35.0 | 37.0 | 41.4
+95 | 1.6 | 1.5 | 2.7 | 2.9 | 3.1 | 21.0 | 40.5 | 43.2 | 48.1
+120 | 1.6 | 1.5 | 2.9 | 3.1 | 3.4 | 22.5 | 44.0 | 47.3 | 52.8
+[Values as printed, verified against page image — note the printed single-core ts at 70 mm² is 2.4 although
+adjacent sizes print 1.2 (50 mm²) and 1.5 (95 mm²); printed cells are authoritative.]
+
+19 SINGLE AND MULTICORE CIRCULAR PVC INSULATED AND SHEATHED CABLES/CORDS
+WITH FLEXIBLE CONDUCTOR (CLASS 5) FOR GENERAL PURPOSE (70°C OR 85°C)
+19.1.1 Flexible Cable: conductor IS 8130 Class 5; material annealed bare or tinned copper; 1, 2, 3, 4 and
+5 core cable; sizes 4.00 to 300 mm². NOTE — in general annealed tinned copper used up to 16 mm² only.
+19.1.2 Flexible Cords: conductor IS 8130 Class 5; annealed bare/tinned copper; 1, 2, 3, 4 and 5 core cords;
+sizes 0.5 to 2.50 mm².
+19.1.3 Insulation: PVC Type D (general purpose) or Type C (HR) per IS 5831 around each conductor;
+thickness per Table 6 (flexible cable) and Table 7 (flexible cords); smallest measured ti not below nominal by
+more than (0.1 mm + 0.1 ti).
+19.1.4 Assembly of Cores: circular cables 2 core and above twisted; recommended lay-up per Table 8.
+19.1.5 Sheath: PVC compound type ST3 (per Amd 1) for general purpose and ST2 (HR) for HR PVC type per
+IS 5831, applied around the cores; FR/FR-LSH formulations where applicable; thickness per Table 6 (flexible
+cable) / Table 7 (flexible cords); sheath may fill spaces between cores (filling) but shall not adhere; separator
+permitted; circular cord assembly practically circular. Average sheath thickness not less than nominal (ts) per
+Table 6/Table 7 (per Amd 1: for fixed installation Table 5, flexible cables Table 6, cords and flexible twin
+twisted and twin parallel cable Table 7); smallest measured not below nominal by more than 0.1 mm + 0.15 ts.
+Colour black or as agreed.
+19.1.6 Ovality ≤ 15 percent (as 18.1.5).
+19.1.7 Overall Dimensions: mean overall dimensions of circular cords within limits of Table 6.
+19.2 Tests: per Table 1.
+
+Table 6 Flexible PVC Insulated and Sheathed Cables (Circular) (Clauses 19.1.3, 19.1.5 and 19.1.7)
+[Nominal Thickness of Sheath, ts per Amd 1]
+Size mm² | ti mm | ts single mm | ts two mm | ts three mm | ts four mm | ts five mm | OD max single mm | OD two mm | OD three mm | OD four mm | OD five mm
+4 | 0.8 | 1 | 1 | 1 | 1 | 1.1 | 6.8 | 11.6 | 12.4 | 13.6 | 15.3
+6 | 0.8 | 1.1 | 1.1 | 1.2 | 1.2 | — | 7.5 | 13.0 | 13.8 | 15.47 | —
+10 | 1 | 1.3 | 1.3 | 1.4 | 1.4 | — | 9.4 | 16.5 | 17.69 | 19.5 | —
+16 | 1 | 1.4 | 1.4 | 1.4 | 1.4 | — | 10.9 | 19.4 | 20.6 | 23.0 | —
+25 | 1.2 | 1.4 | 1.4 | 1.5 | 1.6 | — | 13.6 | 23.8 | 25.6 | 28.5 | —
+35 | 1.2 | 1.6 | 1.6 | 1.6 | 1.7 | — | 15.5 | 27.2 | 29.3 | 32.7 | —
+50 | 1.4 | 2.0 | 2.0 | 2.0 | 2.0 | — | 18.1 | 32.0 | 34.6 | 38.6 | —
+70 | 1.4 | 2.2 | 2.2 | 2.2 | 2.2 | — | 20.8 | 36.8 | 39.6 | 44.3 | —
+95 | 1.6 | 2.4 | 2.4 | 2.4 | 2.4 | — | 23.6 | 41.8 | 47.0 | 50.2 | —
+120 | 1.6 | 2.5 | 2.5 | 2.5 | 2.5 | — | 26.0 | 46.2 | 51.0 | 55.7 | —
+150 | 1.8 | — | — | 2.6 | 2.6 | — | — | — | 54.8 | 62.1 | —
+185 | 2 | — | — | 2.8 | 2.8 | — | — | — | 61.2 | 68.5 | —
+240 | 2.2 | — | — | 3.0 | 3.0 | — | — | — | 69.7 | 77.9 | —
+300 | 2.4 | — | — | 3.2 | 3.2 | — | — | — | 75.7 | 84.7 | —
+[OD values 15.47 (6 mm² four-core) and 17.69 (10 mm² three-core) are printed with two decimals; verified
+against page image at 300 dpi.]
+
+Table 7 Dimensions of Flexible PVC Insulated and Sheathed Cords (Circular) and Flexible Twin Twisted
+and Twin Parallel Cable (Clauses 19.1.3 and 19.1.5) [title per Amd 1; Nominal Thickness of Sheath, ts]
+Size mm² | ti mm | ts single mm | ts twin mm | ts three mm | ts four mm | ts five mm | OD max single mm | OD twin mm | OD three mm | OD four mm | OD five mm | Parallel twin (W × H) mm | Twisted twin mm
+0.5 | 0.6 | 0.9 | 0.9 | 0.9 | 0.9 | 0.9 | 4.3 | 6.9 | 7.3 | 8.0 | 8.7 | 2.6 × 5.2 | 5.2
+0.75 | 0.6 | 0.9 | 0.9 | 0.9 | 0.9 | 0.9 | 4.5 | 7.3 | 7.7 | 8.4 | 9.2 | 2.8 × 5.6 | 5.6
+1.0 | 0.6 | 0.9 | 0.9 | 0.9 | 0.9 | 1.0 | 4.7 | 7.6 | 8.1 | 8.8 | 9.6 | 3.0 × 6.0 | 6.0
+1.5 | 0.6 | 0.9 | 0.9 | 0.9 | 1.0 | 1.0 | 5.4 | 8.9 | 9.4 | 10.4 | 11.4 | 3.3 × 6.6 | 6.6
+2.5 | 0.7 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 6.2 | 10.3 | 10.9 | 12.0 | 13.2 | 4.0 × 8.0 | 8.0
+4 | 0.8 | — | — | — | — | — | — | — | — | — | — | 4.8 × 9.6 | 9.6
+
+Table 8 Recommended Lay-up of Cores (Clauses 19.1.4, 20.1.3 and 21.1.3)
+Cores: 2→2; 3→3; 4→4; 5→5; 6→6; 7→1-6; 8→1-7; 9→1-8; 10→2-8; 11→3-8; 12→3-9; 13→3-10;
+14→4-10; 15→5-10; 16→5-11; 17→5-12; 18→0-6-12; 19→1-6-12; 20→1-7-12; 21→1-7-13; 22→2-7-13;
+23→2-8-13; 24→2-8-14; 25→2-8-15.
+
+20 MULTICORE CIRCULAR PVC INSULATED AND SHEATHED CABLES WITH FLEXIBLE
+CONDUCTOR (CLASS 5) FOR GENERAL PURPOSE (70°C OR 85°C)
+20.1.1 Conductor IS 8130 Class 5. a) No. of conductors — 6 to 25 cores; b) sizes 0.5 to 2.5 mm².
+20.1.2 Insulation: PVC Type D (general) / Type C (HR) per IS 5831 around each conductor; thickness per
+Table 9; smallest measured ti not below nominal by more than (0.1 mm + 0.1 ti).
+20.1.3 Assembly of Cores and Fillers: cores twisted in concentric layers where appropriate; recommended
+lay-up per Table 8; optional tape per layer by agreement, not adhering to cores.
+20.1.4 Sheath: PVC ST3 (general) / ST2 (HR) per IS 5831 around laid-up cores; FR/FR-LSH formulations
+where applicable; optional tape between cores and outer sheath; average ts not less than nominal per Table 9;
+smallest measured not below nominal by more than 0.1 mm + 0.15 ts. Colour black or as agreed.
+20.1.5 Ovality ≤ 15 percent.
+20.2 Tests: per Table 1.
+
+Table 9 Flexible PVC Insulated and Sheathed Cables (Circular) (Clauses 20.1.2 and 20.1.4) — 6 to 25 cores
+Cores | 0.50 mm²: ti | ts | OD max || 0.75 mm²: ti | ts | OD max || 1.00 mm²: ti | ts | OD max || 1.50 mm²: ti | ts | OD max || 2.50 mm²: ti | ts | OD max
+6 | 0.6 | 0.9 | 9.5 || 0.6 | 1.0 | 10.0 || 0.6 | 1.0 | 10.5 || 0.6 | 1.0 | 12.4 || 0.7 | 1.1 | 14.5
+7 | 0.6 | 0.9 | 9.5 || 0.6 | 1.0 | 10.0 || 0.6 | 1.0 | 10.5 || 0.6 | 1.0 | 12.4 || 0.7 | 1.1 | 14.5
+8 | 0.6 | 1.0 | 11.1 || 0.6 | 1.0 | 11.8 || 0.6 | 1.0 | 12.4 || 0.6 | 1.1 | 14.7 || 0.7 | 1.2 | 17.3
+9 | 0.6 | 1.0 | 11.8 || 0.6 | 1.1 | 12.4 || 0.6 | 1.1 | 13.1 || 0.6 | 1.1 | 15.6 || 0.7 | 1.3 | 18.3
+10 | 0.6 | 1.0 | 12.0 || 0.6 | 1.1 | 12.7 || 0.6 | 1.1 | 13.4 || 0.6 | 1.1 | 16.0 || 0.7 | 1.3 | 18.7
+11 | 0.6 | 1.0 | 12.0 || 0.6 | 1.1 | 12.7 || 0.6 | 1.1 | 13.4 || 0.6 | 1.1 | 16.0 || 0.7 | 1.3 | 18.7
+12 | 0.6 | 1.0 | 12.4 || 0.6 | 1.1 | 13.1 || 0.6 | 1.1 | 13.9 || 0.6 | 1.1 | 16.5 || 0.7 | 1.3 | 19.4
+13 | 0.6 | 1.0 | 13.1 || 0.6 | 1.1 | 13.8 || 0.6 | 1.1 | 14.6 || 0.6 | 1.2 | 17.4 || 0.7 | 1.3 | 20.5
+14 | 0.6 | 1.1 | 13.1 || 0.6 | 1.1 | 13.8 || 0.6 | 1.1 | 14.6 || 0.6 | 1.2 | 17.4 || 0.7 | 1.3 | 20.5
+15 | 0.6 | 1.1 | 13.5 || 0.6 | 1.2 | 14.3 || 0.6 | 1.2 | 15.1 || 0.6 | 1.2 | 18.1 || 0.7 | 1.4 | 21.3
+16 | 0.6 | 1.1 | 13.8 || 0.6 | 1.2 | 14.6 || 0.6 | 1.2 | 15.4 || 0.6 | 1.2 | 18.4 || 0.7 | 1.4 | 21.7
+17 | 0.6 | 1.1 | 14.6 || 0.6 | 1.2 | 15.4 || 0.6 | 1.2 | 16.3 || 0.6 | 1.3 | 19.5 || 0.7 | 1.4 | 23.0
+18 | 0.6 | 1.1 | 14.6 || 0.6 | 1.2 | 15.4 || 0.6 | 1.3 | 16.3 || 0.6 | 1.3 | 19.5 || 0.7 | 1.4 | 23.3
+19 | 0.6 | 1.1 | 14.6 || 0.6 | 1.2 | 15.4 || 0.6 | 1.3 | 16.3 || 0.6 | 1.3 | 19.5 || 0.7 | 1.4 | 23.8
+20 | 0.6 | 1.2 | 15.4 || 0.6 | 1.3 | 16.3 || 0.6 | 1.4 | 17.3 || 0.6 | 1.4 | 20.7 || 0.7 | 1.5 | 24.4
+21 | 0.6 | 1.2 | 15.4 || 0.6 | 1.3 | 16.3 || 0.6 | 1.4 | 17.3 || 0.6 | 1.4 | 20.7 || 0.7 | 1.5 | 25.0
+22 | 0.6 | 1.2 | 16.3 || 0.6 | 1.3 | 17.3 || 0.6 | 1.4 | 18.2 || 0.6 | 1.4 | 21.9 || 0.7 | 1.5 | 25.8
+23 | 0.6 | 1.2 | 16.3 || 0.6 | 1.3 | 17.3 || 0.6 | 1.4 | 18.2 || 0.6 | 1.4 | 21.9 || 0.7 | 1.5 | 26.3
+24 | 0.6 | 1.2 | 17.1 || 0.6 | 1.3 | 18.2 || 0.6 | 1.4 | 19.2 || 0.6 | 1.4 | 23.0 || 0.7 | 1.5 | 27.2
+25 | 0.6 | 1.2 | 17.1 || 0.6 | 1.3 | 19.0 || 0.6 | 1.4 | 19.2 || 0.6 | 1.4 | 23.0 || 0.7 | 1.5 | 27.9
+
+21 PARALLEL TWIN AND TWISTED TWIN FLEXIBLE PVC INSULATED UNSHEATHED CORDS
+(CLASS 5) FOR GENERAL PURPOSE (70°C OR 85°C)
+21.1.1 Conductor IS 8130 Class 5. a) No. of conductors — 2; b) sizes 0.5 to 4.0 mm².
+21.1.2 Insulation: PVC Type D (general) / Type C (HR) per IS 5831 around each conductor; thickness per
+Table 10 [per printed clause; Amd 1 substitutes dimensional reference to Table 7]; smallest measured ti not
+below nominal by more than (0.1 mm + 0.1 ti).
+21.1.3 Assembly: twin twisted — cores twisted together with lay; twin parallel — cables laid parallel.
+Dimensions per Table 7 and lay-up of cores per Table 8 (per Amd 1).
+21.2 Tests: per Table 1.
+
+22 TWO AND THREE CORE FLAT CABLES WITH PVC INSULATION AND SHEATH HAVING
+STRANDED OR FLEXIBLE CONDUCTOR (CLASS 2 OR CLASS 5) FOR GENERAL PURPOSE
+(70°C OR 85°C)
+22.1.1 Conductor per IS 8130. a) No. of conductors — 2 and 3; b) for 1.5 and 2.5 mm² conductor either
+stranded (Class 2) or flexible (Class 5); c) for 0.50, 0.75, 1.00, 4 mm² and above, conductor flexible (Class 5);
+d) sizes covered 0.5 to 95 mm² for 3-core flat and 0.5 to 50 mm² for flat twin.
+22.1.2 Insulation: PVC Type A (general) / Type C (HR) per IS 5831 around each conductor; ti per Table 10;
+smallest measured ti not below nominal by more than (0.1 mm + 0.1 ti).
+22.1.3 Assembly of Cores: cores laid in flat formation.
+22.1.4 Sheath: PVC ST1 (general) / ST2 (HR) per IS 5831 around laid up cores; FR/FR-LSH formulation
+where applicable; optional tape between cores and outer sheath; average ts not less than nominal per Table 10;
+smallest measured not below nominal by more than 0.1 mm + 0.15 ts. Colour black or as agreed.
+22.2 Tests: per Table 1.
+
+Table 10 Dimensions of Insulated and Sheathed Two and Three Core Flat Cables (Clauses 21.1.2, 22.1.2 and 22.1.4)
+Size mm² | ti mm | ts mm | Overall dimensions Max (W × H) 2-core mm | 3-core mm
+0.5 | 0.6 | 0.9 | 7.2 × 4.9 | 9.6 × 4.9
+0.75 | 0.6 | 0.9 | 7.8 × 5.2 | 10.5 × 5.2
+1.0 | 0.6 | 0.9 | 8.0 × 5.4 | 11.0 × 5.4
+1.5 | 0.6 | 0.9 | 8.6 × 5.6 | 10.7 × 5.3
+2.5 | 0.7 | 1.0 | 10.5 × 6.6 | 13.0 × 6.2
+4.0 | 0.8 | 1.0 | 12.0 × 7.4 | 15.3 × 7.1
+6.0 | 0.8 | 1.1 | 13.0 × 8.0 | 19.2 × 8.4
+10.0 | 1.0 | 1.4 | 16.0 × 9.6 | 24.2 × 10.4
+16.0 | 1.0 | 1.4 | 18.5 × 11.0 | 29.0 × 12.4
+25.0 | 1.2 | 2.0 | 22.5 × 13.0 | 36.5 × 15.7
+35.0 | 1.2 | 2.0 | 25.5 × 14.5 | 40.5 × 17.2
+50.0 | 1.4 | 2.2 | 29.0 × 16.5 | 46.5 × 19.3
+70.0 | 1.4 | 2.2 | — | 52.0 × 21.0
+95.0 | 1.6 | 2.4 | — | 61.0 × 24.5
+
+ANNEX A (Clause 14) SAMPLING OF CABLES
+A-1 Lot: cables of same size and type manufactured under essentially similar conditions grouped to constitute a lot.
+A-2 Scale of sampling: samples per col 1 and col 2 of Table 11, taken at random (IS 4905). A-3 Number of tests
+and criterion for conformity: test samples from each selected drum/coil/reel subjected to each acceptance test;
+defective if fails any acceptance test; lot conforms if defectives ≤ permissible number (col 3 of Table 11).
+Table 11 Sampling of Cables: lot up to 50 drums/coils/reels — sample 3 — permissible defectives 0; 51-100 —
+5 — 0; 101-300 — 8 — 0; 301 and above — 13 — 1.
+
+ANNEX B (Foreword) COMMITTEE COMPOSITION — Power Cables Sectional Committee, ETD 09
+[Committee member list — organizations and representatives as printed in the standard.]
+
+AMENDMENT NO. 1 SEPTEMBER 2012 — key changes (all incorporated above):
+Foreword history expanded (third revision 1990); thermal stability test included for both insulation and sheath;
+scope dc voltage 1 125 V (for 1 500 V); Section 2 titled 'Non-sheathed'; clause 4.1 conductor material clause
+substituted; 5.1(c) Type D — flexible cords; cable code additions ECC and SZ; Table 1 acceptance tests (e)/(f)
+'and sheath', (f)/(g) requirement ref IS 5831; Table 1 type tests (c)(8) cold bend 02 only, (c)(9) cold impact 02/
+FR/FR-LSH, sheath tests (d) add cold bend and cold impact (02, IS 5831, Parts 20/21); clause 16/17/18/19/20/
+21/22 titles substituted (Class designations, 70°C or 85°C); 18.2 tests wording; 19.1.5 sheath ST3, ts tolerance
+paragraph referencing Table 5 (fixed), Table 6 (flexible cables), Table 7 (cords, flexible twin twisted and twin
+parallel); Table 6/Table 7 col 4-8 heading 'Nominal Thickness of Sheath, ts'; Table 7 title; 21.1.2 'Table 7' for
+'Table 10'; 21.1.3 dimensions per Table 7 and lay-up per Table 8; 20.1.4 delete 'For sheathed cable' etc.
+
+AMENDMENT NO. 2 JULY 2014 — key changes (all incorporated above):
+Scope dc '1 125' for '1 500'; references IS 8130:2013 and IS 13360 (Part 6/Sec 9):2001 added; 4.1 wording;
+5.2 compliance 'by visual inspection'; 8.1(c) 'flexible cables and cords'; 10.7 temperature index minimum
+measured value 250°C at which oxygen index is 21; 10.8 smoke density rating test per IS 13360 (Part 6/Sec 9)
+:2001, maximum smoke density rating 60 percent; 10.9.2 'bath' for 'batch'; 12.1 durability ref 11.1; Table 1
+(ii)(p) col 5 delete; type tests 'Test for smoke density rating'; Section 2 'unsheathed' terminology; 16.1.2
+sentence 3 deleted; 17.1.2 'Table 1' for 'Table 2'; Table 3 and Table 4 titles add '/ HR'; 18.1.4/19.1.5/20.1.4/
+22.1.4 sentence deletions.
+
+This Indian Standard has been developed from Doc No.: ETD 09 (5866).

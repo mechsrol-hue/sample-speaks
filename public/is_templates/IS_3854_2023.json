@@ -1,0 +1,673 @@
+{
+ "isNumber": "IS 3854:2023",
+ "title": "Switches for Domestic and Similar Purposes — Specification",
+ "revision": "Third Revision",
+ "parameterizationDims": [
+  "rating"
+ ],
+ "dimensionOptions": {
+  "rating": [
+   1,
+   2,
+   4,
+   6,
+   10,
+   13,
+   16,
+   20,
+   25,
+   32,
+   40,
+   45,
+   50,
+   63
+  ]
+ },
+ "defaults": {
+  "rating": 16
+ },
+ "parameters": [
+  {
+   "clauseRef": "Cl 12.2.1 / Table 4",
+   "section": "Terminals",
+   "parameterName": "Connectable copper conductor cross-sections (screw terminals)",
+   "limitType": "text",
+   "acceptanceOrType": "acceptance",
+   "variesBy": [
+    "rating"
+   ],
+   "sourceTable": "Table 4",
+   "valueTable": {
+    "1": {
+     "expected": "Momentary-switch ratings; for special purposes such as ELV, flexible conductors 0.5-1 mm²"
+    },
+    "2": {
+     "expected": "Momentary-switch ratings; for special purposes such as ELV, flexible conductors 0.5-1 mm²"
+    },
+    "4": {
+     "expected": "Momentary-switch ratings; for special purposes such as ELV, flexible conductors 0.5-1 mm²"
+    },
+    "6": {
+     "expected": "Rigid (solid/stranded) 0.75-1.5 mm², largest diameter 1.45 mm"
+    },
+    "10": {
+     "expected": "Rigid 1-2.5 mm², largest diameter 2.13 mm; supply terminals (except patterns 3/03/7) accept two 2.5 mm² conductors"
+    },
+    "13": {
+     "expected": "Rigid 1-2.5 mm², largest diameter 2.13 mm; supply terminals (except patterns 3/03/7) accept two 2.5 mm² conductors"
+    },
+    "16": {
+     "expected": "Rigid 1.5-4 mm², largest diameter 2.72 mm; supply terminals (except patterns 3/03/7) accept two 2.5 mm² conductors"
+    },
+    "20": {
+     "expected": "Rigid 2.5-6 mm², largest diameter 3.34 mm"
+    },
+    "25": {
+     "expected": "Rigid 2.5-6 mm², largest diameter 3.34 mm"
+    },
+    "32": {
+     "expected": "Rigid 4-10 mm², largest diameter 4.34 mm"
+    },
+    "40": {
+     "expected": "Rigid 6-16 mm², largest diameter 5.46 mm"
+    },
+    "45": {
+     "expected": "Rigid 6-16 mm², largest diameter 5.46 mm"
+    },
+    "50": {
+     "expected": "Rigid 6-16 mm², largest diameter 5.46 mm"
+    },
+    "63": {
+     "expected": "Rigid 10-25 mm², largest diameter 6.85 mm"
+    }
+   }
+  },
+  {
+   "clauseRef": "Cl 17.1 / Table 19",
+   "section": "Temperature rise",
+   "parameterName": "Temperature-rise test current and conductor",
+   "limitType": "text",
+   "acceptanceOrType": "acceptance",
+   "variesBy": [
+    "rating"
+   ],
+   "sourceTable": "Table 19",
+   "specText": "Loaded 1 h; terminal torque two-thirds of Table 5; conductors ≥ 1 m",
+   "valueTable": {
+    "1": {
+     "expected": "1.5 A with 0.5 mm² conductor"
+    },
+    "2": {
+     "expected": "3 A with 0.75 mm²"
+    },
+    "4": {
+     "expected": "5 A with 1 mm²"
+    },
+    "6": {
+     "expected": "8 A with 1.5 mm²"
+    },
+    "10": {
+     "expected": "13.5 A with 2.5 mm²"
+    },
+    "13": {
+     "expected": "17 A with 2.5 mm²"
+    },
+    "16": {
+     "expected": "20 A with 4 mm² (screwless ≤250 V, non-3/03: 2.5 mm²)"
+    },
+    "20": {
+     "expected": "25 A with 4 mm²"
+    },
+    "25": {
+     "expected": "32 A with 6 mm²"
+    },
+    "32": {
+     "expected": "38 A with 10 mm²"
+    },
+    "40": {
+     "expected": "46 A with 16 mm²"
+    },
+    "45": {
+     "expected": "51 A with 16 mm²"
+    },
+    "50": {
+     "expected": "57.5 A with 16 mm²"
+    },
+    "63": {
+     "expected": "75 A with 25 mm²"
+    }
+   }
+  },
+  {
+   "clauseRef": "Cl 19.1 / Table 21",
+   "section": "Normal operation",
+   "parameterName": "Normal operation — number of operations",
+   "limitType": "text",
+   "acceptanceOrType": "type",
+   "variesBy": [
+    "rating"
+   ],
+   "sourceTable": "Table 21",
+   "specText": "Rated voltage and current; rate 30/min (≤13 A), 15/min (>13 <25 A), 7.5/min (≥25 A); ON 25 %, OFF 75 % of cycle",
+   "valueTable": {
+    "1": {
+     "expected": "40 000 operations (rated voltage ≤250 V, except patterns 3/03) / 20 000 operations (>250 V or patterns 3/03); at cos ϕ 0.6 ± 0.05"
+    },
+    "2": {
+     "expected": "40 000 operations (rated voltage ≤250 V, except patterns 3/03) / 20 000 operations (>250 V or patterns 3/03); at cos ϕ 0.6 ± 0.05"
+    },
+    "4": {
+     "expected": "40 000 operations (rated voltage ≤250 V, except patterns 3/03) / 20 000 operations (>250 V or patterns 3/03); at cos ϕ 0.6 ± 0.05"
+    },
+    "6": {
+     "expected": "40 000 operations (rated voltage ≤250 V, except patterns 3/03) / 20 000 operations (>250 V or patterns 3/03); at cos ϕ 0.6 ± 0.05"
+    },
+    "10": {
+     "expected": "40 000 operations (rated voltage ≤250 V, except patterns 3/03) / 20 000 operations (>250 V or patterns 3/03); at cos ϕ 0.6 ± 0.05"
+    },
+    "13": {
+     "expected": "40 000 operations (rated voltage ≤250 V, except patterns 3/03) / 20 000 operations (>250 V or patterns 3/03); at cos ϕ 0.6 ± 0.05"
+    },
+    "16": {
+     "expected": "40 000 operations (rated voltage ≤250 V, except patterns 3/03) / 20 000 operations (>250 V or patterns 3/03); at cos ϕ 0.6 ± 0.05"
+    },
+    "20": {
+     "expected": "10 000 operations at cos ϕ 0.6 ± 0.05"
+    },
+    "25": {
+     "expected": "10 000 operations at cos ϕ 0.6 ± 0.05"
+    },
+    "32": {
+     "expected": "10 000 operations at cos ϕ 0.6 ± 0.05"
+    },
+    "40": {
+     "expected": "10 000 operations at cos ϕ 0.6 ± 0.05"
+    },
+    "45": {
+     "expected": "10 000 operations at cos ϕ 0.6 ± 0.05"
+    },
+    "50": {
+     "expected": "10 000 operations at cos ϕ 0.6 ± 0.05"
+    },
+    "63": {
+     "expected": "5 000 operations at cos ϕ 0.6 ± 0.05"
+    }
+   }
+  },
+  {
+   "clauseRef": "Cl 19.3 / Tables 2, 22",
+   "section": "Normal operation",
+   "parameterName": "Self-ballasted lamp (SBL) load rating and inrush limits",
+   "limitType": "text",
+   "acceptanceOrType": "type",
+   "variesBy": [
+    "rating"
+   ],
+   "sourceTable": "Table 22",
+   "specText": "Circuit per Fig. 16B; 3 kA prospective at cos ϕ 0.9; R3 = 0.25 Ω; contact closes at 90° ± 5° phase angle; values ± 5 %",
+   "valueTable": {
+    "1": {
+     "expected": "Not applicable — momentary contact switches are not submitted to 19.3"
+    },
+    "2": {
+     "expected": "Not applicable — momentary contact switches are not submitted to 19.3"
+    },
+    "4": {
+     "expected": "Not applicable — momentary contact switches are not submitted to 19.3"
+    },
+    "6": {
+     "expected": "SBL circuit 100 W: Ipeak ≤ 108 A, I²t ≤ 2.8 A²s (alternate 60 W: 162 A / 5.9 A²s); operations per Table 21"
+    },
+    "10": {
+     "expected": "SBL circuit 100 W: Ipeak ≤ 108 A, I²t ≤ 2.8 A²s (alternate 60 W: 162 A / 5.9 A²s); operations per Table 21"
+    },
+    "13": {
+     "expected": "SBL circuit 150 W: Ipeak ≤ 142 A, I²t ≤ 5.5 A²s (alternate 60 W: 162 A / 5.9 A²s)"
+    },
+    "16": {
+     "expected": "SBL circuit 200 W: Ipeak ≤ 170 A, I²t ≤ 9 A²s (alternate 100 W: 200 A / 11.5 A²s)"
+    },
+    "20": {
+     "expected": "SBL circuit 250 W: Ipeak ≤ 192 A, I²t ≤ 13 A²s (alternate 150 W: 231 A / 18.5 A²s)"
+    },
+    "25": {
+     "expected": "Not applicable — switches above 20 A are subjected to 19.1 only"
+    },
+    "32": {
+     "expected": "Not applicable — switches above 20 A are subjected to 19.1 only"
+    },
+    "40": {
+     "expected": "Not applicable — switches above 20 A are subjected to 19.1 only"
+    },
+    "45": {
+     "expected": "Not applicable — switches above 20 A are subjected to 19.1 only"
+    },
+    "50": {
+     "expected": "Not applicable — switches above 20 A are subjected to 19.1 only"
+    },
+    "63": {
+     "expected": "Not applicable — switches above 20 A are subjected to 19.1 only"
+    }
+   }
+  },
+  {
+   "clauseRef": "Cl 12.3.11 / Table 11",
+   "section": "Terminals",
+   "parameterName": "Screwless terminal electrical/thermal test current",
+   "limitType": "text",
+   "acceptanceOrType": "type",
+   "variesBy": [
+    "rating"
+   ],
+   "sourceTable": "Table 11",
+   "specText": "Voltage drop ≤ 15 mV after 1 h at test current; then 192 temperature cycles — drop ≤ 22.5 mV or 2 × 24th-cycle value",
+   "valueTable": {
+    "1": {
+     "expected": "Test current 9 A with 0.75 mm² conductor (1 h; voltage drop ≤ 15 mV)"
+    },
+    "2": {
+     "expected": "Test current 9 A with 0.75 mm² conductor (1 h; voltage drop ≤ 15 mV)"
+    },
+    "4": {
+     "expected": "Test current 9 A with 0.75 mm² conductor (1 h; voltage drop ≤ 15 mV)"
+    },
+    "6": {
+     "expected": "Test current 13.5 A with 1 mm² conductor"
+    },
+    "10": {
+     "expected": "Test current 17.5 A with 1.5 mm² conductor"
+    },
+    "13": {
+     "expected": "Test current 17.5 A with 1.5 mm² conductor"
+    },
+    "16": {
+     "expected": "Test current 22 A with 2.5 mm² conductor"
+    },
+    "20": {
+     "expected": "Not applicable — screwless terminals are limited to rated currents up to 16 A"
+    },
+    "25": {
+     "expected": "Not applicable — screwless terminals are limited to rated currents up to 16 A"
+    },
+    "32": {
+     "expected": "Not applicable — screwless terminals are limited to rated currents up to 16 A"
+    },
+    "40": {
+     "expected": "Not applicable — screwless terminals are limited to rated currents up to 16 A"
+    },
+    "45": {
+     "expected": "Not applicable — screwless terminals are limited to rated currents up to 16 A"
+    },
+    "50": {
+     "expected": "Not applicable — screwless terminals are limited to rated currents up to 16 A"
+    },
+    "63": {
+     "expected": "Not applicable — screwless terminals are limited to rated currents up to 16 A"
+    }
+   }
+  },
+  {
+   "clauseRef": "Cl 13.12 / Table 15",
+   "section": "Construction",
+   "parameterName": "Surface-switch cable entry — external cable dimension limits",
+   "limitType": "text",
+   "acceptanceOrType": "acceptance",
+   "variesBy": [
+    "rating"
+   ],
+   "sourceTable": "Table 15",
+   "specText": "Conduit entries accept sizes 16/20/25/32 (at least two); conduit/sheath enters ≥ 1 mm into enclosure",
+   "valueTable": {
+    "1": {
+     "expected": "Not specified in Table 15"
+    },
+    "2": {
+     "expected": "Not specified in Table 15"
+    },
+    "4": {
+     "expected": "Not specified in Table 15"
+    },
+    "6": {
+     "expected": "2 cond: 3.2×5.2 to 3.9×6.4 mm (flat) or 5.2-11.5 mm"
+    },
+    "10": {
+     "expected": "2 cond ≤ 13.5; 3 cond 6.4-14.5; 4 cond ≤ 15.5 mm (min 5.2 mm)"
+    },
+    "13": {
+     "expected": "Not separately listed in Table 15 (nearest band: 10 A row, conductors 1-2.5 mm²)"
+    },
+    "16": {
+     "expected": "2 cond ≤ 15; 3 cond 7.4-16; 4 cond ≤ 18 mm"
+    },
+    "20": {
+     "expected": "2 cond ≤ 18.5; 3 cond 8.9-20; 4 cond ≤ 22 mm"
+    },
+    "25": {
+     "expected": "2 cond ≤ 18.5; 3 cond 8.9-20; 4 cond ≤ 22 mm"
+    },
+    "32": {
+     "expected": "2 cond ≤ 24; 3 cond 10.5-25.5; 4 cond ≤ 28 mm"
+    },
+    "40": {
+     "expected": "2 cond ≤ 27.5; 3 cond 11.5-29.5; 4 cond ≤ 32 mm"
+    },
+    "45": {
+     "expected": "2 cond ≤ 27.5; 3 cond 11.5-29.5; 4 cond ≤ 32 mm"
+    },
+    "50": {
+     "expected": "2 cond ≤ 27.5; 3 cond 11.5-29.5; 4 cond ≤ 32 mm"
+    },
+    "63": {
+     "expected": "2 cond ≤ 31.5; 3 cond 14.5-34; 4 cond ≤ 37.5 mm"
+    }
+   }
+  },
+  {
+   "clauseRef": "Cl 6.1 / 6.2",
+   "section": "Ratings",
+   "parameterName": "Rated voltages and currents",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "Preferred voltages 110/220/230/240/250/400/415/440 V (others per IS 12360); preferred currents 6/10/13/16/20/25/32/40/45/63 A (min 6 A; momentary contact switches may be 1/2/4 A); ≤ 16 A switches carry AX (externally ballasted) rating equal to rated current except patterns 3/03 and momentary switches; rated current ≤ 16 A for screwless terminals; ≤ 63 A and ≤ 440 V overall"
+  },
+  {
+   "clauseRef": "Cl 8",
+   "section": "Marking",
+   "parameterName": "Marking and durability",
+   "limitType": "qualitative",
+   "acceptanceOrType": "acceptance",
+   "expected": "Rated current (A/AX per tests), voltage, nature of supply, maker, type ref, gap-construction symbols (m/µ/ɛ), IP where declared; N and earth symbols not on removable parts; position marking; red push-button only for opening; durability: 15 s rub with water then 15 s petroleum spirit — legible (routine test: marking)"
+  },
+  {
+   "clauseRef": "Cl 10.1",
+   "section": "Safety",
+   "parameterName": "Protection against electric shock",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "Live parts inaccessible after removing tool-free parts (test finger, 40-50 V indicator; smallest and largest conductors). Thermoplastic/elastomeric enclosures: 1 min, 75 N via probe 11 of IS 1401 at 35 ± 2 °C (10 N on knock-outs) — no deformation exposing live parts"
+  },
+  {
+   "clauseRef": "Cl 11.4",
+   "section": "Earthing",
+   "parameterName": "Earth continuity resistance, Max",
+   "unit": "Ω",
+   "limitType": "max",
+   "acceptanceOrType": "type",
+   "max": 0.05,
+   "expected": "Test at 1.5 × rated current or 25 A (whichever greater) from ac source ≤ 12 V no-load; resistance from voltage drop ≤ 0.05 Ω"
+  },
+  {
+   "clauseRef": "Cl 12.2 / Table 5-8",
+   "section": "Terminals",
+   "parameterName": "Screw terminal mechanical tests",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "Torques per Table 5 (0.2-3.0 Nm by thread diameter and column; dolly-type row-6 values 1.4/1.8 Nm); flexion test 15 min at 10 ± 2 r/min with Table 6 bushing/height/mass (0.3-4.5 kg); pull-out per Table 7 (30/40/50/50/60/80/90/100 N for 0.5-25 mm²) for 1 min; 5 × tighten/loosen at full torque — no slip-out, breakage or damage; flexible conductors: ≤ 15 % broken wires"
+  },
+  {
+   "clauseRef": "Cl 12.3.10-12.3.12",
+   "section": "Terminals",
+   "parameterName": "Screwless terminal mechanical and deflection tests",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "5 × connect/disconnect + 30 N pull 1 min; 15 min circular motion with Table 7 pull; deflection test in 12 directions (forces 0.25/0.5/1.0 N for 1.0/1.5/2.5 mm² at 100 mm): voltage drop across clamping unit ≤ 25 mV"
+  },
+  {
+   "clauseRef": "Cl 13.3 / Table 14",
+   "section": "Construction",
+   "parameterName": "Fixing of covers, cover plates and actuating members",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "Held at ≥ 2 points (or single fixing + location); non-screw fixings: shall NOT come off at 40 N (live-part access; 80 N if not complying with 20.8/20.9), 10/20 N (non-earthed metal), 10 N (insulating/earthed/SELV ≤ 25 V); SHALL come off at ≤ 120 N; verified also over 1 mm hard sheet; groove gauge penetration ≤ 1.0 mm at 1 N"
+  },
+  {
+   "clauseRef": "Cl 13.9",
+   "section": "Construction",
+   "parameterName": "IP-rated surface switches — drain holes and lid springs",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "IPX4/IPX5/IPX6: provision for opening a drain hole ≥ 5 mm diameter or ≥ 20 mm² (width and length ≥ 3 mm), effective in mounting position(s); lid springs of corrosion-resistant material (bronze/stainless steel)"
+  },
+  {
+   "clauseRef": "Cl 13.15",
+   "section": "Construction",
+   "parameterName": "Membranes in inlet openings",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "Replaceable; fixed reliably: 30 N for 5 s via test-finger tip at 40 ± 2 °C (aged and new membranes) without displacement/live-part access; axial pull 30 N 5 s; after 2 h at −15 ± 2 °C cables of heaviest type introducible without undue force; no harmful deformation or cracks"
+  },
+  {
+   "clauseRef": "Cl 14",
+   "section": "Mechanism",
+   "parameterName": "Mechanism requirements",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "Actuating member takes contact position (single rest allowed for cord/push types); rest only in on/off (intermediate needs adequate insulation, checked per 16.3); no undue arcing at slow 2 s operation (10 breaks after test 19); patterns 2/3/03/6/2 operate poles substantially simultaneously (03: neutral not after make/before break); action independent of cover (no lamp flicker); cord-operated: off-change with pull ≤ 45 N vertical / ≤ 65 N at 45°"
+  },
+  {
+   "clauseRef": "Cl 15.1",
+   "section": "Environmental",
+   "parameterName": "Resistance to ageing",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "168 h at 70 ± 2 °C, then ≥ 96 h at room temperature and 45-55 % RH: no visible cracks, material not sticky or greasy (5 N cloth-wrapped-finger check)"
+  },
+  {
+   "clauseRef": "Cl 15.2",
+   "section": "Environmental",
+   "parameterName": "Protection by enclosure (IP code verification)",
+   "limitType": "qualitative",
+   "acceptanceOrType": "acceptance",
+   "expected": "Per IS/IEC 60529 mounted as in normal use: access to hazardous parts; dust (numeral 5 = category 2, no interfering dust; numeral 6 = category 1, no dust); water per second numeral (gland torques two-thirds of Table 16: metal 6.25/7.5/10 Nm, moulded 3.75/5/7.5 Nm); electric strength per 16.3 within 5 min after; no water on live parts"
+  },
+  {
+   "clauseRef": "Cl 15.3",
+   "section": "Environmental",
+   "parameterName": "Resistance to humidity",
+   "limitType": "qualitative",
+   "acceptanceOrType": "acceptance",
+   "expected": "91-95 % RH at 20-30 °C for 48 h (IPX0) or 168 h (> IPX0) [24 h for acceptance tests]; followed immediately by IR and electric strength tests of 16 — no damage"
+  },
+  {
+   "clauseRef": "Cl 16.2 / Table 18",
+   "section": "Insulation",
+   "parameterName": "Insulation resistance (poles to body), Min",
+   "unit": "MΩ",
+   "limitType": "min",
+   "acceptanceOrType": "acceptance",
+   "min": 5,
+   "expected": "500 V dc, measured after 1 min, connection points per Table 17; ≥ 5 MΩ for poles-to-body, mechanism/knob-foil/key/anchorage/accessible-metal and enclosure-lining items"
+  },
+  {
+   "clauseRef": "Cl 16.2 / Table 18",
+   "section": "Insulation",
+   "parameterName": "Insulation resistance (pole-to-pole and across open contacts), Min",
+   "unit": "MΩ",
+   "limitType": "min",
+   "acceptanceOrType": "acceptance",
+   "min": 2,
+   "expected": "Each pole in turn to all others connected to body (switch on) and between terminals electrically connected in on-position while switch off (normal/mini/micro-gap)"
+  },
+  {
+   "clauseRef": "Cl 16.3 / Table 18",
+   "section": "Insulation",
+   "parameterName": "Electric strength",
+   "limitType": "qualitative",
+   "acceptanceOrType": "acceptance",
+   "expected": "1 min, 50/60 Hz: 1 250 V (rated ≤ 130 V) / 2 000 V (> 130 V) for items 1-5; 2 000 / 3 000 V live-to-accessible where mechanism not insulated; 2 500 / 4 000 V live to metal knobs/push-buttons; micro-gap open contacts 500 / 1 250 V (750 V after humidity, 500 V after normal operation for ≤ 250 V) — no flashover or breakdown (transformer ≥ 200 mA; trip ≥ 100 mA)"
+  },
+  {
+   "clauseRef": "Cl 17.1",
+   "section": "Temperature rise",
+   "parameterName": "Temperature rise of terminals, Max",
+   "unit": "K",
+   "limitType": "max",
+   "acceptanceOrType": "acceptance",
+   "max": 45,
+   "expected": "After 1 h at Table 19 test current, mounted per 17.1 (flush: pinewood + plaster block; surface: 500 × 500 × 20 mm wooden block)"
+  },
+  {
+   "clauseRef": "Cl 17.2",
+   "section": "Temperature rise",
+   "parameterName": "Surface temperature rise with pilot light, Max",
+   "limitType": "qualitative",
+   "acceptanceOrType": "acceptance",
+   "expected": "Pilot light at rated voltage 1 h + rated current load: ≤ 45 K non-metallic knobs/handles/sensing surfaces; ≤ 55 K other non-metallic; ≤ 35 K metallic knobs; ≤ 45 K other metallic (neon/LED ≤ 3 mA exempt)"
+  },
+  {
+   "clauseRef": "Cl 18.2",
+   "section": "Switching capacity",
+   "parameterName": "Making and breaking capacity (overload)",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "200 operations at 1.1 × rated voltage, 1.25 × rated current, cos ϕ 0.3 ± 0.05; rate 30/min (≤ 13 A), 15/min (> 13 < 25 A), 7.5/min (≥ 25 A); ON 25 % / OFF 75 %; earth fuse (0.1 mm Cu wire ≥ 50 mm) shall not blow; no sustained arcing; no damage impairing use"
+  },
+  {
+   "clauseRef": "Cl 18.3",
+   "section": "Switching capacity",
+   "parameterName": "Overload test with filament lamps",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "For switches ≤ 16 A (and patterns 3/03 > 250 V): tungsten filament lamp load ≥ 1.2 × rated current at ≥ 95 % voltage; prospective short-circuit ≥ 1 500 A; conditions per 18.2 — no sustained arcing; momentary contact switches exempt"
+  },
+  {
+   "clauseRef": "Cl 19.1",
+   "section": "Normal operation",
+   "parameterName": "Normal operation — post-test requirements",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "After Table 21 operations: pass electric strength (voltages reduced by 500 V; 4 000 → 3 000 V) and terminal temperature-rise at rated current; no wear impairing use, no actuator/contact position discrepancy, no enclosure/lining deterioration, no sealing seepage, no loosening, no relative contact displacement (patterns 2/3/03/6/2); then 14.3 slow-operation check"
+  },
+  {
+   "clauseRef": "Cl 19.2",
+   "section": "Normal operation",
+   "parameterName": "Externally ballasted lamp load test (AX rating)",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "Circuit Fig. 16A: 3-4 kA prospective at cos ϕ 0.9 ± 0.05; C1 = 70 µF (6 A) / 140 µF (others) ± 10 %; R3 = 0.25 Ω; 10 000 operations at 30/min (6-13 A) or 5 000 at 15/min (> 13-16 A); then reduced electric strength + terminal temperature rise; functional criteria as 19.1"
+  },
+  {
+   "clauseRef": "Cl 20.2 / Table 24",
+   "section": "Mechanical",
+   "parameterName": "Pendulum hammer impact resistance",
+   "limitType": "qualitative",
+   "acceptanceOrType": "acceptance",
+   "expected": "250 g hammer, 9 blows; fall heights — IPX0: 80 mm (parts A/B), 120 (C), 160 (D); IP > IPX0: 120/120/160/200 mm; panel-mount parts 100 mm; after test live parts not accessible (probe B; probe 11 at 10 N for pilot-light lens), no damage within the standard"
+  },
+  {
+   "clauseRef": "Cl 20.3-20.10",
+   "section": "Mechanical",
+   "parameterName": "Other mechanical strength tests",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "Surface-switch base on cylinder (radius 4.5 × fixing distance, ≥ 200 mm; screw torque 0.5/1.2 Nm) then flat sheet — no damage; glands: Table 16 torque 1 min; knob attachment: axial 30 N (likely) / 15 N (unlikely) 1 min + 100 reverse rotations; cord-operated operating member: 100 N 1 min + 50 N within 80° cone 1 min — still operates"
+  },
+  {
+   "clauseRef": "Cl 21.2",
+   "section": "Heat & fire",
+   "parameterName": "Basic heating test (100 °C)",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "1 h at 100 ± 2 °C: no change impairing use; sealing compound shall not flow to expose live parts; live parts not accessible afterwards (test finger ≤ 5 N); markings legible"
+  },
+  {
+   "clauseRef": "Cl 21.3",
+   "section": "Heat & fire",
+   "parameterName": "Ball pressure — parts retaining current-carrying/earthing parts, Max impression",
+   "unit": "mm",
+   "limitType": "max",
+   "acceptanceOrType": "type",
+   "max": 2,
+   "expected": "5 mm steel ball, 20 N, 1 h at 125 ± 2 °C; impression diameter ≤ 2 mm"
+  },
+  {
+   "clauseRef": "Cl 21.4",
+   "section": "Heat & fire",
+   "parameterName": "Ball pressure — other insulating parts, Max impression",
+   "unit": "mm",
+   "limitType": "max",
+   "acceptanceOrType": "type",
+   "max": 2,
+   "expected": "5 mm ball, 20 N, 1 h at 70 ± 2 °C or 40 ± 2 °C + highest temperature rise from Cl 17 (whichever higher); also for surface boxes, separable covers, frames and rubber switches"
+  },
+  {
+   "clauseRef": "Cl 22",
+   "section": "Materials",
+   "parameterName": "Screws, current-carrying parts and connections",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "Contact-pressure screws of metal in metal threads; 10 × (insulating thread) / 5 × tighten-loosen at 12.2.5 torque without damage; contact pressure not through insulation (except ceramic/pure mica); current-carrying parts of copper, ≥ 58/50 % copper alloy, stainless ≥ 13 % Cr ≤ 0.09 % C, or plated steel (Zn 5/12.5/25 µm, Ni+Cr 20/30/40 µm, Sn 12/20/30 µm by IP); sliding contacts corrosion-resistant; thread-forming screws not for current connections (earthing: ≥ 2 screws, undisturbed)"
+  },
+  {
+   "clauseRef": "Cl 23.1 / Table 9",
+   "section": "Distances",
+   "parameterName": "Creepage distance across open contacts, Min",
+   "unit": "mm",
+   "limitType": "min",
+   "acceptanceOrType": "type",
+   "min": 3,
+   "expected": "Normal/mini/micro gap: 3 mm (mini/micro reducible for ≤ 250 V to 1.2 mm with CTI ≥ 600 or 1.8 mm with CTI ≥ 400)"
+  },
+  {
+   "clauseRef": "Cl 23.1 / Table 9",
+   "section": "Distances",
+   "parameterName": "Creepage distance between live parts of different polarity, Min",
+   "unit": "mm",
+   "limitType": "min",
+   "acceptanceOrType": "type",
+   "min": 4,
+   "expected": "4 mm (3 mm for rated voltage ≤ 250 V); 1 mm between lead wires in the pinch of a neon lamp/LED with external resistor"
+  },
+  {
+   "clauseRef": "Cl 23.1 / Table 9",
+   "section": "Distances",
+   "parameterName": "Clearances and sealing-compound distances",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "Clearances: open contacts 3 mm (mini-gap 1.2; micro-gap < 1.2 but > contact gap); polarity 3; live-to-accessible groups 3; live to unearthed metal boxes without lining 4.5; live to mounting surface 6; live to unearthed accessible metal 6 (4.5 for ≤ 250 V); through sealing compound ≥ 2 mm cover: 4 (3 for ≤ 250 V) to mounting surface, 2.5 to conductor-space bottom; grooves < 1 mm count width; air gaps < 1 mm ignored; double-break distances summed"
+  },
+  {
+   "clauseRef": "Cl 24.1",
+   "section": "Heat & fire",
+   "parameterName": "Glow-wire test",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "850 °C for insulating parts retaining current-carrying/earthing parts (650 °C for parts retaining earth terminal in a box); 650 °C for other parts: no visible flame/sustained glowing, or self-extinguish within 30 s; no ignition of tissue/scorching of board; small parts (15 mm/8 mm circle rule) and ceramics exempt"
+  },
+  {
+   "clauseRef": "Cl 24.2",
+   "section": "Heat & fire",
+   "parameterName": "Proof tracking index (IP > IPX0), Min",
+   "unit": "V",
+   "limitType": "min",
+   "acceptanceOrType": "type",
+   "min": 175,
+   "testMethod": "IS 2824",
+   "expected": "PTI 175 V, solution A, 50 drops at 30 ± 5 s interval — no flashover or breakdown; ceramics exempt"
+  },
+  {
+   "clauseRef": "Cl 25",
+   "section": "Materials",
+   "parameterName": "Resistance to rusting",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "Degrease; 10 min in 10 % ammonium chloride at 27 ± 5 °C; 10 min in saturated-moisture box at 27 ± 5 °C (RH ≥ 90 %); dry 10 min at 100 ± 5 °C — no rust (sharp-edge traces/yellowish removable film ignored)"
+  },
+  {
+   "clauseRef": "Annex A",
+   "section": "Construction",
+   "parameterName": "Flexible cable outlet switches (where provided)",
+   "limitType": "qualitative",
+   "acceptanceOrType": "type",
+   "expected": "Cable anchorage relieves strain and twisting, insulating or lined, not releasable from outside, no special tool; entry accepts Table A-1 cable sizes; test: 25 × 30 N pulls (1 s) + 0.15 Nm torque 1 min (repeat 60 N / 0.35 Nm with largest 60245 IEC 66 cable): displacement ≤ 2 mm; 2 000 V ac 1 min conductors-to-anchorage without damage"
+  },
+  {
+   "clauseRef": "Cl 26",
+   "section": "Test schedule",
+   "parameterName": "Type / acceptance / routine test schedule",
+   "limitType": "qualitative",
+   "acceptanceOrType": "acceptance",
+   "expected": "Type tests: clauses 6-25 full sequence per Table 1 (12 specimens + 9 for dual rating). Acceptance tests: marking (8); water/humidity (15.2, 15.3 — 24 h); IR + electric strength (16); temperature rise (17); mechanical strength (20); sampling per Annex B Table B-1. Routine test: marking (8)"
+  }
+ ]
+}

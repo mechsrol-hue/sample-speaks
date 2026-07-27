@@ -1,0 +1,202 @@
+{
+  "isNumber": "IS 4250:2025",
+  "title": "Electric Food-Mixers (Liquidizers and Grinders) and Centrifugal Juicers — Specification",
+  "revision": "Second Revision",
+  "parameterizationDims": ["bowlCapacity"],
+  "dimensionOptions": {
+    "bowlCapacity": [0.5, 1.0, 1.5]
+  },
+  "defaults": { "bowlCapacity": 1.0 },
+  "parameters": [
+    {
+      "clauseRef": "Cl 4.2", "section": "General", "parameterName": "External finish of metal components",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [],
+      "expected": "Heat and moisture-resisting finish, not adversely affected by temperature variations in normal operation or during the endurance test; body finish of the food mixer shall not become stained by spillage of foodstuff from the bowl"
+    },
+    {
+      "clauseRef": "Cl 8", "section": "Safety", "parameterName": "Safety requirements (8 to 32 of IS 302 (Part 2/Sec 14))",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 1",
+      "testMethod": "IS 302 (Part 2/Sec 14):2009 + IS 4250 Annex A",
+      "expected": "Relevant provisions of 8 to 32 of IS 302 (Part 2/Sec 14) apply; tests of 11 (heating), 20 (stability), 22 (construction) and 24 (components) carried out per Annex A of this standard"
+    },
+    {
+      "clauseRef": "Cl 9", "section": "Endurance", "parameterName": "Endurance for motor and base assembly (48 ON-hours)",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 1",
+      "testMethod": "IS 4250 Annex B / IS 302-1:2024, Cl 16.3",
+      "expected": "Unit (excluding jars) operated at rated input on generator load (Annex B): 24 ON-hours at 1.06 × rated voltage + 24 ON-hours at 0.94 × rated voltage, in ON/OFF cycles per operation class — (a) rated ON < 5 min: 6 ×, 3 min ON / 2 min OFF; (b) rated ON ≥ 5 min: 6 ×, 5 min ON / 2 min OFF; (c) rated ON > 30 min: (rated ON ÷ 5, rounded) ×, 5 min ON / 2 min OFF; (d) continuous: ≥ 10 × or until steady, 5 min ON / 2 min OFF; rest ≤ 60 min to room temperature; total ON time = 48 h; OLP short-circuited; highest speed; coupler breakage due to fixture excluded. After test: withstand electric strength test of 16.3 of IS 302-1"
+    },
+    {
+      "clauseRef": "Cl 10.2", "section": "Operational — Grinding Coffee", "parameterName": "Coffee residue on 710-micron sieve, Max",
+      "unit": "%", "limitType": "max", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Cl 10.2",
+      "testMethod": "IS 460 (Part 1):2020 / IS 3077:2022",
+      "max": 20,
+      "expected": "Material retained on 710-micron sieve not more than 20 percent of end-of-test weight"
+    },
+    {
+      "clauseRef": "Cl 10.2", "section": "Operational — Grinding Coffee", "parameterName": "Coffee residue on 500-micron sieve, Max",
+      "unit": "%", "limitType": "max", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Cl 10.2",
+      "testMethod": "IS 460 (Part 1):2020 / IS 3077:2022",
+      "max": 20,
+      "expected": "Material retained on 500-micron sieve not more than 20 percent of end-of-test weight"
+    },
+    {
+      "clauseRef": "Cl 10.2", "section": "Operational — Grinding Coffee", "parameterName": "Coffee passing 355-micron sieve, Min",
+      "unit": "%", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Cl 10.2",
+      "testMethod": "IS 460 (Part 1):2020 / IS 3077:2022",
+      "min": 30,
+      "expected": "Material passing 355-micron sieve not less than 30 percent of end-of-test weight"
+    },
+    {
+      "clauseRef": "Cl 10.2", "section": "Operational — Grinding Coffee", "parameterName": "Coffee grinding — test conditions",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [],
+      "testMethod": "IS 3077:2022 (light roast)",
+      "expected": "Charge = 40 percent of rated capacity of grinder bowl, freshly roasted 'light roast' seeds per IS 3077; operational time ≤ 3 min; total time incl. rest ≤ 5 min; one mid-test scrape permitted at rest (applicable to machines with dry grinding arrangement)"
+    },
+    {
+      "clauseRef": "Cl 10.3", "section": "Operational — Whisking", "parameterName": "Whisking egg whites",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [],
+      "expected": "Charge = egg whites (g) equal to 20 percent of liquidizer bowl rated capacity (ml), fresh, at room temperature; whisked to stiff froth; operational time ≤ 3 min, total ≤ 5 min; satisfactory if bowl inverted for 5 s and material remains in bowl (applicable to machines with whisking arrangement)"
+    },
+    {
+      "clauseRef": "Cl 10.4", "section": "Operational — Idli Batter", "parameterName": "Idli batter — black gram charge (solids + soak water)",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["bowlCapacity"], "sourceTable": "Cl 10.4 table",
+      "valueTable": {
+        "0.5": { "expected": "100 g decuticled black gram (Urad dal) soaked in 225 ml water for 12 h" },
+        "1": { "expected": "200 g decuticled black gram (Urad dal) soaked in 450 ml water for 12 h" },
+        "1.5": { "expected": "300 g decuticled black gram (Urad dal) soaked in 675 ml water for 12 h" }
+      }
+    },
+    {
+      "clauseRef": "Cl 10.4", "section": "Operational — Idli Batter", "parameterName": "Idli batter — parboiled rice charge (solids + soak water)",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": ["bowlCapacity"], "sourceTable": "Cl 10.4 table",
+      "valueTable": {
+        "0.5": { "expected": "100 g parboiled rice soaked in 113 ml water for 12 h" },
+        "1": { "expected": "200 g parboiled rice soaked in 225 ml water for 12 h" },
+        "1.5": { "expected": "300 g parboiled rice soaked in 338 ml water for 12 h" }
+      }
+    },
+    {
+      "clauseRef": "Cl 10.4", "section": "Operational — Idli Batter", "parameterName": "Black gram grinding result",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [],
+      "expected": "Ground ≤ 6 min per ingredient (rest as recommended by manufacturer); mixture worked between thumb and fingers shall be smooth and frothy with no lumps detected; up to 20 percent excess water may be added during grinding"
+    },
+    {
+      "clauseRef": "Cl 10.4", "section": "Operational — Idli Batter", "parameterName": "Rice residue on 1.40 mm sieve, Max",
+      "unit": "%", "limitType": "max", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Cl 10.4",
+      "testMethod": "IS 460 (Part 1):2020",
+      "max": 10,
+      "expected": "Not more than 10 percent of the mass of rice originally taken retained by the 1.40 mm sieve"
+    },
+    {
+      "clauseRef": "Cl 10.4", "section": "Operational — Idli Batter", "parameterName": "Rice residue on 1.00 mm sieve, Max",
+      "unit": "%", "limitType": "max", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Cl 10.4",
+      "testMethod": "IS 460 (Part 1):2020",
+      "max": 15,
+      "expected": "Not more than 15 percent of the mass of rice originally taken retained by the 1 mm sieve"
+    },
+    {
+      "clauseRef": "Cl 10.4", "section": "Operational — Idli Batter", "parameterName": "Rice residue on 0.5 mm sieve, Max",
+      "unit": "%", "limitType": "max", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Cl 10.4",
+      "testMethod": "IS 460 (Part 1):2020",
+      "max": 70,
+      "expected": "Not more than 70 percent of the mass of rice originally taken retained by the 0.5 mm sieve"
+    },
+    {
+      "clauseRef": "Cl 10.5.1", "section": "Operational — Juicers", "parameterName": "Juice extracted [(B/A) × 100], Min",
+      "unit": "%", "limitType": "min", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Cl 10.5.1",
+      "min": 50,
+      "expected": "Amount of juice extracted, as percentage of carrots/fruit taken, not less than 50 percent"
+    },
+    {
+      "clauseRef": "Cl 10.5.1", "section": "Operational — Juicers", "parameterName": "Juicer operation — test conditions and flow",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [],
+      "expected": "Carrots/fresh seasonal fruits soaked 24 h, topped-tailed, cut ~20 mm thick; batch juicers: ~350 g per cycle × 5 cycles; continuous juicers: 5 min or rated operating time, whichever is less; juice filtered through 0.25 mm sieve and weighed; juice pouring from the vent shall have an even flow"
+    },
+    {
+      "clauseRef": "Cl 10.5.2", "section": "Operational — Juicers", "parameterName": "Spillage/leakage from centrifugal mesh",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [],
+      "expected": "After dismantling, cleaning and inspection: no spillage/leakage from the centrifugal mesh to parts of the juicer that do not form the flow path of the extracted juice"
+    },
+    {
+      "clauseRef": "Cl 11", "section": "Bowl", "parameterName": "Temperature withstand test for bowl",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Table 1 / Table 2",
+      "expected": "Boiling water poured rapidly into bowl at room temperature to full capacity; emptied and returned to room temperature; repeated 5 times: no sign of cracks or deformation, and bowl properly fits into holder (not applicable to metal bowls)"
+    },
+    {
+      "clauseRef": "Cl 12.1", "section": "Controls", "parameterName": "Test for switches (overload protection)",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 1",
+      "expected": "Controlling switches for overload protection shall break the stalled motor current at maximum rated voltage six times without failure (rated capacity taken equivalent to rated input)"
+    },
+    {
+      "clauseRef": "Cl 13", "section": "Assembly", "parameterName": "Strength of assembly",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 1",
+      "expected": "Bowl assembled and mounted on motor housing six times — press-fit joints with 25 kgf force; screwed joints with 25 kgf·cm screwing couple: no chipping, cracking or visible denting on mounting surfaces"
+    },
+    {
+      "clauseRef": "Annex A, A-2", "section": "Safety", "parameterName": "Stability and mechanical hazards",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [],
+      "testMethod": "IS 302 (Part 2/Sec 14):2009, Cl 20",
+      "expected": "Provisions of 20 of IS 302 (Part 2/Sec 14) apply, except tests 20.104, 20.112, 20.113 and 20.114 kept in abeyance for 36 months from publication of this standard"
+    },
+    {
+      "clauseRef": "Annex A, A-3", "section": "Construction", "parameterName": "Construction (A-3.1 to A-3.9)",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [],
+      "testMethod": "IS 302 (Part 2/Sec 14):2009, Cl 22 + IS 4250 Annex A",
+      "expected": "Compact, self-contained, rigid; hygiene-critical parts readily accessible without special tools; castings smooth, round-edged, free from blow holes/pits/foreign matter; parts interchangeable, wear parts easily replaceable; liquidizer lid (held firmly, with breather); lid for open-type grinder bowl; no accidental bodily contact with cutters/blades in normal operation; lubricants shall not contaminate food; food kept from moving parts except blades/cutters; cutters and food-contact parts of non-fouling, corrosion/rust-resistant material (e.g. stainless steel)"
+    },
+    {
+      "clauseRef": "Annex A, A-4", "section": "Components", "parameterName": "Components (A-4.1 to A-4.6)",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [],
+      "testMethod": "IS 302 (Part 2/Sec 14):2009, Cl 24 + IS 4250 Annex A",
+      "expected": "Body/motor housing of cast iron, cast aluminium, sheet metal, high-impact thermosetting plastics or thermoplastics (ABS, polypropylene, etc.) of adequate strength; ventilation openings screened against spillage; flexible, easily replaceable power coupling withstanding 48 h use, shock and vibrations; sleeve or ball bearings, permanently lubricated, life ≥ 48 h; bowl of materials neutral to food acids/salts, withstanding up to 100 °C (glass, high-impact thermosetting plastic, or stainless steel), easily removable, free from pits/cracks/crevices, smooth without corners/niches; tool-free stable mounting with accurate guides, gasket + mechanical seal where bowl detaches from base plate; blades of cutters of stainless steel"
+    },
+    {
+      "clauseRef": "Annex A, A-1 / Annex C", "section": "Performance", "parameterName": "Heating test (temperature rise)",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [],
+      "testMethod": "IS 302 (Part 2/Sec 14):2009, Cl 11 per IS 4250 Annex C / IS 302-1:2024, Cl 11",
+      "expected": "Operated on generator load (Annex B setup) at rated power input, most unfavourable voltage between 0.94 and 1.06 × rated; ON/OFF cycles per operation class as in Cl 9; OLP short-circuited; highest speed; winding temperature rise Δt = ((R₂−R₁)/R₁)(k+t₁)−(t₂−t₁), k = 234.5 (copper) / 225 (aluminium), by resistance method (thermocouples if windings non-uniform); temperature rises shall not exceed the values of Table 3 per 11 of IS 302-1"
+    },
+    {
+      "clauseRef": "Cl 14.2, Table 2 (i)", "section": "Acceptance (IS 302)", "parameterName": "Protection against access to live parts",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Table 2",
+      "testMethod": "IS 302 (Part 2/Sec 14):2009, Cl 8",
+      "expected": "Shall comply with 8 of IS 302 (Part 2/Sec 14)"
+    },
+    {
+      "clauseRef": "Cl 14.2, Table 2 (ii)", "section": "Acceptance (IS 302)", "parameterName": "Power input and current",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Table 2",
+      "testMethod": "IS 302 (Part 2/Sec 14):2009, Cl 10",
+      "expected": "Shall comply with 10 of IS 302 (Part 2/Sec 14)"
+    },
+    {
+      "clauseRef": "Cl 14.2, Table 2 (iii)", "section": "Acceptance (IS 302)", "parameterName": "Leakage current and electric strength at operating temperature",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Table 2 / Table 3",
+      "testMethod": "IS 302 (Part 2/Sec 14):2009, Cl 13",
+      "expected": "Shall comply with 13 of IS 302 (Part 2/Sec 14) (also a routine test per Table 3)"
+    },
+    {
+      "clauseRef": "Cl 14.2, Table 2 (iv)", "section": "Acceptance (IS 302)", "parameterName": "Moisture resistance",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Table 2",
+      "testMethod": "IS 302 (Part 2/Sec 14):2009, Cl 15",
+      "expected": "Shall comply with 15 of IS 302 (Part 2/Sec 14)"
+    },
+    {
+      "clauseRef": "Cl 14.2, Table 2 (v)", "section": "Acceptance (IS 302)", "parameterName": "Leakage current and electric strength",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Table 2",
+      "testMethod": "IS 302 (Part 2/Sec 14):2009, Cl 16",
+      "expected": "Shall comply with 16 of IS 302 (Part 2/Sec 14)"
+    },
+    {
+      "clauseRef": "Cl 14.2, Table 2 (vi)", "section": "Acceptance (IS 302)", "parameterName": "Provision for earthing",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Table 2 / Table 3",
+      "testMethod": "IS 302 (Part 2/Sec 14):2009, Cl 27",
+      "expected": "Shall comply with 27 of IS 302 (Part 2/Sec 14) (also a routine test per Table 3)"
+    },
+    {
+      "clauseRef": "Cl 14.3, Table 3", "section": "Routine Tests", "parameterName": "Routine tests on every unit",
+      "limitType": "qualitative", "acceptanceOrType": "acceptance", "variesBy": [], "sourceTable": "Table 3",
+      "testMethod": "IS 302 (Part 2/Sec 14):2009, Cl 8 / 13 / 27",
+      "expected": "Every food-mixer/juicer: protection against access to live parts (8), leakage current and electric strength at operating temperature (13), provision for earthing (27) of IS 302 (Part 2/Sec 14), plus a simple running test to verify satisfactory functioning"
+    }
+  ]
+}

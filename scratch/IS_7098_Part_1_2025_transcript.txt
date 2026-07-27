@@ -1,0 +1,338 @@
+IS 7098 (Part 1) : 2025
+Indian Standard
+CROSSLINKED POLYETHYLENE INSULATED THERMOPLASTIC SHEATHED CABLES — SPECIFICATION
+Part 1 For Working Voltages up to and including 1 100 Volts
+( Second Revision )
+ICS 29.060.20
+© BIS 2025 — June 2025 — Price Group 11
+Power Cables Sectional Committee, ETD 09
+
+FOREWORD
+This Indian Standard (Part 1) (Second Revision) was adopted by BIS after the draft finalized by the Power Cables
+Sectional Committee had been approved by the Electrotechnical Division Council. First published 1977, revised 1988;
+this revision aligns with international practices. Published in three parts: Part 2 (3.3 kV up to and including 33 kV),
+Part 3 (66 kV up to and including 220 kV). All amendments to first revision incorporated.
+Attention: cables with Category C3 (see Annex A), sheathed with low smoke and halogen free (LSHF) compound, are
+mechanically not comparable with other categories; not intended for outdoor installations; handle and install with
+sufficient care against mechanical damage, corrosive substances or solvents, UV radiation and excessive heat.
+Assistance derived from IEC 60502-1. Rounding off per IS 2 : 2022.
+
+SECTION 1 GENERAL
+1 SCOPE
+1.1 This standard (Part 1) covers requirements for both armoured and unarmoured single, twin, three, four and
+multi core cross-linked polyethylene (XLPE) insulated and thermoplastic sheathed cables for electric supply and
+control purposes.
+1.2 Suitable for ac single phase or three phase (earthed or unearthed) systems for rated voltages up to and
+including 1 100 V; may be used on dc systems for rated voltages up to and including 1 500 V.
+NOTE — Cables may be operated continuously at a power frequency voltage 10 percent higher than rated voltage.
+1.3 Armoured cables are suitable for use in mines also; additional requirements at 4.2, 14.5.2 and 18.2.
+1.4 Suitable where combination of ambient temperature and temperature rise due to load results in conductor
+temperature not exceeding 90 °C under normal operation and 250 °C under short-circuit condition.
+1.5 Also covers cables with improved fire performance, categories C1, C2 and C3 (Annex A); additional
+requirements at 8.2, 8.4, 16.1, 16.2 and 18.2.1.
+NOTE — Cables with PVC outer sheath can be classified as meeting requirement of Category 01.
+
+2 REFERENCES — see Annex B.
+
+3 TERMINOLOGY
+3.1 Routine Test — carried out by manufacturer on all finished cable lengths to check requirements likely to vary
+during manufacture. 3.2 Type Test — to prove quality and design of a given type of cable; need not be repeated
+unless changes in cable materials or design; type approval valid for other conductor material/cross-section if same
+grade of insulation (XLPE) and manufacturing process and conductor cross-sectional area not larger than tested.
+3.3 Acceptance Tests — on samples from a lot for acceptance of the lot. 3.4 Optional Tests — by agreement.
+3.5 Earthed System / 3.6 Unearthed System — definitions as printed (fault-condition voltage ≤ 80 percent of
+nominal system voltage for earthed neutral, protective cut-out arrangement, or arc suppression coil with isolation
+within 1 h (non-radial field cables) / 8 h (radial cables), total ≤ 125 h per year).
+
+SECTION 2 MATERIALS
+4 CONDUCTOR
+4.1 Plain copper or aluminium wires complying with IS 8130. 4.2 Mining cables for gassy mines: copper
+conductor only. NOTE — tinned copper by agreement.
+5 INSULATION — cross-linked polyethylene (XLPE) conforming to Table 1.
+6 FILLER AND INNER SHEATH
+6.1 Vulcanized or unvulcanized rubber, or thermoplastic materials. 6.2 Materials shall not be harder than
+insulation and outer sheath respectively; compatible with temperature ratings; no deleterious effect on other
+components. 6.3 For LSHF cables: halogen free and complying with sl no. (v) of Table 1B.
+7 ARMOURING
+7.1 Galvanized round steel wire; galvanized formed steel wire (strip); any metallic non-magnetic wire/strip.
+7.2 Galvanized round/formed steel wires per IS 3975 and 14.6; non-magnetic materials as agreed.
+8 OUTER SHEATH
+8.1 PVC compound or thermoplastic polyethylene (PE) compound or thermoplastic low smoke and halogen free
+(LSHF) compound. 8.2 PVC compound: type ST2 of IS 5831 (NOTE — for Category C1 and C2, ST2 with
+suitable additives to meet 16.1 and 16.2). 8.3 PE compound per Table 1A. 8.4 LSHF compound per Table 1B.
+
+Table 1 Properties of XLPE Insulation (Clauses 5, 16.1 and 16.2)
+i) Tensile strength — 12.5 N/mm² (Min)
+ii) Elongation at break — 200 percent (Min); Ageing in air oven treatment: 135 °C ± 3 °C, 7 days; variation in
+tensile strength from unaged — ± 25 percent (Max); variation in elongation at break from unaged — ± 25 percent (Max)
+iii) Hot set: treatment 200 °C ± 3 °C, 15 min under load, mechanical stress 20 N/cm²; elongation under load —
+175 percent (Max); permanent elongation after cooling — 15 percent (Max)
+iv) Shrinkage: treatment 130 °C ± 3 °C, 1 h; shrinkage — 4.0 percent (Max)
+v) Water absorption (gravimetric): treatment 85 °C ± 2 °C, 14 days; water absorbed — 1 mg/cm² (Max)
+vi) Volume resistivity: at 27 °C — 1 × 10^14 ohm-cm (Min); at 90 °C — 1 × 10^12 ohm-cm (Min)
+
+Table 1A Properties of PE Sheathing Compound (Clauses 8.3 and 16.1)
+i) Before ageing: tensile strength — 12.5 N/mm² (Min); elongation at break — 300 percent (Min)
+ii) Ageing in air oven (110 °C ± 2 °C, 7 days): elongation at break — 300 percent (Min)
+iii) Hot deformation test (110 °C ± 2 °C, 6 h): depth of indentation — 50 percent (Max)
+iv) Carbon black content (for black sheath only) — 2.5 percent ± 0.5 percent
+
+Table 1B Properties of LSHF Sheathing Compound (Clauses 6.3, 8.4, 16.1 and 16.4)
+Property | Type ST8 | Type ST12
+Before ageing — tensile strength | 9.0 N/mm² (Min) | 12.5 N/mm² (Min)
+Before ageing — elongation at break | 125 percent (Min) | 300 percent (Min)
+After ageing in air oven — temperature/duration | 100 °C ± 2 °C, 7 days | 110 °C ± 2 °C, 10 days
+After ageing — tensile strength | 9.0 N/mm² (Min) | 10.0 N/mm² (Min)
+After ageing — variation in tensile strength | ± 40 percent (Max) | ± 30 percent (Max)
+After ageing — elongation at break | 100 percent (Min) | 300 percent (Min)
+After ageing — variation in elongation at break | ± 40 percent (Max) | —
+Hot deformation (4 h) | 80 °C ± 2 °C, depth ≤ 50 percent | 110 °C ± 2 °C, depth ≤ 50 percent
+Water absorption gravimetric (70 °C ± 2 °C, 24 h) | increase in mass 10 mg/cm² (Max) | Not applicable
+pH | 4.3 (Min) | 4.3 (Min)
+Conductivity | 10 µS/mm (Max) | 10 µS/mm (Max)
+HCl | 0.5 percent (Max) | 0.5 percent (Max)
+Cold bend test (−15 °C ± 2 °C, 3 h) | No cracks | No cracks
+Cold elongation (−15 °C ± 2 °C, 3 h) | 20 percent (Min) | 20 percent (Min)
+Cold impact test (−15 °C ± 2 °C, 3 h) | No cracks | No cracks
+Shrinkage test | Not applicable | 80 °C ± 2 °C, 5 h — 3 percent (Max)
+
+SECTION 3 CONSTRUCTION
+9 CONDUCTOR
+9.1 Construction of conductor:
+i) Copper — / Aluminium 1.5 mm² — Solid — Class 1
+ii) Copper 1.5 to 6 mm² / Aluminium 2.5 to 10 mm² — Solid/Stranded — Class 1 for solid, Class 2 for stranded
+iii) Copper 10 mm² and above / Aluminium 16 mm² and above — Stranded — Class 2
+9.2 Protective barrier may be applied between conductor and insulation; compatible with insulating material and
+suitable for operating temperature.
+9.3 Cables with reduced neutral conductor shall have sizes as per Table 2.
+
+Table 2 Cross Sectional Area of Reduced Neutral Conductors (Clauses 9.3 and 16.2)
+Phase conductor mm² → Reduced neutral mm²: 25→16; 35→16; 50→25; 70→35; 95→50; 120→70; 150→70;
+185→95; 240→120; 300→150; 400→185; 500→240; 630→300.
+
+10 INSULATION
+10.1 Conductor (with protective barrier wherever applied) provided with XLPE insulation applied by extrusion.
+10.2 Average thickness of insulation not less than nominal value (ti) specified in Table 3.
+10.3 Tolerance: smallest measured thickness shall not fall below nominal (ti) by more than 0.1 mm + 0.1 ti
+[printed as "0.1 ti + 0.1 ti"; the standard tolerance formula is 0.1 mm + 0.1 ti].
+10.4 Application: fits closely on conductor (or barrier); removable without damaging the conductor.
+
+Table 3 Thickness of Insulation (Clauses 10.2, 10.3 and 16.1)
+[Printed column (3) header reads "Single-core Armoured Cables" — an evident misprint for "Single-core
+Unarmoured Cables", since column (4) reads "Single-core Armoured and Multi-core Cables"; per the 1988
+edition the thicker column applies to single-core unarmoured cables.]
+Size mm² | ti single-core unarmoured (col 3, as printed "Armoured") mm | ti single-core armoured and multi-core mm
+1.5 | 1.0 | 0.7
+2.5 | 1.0 | 0.7
+4 | 1.0 | 0.7
+6 | 1.0 | 0.7
+10 | 1.0 | 0.7
+16 | 1.0 | 0.7
+25 | 1.2 | 0.9
+35 | 1.2 | 0.9
+50 | 1.3 | 1.0
+70 | 1.4 | 1.1
+95 | 1.4 | 1.1
+120 | 1.5 | 1.2
+150 | 1.7 | 1.4
+185 | 1.9 | 1.6
+240 | 2.0 | 1.7
+300 | 2.1 | 1.8
+400 | 2.4 | 2.0
+500 | 2.6 | 2.2
+630 | 2.8 | 2.4
+800 | 3.1 | 2.6
+1 000 | 3.3 | 2.8
+
+11 CORE IDENTIFICATION
+11.1 a) coloured strip applied on the core (red/yellow/blue for phases, black for reduced neutral); b) colouring of
+XLPE insulation: single core — red, black, yellow, blue or natural; two core — red and black; three core — red,
+yellow and blue; four core — red, yellow, blue and black; five core — red, yellow, blue, black and grey; six core
+and above — two adjacent cores (counting and direction core) in each layer blue and yellow, remaining cores
+grey; c) by numerals (up to 4 cores): two core 0,1; three core 0,1,2; four core 0,1,2,3; control cables: 0 counting
+core, 1 direction core, remaining unnumbered.
+11.2 Reduced neutral core black. 11.3 More than 4 cores: alternatively numbered sequentially starting 1 in inner
+layer, hindu-arabic numerals, same contrasting colour, legible. 11.4 Reduced neutral core numbered '0'.
+
+12 LAYING UP OF CORES
+12.1 Twin, three and multicore: cores laid up with suitable lay; outermost layer right-hand lay, successive layers
+opposite lay; interstices filled with non-hygroscopic material where necessary.
+12.2 Recommended lay-up plan for multi-cores up to 100 per Table 4.
+
+Table 4 Lay-Up of Cores for Cables (Clauses 12.2 and 16.2) — guidance only
+2→2; 3→3; 4→4; 5→5; 6→6; 7→1-6; 8→1-7; 9→1-8; 10→2-8; 11→3-8; 12→3-9; 13→3-10; 14→4-10;
+15→5-10; 16→5-11; 17→5-12; 18→0-6-12; 19→1-6-12; 20→1-7-12; 21→1-7-13; 22→2-7-13; 23→2-8-13;
+24→2-8-14; 25→2-8-15; 26→3-9-14; 27→3-9-15; 28→3-9-16; 29→4-10-15; 30→4-10-16; 31→4-10-17;
+32→5-11-16; 33→5-11-17; 34→5-11-18; 35→5-12-18; 36→0-6-12-18; 37→0-6-12-18; 38→1-6-12-19;
+39→1-6-13-19; 40→1-7-13-19; 41→1-7-13-20; 42→2-8-13-19; 43→2-8-14-19; 44→2-8-14-20; 45→2-8-14-21;
+46→3-9-14-20; 47→3-9-15-20; 48→3-9-15-21; 49→3-9-15-22; 50→3-9-16-22; 51→4-10-16-21; 52→4-10-16-22;
+53→4-10-16-23; 54→4-10-17-23; 55→4-11-17-23; 56→5-11-17-23; 57→5-11-17-24; 58→5-11-18-24;
+59→5-12-18-24; 60→0-6-12-18-24; 61→1-6-12-18-24; 62→1-6-12-18-24; 63→1-7-12-18-25; 64→1-7-13-18-25;
+65→1-7-13-19-25; 66→1-7-13-19-26; 67→2-8-13-19-25; 68→2-8-14-19-25; 69→2-8-14-20-25; 70→2-8-14-20-26;
+71→2-8-14-20-27; 72→2-8-14-21-27; 73→3-9-15-20-26; 74→3-9-15-21-26; 75→3-9-15-21-27; 76→3-9-15-21-28;
+77→3-9-15-22-28; 78→4-10-15-21-28; 79→4-10-16-22-27; 81→4-10-16-22-29; 82→4-10-16-23-29;
+83→4-10-17-23-29; 84→5-11-17-23-28; 85→5-11-17-23-29; 86→5-11-17-23-30; 87→5-11-17-24-30;
+88→5-11-18-24-30; 89→0-6-11-18-24-30; 90→0-6-12-18-24-30; 91→1-6-12-18-24-30; 92→1-6-12-18-24-31;
+93→1-6-12-18-25-31; 94→1-6-12-19-25-31; 95→1-6-13-19-25-31; 96→1-7-13-19-25-31; 97→1-7-13-19-26-31;
+98→2-8-13-19-25-31; 99→2-8-14-19-25-31; 100→2-8-14-20-25-31.
+[The printed table skips core-count 80: sequence runs 79 then 81.]
+NOTES: figures = cores per successive layer; table is for guidance only; assembly coefficients per IS 10462
+(Part 1); above 48 cores, coefficient as agreed.
+
+13 INNER SHEATH (COMMON COVERING)
+13.1 Applied by extrusion or wrapping over laid-up cores; as circular as possible. 13.2 Fits closely; removable
+without damage to insulation. 13.3 Thickness per Table 5; single core cables have no inner sheath; binder tape
+layers not construed as part of extruded inner sheath.
+
+Table 5 Thickness of Inner Sheath (Clauses 13.3, 15.3.1 and 16.1)
+Calculated diameter over laid-up cores [IS 10462 (Part 1)]: over — up to and including → min thickness:
+— to 25 mm → 0.3 mm; 25-35 → 0.4; 35-45 → 0.5; 45-55 → 0.6; over 55 → 0.7.
+
+14 ARMOURING
+14.1.1 Applied over insulation (single core) / over inner sheath (twin, three, multi core). 14.1.2 Round/formed
+wires applied as closely as practicable, coverage not less than 90 percent (determination per Annex C).
+14.1.3 Direction of lay left hand; double-layer armour: outer layer reverse direction with non-hygroscopic
+separator between layers. 14.1.4 Binder tape may be provided on the armour.
+14.2 Type of Armour: calculated diameter below armouring ≤ 13 mm → round wires; > 13 mm → round steel
+wires or formed wires. NOTE — single core ac cables desirably non-magnetic armour by special agreement.
+14.3 Dimensions per Table 6; tolerance per IS 3975 (formed wires: only dimensions 'A' and 'C').
+14.4 Joints: brazed or welded, surface irregularities removed; joint ≥ 300 mm from nearest joint in any other
+armour wire/strip.
+14.5.1 dc resistance of armour (if specified) corrected to 20 °C shall comply with value declared by purchaser.
+14.5.2 Mining cables: armour resistance shall not exceed conductor resistance per IS 8130 by more than
+33 percent; substitution by tinned copper wires/strips permissible.
+14.6 Round/formed steel wires from cable: a) tensile strength 250-580 N/mm²; b) elongation at break ≥ 6 percent;
+c) torsion test per Table 6 of IS 3975 (round wires); d) zinc coating no cracks/flaking on winding test (formed);
+e) uniformity of zinc coating per IS 3975 (dips reduced by one half-minute dip; formed wires face only); f) mass
+of zinc coating of round wire ≥ 95 percent of Table 2 of IS 4826; g) mass of zinc coating of formed wire ≥ 95
+percent of IS 3975; h) resistivity per IS 3975.
+
+Table 6 Diameter of Armour Wires (Clauses 14.3 and 16.2)
+Method A: for all calculated diameters under armour in excess of 13 mm — formed wire nominal thickness 0.8 mm.
+Method B: ≤ 13 mm — round wire 1.4 mm; 13-25 → formed 0.8 / round 1.6; 25-40 → formed 0.8 / round 2.0;
+40-55 → formed 1.4 / round 2.50; 55-70 → formed 1.4 / round 3.15; over 70 → formed 1.4 / round 4.00.
+NOTE — Method A and Method B indicate two methods of practice in the application of armouring.
+
+15 OUTER SHEATH
+15.1 Applied by extrusion: over insulation (unarmoured single core); over inner sheath (unarmoured twin/three/
+multicore); over armouring (armoured cables). 15.2 Colour black or as agreed.
+15.3.1 Unarmoured cables: average outer sheath thickness ≥ nominal in col (3) of Table 7; smallest measured
+≥ minimum in col (4) of Table 7. NOTE — multi-core unarmoured: inner+outer sheath in single extrusion of
+outer-sheath material permitted; thickness ≥ (Table 5 inner + Table 7 col 3 nominal), smallest ≥ (Table 5 inner +
+Table 7 col 4 minimum).
+15.3.2 Armoured cables: outer sheath thickness ≥ minimum values in col (5) of Table 7.
+
+Table 7 Thickness of Outer Sheath (Clauses 15.3.1, 15.3.2 and 16.1)
+Calculated diameter under outer sheath [IS 10462 (Part 1)] over — up to and including → nominal (unarmoured) /
+minimum (unarmoured) / minimum (armoured):
+— to 15 mm → 1.8 / 1.24 / 1.24
+15-25 → 2.0 / 1.40 / 1.40
+25-35 → 2.2 / 1.56 / 1.56
+35-40 → 2.4 / 1.72 / 1.72
+40-45 → 2.6 / 1.88 / 1.88
+45-50 → 2.8 / 2.04 / 2.04
+50-55 → 3.0 / 2.20 / 2.20
+55-60 → 3.2 / 2.36 / 2.36
+60-65 → 3.4 / 2.52 / 2.52
+65-70 → 3.6 / 2.68 / 2.68
+70-75 → 3.8 / 2.84 / 2.84
+75-85 → 4.0 / 3.00 / 3.00
+[Arithmetic cross-check: minimum = 0.8 × nominal − 0.2 mm holds for every row.]
+
+SECTION 4 TESTS
+16 CLASSIFICATION OF TESTS
+16.1 Type Tests: i) conductor — annealing (Cu, Part 1), tensile (Al, Part 2), wrapping (Al, Part 3), resistance
+(IS 8130, Part 5); ii) round/formed steel wire armour — dimensions (14.3, Part 36); physical: tensile strength
+(14.6a, Part 37), elongation at break (14.6b, Part 37), torsion (round, 14.6c, Part 38), winding (formed, 14.6d,
+Part 39), uniformity of zinc coating (14.6e, Part 40), mass of zinc coating (14.6f, Part 41), resistivity (14.6g,
+Part 42); iii) thickness of insulation and sheath (10, 13, 15; Tables 3, 5 and 7; Part 6); iv) physical tests for
+insulation — tensile strength and elongation at break (Table 1, Part 7), ageing in air oven (Part 11), hot set
+(Part 30), shrinkage (Part 12), water absorption gravimetric (Part 33); v) physical tests for outer sheath — PVC:
+tensile/elongation (IS 5831, Part 7), ageing (Part 11), loss of mass (Part 10), shrinkage (Part 12), hot deformation
+(Part 15), heat shock (Part 14), thermal stability (Part 60); PE: carbon black (Table 1A, Part 32), tensile/elongation
+before and after ageing (Part 7), hot deformation (Part 15), shrinkage (Part 12); LSHF: tensile/elongation before
+and after ageing (Table 1B, Part 7), hot deformation (Part 15), water absorption (ST8, Part 33), shrinkage (ST12,
+Part 12); vi) insulation resistance (volume resistivity, Table 1, Part 43); vii) high voltage test (17.2, Part 45);
+viii) flammability test (17.3, Part 53); ix) additional tests for improved fire performance categories (Annex A):
+C1 — oxygen index (17.4, Part 58), temperature index (17.9, Part 64), flame retardance single cable (17.5,
+Part 61), flame retardance bunched cables (17.6, Part 62); C2 — C1 tests plus smoke density (17.8, IS 13360
+(Part 6/Sec 9)) and halogen acid evolution (17.7, Part 59); C3 — C2 tests plus light transmission (17.11, Part 63)
+and pH and conductivity (17.10).
+16.2 Acceptance Tests: annealing (Cu); tensile (Al); wrapping (Al); conductor resistance; thickness of insulation
+and sheath; hot set for insulation; tensile strength and elongation at break for insulation and sheath; high voltage
+test; insulation resistance (volume resistivity); additional category tests — C1: oxygen index, flame retardance
+single and bunched; C2: + halogen acid, smoke density; C3: + light transmission, pH and conductivity.
+Recommended sampling plan per Annex D.
+16.3 Routine Tests: conductor resistance (IS 8130, Part 5); high voltage test (17.2, Part 45); resistance test for
+armour (mining cable only, 14.5.1, Part 42).
+16.4 Optional Tests: cold bend test for outer sheath (OD > 12.5 mm) (IS 5831 or Table 1B, Part 20); cold impact
+test for outer sheath (Part 21); cold elongation test for LSHF sheath (Table 1B, Part 7); resistance test for armour
+(other than mining cable) (14.5.1, Part 42).
+
+17 DETAIL OF TESTS
+17.1 General — per appropriate parts of IS 10810 with additional information in this standard.
+17.2 High Voltage Test at Room Temperature (type, acceptance, routine): withstand 3 kV ac (rms) 40-60 Hz or
+dc 7.2 kV, between conductors and between conductors and ECC (if any), 5 min per test connection.
+17.3 Flammability Test: period of burning after removal of flame ≤ 60 s; unaffected (uncharred) portion from
+lower edge of top clamp ≥ 50 mm.
+17.4 Oxygen Index Test (FR, FR-LSH or LSHF sheath): samples of inner/outer sheath at 27 °C ± 2 °C or room
+temperature; oxygen index ≥ 29.
+17.5 Flame Retardance Test on Single Cables (OD < 35 mm) (FR, FR-LSH or LSHF sheathed): no visible
+damage on test specimen within 300 mm from its upper end (marks from mixing devices, soot, colour change
+not considered damage).
+17.6 Flame Retardance Test on Bunched Cables (FR, FR-LSH or LSHF sheathed): after burning ceases, charred/
+affected portion ≤ 2.5 m above bottom edge of burner (front and rear). NOTE — Category B and C methods of
+IS 10810 (Part 62) used; in absence of special requirements for method B, method C used for both C1 and C2.
+17.7 Halogen Acid Gas Evolution (FR-LSH or LSHF outer sheath): HCl evolved ≤ 20 percent by weight
+(FR-LSH); ≤ 0.5 percent (LSHF).
+17.8 Smoke Density (FR-LSH or LSHF sheath): smoke density rating ≤ 60 (FR-LSH); ≤ 20 (LSHF).
+17.9 Temperature Index (FR, FR-LSH or LSHF sheath): extrapolated temperature at which oxygen index is 21
+shall be ≥ 250 °C.
+17.10 pH and Conductivity of LSHF Sheath: per Annex F of IS 17505 (Part 1) [pH ≥ 4.3; conductivity
+≤ 10 µS/mm per Table 1B].
+17.11 Light Transmission for LSHF Sheathed Cables: per IS 10810 (Part 63); light transmittance ≥ 70 percent (Min).
+
+SECTION 5 IDENTIFICATION, PACKING AND MARKING
+18 IDENTIFICATION
+18.1 Manufacturer identified throughout length by tape bearing name/trademark, or by indenting/printing/
+embossing on outer sheath (or BIS-approved colour identification threads); spacing ≤ 1 m.
+18.2 The word 'ELECTRIC' indented/printed/embossed throughout length (distinguish from telephone cables);
+'MINING' for mines cables; on outer sheath only.
+18.2.1 Special cables additionally marked: Category C1 — FR; Category C2 — FR-LSH; Category C3 — LSHF.
+18.2.2 Single core cables with magnetic armour for dc applications additionally marked 'd.c. cable'.
+18.3 Cable Code: Aluminium conductor A; XLPE insulation 2X; steel round wire armour W; non-magnetic round
+wire armour Wa; steel strip armour F; non-magnetic strip armour Fa; double steel strip armour FF; double steel
+round wire armour WW; PVC outer sheath Y; PE outer sheath 2Y; LSHF outer sheath Z. NOTE — no code letter
+for copper conductor.
+19 PACKING AND MARKING
+19.1 Wound on drum (IS 10418), ends sealed with non-hygroscopic sealing material.
+19.2 Information on drum/label: a) IS 7098 (Part 1); b) manufacturer's name or trade-mark; c) type of cable and
+voltage grade; d) number of cores; e) nominal cross-sectional area; f) cable code; g) length on drum; h) number of
+lengths (if more than one); j) direction of rotation arrow; k) gross mass; m) country of manufacture; n) year of
+manufacture. 19.2.1 Standard Mark optional. 19.3 BIS certification marking per BIS Act, 2016.
+
+ANNEX A — CLASSIFICATION OF CABLES FOR IMPROVED FIRE PERFORMANCE
+01 — cables in open areas — flame retardant, single self-extinguishing, does not propagate fire.
+C1 (FR) — constrained areas — flame retardant, single self-extinguishing, does not propagate fire even in groups
+in vertical ducts.
+C2 (FR-LSH) — constrained areas with limited human activities and/or sophisticated systems — flame retardant
+with reduced halogen evolution and smoke.
+C3 (LSHF) — constrained areas, tunnels, airways etc — flame retardant with zero halogen evolution and low
+smoke, adequate light transmission.
+
+ANNEX B — referred standards: IS 1885 (Part 32):2019, IS 3961 (Part 6):2016, IS 3975:1999, IS 4826:2023,
+IS 4905:2015, IS 5831:1984, IS 8130:2013, IS 10418:2024, IS 10462 (Part 1):1983, IS 10810 (Parts 1, 2, 3, 5, 6,
+7, 10, 11, 12, 14, 15, 21, 30, 32, 36, 37, 45, 53, 58, 59, 60, 62, 63, 64), IS 13360 (Part 6/Sec 9):2001,
+IS 16269:2018, IS 17505 (Part 1):2021.
+
+ANNEX C — ARMOUR COVERAGE PERCENTAGE: Percent coverage = (N × d / W) × 100; N = number of
+parallel wires; d = diameter of wire/width of formed wires; W = π × D × Cos α; D = diameter under armour;
+tan α = π × D / C; C = lay length of armouring wires.
+
+ANNEX D — SAMPLING: lot = same size, similar production conditions. Drums selected per Table 8; suitable
+test sample lengths from each selected drum subjected to acceptance tests; defective if fails any; lot conforms if
+defectives ≤ permissible (a). Table 8: up to 25 drums → n 3, a 0; 26-50 → 5, 0; 51-100 → 8, 0; 101-300 → 13, 1;
+301 to above → 20, 1; 501 and above → 32, 2.
+
+ANNEX E — COMMITTEE COMPOSITION — Power Cables Sectional Committee, ETD 09.
+This Indian Standard has been developed from Doc No.: ETD 09 (23577).

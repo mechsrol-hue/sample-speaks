@@ -1,0 +1,154 @@
+{
+  "isNumber": "IS 368:2014",
+  "title": "Electric Immersion Water Heaters — Specification",
+  "revision": "Fifth Revision",
+  "parameterizationDims": [],
+  "dimensionOptions": {},
+  "defaults": {},
+  "parameters": [
+    {
+      "clauseRef": "Cl 8", "section": "Safety", "parameterName": "Protection against access to live parts",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 8",
+      "expected": "This clause of IS 302-2-201 is applicable — adequate protection against access to live parts; shall comply"
+    },
+    {
+      "clauseRef": "Cl 10", "section": "Performance", "parameterName": "Power input and current",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 10",
+      "expected": "This clause of IS 302-2-201 is applicable — power input and current at rated voltage within the deviations permitted by IS 302-2-201"
+    },
+    {
+      "clauseRef": "Cl 11", "section": "Performance", "parameterName": "Heating",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 11",
+      "expected": "This clause of IS 302-2-201 is applicable — temperature rises during normal operation shall not exceed the limits of IS 302-2-201"
+    },
+    {
+      "clauseRef": "Cl 12", "section": "Performance", "parameterName": "Operation under overload conditions (appliances with heating elements)",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 368:2014, Cl 12.2",
+      "expected": "15 cycles: each cycle = operating period per Cl 11.7 (adequate heat discharge) + cooling to approx. room temperature; supply voltage such that input is 1.27 × actual input, or 1.21 × actual input + 12 W, whichever is greater (rated input > 100 W). After test: no damage; creepage distances and clearances not reduced below Cl 29 values; heating wires, internal wiring and assembly show no such deformation; contacts and connections not worked loose"
+    },
+    {
+      "clauseRef": "Cl 13", "section": "Safety", "parameterName": "Leakage current and electric strength at operating temperature",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 13",
+      "expected": "This clause of IS 302-2-201 is applicable — leakage current and electric strength at operating temperature shall comply"
+    },
+    {
+      "clauseRef": "Cl 14", "section": "Safety", "parameterName": "Transient overvoltages",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 14",
+      "expected": "This clause of IS 302-2-201 is applicable — shall withstand transient overvoltages as specified"
+    },
+    {
+      "clauseRef": "Cl 15", "section": "Safety", "parameterName": "Moisture resistance",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 15",
+      "expected": "This clause of IS 302-2-201 is applicable — moisture resistance shall comply"
+    },
+    {
+      "clauseRef": "Cl 16", "section": "Safety", "parameterName": "Leakage current and electric strength",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 16",
+      "expected": "This clause of IS 302-2-201 is applicable — leakage current and electric strength shall comply"
+    },
+    {
+      "clauseRef": "Cl 18", "section": "Endurance", "parameterName": "Endurance (96 h at 1.15 × maximum rated input)",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 368:2014, Cl 18.1 / IS 302-1:2008, Cl 16.4",
+      "expected": "Cl 18.1: operate 96 h immersed to maximum depth (max safe immersion level for dip-in type) in a vessel containing 2.0 to 2.5 litre water per 100 W rated input (initially cold; losses topped up), supply maintained at 1.15 × maximum rated input throughout. Cl 18.2: after the test, shall withstand the electric strength test per Cl 16.4 of IS 302-1"
+    },
+    {
+      "clauseRef": "Cl 19", "section": "Safety", "parameterName": "Abnormal operation (incl. 19.101 thermal cut-out test)",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 19 + IS 368:2014, Cl 19.101",
+      "expected": "IS 302-2-201 Cl 19 applicable, with addition 19.101: if a thermal cut-out is incorporated — operate in dry air at rated supply voltage; after cut-out operates, cool to room temperature and reset (= 1 cycle); withstand 4 such cycles without burning out of the heating element, then satisfactorily withstand the endurance test"
+    },
+    {
+      "clauseRef": "Cl 20", "section": "Mechanical", "parameterName": "Stability and mechanical hazards",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 20",
+      "expected": "This clause of IS 302-2-201 is applicable — stability and mechanical hazards shall comply"
+    },
+    {
+      "clauseRef": "Cl 21", "section": "Mechanical", "parameterName": "Mechanical strength",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 21",
+      "expected": "This clause of IS 302-2-201 is applicable — mechanical strength shall comply"
+    },
+    {
+      "clauseRef": "Cl 22", "section": "Construction", "parameterName": "Construction (incl. additions 22.101–22.103)",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 22",
+      "expected": "IS 302-2-201 Cl 22 applicable, with additions: 22.101 resistance wire arranged for effective electrical contact with connecting leads; terminal/cord-to-element connections secure and durable; all connections and terminals suitably insulated from one another. 22.102 heating element conforming to IS 4159, completely enclosed in a water-tight metal casing thick enough to protect the filling material; element located centrally with no relative movement or element–casing contact; rigid spacer/bushing/filling at element exit; casing surface treated against undue corrosion; handle (if provided) of insulating, fire-resisting and moisture-resisting material. 22.103 dip-in type provided with hook or other effective supporting means of non-ferrous non-corrosive material"
+    },
+    {
+      "clauseRef": "Cl 22.103", "section": "Construction", "parameterName": "Thickness of supporting hook (dip-in type), Min",
+      "unit": "mm", "limitType": "min", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Cl 22.103",
+      "min": 0.9,
+      "expected": "Hook or other effective supporting means of non-ferrous, non-corrosive material, minimum thickness 0.9 mm"
+    },
+    {
+      "clauseRef": "Cl 23", "section": "Construction", "parameterName": "Internal wiring",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 23",
+      "expected": "This clause of IS 302-2-201 is applicable — internal wiring shall comply"
+    },
+    {
+      "clauseRef": "Cl 24", "section": "Construction", "parameterName": "Components",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 24",
+      "expected": "This clause of IS 302-2-201 is applicable — components shall comply"
+    },
+    {
+      "clauseRef": "Cl 25", "section": "Construction", "parameterName": "Supply connection and external flexible cords",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 25",
+      "expected": "This clause of IS 302-2-201 is applicable — supply connection and external flexible cords shall comply"
+    },
+    {
+      "clauseRef": "Cl 26", "section": "Construction", "parameterName": "Terminals for external conductors",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 26",
+      "expected": "This clause of IS 302-2-201 is applicable — terminals for external conductors shall comply"
+    },
+    {
+      "clauseRef": "Cl 27", "section": "Safety", "parameterName": "Provision for earthing",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 27",
+      "expected": "This clause of IS 302-2-201 is applicable — provision for earthing shall comply"
+    },
+    {
+      "clauseRef": "Cl 28", "section": "Construction", "parameterName": "Screws and connections",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 28",
+      "expected": "This clause of IS 302-2-201 is applicable — screws and connections shall comply"
+    },
+    {
+      "clauseRef": "Cl 29", "section": "Safety", "parameterName": "Clearances, creepage distances and solid insulation",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 29",
+      "expected": "This clause of IS 302-2-201 is applicable — clearances, creepage distances and solid insulation shall comply"
+    },
+    {
+      "clauseRef": "Cl 30", "section": "Safety", "parameterName": "Resistance to heat and fire",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 30",
+      "expected": "This clause of IS 302-2-201 is applicable — resistance to heat and fire shall comply"
+    },
+    {
+      "clauseRef": "Cl 31", "section": "Construction", "parameterName": "Resistance to rusting",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 31 + IS 368:2014 addition",
+      "expected": "Ferrous parts whose rusting might cause non-compliance shall be adequately protected. Test (addition): degrease 10 min in carbon tetrachloride/trichloroethane; immerse 10 min in 10 percent ammonium chloride solution at 15–35 °C; without drying (drops shaken off) place 10 min in air ≥ 90 percent RH at 15–35 °C; dry 10 min at 100 ± 5 °C — surfaces shall show no signs of rust (traces on sharp edges and yellowish rub-off film ignored). Grease layer may protect small springs/abraded parts (tested with grease if effectiveness in doubt); ferrous parts forming part of the heating element wire exempt"
+    },
+    {
+      "clauseRef": "Cl 32", "section": "Safety", "parameterName": "Radiation, toxicity and similar hazards",
+      "limitType": "qualitative", "acceptanceOrType": "type", "variesBy": [], "sourceTable": "Table 101",
+      "testMethod": "IS 302-2-201:2007, Cl 32",
+      "expected": "This clause of IS 302-2-201 is applicable — radiation, toxicity and similar hazards shall comply"
+    }
+  ]
+}

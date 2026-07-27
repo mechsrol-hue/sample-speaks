@@ -1,0 +1,146 @@
+#!/usr/bin/env node
+/**
+ * Generate public/is_templates/IS_7098_Part_1_2025.json from verified IS 7098 (Part 1):2025
+ * data. Table 3 verified against page image (printed col-3 header "Single-core Armoured
+ * Cables" is an evident misprint for "Unarmoured" — see transcript note). Table 7 minimums
+ * verified by the exact printed arithmetic (min = 0.8 × nominal − 0.2).
+ */
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const REPO = path.join(__dirname, '..');
+
+const SIZES = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300, 400, 500, 630, 800, 1000];
+const CONS = ['single-core unarmoured', 'single-core armoured & multi-core'];
+const LSHF = ['ST8', 'ST12'];
+const S = v => String(v);
+const NOT_OFFERED = 'Not specified in IS (combination not offered)';
+
+// Table 3: [size, ti unarmoured single-core, ti armoured single-core & multicore]
+const T3 = [
+  [1.5, 1.0, 0.7], [2.5, 1.0, 0.7], [4, 1.0, 0.7], [6, 1.0, 0.7], [10, 1.0, 0.7], [16, 1.0, 0.7],
+  [25, 1.2, 0.9], [35, 1.2, 0.9], [50, 1.3, 1.0], [70, 1.4, 1.1], [95, 1.4, 1.1], [120, 1.5, 1.2],
+  [150, 1.7, 1.4], [185, 1.9, 1.6], [240, 2.0, 1.7], [300, 2.1, 1.8], [400, 2.4, 2.0], [500, 2.6, 2.2],
+  [630, 2.8, 2.4], [800, 3.1, 2.6], [1000, 3.3, 2.8],
+];
+// Table 2: phase → reduced neutral
+const T2 = { 25: 16, 35: 16, 50: 25, 70: 35, 95: 50, 120: 70, 150: 70, 185: 95, 240: 120, 300: 150, 400: 185, 500: 240, 630: 300 };
+
+const params = [];
+const add = p => params.push(p);
+
+{
+  const vt = {};
+  for (const [s, tiU, tiA] of T3) { vt[`${S(s)}|${CONS[0]}`] = { min: tiU }; vt[`${S(s)}|${CONS[1]}`] = { min: tiA }; }
+  add({
+    clauseRef: 'Cl 10.2 / Table 3', section: 'Insulation', parameterName: 'Insulation thickness (nominal ti), average Min',
+    unit: 'mm', limitType: 'min', acceptanceOrType: 'acceptance', variesBy: ['size', 'cableConstruction'], sourceTable: 'Table 3',
+    testMethod: 'IS 10810 (Part 6)',
+    specText: 'Average ≥ nominal ti; smallest measured ≥ ti − (0.1 mm + 0.1 ti). Printed col-3 header "Single-core Armoured Cables" is an evident misprint for single-core UNARMOURED cables (col 4 covers single-core armoured and multi-core)',
+    valueTable: vt,
+  });
+}
+{
+  const vt = {};
+  for (const s of SIZES) for (const c of CONS) {
+    vt[`${S(s)}|${c}`] = T2[s] ? { expected: `${T2[s]} mm² reduced neutral conductor` } : { expected: 'Not specified in IS (no reduced-neutral construction for this size)' };
+  }
+  add({
+    clauseRef: 'Cl 9.3 / Table 2', section: 'Conductor', parameterName: 'Reduced neutral conductor cross-sectional area',
+    unit: 'mm²', limitType: 'text', acceptanceOrType: 'acceptance', variesBy: ['size', 'cableConstruction'], sourceTable: 'Table 2',
+    valueTable: vt,
+  });
+}
+// LSHF Table 1B — varying by lshfType
+const lshfRows = [
+  ['Tensile strength before ageing, Min', 'N/mm²', 'min', { ST8: { min: 9.0 }, ST12: { min: 12.5 } }, null],
+  ['Elongation at break before ageing, Min', '%', 'min', { ST8: { min: 125 }, ST12: { min: 300 } }, null],
+  ['Tensile strength after ageing, Min', 'N/mm²', 'min', { ST8: { min: 9.0 }, ST12: { min: 10.0 } }, 'Ageing: ST8 — 100 °C ± 2 °C, 7 days; ST12 — 110 °C ± 2 °C, 10 days'],
+  ['Variation in tensile strength after ageing, Max', '%', 'max', { ST8: { max: 40 }, ST12: { max: 30 } }, '± variation from unaged value'],
+  ['Elongation at break after ageing, Min', '%', 'min', { ST8: { min: 100 }, ST12: { min: 300 } }, null],
+  ['Variation in elongation at break after ageing, Max', '%', 'max', { ST8: { max: 40 }, ST12: { value: 'Not applicable', expected: 'Not applicable' } }, '± variation from unaged value (ST8 only)'],
+  ['Hot deformation — depth of indentation, Max', '%', 'max', { ST8: { max: 50 }, ST12: { max: 50 } }, 'ST8: 80 °C ± 2 °C, 4 h; ST12: 110 °C ± 2 °C, 4 h'],
+  ['Water absorption (gravimetric) increase in mass, Max', 'mg/cm²', 'max', { ST8: { max: 10 }, ST12: { value: 'Not applicable', expected: 'Not applicable' } }, 'ST8: 70 °C ± 2 °C, 24 h'],
+  ['Shrinkage, Max', '%', 'max', { ST8: { value: 'Not applicable', expected: 'Not applicable' }, ST12: { max: 3 } }, 'ST12: 80 °C ± 2 °C, 5 h'],
+];
+for (const [name, unit, lt, vt, note] of lshfRows) {
+  add({
+    clauseRef: 'Cl 8.4 / Table 1B', section: 'LSHF outer sheath', parameterName: `LSHF sheath — ${name}`,
+    unit, limitType: lt, acceptanceOrType: 'type', variesBy: ['lshfType'], sourceTable: 'Table 1B',
+    testMethod: 'IS 10810 (Part 7/15/33/12)', ...(note ? { specText: note } : {}),
+    valueTable: vt,
+  });
+}
+
+const constants = [
+  // XLPE insulation — Table 1
+  { clauseRef: 'Cl 5 / Table 1', section: 'XLPE insulation', parameterName: 'XLPE tensile strength, Min', unit: 'N/mm²', limitType: 'min', acceptanceOrType: 'acceptance', min: 12.5, testMethod: 'IS 10810 (Part 7)' },
+  { clauseRef: 'Cl 5 / Table 1', section: 'XLPE insulation', parameterName: 'XLPE elongation at break, Min', unit: '%', limitType: 'min', acceptanceOrType: 'acceptance', min: 200, testMethod: 'IS 10810 (Part 7)' },
+  { clauseRef: 'Cl 5 / Table 1', section: 'XLPE insulation', parameterName: 'XLPE variation in tensile strength after ageing, Max', unit: '%', limitType: 'max', acceptanceOrType: 'type', max: 25, testMethod: 'IS 10810 (Part 11)', expected: 'Ageing in air oven 135 °C ± 3 °C for 7 days; ± 25 percent max variation from unaged' },
+  { clauseRef: 'Cl 5 / Table 1', section: 'XLPE insulation', parameterName: 'XLPE variation in elongation at break after ageing, Max', unit: '%', limitType: 'max', acceptanceOrType: 'type', max: 25, testMethod: 'IS 10810 (Part 11)' },
+  { clauseRef: 'Cl 5 / Table 1', section: 'XLPE insulation', parameterName: 'XLPE hot set — elongation under load, Max', unit: '%', limitType: 'max', acceptanceOrType: 'acceptance', max: 175, testMethod: 'IS 10810 (Part 30)', expected: 'Treatment 200 °C ± 3 °C, 15 min under load, mechanical stress 20 N/cm²' },
+  { clauseRef: 'Cl 5 / Table 1', section: 'XLPE insulation', parameterName: 'XLPE hot set — permanent elongation after cooling, Max', unit: '%', limitType: 'max', acceptanceOrType: 'acceptance', max: 15, testMethod: 'IS 10810 (Part 30)' },
+  { clauseRef: 'Cl 5 / Table 1', section: 'XLPE insulation', parameterName: 'XLPE shrinkage, Max', unit: '%', limitType: 'max', acceptanceOrType: 'type', max: 4.0, testMethod: 'IS 10810 (Part 12)', expected: 'Treatment 130 °C ± 3 °C, 1 h' },
+  { clauseRef: 'Cl 5 / Table 1', section: 'XLPE insulation', parameterName: 'XLPE water absorption (gravimetric), Max', unit: 'mg/cm²', limitType: 'max', acceptanceOrType: 'type', max: 1, testMethod: 'IS 10810 (Part 33)', expected: 'Treatment 85 °C ± 2 °C, 14 days' },
+  { clauseRef: 'Cl 5 / Table 1', section: 'XLPE insulation', parameterName: 'XLPE volume resistivity at 27 °C, Min', unit: 'ohm·cm', limitType: 'min', acceptanceOrType: 'acceptance', min: 1e14, testMethod: 'IS 10810 (Part 43)' },
+  { clauseRef: 'Cl 5 / Table 1', section: 'XLPE insulation', parameterName: 'XLPE volume resistivity at 90 °C, Min', unit: 'ohm·cm', limitType: 'min', acceptanceOrType: 'acceptance', min: 1e12, testMethod: 'IS 10810 (Part 43)' },
+  // PE sheath — Table 1A
+  { clauseRef: 'Cl 8.3 / Table 1A', section: 'PE outer sheath', parameterName: 'PE sheath tensile strength (before ageing), Min', unit: 'N/mm²', limitType: 'min', acceptanceOrType: 'type', min: 12.5, testMethod: 'IS 10810 (Part 7)' },
+  { clauseRef: 'Cl 8.3 / Table 1A', section: 'PE outer sheath', parameterName: 'PE sheath elongation at break (before ageing), Min', unit: '%', limitType: 'min', acceptanceOrType: 'type', min: 300, testMethod: 'IS 10810 (Part 7)' },
+  { clauseRef: 'Cl 8.3 / Table 1A', section: 'PE outer sheath', parameterName: 'PE sheath elongation at break after ageing, Min', unit: '%', limitType: 'min', acceptanceOrType: 'type', min: 300, testMethod: 'IS 10810 (Part 11)', expected: 'Ageing in air oven 110 °C ± 2 °C, 7 days' },
+  { clauseRef: 'Cl 8.3 / Table 1A', section: 'PE outer sheath', parameterName: 'PE sheath hot deformation — depth of indentation, Max', unit: '%', limitType: 'max', acceptanceOrType: 'type', max: 50, testMethod: 'IS 10810 (Part 15)', expected: '110 °C ± 2 °C, 6 h' },
+  { clauseRef: 'Cl 8.3 / Table 1A', section: 'PE outer sheath', parameterName: 'PE sheath carbon black content (black sheath only)', unit: '%', limitType: 'range', acceptanceOrType: 'type', min: 2.0, max: 3.0, testMethod: 'IS 10810 (Part 32)', expected: '2.5 percent ± 0.5 percent' },
+  // LSHF constants (same for both types)
+  { clauseRef: 'Cl 8.4 / Table 1B', section: 'LSHF outer sheath', parameterName: 'LSHF sheath pH, Min', limitType: 'min', acceptanceOrType: 'type', min: 4.3, testMethod: 'IS 17505 (Part 1), Annex F' },
+  { clauseRef: 'Cl 8.4 / Table 1B', section: 'LSHF outer sheath', parameterName: 'LSHF sheath conductivity, Max', unit: 'µS/mm', limitType: 'max', acceptanceOrType: 'type', max: 10, testMethod: 'IS 17505 (Part 1), Annex F' },
+  { clauseRef: 'Cl 8.4 / Table 1B', section: 'LSHF outer sheath', parameterName: 'LSHF sheath HCl content, Max', unit: '%', limitType: 'max', acceptanceOrType: 'type', max: 0.5 },
+  { clauseRef: 'Cl 8.4 / Table 1B', section: 'LSHF outer sheath', parameterName: 'LSHF sheath cold bend / cold impact (−15 °C ± 2 °C, 3 h)', limitType: 'qualitative', acceptanceOrType: 'type', expected: 'No cracks (optional test per 16.4; cold bend for OD > 12.5 mm)', testMethod: 'IS 10810 (Parts 20, 21)' },
+  { clauseRef: 'Cl 8.4 / Table 1B', section: 'LSHF outer sheath', parameterName: 'LSHF sheath cold elongation at −15 °C, Min', unit: '%', limitType: 'min', acceptanceOrType: 'type', min: 20, testMethod: 'IS 10810 (Part 7)', expected: '−15 °C ± 2 °C, 3 h (optional test per 16.4)' },
+  // Conductor
+  { clauseRef: 'Cl 4.1 / Cl 9.1', section: 'Conductor', parameterName: 'Conductor material and construction', limitType: 'qualitative', acceptanceOrType: 'type', testMethod: 'IS 8130', expected: 'Plain copper or aluminium per IS 8130 (mining/gassy-mine cables: copper only; tinned copper by agreement). Construction: Al 1.5 mm² solid Class 1; Cu 1.5-6 / Al 2.5-10 mm² solid (Class 1) or stranded (Class 2); Cu ≥ 10 / Al ≥ 16 mm² stranded Class 2. Optional protective barrier compatible with insulation' },
+  { clauseRef: 'Cl 16.3', section: 'Conductor', parameterName: 'Conductor resistance at 20 °C', limitType: 'qualitative', acceptanceOrType: 'acceptance', testMethod: 'IS 10810 (Part 5)', expected: 'Per IS 8130 for the class of conductor (routine + acceptance + type test)' },
+  // Inner sheath / armour / outer sheath (band tables)
+  { clauseRef: 'Cl 13.3 / Table 5', section: 'Inner sheath', parameterName: 'Inner sheath thickness, Min (by calculated diameter over laid-up cores)', unit: 'mm', limitType: 'qualitative', acceptanceOrType: 'acceptance', testMethod: 'IS 10810 (Part 6)', expected: 'Up to 25 mm → 0.3; over 25-35 → 0.4; over 35-45 → 0.5; over 45-55 → 0.6; over 55 → 0.7 (single-core cables have no inner sheath; binder tape not counted)' },
+  { clauseRef: 'Cl 14.1.2', section: 'Armour', parameterName: 'Armour coverage, Min', unit: '%', limitType: 'min', acceptanceOrType: 'type', min: 90, testMethod: 'IS 7098-1 Annex C', expected: 'Round/formed wires applied as closely as practicable; coverage = (N × d / W) × 100 per Annex C' },
+  { clauseRef: 'Cl 14.2 / 14.3 / Table 6', section: 'Armour', parameterName: 'Armour wire dimensions (by calculated diameter under armour)', limitType: 'qualitative', acceptanceOrType: 'type', testMethod: 'IS 10810 (Part 36)', expected: 'Method A: > 13 mm — formed wire 0.8 mm. Method B: ≤ 13 mm — round 1.4; 13-25 — formed 0.8 / round 1.6; 25-40 — formed 0.8 / round 2.0; 40-55 — formed 1.4 / round 2.50; 55-70 — formed 1.4 / round 3.15; > 70 — formed 1.4 / round 4.00. ≤ 13 mm below armour → round wires; tolerance per IS 3975 (formed: dimensions A and C only)' },
+  { clauseRef: 'Cl 14.6(a)', section: 'Armour', parameterName: 'Armour wire tensile strength', unit: 'N/mm²', limitType: 'range', acceptanceOrType: 'type', min: 250, max: 580, testMethod: 'IS 10810 (Part 37)' },
+  { clauseRef: 'Cl 14.6(b)', section: 'Armour', parameterName: 'Armour wire elongation at break, Min', unit: '%', limitType: 'min', acceptanceOrType: 'type', min: 6, testMethod: 'IS 10810 (Part 37)' },
+  { clauseRef: 'Cl 14.6(c)-(h)', section: 'Armour', parameterName: 'Armour wire — torsion, winding, zinc coating, resistivity', limitType: 'qualitative', acceptanceOrType: 'type', testMethod: 'IS 10810 (Parts 38-42) / IS 3975 / IS 4826', expected: 'Torsion per Table 6 of IS 3975 (round); winding test — zinc coating no cracks/flaking (formed); uniformity of zinc per IS 3975 (dips reduced by one half-minute; formed: face only); mass of zinc ≥ 95 percent of Table 2 of IS 4826 (round) / IS 3975 (formed); resistivity per IS 3975' },
+  { clauseRef: 'Cl 14.4 / 14.1.3', section: 'Armour', parameterName: 'Armour application — lay, joints, layers', limitType: 'qualitative', acceptanceOrType: 'type', expected: 'Left-hand lay (inner layer for double armour; outer layer reverse with non-hygroscopic separator); joints brazed/welded, irregularities removed, ≥ 300 mm from nearest joint in any other wire/strip; optional binder tape' },
+  { clauseRef: 'Cl 14.5.2', section: 'Armour', parameterName: 'Armour resistance (mining cables), Max', limitType: 'qualitative', acceptanceOrType: 'acceptance', testMethod: 'IS 10810 (Part 42)', expected: 'Not more than conductor resistance per IS 8130 + 33 percent; substitution of steel by tinned copper wires/strips permissible. (Routine test for mining cables; optional for others; dc armour resistance at 20 °C per purchaser declaration if specified)' },
+  { clauseRef: 'Cl 15.3 / Table 7', section: 'Outer sheath', parameterName: 'Outer sheath thickness (by calculated diameter under outer sheath)', unit: 'mm', limitType: 'qualitative', acceptanceOrType: 'acceptance', testMethod: 'IS 10810 (Part 6)', expected: 'Unarmoured: average ≥ nominal col (3), smallest ≥ minimum col (4); armoured: ≥ minimum col (5). Bands (over-incl → nominal / min): ≤15 → 1.8/1.24; 15-25 → 2.0/1.40; 25-35 → 2.2/1.56; 35-40 → 2.4/1.72; 40-45 → 2.6/1.88; 45-50 → 2.8/2.04; 50-55 → 3.0/2.20; 55-60 → 3.2/2.36; 60-65 → 3.4/2.52; 65-70 → 3.6/2.68; 70-75 → 3.8/2.84; 75-85 → 4.0/3.00 (armoured min = same as col 4). Multi-core unarmoured single-extrusion: thickness ≥ Table 5 + Table 7 values' },
+  { clauseRef: 'Cl 8.2 / 15.1 / 15.2', section: 'Outer sheath', parameterName: 'Outer sheath material and application', limitType: 'qualitative', acceptanceOrType: 'type', testMethod: 'IS 5831 (ST2) / Table 1A / Table 1B', expected: 'PVC type ST2 of IS 5831 (C1/C2: ST2 with suitable additives), or PE per Table 1A, or LSHF per Table 1B; extruded over insulation (unarmoured single-core) / inner sheath (unarmoured multi-core) / armour (armoured); colour black or as agreed' },
+  // Electrical & fire tests
+  { clauseRef: 'Cl 17.2', section: 'Electrical', parameterName: 'High voltage test at room temperature', limitType: 'qualitative', acceptanceOrType: 'acceptance', testMethod: 'IS 10810 (Part 45)', expected: 'Withstand 3 kV ac rms (40-60 Hz) or 7.2 kV dc, between conductors and conductors-to-ECC (if any), 5 min per test connection (routine + acceptance + type)' },
+  { clauseRef: 'Cl 17.3', section: 'Fire performance', parameterName: 'Flammability — burning after flame removal, Max', unit: 's', limitType: 'max', acceptanceOrType: 'type', max: 60, testMethod: 'IS 10810 (Part 53)' },
+  { clauseRef: 'Cl 17.3', section: 'Fire performance', parameterName: 'Flammability — unaffected portion from top clamp, Min', unit: 'mm', limitType: 'min', acceptanceOrType: 'type', min: 50, testMethod: 'IS 10810 (Part 53)' },
+  { clauseRef: 'Cl 17.4', section: 'Fire performance', parameterName: 'Oxygen index (FR / FR-LSH / LSHF sheath), Min', unit: '%', limitType: 'min', acceptanceOrType: 'acceptance', min: 29, testMethod: 'IS 10810 (Part 58)', expected: 'Samples of inner/outer sheath at 27 °C ± 2 °C or room temperature' },
+  { clauseRef: 'Cl 17.9', section: 'Fire performance', parameterName: 'Temperature index (FR / FR-LSH / LSHF sheath), Min', unit: '°C', limitType: 'min', acceptanceOrType: 'type', min: 250, testMethod: 'IS 10810 (Part 64)', expected: 'Extrapolated temperature at which oxygen index is 21' },
+  { clauseRef: 'Cl 17.5', section: 'Fire performance', parameterName: 'Flame retardance — single cable (OD < 35 mm)', limitType: 'qualitative', acceptanceOrType: 'acceptance', testMethod: 'IS 10810 (Part 61)', expected: 'No visible damage within 300 mm from upper end of specimen (soot, mixing-device marks, colour change not counted)' },
+  { clauseRef: 'Cl 17.6', section: 'Fire performance', parameterName: 'Flame retardance — bunched cables, charred height Max', unit: 'm', limitType: 'max', acceptanceOrType: 'acceptance', max: 2.5, testMethod: 'IS 10810 (Part 62)', expected: 'Charred/affected portion ≤ 2.5 m above bottom edge of burner (front and rear); Category B/C methods of Part 62' },
+  { clauseRef: 'Cl 17.7', section: 'Fire performance', parameterName: 'Halogen acid gas evolution — FR-LSH sheath, Max', unit: '% by weight', limitType: 'max', acceptanceOrType: 'acceptance', max: 20, testMethod: 'IS 10810 (Part 59)' },
+  { clauseRef: 'Cl 17.7', section: 'Fire performance', parameterName: 'Halogen acid gas evolution — LSHF sheath, Max', unit: '% by weight', limitType: 'max', acceptanceOrType: 'acceptance', max: 0.5, testMethod: 'IS 10810 (Part 59)' },
+  { clauseRef: 'Cl 17.8', section: 'Fire performance', parameterName: 'Smoke density rating — FR-LSH sheath, Max', limitType: 'max', acceptanceOrType: 'acceptance', max: 60, testMethod: 'IS 13360 (Part 6/Sec 9)' },
+  { clauseRef: 'Cl 17.8', section: 'Fire performance', parameterName: 'Smoke density rating — LSHF sheath, Max', limitType: 'max', acceptanceOrType: 'acceptance', max: 20, testMethod: 'IS 13360 (Part 6/Sec 9)' },
+  { clauseRef: 'Cl 17.11', section: 'Fire performance', parameterName: 'Light transmission (LSHF sheathed cables), Min', unit: '%', limitType: 'min', acceptanceOrType: 'acceptance', min: 70, testMethod: 'IS 10810 (Part 63)' },
+  // Identification
+  { clauseRef: 'Cl 11 / 12', section: 'Identification & marking', parameterName: 'Core identification and laying up', limitType: 'qualitative', acceptanceOrType: 'acceptance', expected: 'Core colours: 1-core red/black/yellow/blue/natural; 2-core red+black; 3-core red+yellow+blue; 4-core +black; 5-core +grey; ≥ 6 cores: blue+yellow counting/direction cores per layer, rest grey — or numbered cores (strips/printing; ≤ 4 cores 0-3; > 4 cores sequential from 1). Reduced neutral core black / number 0. Lay-up: outermost layer right-hand lay, successive opposite; recommended plan per Table 4 (guidance; printed table skips 80)' },
+  { clauseRef: 'Cl 18', section: 'Identification & marking', parameterName: 'Cable identification and code', limitType: 'qualitative', acceptanceOrType: 'acceptance', expected: 'Manufacturer name/trademark (tape, indent, print or emboss on outer sheath, ≤ 1 m spacing); word ELECTRIC throughout; MINING for mines cables; FR (C1) / FR-LSH (C2) / LSHF (C3); "d.c. cable" for single-core magnetic-armour dc cables. Code letters: A aluminium; 2X XLPE; W / Wa round-wire armour (steel/non-magnetic); F / Fa strip armour; FF / WW double armour; Y PVC sheath; 2Y PE sheath; Z LSHF sheath; no letter for copper conductor' },
+  { clauseRef: 'Cl 19', section: 'Identification & marking', parameterName: 'Packing and drum marking', limitType: 'qualitative', acceptanceOrType: 'acceptance', expected: 'Wound on drum (IS 10418), ends sealed non-hygroscopic; drum/label: IS 7098 (Part 1), manufacturer, type and voltage grade, cores, cross-sectional area, cable code, length, number of lengths, rotation arrow, gross mass, country and year of manufacture; optional Standard Mark (BIS Act 2016)' },
+];
+for (const c of constants) add(c);
+
+const tpl = {
+  isNumber: 'IS 7098 (Part 1) : 2025',
+  title: 'Crosslinked Polyethylene Insulated Thermoplastic Sheathed Cables — Specification Part 1 For Working Voltages up to and including 1 100 Volts',
+  revision: 'Second Revision',
+  parameterizationDims: ['size', 'cableConstruction', 'lshfType'],
+  dimensionOptions: { size: SIZES, cableConstruction: CONS, lshfType: LSHF },
+  defaults: { size: 95, cableConstruction: CONS[1], lshfType: 'ST8' },
+  parameters: params,
+};
+
+const out = path.join(REPO, 'public/is_templates/IS_7098_Part_1_2025.json');
+fs.writeFileSync(out, JSON.stringify(tpl, null, 1));
+const nCells = params.reduce((n, p) => n + (p.valueTable ? Object.keys(p.valueTable).length : 0), 0);
+console.log(`[gen] wrote ${out}: ${params.length} parameters, ${nCells} valueTable cells, ${Math.round(fs.statSync(out).size / 1024)} KB`);

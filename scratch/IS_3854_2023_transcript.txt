@@ -1,0 +1,336 @@
+IS 3854 : 2023
+Indian Standard
+SWITCHES FOR DOMESTIC AND SIMILAR PURPOSES — SPECIFICATION
+( Third Revision )
+ICS 29.120.40
+© BIS 2023 — November 2023 — Price Group 17
+Electrical Wiring Accessories Sectional Committee, ETD 14
+
+FOREWORD
+Third revision, aligned with IEC 60669-1:2017. First published 1966, revised 1986 and 1997. Significant changes:
+scope changes for motor and lamp load switches; new definitions; additional marking; 13 A switches included;
+flexible-conductor requirements in 12; pilot light units; new test for self-ballasted lamp loads (19.3); Table 23
+redrawn as Table 9 covering normal, mini and micro-gap switches; informative Annex C (circuit development
+for 19.3) and Annex D (insulation-piercing terminals). Rounding per IS 2 : 2022.
+
+1 SCOPE
+1.1 Manually operated general-purpose switches for ac only, rated voltage ≤ 440 V, rated current ≤ 63 A, for
+household and similar fixed electrical installations, indoors or outdoors.
+1.2 Rated current limited to 16 A for switches with screwless terminals (also for insulation piercing terminals per
+Annex D).
+1.3 Loads controlled in normal use: a) tungsten filament lamp circuits; b) externally ballasted lamp circuits (LED,
+CFL, fluorescent); c) self-ballasted lamp circuits (LEDi, CFLi); d) substantially resistive loads with power factor
+≥ 0.95; e) single-phase motor loads ≤ 3 A at 250 V (750 VA), power factor ≥ 0.8 (switches ≥ 10 A, momentary
+switches ≥ 6 A, without additional tests).
+1.4 Also applies to boxes for switches (except flush mounting boxes — see IS 14772). 1.5 Also applies to switches
+with pilot lights, time-delay devices, combinations (except with fuses), and switches with facilities for outlet and
+retention of flexible cables (Annex A). Ambient: normally ≤ 35 °C, occasionally 45 °C.
+1.6 Special conditions (ships, vehicles, hazardous locations) may need special construction. 1.7 Does not apply to
+circuit-breakers, appliance switches, in-line cord switches, cable-reel switches.
+
+2 REFERENCES — IS 694:2010, IS 1068:1993, IS 1401:2008, IS 1573:1986, IS 2824:2007/IEC 60112:2003,
+IS 9968-1:1988, IS 10462-1:1983, IS 10462-2:1991, IS 11000 (Part 2/Sec 1):2018 (glow-wire), IS 12360:1988,
+IS 14772:2019, IS 9000 (Part 7/Sec 7):2006/IEC 60068-2-75 (hammer tests), IS/IEC 60529:2001 (IP Code),
+IS/IEC 60669-2-1/-2-2, IEC 60999-1, IEC 60669-2-4/-2-5/-2-6, IS/ISO/IEC Guide 51.
+
+3 TERMINOLOGY (selected)
+3.1 switch; 3.2 one operation; 3.3-3.11 terminal types — screw type: pillar (Fig. 1), screw head (Fig. 2), stud
+(Fig. 2), saddle (Fig. 3), lug (Fig. 4), mantle (Fig. 5); screwless (3.11); 3.12 mechanical time-delay device;
+3.13 base; 3.14 rated voltage; 3.15 rated current; 3.16 push-button switch; 3.17 momentary contact switch;
+3.18 momentary push-button; 3.19 cord-operated switch; 3.20 mini-gap construction — contact clearance
+< 3 mm but ≥ 1.2 mm (functional purposes, not for safety isolation); 3.21 clamping unit; 3.22 thread-forming
+screw; 3.23 thread-cutting screw; 3.24 operating member; 3.25 pole; 3.26 SELV ≤ 32 V (no-load ≤ 38 V);
+3.27 routine tests; 3.28 acceptance tests; 3.29 type tests; 3.30 dolly type switches; 3.31 micro-gap construction —
+open-contact clearance < 1.2 mm; 3.32 on/off switch; 3.33 actuating member; 3.34 pilot light; main part;
+3.35 grommet; 3.36 entry membrane; 3.37 protecting membrane; 3.38 self-ballasted lamp (SBL/CFLi/LEDi);
+3.39 externally ballasted lamp; 3.40 covers/cover plates/actuating members.
+
+Terminal figure data (screw terminals):
+Fig. 1 Pillar terminals — conductor space min diameter D and torque: ≤1.5 mm² → D 2.5, torque 0.4 Nm (1 or
+2 screws, per Table 5 columns 1/3/5); 2.5 (circular hole) → 3.0, 0.5/0.4; 2.5 (elongated 2.5×4.5) → 0.5/0.4;
+4 → 3.6, 0.8/0.4; 6 → 4.0, 0.8/0.5; 10 → 4.5, 1.2/0.5. Min distance g between clamping screw and conductor end:
+1.5-2.0 mm (per size); one/two screw variants as tabulated.
+Fig. 2 Screw/stud terminals — D: ≤1.5 → 1.7; ≤2.5 → 2.0; ≤4 → 2.7; ≤6 → 3.6; ≤10 → 4.3; ≤16 → 5.5; ≤25 → 7.0;
+torques 0.5-3.0 Nm per columns 3/4 of Table 5.
+Fig. 3 Saddle terminals — D 3.0-7.0, torque 0.5-2.0 Nm (≤4 to ≤25 mm²).
+Fig. 4 Lug terminals — distance g ≥ 7.5 (≤16 mm²) / 9.0 (≤25 mm²); torque 2.0-3.0 Nm; spring washer or locking
+means required.
+Fig. 5 Mantle terminals — D 1.7-7.0; min distance fixed part to conductor end 1.5-3.0 mm.
+
+4 GENERAL REQUIREMENTS — reliable performance in normal use; compliance by all relevant tests.
+5 GENERAL NOTES ON TESTS
+5.1 Tests are type tests; schedules in 26. 5.2 Specimens as delivered, normal use; pilot-light switches tested with
+pilot lights fitted; flush/semi-flush tested in IS 14772 box (or manufacturer-specified box). 5.3 Ambient +15 to
++35 °C (doubt: 27 ± 2 °C). Three specimens per voltage/current combination (Table 1: 12 specimens total,
++9 for dual rating; sets ABC/DEF/GHI/UVW etc.). Switches ≤ 16 A: tests 19.1 + 19.2 + 19.3; > 16 ≤ 20 A: 19.1 +
+19.3 (19.2 only if AX rating assigned); > 20 A: 19.1 only. 250/415 V switch tested as 415 V. Momentary contact
+switches: not subjected to 18.3, 19.2, 19.3. One-fault repeat rule per 5.3.
+
+6 RATINGS
+6.1 Preferred rated voltages: 110, 220, 230, 240, 250, 400, 415, 440 V (others per IS 12360).
+6.2 Preferred rated currents: 6 A, 10 A, 13 A, 16 A, 20 A, 25 A, 32 A, 40 A, 45 A or 63 A; minimum 6 A except
+momentary contact switches where 1 A, 2 A or 4 A allowed. Switches ≤ 16 A shall have externally ballasted lamp
+current rating (AX) equal to rated current (not for patterns 3/03 or momentary switches). Switches ≤ 20 A tested
+with SBL circuits per 19.3.
+Table 2 Rated power of SBL circuit (220/400-250/415 V systems): ≤10 A → 100 W; >10-13 A → 150 W;
+>13-16 A → 200 W; >16-20 A → 250 W.
+6.3 / Table 3 Preferred combinations of poles and ratings: 1/2/4 A — 1 pole (≤250 V); 6 A — 1, 2 poles (≤250 V),
+1, 2 (>250 V); 10 and 13 A — 1, 2 (≤250 V), 1, 2, 3, 4 (>250 V); 16-63 A — 1, 2, 3, 4 poles (both).
+
+7 CLASSIFICATIONS
+7.1.1 By connections (pattern numbers): 1 single-pole; 2 double-pole; 3 three-pole; 03 three-pole + switched
+neutral; 6 two-way; 5 two-circuit with common incoming; 4 two-way with one off-position; 6/2 two-way
+double-pole; 7 two-way double-pole reversing (intermediate).
+7.1.2 By contact opening: normal gap; mini-gap; micro-gap; without contact gap (semiconductor).
+7.1.3/7.1.4 By IP degrees (IS/IEC 60529). 7.1.5 By actuation: rotary, tumbler, rocker, push-button, cord-operated,
+dolly. 7.1.6 By mounting: surface, flush, semi-flush, panel, architrave. 7.1.7 By terminals: screw-type; screwless
+(rigid only); screwless (rigid and flexible).
+
+8 MARKING
+8.1 Rated current (A / AX per tests done), rated voltage (V), symbol for nature of supply, maker's name or
+trade-mark, type reference (optional), symbols m (mini-gap), µ (micro-gap), ɛ (semiconductor), IP degrees where
+declared > IP2X/4; length of insulation to remove (screwless); symbol r (rigid conductors only); manufacturer
+documentation: SBL rated power/type, country of manufacture. 8.2 Symbols: AX, A, V, ~, W, N, L, earth,
+O (open), I (closed), IPXX etc. 8.3 Visibility. 8.4 Phase terminal marking (L, L1, L2, L3 or bare brass/copper).
+8.5 Neutral N; earth symbol; not on screws/removable parts. 8.6 Switch position indication. 8.7 Red push-button
+only for opening circuit. 8.8 Instruction sheet for special precautions. 8.9 Durability: rub 15 s with water-soaked
+cloth then 15 s with petroleum spirit; markings legible (impression/moulding/engraving exempt). 8.10 Standard
+Mark (BIS Act 2016).
+
+9 CHECKING OF DIMENSIONS — compliance with manufacturer's drawings; by measurement.
+
+10 PROTECTION AGAINST ELECTRIC SHOCK
+10.1 Live parts not accessible after removal of parts removable without tool; standard test finger with 40-50 V
+indicator; smallest and largest conductors per 12. Thermoplastic/elastomeric enclosures: additional test at
+(35 ± 2) °C, 75 N for 1 min via test probe 11 of IS 1401 (10 N on thin-walled knock-outs); no deformation making
+live parts touchable. 10.2 Knobs/levers/push-buttons/rockers of insulating material unless double/reinforced
+insulation or earthed. 10.3 Accessible parts of insulating material except small isolated screws, actuating members
+per 10.2, metal covers per 10.3.2/10.3.3 (insulating linings/barriers; or earthing via fixing screws with low
+resistance). 10.4 Metal mechanism parts shall not protrude from enclosure (key-operated: insulated from live
+parts). 10.5 Mechanism metal parts inaccessible; insulated from accessible metal parts/frames/fixing screws unless
+creepage/clearances ≥ 2 × Table 9 values or earthed. 10.6 Indirect operation (key/cord/chain/rod): touching parts
+insulated from live parts. 10.7 Replaceable pull cord fitted without touching live parts.
+
+11 PROVISION FOR EARTHING
+11.1 Accessible metal parts liable to become live shall have earthing terminal (permanent, reliable). 11.2 Earthing
+terminals: screw clamping or screwless per 12; 11.3 surface switches (IP > IPX0, > 1 cable inlet): internal earthing
+terminal for continuity. 11.4 Earth continuity test: ac source ≤ 12 V no-load, current 1.5 × rated current or 25 A
+(whichever greater); resistance between earthing terminal and each accessible metal part shall not exceed 0.05 Ω.
+
+12 TERMINALS
+12.1 Screw clamping or screwless; clamping means shall not fix other components; tests after 15.1; rigid solid =
+Class 1, rigid stranded = Class 2, flexible = Class 5 per IS 694.
+12.2 Screw terminals: Table 4 cross-sections; conductor space per Fig. 1-5; connection without special
+preparation; metric ISO thread; not soft metal (zinc/aluminium).
+Table 4 Rated current ranges → rigid conductor cross-sections (mm²) and largest diameter (mm): ≤4 A —
+(flexible 0.5-1 for ELV); >4-6 — 0.75-1.5, Ø1.45; >6-13 — 1-2.5, Ø2.13; >13-16 — 1.5-4, Ø2.72; >16-25 —
+2.5-6, Ø3.34; >25-32 — 4-10, Ø4.34; >32-50 — 6-16, Ø5.46; >50-63 — 10-25, Ø6.85. Supply terminals (except
+patterns 3, 03, 7) shall accept two 2.5 mm² conductors (round hole sufficient ≤ 250 V). Flexible conductors
+permitted.
+Table 5 Tightening torques (Nm) by thread diameter: ≤2.8 → 0.2/0.4/0.4 (cols 1/3/5); 2.8-3.0 → 0.25/0.5/0.5;
+3.0-3.2 → 0.3/0.6/0.6; 3.2-3.6 → 0.4/0.8/0.8; 3.6-4.1 → 0.7/1.2 (col 2)/1.2/1.2/1.2; 4.1-4.7 → 0.8/1.2/1.8/1.8/1.8;
+4.7-5.3 → 0.8/1.4/2.0/2.0/2.0; 5.3-6.0 → –/1.8/2.5/3.0/3.0; >6 → col 6 = 0.8 (central-hole fixing nuts). Dolly type
+row-6 values: 4.1-4.3 → 1.4; 4.3-4.7 → 1.8.
+12.2.5 Flexion test (Fig. 11): platen rotated (10 ± 2) r/min, 15 min; bushing/height/mass per Table 6 (0.5 mm² →
+6.5 mm/260 mm/0.3 kg; 0.75 → 0.4 kg; 1.0/1.5 → 0.4 kg; 2.5 → 9.5/280/0.7; 4.0 → 0.9; 6.0 → 1.4; 10 → 2.0;
+16 → 13.0/300/2.9; 25 → 4.5). No slip-out, breakage, or damage; flexible: ≤ 15 percent broken wires allowed.
+12.2.6 Clamp reliably between metal surfaces; pull test per Table 7 for 1 min: 0.5-0.75 → 30 N; 0.75-1.5 → 40 N;
+1.5-2.5 → 50 N; 2.5-4 → 50 N; 4-6 → 60 N; 6-10 → 80 N; 10-16 → 90 N; 16-25 → 100 N; no noticeable movement.
+12.2.7 No escape of wires (Table 8 conductor compositions; 1 mm² 1×1.13 solid / 7×0.42 stranded up to 25 mm²
+7×2.14); torque two-thirds of Table 5.
+12.2.8 Terminals shall not work loose; 5 × tighten/loosen with Table 5 torque; no damage.
+12.2.9 Earthing terminal screws locked against accidental loosening (tool needed). 12.2.10 No corrosion risk
+with copper; body brass or equally resistant. 12.2.11 Pillar terminal distances per Fig. 1; mantle per Fig. 5.
+12.2.12 Lug terminals only for switches ≥ 40 A; spring washers/locking means.
+12.3 Screwless terminals: Table 10 — ≤4 A → 0.75-1 mm² (rigid Ø1.19); >4-6 → 1-1.5 (Ø1.45; flexible Ø1.73);
+>6-16 → 1.5-2.5 (Ø2.13/2.21); two 2.5 mm² per supply terminal (10 A terminal, separate clamping units).
+Connection without special preparation; current-carrying parts per 22.5; clamp between metal surfaces;
+disconnection by operation other than pull; separate clamping unit per conductor; insertion stop; properly fixed.
+12.3.10 Mechanical test: 5 × connect/disconnect (solid; stranded 1 ×; flexible 5 ×), pull 30 N 1 min; 15 min circular
+motion (10 ± 2) r/min with Table 7 pull; no movement/damage.
+12.3.11 Electrical/thermal: Table 11 test currents (1 h): ≤4 A → 9 A / 0.75 mm²; >4-6 → 13.5 A / 1; >6-13 →
+17.5 A / 1.5; >13-16 → 22 A / 2.5. Voltage drop ≤ 15 mV at rated current after 1 h. Then 192 temperature cycles
+(~1 h each: 30 min on / 30 min off); voltage drop measured after 24th and 192nd cycles (+ any three of 48/72/96/
+120/144/168): shall not exceed 22.5 mV nor 2 × value after 24th cycle; no cracks/deformation; repeat 12.3.10.
+12.3.12 Deflection test (Table 12 conductors: ≤6 A → 1.0/1.5 mm²; >6-16 → 1.5/2.5 mm²; Table 13 forces: 1.0 →
+0.25 N; 1.5 → 0.5 N; 2.5 → 1.0 N) in 12 directions at 100 mm; voltage drop across clamping unit ≤ 25 mV (recovery
+window ≤ 1 min, then 30 s hold).
+12.4 (Annex D, informative) IPTs: Table D-2 sizes (≤4 A → 0.75-1.5; >4-6 → 1-1.5; >6-16 → 1.5-2.5 mm²);
+Table D-3 test currents 9/13.5/17.5 A (min section) and 17.5/17.5/24 A (max section); voltage drop ≤ 22.5 mV or
+1.5 × 24th-cycle value; 192 cycles 20↔40 °C.
+
+13 CONSTRUCTIONAL REQUIREMENTS
+13.1 Insulating linings/barriers: adequate strength, secured. 13.2 Installation: easy introduction/connection,
+correct positioning, easy fixing, adequate space; screwless connecting means not activated by conductors during
+installation (test: probe 1 of IS 1401, 120 N + conductor pull 30 N 1 min). 13.3 Covers/cover plates/actuating
+members held at ≥ 2 points (or 1 fixing + location); verification per 13.3.2 (screw type), 13.3.3 (Table 14 forces:
+to live parts 40/80 N shall-not-come-off, 120 N shall-come-off; to non-earthed metal 10/20 N; to insulating/
+earthed/SELV ≤ 25 V 10 N), 13.3.4 (tool removal). 13.4 No free openings per IP. 13.5 Knob attachment: axial pull
+30 N (likely) / 15 N (unlikely) 1 min; 100 reverse rotations. 13.6 Mounting means accessible from front. 13.7
+Combinations: correct position, independent fixing. 13.8 Combined accessories per own standards. 13.9 IP > IP20
+surface switches with conduits/glands; IPX4/5/6: drain hole ≥ 5 mm diameter or 20 mm² (width ≥ 3 mm); lid
+springs corrosion-resistant. 13.10 Box installation: conductor ends preparable after box mounted; stable base.
+13.11 Second current-carrying conductor terminal for surface pattern 1/5/6 multi-inlet switches. 13.12 Inlet
+openings: conduit 16/20/25/32 (two sizes or combination); cable dimensions per Table 15: 6 A (2 cond) 3.2×5.2
+to 3.9×6.4 or 5.2-11.5 mm; 10 A: 2c ≤ 13.5, 3c 6.4-14.5, 4c ≤ 15.5; 16 A: 2c ≤ 15, 3c 7.4-16, 4c ≤ 18; 20-25 A:
+2c ≤ 18.5, 3c 8.9-20, 4c ≤ 22; 32 A: 2c ≤ 24, 3c 10.5-25.5, 4c ≤ 28; 40/45/50 A: 2c ≤ 27.5, 3c 11.5-29.5, 4c ≤ 32;
+63 A: 2c ≤ 31.5, 3c 14.5-34, 4c ≤ 37.5. 13.13 Back entry provision. 13.14 Membranes replaceable.
+13.15 Membranes: fixing test at (40 ± 2) °C, 30 N 5 s via test finger tip (aged per 15.1 and new); axial pull 30 N
+5 s; cold introduction test at (−15 ± 2) °C 2 h — cable introduction possible without undue force; no harmful
+deformation/cracks. 13.16 Pilot light units per 101.1.1.1 and 102 of IS/IEC 60669-2-1.
+
+14 MECHANISM
+14.1 Actuating member takes position of moving contacts (cord-operated/single push-button may have single rest
+position). 14.2 Rest only in on/off positions (intermediate allowed if insulation adequate — electric strength per
+16.3). 14.3 No undue arcing on slow operation (10 further breaks at end of test 19, 2 s steady movement; no
+sustained arcing). 14.4 Patterns 2, 3, 03, 6/2 make/break all poles substantially simultaneously (03: neutral not
+after/before others). 14.5 Mechanism action independent of cover/cover plate (lamp shall not flicker).
+14.6 Cord-operated: change from off by steady pull ≤ 45 N vertical, ≤ 65 N at 45° ± 5°.
+
+15 RESISTANCE TO AGEING, INGRESS OF WATER, HUMIDITY
+15.1 Ageing: heating cabinet (70 ± 2) °C, 7 days (168 h); then ≥ 4 days at room/45-55 percent RH; no cracks,
+not sticky (5 N cloth-wrapped finger test — no traces). 15.2 IP protection per IS/IEC 60529: mounted as normal
+use; glands torque two-thirds Table 16 (metal glands 6.25/7.5/10.0 Nm; moulded 3.75/5.0/7.5 Nm by test-rod
+diameter ≤14/14-20/>20 mm); first numeral 5 → category 2 (no dust interfering); 6 → category 1 (no dust);
+water per IPX; drain holes; electric strength per 16.3 within 5 min after. 15.3 Humidity: 91-95 percent RH,
+20-30 °C, 48 h (IPX0) or 168 h (> IPX0) [acceptance tests: 24 h]; then no damage.
+
+16 INSULATION RESISTANCE AND ELECTRIC STRENGTH
+16.2 IR at ~500 V dc, 1 min: Table 17 connection points by pattern; minimum values per Table 18: ≥ 5 MΩ
+(poles together to body, switch on; mechanism metal parts to live parts / foil on knob / key / cord anchorage /
+accessible metal; metal enclosure to lining foil); ≥ 2 MΩ (each pole in turn to others+body; across open contacts
+normal/mini/micro-gap). Combinations: measurements per pattern; ≥ 5 MΩ.
+16.3 Electric strength 50/60 Hz, 1 min: rated ≤ 130 V → 1 250 V; > 130 V → 2 000 V (items 1-5); live-to-accessible
+(mechanism not insulated): 2 000 / 3 000 V; live parts to metal knobs/push-buttons: 2 500 / 4 000 V. Micro-gap
+across open contacts: 500 V (≤130 V) / 1 250 V (>130 V; reduced to 750 V after humidity, 500 V after normal
+operation for ≤ 250 V). No flashover/breakdown; transformer 200 mA capability; trip ≥ 100 mA.
+
+17 TEMPERATURE RISE
+Mounted vertically, PVC rigid conductors per Table 19, terminal torque two-thirds Table 5, ≥ 1 m conductors,
+loaded 1 h with test current. Temperature rise of terminals ≤ 45 K.
+Table 19 (rated current → test current / conductor): 1 → 1.5 A / 0.5 mm²; 2 → 3 / 0.75; 4 → 5 / 1; 6 → 8 / 1.5;
+10 → 13.5 / 2.5; 13 → 17 / 2.5; 16 → 20 / 4 (screwless ≤ 250 V other than 3/03: 2.5 mm²); 20 → 25 / 4; 25 → 32 / 6;
+32 → 38 / 10; 40 → 46 / 16; 45 → 51 / 16; 50 → 57.5 / 16; 63 → 75 / 25. (Interpolation for other ratings.) Patterns
+4, 5, 6, 6/2, 7: one circuit loaded. Flush-mounted: box in pinewood block with plaster (10-15 mm), dried ≥ 7 days;
+cables from top, sealed; 80 ± 10 mm conductor in box. Surface: on wooden block ≥ 20 mm thick, 500 × 500 mm.
+17.2 Pilot lights (illuminated 1 h, rated voltage + rated current load): surface temperature rise limits — 45 K
+non-metallic knobs/handles/sensing surfaces; 55 K other non-metallic; 35 K metallic knobs; 45 K other metallic.
+Neon/LED ≤ 3 mA not tested.
+
+18 MAKING AND BREAKING CAPACITY
+18.1 Apparatus Fig. 14, connections Fig. 15; pattern 7 tested one side as pattern 6; selector switch fractions
+(Table 20): patterns 6, 6/2, 7 rotary both directions — 1/4 and 3/4; other types — 1/2. Conductors as per 17.
+18.2 Overload: 1.1 × rated voltage, 1.25 × rated current, cos ϕ 0.3 ± 0.05; 200 operations at 30/min (≤ 13 A),
+15/min (> 13 < 25 A), 7.5/min (≥ 25 A); on-period 25 percent (+5/0), off 75 (−5/0); rotary both-direction: half each
+way; pattern 5 single mechanism: 200 ops with In + 0.25 In, then 200 ops each 0.625 In; earthing via 0.1 mm
+copper wire fuse ≥ 50 mm (shall not blow). No sustained arcing; sticking separable without damage; no blows;
+no damage impairing use.
+18.3 Overload with filament lamps (≤ 16 A ≤ 250 V and patterns 3/03 > 250 V): rated voltage, load ≥ 1.2 × rated
+current using tungsten filament lamps (test voltage = lamp rated voltage ≥ 95 percent), smallest lamp count
+≥ 1.2 In; available short-circuit current ≥ 1 500 A; conditions per 18.2; no sustained arcing.
+
+19 NORMAL OPERATION
+19.1 Inductive load test: rated voltage and current, cos ϕ 0.6 ± 0.05; number of operations per Table 21:
+≤ 16 A & ≤ 250 V (except patterns 3/03) → 40 000; ≤ 16 A & > 250 V and patterns 3/03 → 20 000; > 16-50 A →
+10 000; > 50 A → 5 000. Rate per 18.2; on 25/off 75 percent. Pattern rules as 18. After test: electric strength per
+16 (voltages reduced: 4 000 → 3 000 V; others − 500 V), terminal temperature rise at rated current; no wear
+impairing use, no position discrepancy, no enclosure deterioration, no sealing seepage, no loosening, no relative
+contact displacement (patterns 2, 3, 03, 6/2); then test of 14.3.
+19.2 Externally ballasted lamp loads (new specimens): circuit Fig. 16A; prospective short-circuit 3-4 kA at
+cos ϕ 0.9 ± 0.05; F = 0.1 mm copper fuse ≥ 50 mm; R1 limits ~100 A; R3 = 0.25 Ω (1.5 mm² cable ≤ 13 A;
+2.5 mm² 13-20 A); load A: C1 = 70 µF ± 10 percent (6 A) / 140 µF ± 10 percent (others) + L1/R2 for cos ϕ
+0.9 ± 0.05 at test current; operations: 6-13 A → 10 000 at 30/min; > 13-16 A → 5 000 at 15/min. After: electric
+strength (reduced) + terminal temperature rise; functional requirements as 19.1.
+19.3 Self-ballasted lamp loads (SBL): circuit Fig. 16B; 3 kA cos ϕ 0.9; R3 0.25 Ω; load B (R2, C) tuned to
+Table 22 Ipeak and I²t (± 5 percent) closing at 90° ± 5° phase angle; R4 sets SBL power current. Table 22:
+≤ 10 A → Ipeak 108 A, I²t 2.8 A²s (100 W) / 162 A, 5.9 A²s (60 W); > 10-13 → 142, 5.5 (150 W) / 162, 5.9 (60 W);
+> 13-16 → 170, 9 (200 W) / 200, 11.5 (100 W); > 16-20 → 192, 13 (250 W) / 231, 18.5 (150 W). 250 V switch
+treated as 230/400 V system. Table 23 (informative circuit values at 230 V): R2/C = 1.9 Ω/125 µF; 1.25/180;
+0.95/240; 0.8/310. Operations per Table 21; conditions per 18.2. After: electric strength (reduced) + terminal
+temperature rise; functional criteria as 19.1.
+
+20 MECHANICAL STRENGTH
+20.2 Pendulum hammer (IS 9000 Part 7/Sec 7, 250 g): heights of fall per Table 24 — IPX0: parts A/B 80 mm,
+C 120 mm, D 160 mm; IP > IPX0: A/B 120, C 160, D 200 mm (A front-face parts; B ≤ 15 mm projection;
+C 15-25 mm; D > 25 mm); 9 blows (5 on A, 4 on B/C/D); panel-mount parts 100 mm. After: no damage; live parts
+not accessible; lens may crack but probes B / 11 (10 N) shall not touch live parts.
+20.3 Main parts of surface switches: fixing to cylinder radius 4.5 × hole distance (≥ 200 mm); screw torque 0.5 Nm
+(≤ 3 mm) / 1.2 Nm (> 3 mm); then flat sheet; no damage.
+20.4 Screwed glands: metal rod, torque per Table 16, 1 min; no damage.
+20.5-20.9 Covers: non-removal forces (40 N / 80 N for 1 min per 13.3.3/Table 14), removal ≤ 120 N; 10 ×; with
+1 mm hard sheet (wallpaper simulation); gauges per Fig. 18-22 (grooves gauge penetration ≤ 1.0 mm at 1 N).
+20.10 Cord-operated: pull 100 N 1 min (normal direction) + 50 N 1 min within 80° cone; still operates.
+
+21 RESISTANCE TO HEAT
+21.2 Basic heating: 1 h at (100 ± 2) °C; no change impairing use; sealing compound shall not flow to expose live
+parts; live parts not accessible afterwards (test finger ≤ 5 N); markings legible.
+21.3 Ball pressure (5 mm ball, 20 N) on insulating parts retaining current-carrying/earthing parts: (125 ± 2) °C,
+1 h; impression diameter ≤ 2 mm. (Earth-terminal-in-box parts per 21.4.)
+21.4 Ball pressure on other insulating parts: (70 ± 2) °C or (40 ± 2) °C + highest temperature rise from 17,
+whichever higher; impression ≤ 2 mm. Surface boxes/covers/frames and rubber switches per 21.4.
+
+22 SCREWS, CURRENT-CARRYING PARTS AND CONNECTIONS
+22.1 Screws/nuts transmitting contact pressure: metal, engaging metal thread; tighten/loosen 10 × (insulating
+thread) / 5 × (others) at 12.2.5 torque; no damage. 22.2 Correct insertion of screws into insulating threads.
+22.3 Contact pressure not through insulating material (except ceramic/pure mica or equivalent). 22.4 Screws/
+rivets serving electrical + mechanical connection locked against loosening. 22.5 Current-carrying parts: copper;
+copper alloy ≥ 58 percent (cold-rolled sheet) / ≥ 50 percent (other); stainless steel ≥ 13 percent Cr, ≤ 0.09 percent C;
+electroplated steel — zinc (IS 1573) 5/12.5/25 µm for IPX0/IPX4/IPX5-6; nickel+chromium (IS 1068)
+20/30/40 µm; tin (IS 1359) 12/20/30 µm. Wear-subject parts not electroplated steel; no great electrochemical
+difference under moist conditions; sliding contacts corrosion-resistant metal. 22.7 Thread-forming screws not for
+current-carrying connections; earthing continuity allowed if ≥ 2 screws, undisturbed.
+
+23 CREEPAGE DISTANCES, CLEARANCES, SEALING COMPOUND (Table 9, mm):
+Creepage: across open contacts 3 (mini/micro: 3, reducible to 1.2 with CTI ≥ 600 or 1.8 with CTI ≥ 400 for
+≤ 250 V); between different polarity 4 (3 for ≤ 250 V); live to accessible insulating surfaces/earthed metal/frames/
+fixing screws/mechanism 3; mechanism-to-accessible group 3; live to accessible unearthed metal 6 (4.5 for
+≤ 250 V). Clearances: across open contacts 3 (mini 1.2; micro < 1.2, > contact gap); polarity 3; live to surfaces
+group 3; live to earthed metal boxes 3 / unearthed boxes without lining 4.5; mechanism group 3; live to mounting
+surface 6; live to bottom of conductor space 3; live to accessible unearthed metal 6 (4.5 ≤ 250 V). Sealing
+compound: live (≥ 2 mm covered) to mounting surface 4 (3 ≤ 250 V); to bottom of conductor space 2.5. Neon/LED
+pinch lead wires: 1 mm polarity distances. Measurement rules: grooves < 1 mm wide count width only; air gaps
+< 1 mm ignored; double-break sums.
+23.2 Insulating compound shall not protrude above cavity edge.
+
+24 RESISTANCE OF INSULATING MATERIAL TO ABNORMAL HEAT, FIRE, TRACKING
+24.1 Glow-wire per IS 11000 (Part 2/Sec 1): 850 °C for parts retaining current-carrying/earthing parts (650 °C for
+earth-terminal-in-box parts); 650 °C for other parts even if in contact. Pass: no visible flame/sustained glowing, or
+extinguish within 30 s of removal; no ignition of tissue/scorching of board. Small parts (15 mm circle / 8 mm rule)
+and ceramic exempt; 24 h conditioning; one specimen (doubt: two more).
+24.2 Tracking (IP > IPX0, parts retaining live parts): PTI 175 V, solution A, 50 drops, (30 ± 5) s interval, no
+flashover/breakdown; ceramic exempt.
+
+25 RESISTANCE TO RUSTING
+Degrease; immerse 10 min in 10 percent ammonium chloride at (27 ± 5) °C; 10 min in saturated moisture box at
+(27 ± 5) °C, RH ≥ 90 percent; dry 10 min at (100 ± 5) °C: no rust (sharp-edge traces/yellowish removable film
+ignored; greased springs tested only in doubt).
+
+26 TESTS
+26.1 Type tests: ratings (6); classification (7); marking (8); dimensions (9); protection against electric shock (10);
+earthing (11); terminals (12); construction (13); mechanism (14); ageing/water/humidity (15); IR + electric
+strength (16); temperature rise (17); making and breaking capacity (18); normal operation (19); SBL test (19.3);
+mechanical strength (20); resistance to heat (21); screws/current-carrying parts (22); creepage/clearances (23);
+fluorescent-circuit operation (19.2); abnormal heat and fire (24.1); tracking (24.2); rusting (25). Specimens and
+sequence per Table 1. Criteria: pass all; on failure twice the specimens for repeat, no single failure permitted.
+26.2 Acceptance tests: marking (8); water/humidity (15.2, 15.3 — humidity 24 h); IR + electric strength (16);
+temperature rise (17); mechanical strength (20). Sampling per Annex B (Table B-1: lot 51-100 → n1 10, n2 20,
+C1 0, C2 3 … 1 300+ → 75/150, C1 5, C2 12; accepts ~≤ 4 percent defective lots).
+26.3 Routine tests: marking (8).
+
+ANNEX A (Normative) — Flexible cable outlet switches: cable per IEC 60245-4 (60245 IEC 66) or IEC 60227-5
+(60227 IEC 53); entry accepts Table A-1 max dimensions (6 A: 2c ≤ 11.0 … 5c ≤ 14.4; 10/13 A: ≤ 13.1-17;
+16 A: ≤ 15.1-19.9; 20-25 A: ≤ 16.8-22.2 mm; minima 5.7/5.9/6.8/8.4 or flat equivalents); cable anchorage relieves
+strain/twisting, insulating (or lined), not releasable from outside, no special tool; test: 1.5 mm² cord, terminal
+screws just tight, anchorage clamped at two-thirds torque; 25 pulls of 30 N (1 s each) + 1 min torque 0.15 Nm;
+repeat with largest 60245 IEC 66 cable at 60 N / 0.35 Nm; displacement ≤ 2 mm; 2 000 V ac 1 min between
+conductors and anchorage — no damage to cable insulation.
+
+ANNEX B — sampling plan (acceptance tests) as tabulated above.
+ANNEX C (Informative) — SBL circuit development: single-lamp Ipeak/I²t (Table C-1: P ≤ 15 W 230 V → 20 A /
+0.08 A²s; 15 < P ≤ 25 230 V → 35 A / 0.15 A²s; 120 V values 60 A / 0.5 A²s); multiple-lamp modelling.
+ANNEX D (Informative) — insulation-piercing terminals (future requirements): definitions, classification
+(reusable/non-reusable; tool/hand), marking, Table D-2 sizes, mechanical tests (Fig. 12 apparatus, Table 6/7
+values), electrical/thermal: 192 cycles 20↔40 °C, voltage drop ≤ 22.5 mV or 1.5 × 24th-cycle value (Table D-3
+currents); non-reusable IPT only for trunking systems; screws 5 × tighten/loosen.
+ANNEX E — Committee composition (ETD 14).
+This Indian Standard has been developed from Doc No.: ETD 14 (13172).

@@ -1,0 +1,408 @@
+IS 1180 (Part 1) : 2014
+[Amalgamating IS 1180 (Part 2) : 1989]
+Indian Standard
+OUTDOOR TYPE OIL IMMERSED DISTRIBUTION TRANSFORMERS UPTO AND INCLUDING
+2 500 kVA, 33 kV — SPECIFICATION
+PART 1 MINERAL OIL IMMERSED
+( Fourth Revision )
+ICS 29.180
+
+===================================================================
+1 SCOPE
+This standard specifies the requirements and tests including standard loss levels of mineral oil-immersed,
+natural air-cooled, outdoor type, double-wound distribution transformers for use in power distribution systems
+with nominal system voltages up to and including 33 kV and of following types and ratings:
+ a) Three phase ratings up to and including 200 kVA both non-sealed type and sealed type.
+ b) Three phase ratings higher than 200 kVA, up to and including 2 500 kVA both non-sealed type and sealed type.
+ c) Single phase ratings up to and including 25 kVA sealed type.
+
+2 REFERENCES
+The standards listed in Annex A constitute provisions of this standard.
+
+3 TERMINOLOGY
+3.1 Distribution Transformer — provides the final voltage transformation in the electric power distribution system.
+3.2 Non-Sealed Type Transformer — has a conservator and a breather.
+3.3 Sealed Type Transformer — non-breathing, so sealed there is no significant interchange with atmosphere.
+
+4 SERVICE CONDITIONS
+The provisions of IS 2026 (Part 1) shall apply.
+
+5 GENERAL
+Technical parameters including standard loss levels of three categories of distribution transformers are given
+in 6, 7 and 8. Other requirements as described in 9 to 22 are applicable for all types and ratings.
+
+===================================================================
+6 TECHNICAL PARAMETERS OF THREE PHASE DISTRIBUTION TRANSFORMERS UP TO AND INCLUDING 200 kVA
+(NON-SEALED AND SEALED TYPE)
+
+6.1 Ratings — as per Table 1.
+
+Table 1 Standard Ratings (Clause 6.1)
+Sl No. | Nominal System Voltage | Standard Ratings (kVA)
+i)  | Up to and including 11 kV        | *6.3, *10, 16, *20, 25, *40, 63, 100, 160 and 200
+ii) | Above 11 kV up to and incl 22 kV | 63, 100, 160 and 200
+iii)| Above 22 kV up to and incl 33 kV | 100, 160 and 200
+NOTE — *ratings are non-preferred.
+
+6.2 Rated Frequency — 50 Hz.
+
+6.3 Nominal System Voltage:
+High Voltage (HV) — 3.3, 6.6, 11, 22 and 33 kV
+Low Voltage (LV) — 415V
+
+6.4 Basic Insulation Level (BIL) — as given in Table 2.
+
+Table 2 Rated Basic Insulation Level (Clause 6.4)
+Sl No. | Nominal System Voltage (kV) | Rated BIL (kVp)
+i)   | 3.3 | 40
+ii)  | 6.6 | 60
+iii) | 11  | 75
+iv)  | 22  | 125
+v)   | 33  | 170
+
+6.5 No-Load Voltage Ratios:
+3 300/433-250, 6 600/433-250, 11 000/433-250, 22 000/433-250 and 33 000/433-250 V
+NOTE — Secondary voltage may be selected as 415-240 V, subject to agreement.
+
+6.6 Winding Connections and Phase Displacement — Primary delta, secondary star (Dyn 11), +30° phase displacement.
+
+6.7 Tapping Range and Tapping Methods
+6.7.1 No taps normally required up to 100 kVA rating unless specified.
+6.7.2 Standard tapping range when taps provided above 100 kVA:
+  Winding tapped: HV; Number of tap positions: 4; Voltage variation: +2.5 percent to –5 percent of HV in steps of 2.5 percent.
+6.7.3 Off circuit tap-changing arrangement by links or externally-operated switch with mechanical locking device.
+
+6.8 Losses and Impedance Values
+6.8.1 Losses — Multiple Rating with Regard to Energy Efficiency
+6.8.1.1 For transformers of HV voltage up to 11 kV, total losses (no-load + load losses at 75°C) at 50 percent
+of rated load and total losses at 100 percent of rated load shall not exceed maximum total loss values given in Table 3.
+6.8.1.2 For voltage class above 11 kV and up to 22 kV, permissible total loss values shall not exceed by 5 percent
+of the maximum total loss values in Table 3.
+6.8.1.3 For voltage class above 22 kV and up to 33 kV, permissible total loss values shall not exceed by 7½ percent
+of the maximum total loss values in Table 3.
+6.8.2 Impedance — recommended impedance at 75°C for different ratings is as per Table 3.
+
+Table 3 Maximum Total Losses Upto 11kV Class Transformers
+(Clauses 6.8.1.1, 6.8.1.2, 6.8.1.3 and 6.8.2)
+Columns: Sl No. | Rating (kVA) | Impedance (Percent) | EE Level 1: 50% Load | EE Level 1: 100% Load | EE Level 2: 50% Load | EE Level 2: 100% Load | EE Level 3: 50% Load | EE Level 3: 100% Load
+i)   | 16  | 4.5 | 150 | 480  | 135 | 440  | 120 | 400
+ii)  | 25  | 4.5 | 210 | 695  | 190 | 635  | 175 | 595
+iii) | 63  | 4.5 | 380 | 1 250| 340 | 1 140| 300 | 1 050
+iv)  | 100 | 4.5 | 520 | 1 800| 475 | 1 650| 435 | 1 500
+v)   | 160 | 4.5 | 770 | 2 200| 670 | 1 950| 570 | 1 700
+vi)  | 200 | 4.5 | 890 | 2 700| 780 | 2 300| 670 | 2 100
+NOTE — For non-preferred ratings of Table 1, maximum losses are subject to agreement between user and supplier.
+
+6.9 Permissible Flux Density and Over Fluxing
+6.9.1 Maximum flux density with +12.5 percent combined voltage and frequency variation shall not exceed 1.9 Tesla.
+6.9.2 No-load current up to 200 kVA shall not exceed 3 percent of full load current. Increase of 12.5 percent of
+rated voltage shall not increase the no load current by 6 percent maximum of full load current.
+
+6.10 Limits of Temperature-rise
+6.10.1 Type of cooling shall be ONAN as per IS 2026 (Part 2).
+6.10.2 Permissible temperature-rise shall not exceed 40°C (by resistance method) for winding and 35°C (by
+thermometer) for top oil when tested per IS 2026 (Part 2).
+
+===================================================================
+7 TECHNICAL PARAMETERS OF THREE PHASE DISTRIBUTION TRANSFORMERS HIGHER THAN 200 kVA UP TO AND
+INCLUDING 2 500 kVA (NON-SEALED AND SEALED TYPE)
+
+7.1 Ratings — as per Table 4.
+
+Table 4 Standard Ratings (Clause 7.1)
+Sl No. | Nominal System Voltage | Standard Ratings (kVA)
+i)   | Up to and including 11 kV         | 250, 315, 400, 500, 630, 1 000, 1 250, 1 600, 2 000 and 2 500
+ii)  | Above 11 kV up to and incl 22 kV  | 250, 315, 400, 500, 630, 1 000, 1 250, 1 600, 2 000 and 2 500
+iii) | Above 22 kV up to and incl 33 kV  | 250, 315, 400, 500, 630, 1 000, 1 250, 1 600, 2 000 and 2 500
+
+7.2 Rated Frequency — 50 Hz.
+
+7.3 Nominal System Voltage: HV — 3.3, 6.6, 11, 22 and 33 kV; LV — 415V
+
+7.4 Rated Basic Insulation Level (BIL) — as given in Table 5.
+
+Table 5 Rated Basic Insulation Level (Clause 7.4)
+Sl No. | Nominal System Voltage (kV) | Rated Basic Insulation Level (kVp)
+i)   | 3.3 | 40
+ii)  | 6.6 | 60
+iii) | 11  | 75
+iv)  | 22  | 125
+v)   | 33  | 170
+
+7.5 No-Load Voltage Ratios:
+3 300/433-250, 6 600/433-250, 11 000/433-250, 22 000/433-250 and 33 000/433-250 V
+
+7.6 Winding Connections and Phase Displacement — Primary delta, secondary star (Dyn 11), +30°. Alternatively Dyn1.
+
+7.7 Tapping Ranges and Tapping Methods
+7.7.1 Standard tapping ranges when taps provided:
+  Winding tapped: HV; Number of tap positions: 7; Voltage variations: +5 percent to –10 percent in steps of 2.5 percent for variation of HV.
+7.7.2 Off circuit tap-changing arrangement by links or externally-operated switch.
+7.7.3 For ratings greater than 500 kVA, on load tap changers may be provided for variation of HV voltage from
++5 percent to –15 percent in steps of 2.5 percent.
+
+7.8 Losses and Impedance Values
+7.8.1 Losses — Multiple Rating with Regard to Energy Efficiency
+7.8.1.1 For transformers of HV voltage up to 11 kV, total losses (no-load + load losses at 75°C) at 50 percent
+and 100 percent of rated load shall not exceed maximum total loss values given in Table 6.
+7.8.1.2 For voltage class above 11 kV and up to 22 kV, permissible total loss values shall not exceed by 5 percent
+of the maximum total loss values in Table 6.
+7.8.1.3 For voltage class above 22 kV and up to 33kV, permissible total loss values shall not exceed by 7½ percent
+of the maximum total loss values in Table 6.
+7.8.2 Impedance — recommended percent impedance at 75°C shall be as per Table 6.
+
+Table 6 Maximum Total Losses Up to 11 kV Class Transformer (Clause 7.8.1.1)
+Columns: Sl No. | Rating (kVA) | Impedance (Percent) | EE Level 1: 50% Load | EE Level 1: 100% Load | EE Level 2: 50% Load | EE Level 2: 100% Load | EE Level 3: 50% Load | EE Level 3: 100% Load
+i)    | 250   | 4.50 | 1 050 | 3 150  | 980   | 2 930  | 920   | 2 700
+ii)   | 315   | 4.50 | 1 100 | 3 275  | 1 025 | 3 100  | 955   | 2 750
+iii)  | 400   | 4.50 | 1 300 | 3 875  | 1 225 | 3 450  | 1 150 | 3 330
+iv)   | 500   | 4.50 | 1 600 | 4 750  | 1 510 | 4 300  | 1 430 | 4 100
+v)    | 630   | 4.50 | 2 000 | 5 855  | 1 860 | 5 300  | 1 745 | 4 850
+vi)   | 1 000 | 5.00 | 3 000 | 9 000  | 2 790 | 7 700  | 2 620 | 7 000
+vii)  | 1 250 | 5.00 | 3 600 | 10 750 | 3 300 | 9 200  | 3 220 | 8 400
+viii) | 1 600 | 6.25 | 4 500 | 13 500 | 4 200 | 11 800 | 3 970 | 11 300
+ix)   | 2 000 | 6.25 | 5 400 | 17 000 | 5 050 | 15 000 | 4 790 | 14 100
+x)    | 2 500 | 6.25 | 6 500 | 20 000 | 6 150 | 18 500 | 5 900 | 17 500
+
+7.9 Permissible Flux Density and Overfluxing
+7.9.1 Maximum flux density with +12.5 percent combined variation shall not exceed 1.9 Tesla.
+7.9.2 No load current shall not exceed 2 percent of full load current. Increase of 12.5 percent of rated voltage
+shall not increase the no-load current by 5 percent of full load current.
+
+7.10 Limits of Temperature-rise
+7.10.1 Type of cooling shall be ONAN as per IS 2026 (Part 2).
+7.10.2 Permissible temperature-rise shall not exceed 45°C (by resistance method) for winding and 40°C (by
+thermometer) for top oil per IS 2026 (Part 2).
+
+===================================================================
+8 TECHNICAL PARAMETERS OF SINGLE PHASE DISTRIBUTION TRANSFORMERS UP TO AND INCLUDING 25 kVA (SEALED TYPE)
+
+8.1 Ratings — as per Table 7.
+
+Table 7 Standard Ratings (Clause 8.1)
+Nominal System Voltage | Standard Ratings (kVA)
+11 kV | 5, 10, 16 & 25
+22 kV | 10, 16 & 25
+33 kV | 16 & 25
+
+8.2 Rated Frequency — 50 Hz.
+
+8.3 Nominal System Voltage: HV — 11, 22 and 33 kV; LV — 415V (240 V, 1 Phase)
+
+8.4 Rated Basic Insulation Level (BIL) — as given in Table 8.
+
+Table 8 Rated Basic Insulation Level (Clause 8.4)
+Nominal System Voltage (kV) | Rated BIL (kVp)
+11 | 75
+22 | 125
+33 | 170
+
+8.5 No-Load Voltage Ratio:
+11 000/√3 / 250 V, 11 000/250 V; 22 000/√3 / 250 V, 22 000/250 V; 33 000/√3 / 250 V, 33 000/250 V
+
+8.6 Number of Phases and Polarity — Number of phases: one (Single Phase). Polarity: Additive or Subtractive.
+
+8.7 Tap Changing Arrangement — Taps are not required.
+
+8.8 Losses and Impedance Values
+8.8.1 Losses — Multiple Rating with Regard to Energy Efficiency
+8.8.1.1 For transformer of HV voltage 11 kV, total losses (no load + load losses at 75°C) at 50 percent and 100
+percent of rated load shall not exceed maximum total loss values given in Table 9.
+8.8.1.2 For voltage class above 11 kV and up to 22 kV, permissible total loss values shall not exceed by 7½ percent
+of the maximum total loss values given in Table 9.
+8.8.1.3 For voltage class above 22 kV and up to 33 kV, permissible total loss values shall not exceed by 10 percent
+of the maximum total loss values given in Table 9.
+8.8.2 Impedance — recommended percent impedance at 75°C shall be as per Table 9.
+
+Table 9 Maximum Total Losses of Single Phase Transformers Upto 11 kV (Clauses 8.8.1.1, 8.8.1.2 and 8.8.1.3)
+Columns: Sl No. | Rating (kVA) | Impedance (Percent) | EE Level 1: 50% Load | EE Level 1: 100% Load | EE Level 2: 50% Load | EE Level 2: 100% Load | EE Level 3: 50% Load | EE Level 3: 100% Load
+i)   | 5  | 2.5  | 40  | 115 | 35  | 95  | 30 | 75
+ii)  | 10 | 4.00 | 70  | 190 | 60  | 170 | 55 | 150
+iii) | 16 | 4.00 | 95  | 265 | 82  | 224 | 63 | 190
+iv)  | 25 | 4.00 | 125 | 340 | 110 | 300 | 95 | 260
+
+8.9 Permissible Flux Density and Overfluxing
+8.9.1 Maximum flux density with +12.5 percent combined variation shall not exceed 1.9 Tesla.
+8.9.2 No load current shall not exceed 3 percent of full load current. Increase of 12.5 percent of rated voltage
+shall not increase the no-load current by 6 percent maximum of full load current.
+
+8.10 Limits of Temperature-rise
+8.10.1 Type of cooling shall be ONAN as per IS 2026 (Part 2).
+8.10.2 Permissible temperature-rise shall not exceed 40°C (by resistance method) for winding and 35°C (by
+thermometer) for top oil per IS 2026 (Part 2).
+
+===================================================================
+9 STANDARD MATERIALS
+9.1 Major material used shall conform to the following IS:
+ a) Cold rolled grain oriented electrical steel – IS 3024
+ b) Amorphous core material – (IS under preparation)
+ c) Copper/Aluminum conductor – IS 191, IS 1897, IS 7404, IS 12444, IS 13730/IS 6162 series
+ d) Kraft paper – IS 9335 series
+ e) Press board – IS 1576
+ f) Mineral oil – IS 335
+
+10 TERMINAL ARRANGEMENT
+10.1 For Three Phase Transformers — HV bushings (3 Nos.) conform to IS 2099; LV bushings (4 Nos.) conform to IS 7421.
+10.1.5 Dimensions of bushings by voltage class:
+  Up to 1.0 kV bushings — Porcelain IS 3347 (Part 1/Sec 1); Metal IS 3347 (Part 1/Sec 2)
+  3.6 kV bushings — Porcelain IS 3347 (Part 2/Sec 1); Metal IS 3347 (Part 2/Sec 2)
+  12 kV bushings — Porcelain IS 3347 (Part 3/Sec 1); Metal IS 3347 (Part 3/Sec 2)
+  24 kV bushings — Porcelain IS 3347 (Part 4/Sec 1); Metal IS 3347 (Part 4/Sec 2)
+  36 kV bushings — Porcelain IS 3347 (Part 5/Sec 1); Metal IS 3347 (Part 5/Sec 2)
+10.2 For Single Phase Transformers.
+10.3 Marking and Relative Positions of Terminals per IS 2026 (Part 1).
+
+11 MINIMUM CLEARANCES IN AIR — as per Table 10.
+
+Table 10 External (Air) Clearances Between Bushings Mounted on Transformers (Clause 11)
+Nominal System Voltage | Phase-to-Phase Clearance (mm) | Phase-to-Earth Clearance (mm)
+Up to 1.1 kV | 75  | 40
+11 kV        | 255 | 140
+22 kV        | 330 | 230
+33 kV        | 350 | 320
+
+11.1 For transformers with air filled cable-end box/connection chamber — as per Table 11.
+
+Table 11 Air Clearances in Cable Box (Clause 11.1)
+Nominal System Voltage | Phase-to-Phase Clearance (mm) | Phase-to-Earth Clearance (mm)
+Up to 1.1 kV | 25  | 20
+11 kV        | 130 | 80
+22 kV        | 240 | 140
+33 kV        | 350 | 220
+
+12 CONNECTORS (APPLICABLE FOR BARE BUSHING TERMINATIONS ONLY) — bimetallic connectors on HV and LV side.
+
+13 MARKING
+13.1 Rating Plate — anodized aluminium/stainless steel; info per Fig. 1 (3-phase) and Fig. 2 (single phase).
+13.2 Terminal Marking Plate per Fig. 3 to Fig. 5.
+13.4 May be marked with Standard Mark.
+
+14 MOUNTING ARRANGEMENT
+14.1 Under-base of 3-phase up to 200 kVA: two 75 mm × 40 mm channels 460 mm long.
+14.4 Single phase pole mounted; two mounting lugs, two bolts of 20 mm diameter; lugs of steel min 5 mm thickness.
+
+15 TRANSFORMER TANK
+15.2 Pressure and Vacuum Requirements
+15.2.1 Up to 200 kVA: plain tank withstand pressure of 80 kPa and vacuum of 250 mm of mercury.
+   Above 200 kVA: plain tank withstand pressure of 80 kPa and vacuum of 500 mm of mercury.
+   Single phase up to 25 kVA: round tank withstand pressure of 100 kPa and vacuum of 760 mm of mercury.
+15.2.2 3-phase up to 2 500 kVA corrugated tanks designed for pressure of 15 kPa at top of tank with no leakage.
+15.2.3 3-phase sealed type welded cover: withstand pressure of 80 kPa without any deformation.
+15.2.4 Single phase sealed type: pressure inside tank shall not exceed 0.4 kg/cm2 positive or negative.
+15.3 Bolts/nuts/washers exposed to atmosphere: Size 12 mm or below — stainless steel; Above 12 mm — steel galvanized.
+15.4 Gaskets conform to Type III per IS 11149 / Type C per IS 4253 (Part 2).
+15.5 Paint — per Table 12.
+
+Table 12 Paint Scheme for Distribution Transformers (Clause 15.5)
+Sl No. | Paint Type | Area to be Painted | No. of Coats | Total Dry Film Thickness, Min (microns)
+i)  | Thermo setting powder paint      | Inside  | 01 | 30
+    |                                  | Outside | 01 | 60
+ii) | Liquid paint                     |         |    |
+    |  a) Epoxy (primer)               | Outside | 01 | 30
+    |  b) Polyurethane (finish coat)   | Outside | 02 | 25 each
+    |  c) Hot oil resistant paint/varnish | Inside | 01 | 35 / 10
+
+16 CONSERVATOR FOR NON-SEALED TYPE TRANSFORMERS
+16.1 Ratings 63 kVA and above with plain tank: conservator mandatory. Corrugated/sealed: not required.
+16.3 Inside diameter of connecting pipe 25 to 50 mm.
+
+17 ABILITY OF TRANSFORMERS TO WITHSTAND EXTERNAL SHORT CIRCUIT
+Performance under external short-circuit shall be in accordance with IS 2026 (Part 5).
+
+18 EFFICIENCY AND REGULATION — based on rated kVA and unity power factor, per Annex B and Annex C.
+
+19 TOLERANCES — tolerance on electrical performance excluding losses per IS 2026 (Part 1).
+
+20 FITTINGS
+20.1 Standard Fittings: a) Two earthing terminals; b) Oil level gauge; c) Air release device; d) Rating and
+terminal marking plates; e) Breathing device; f) Drain-cum-sampling valve; g) Thermometer pocket; h) Oil filling
+holes; j) Extended pipe connection; k) Lifting lugs; m) Nitrogen/air filling device; n) Pressure relief device
+above 200 kVA; p) Filter valve above 200 kVA; q) Unidirectional flat rollers above 200 kVA; r) Inspection hole
+above 200 kVA; s) Pressure gauge; t) HV neutral grounding strip; u) LV earthing; v) Buchholz relay above 1 000 kVA.
+20.2 Optional Fittings: Dehydrating breather, Filter valve, Arcing horns/lightning arrestors, Bird guard,
+Terminal connectors, OTI/WTI, Jacking pads, Buchholz relay, Magnetic oil level gauge, Non return valve,
+Pressure relief device, Protection relay, anti-theft fasteners.
+
+===================================================================
+21 TESTS
+21.1 General — All routine, type and special tests as described in 21.2 to 21.4 performed per relevant parts of
+IS 2026. Pressure and oil leakage test per 21.5.
+
+21.2 Routine Tests (to be conducted on all units):
+ a) Measurement of winding resistance [IS 2026 (Part 1)].
+ b) Measurement of voltage ratio and check of phase displacement [IS 2026 (Part 1)].
+ c) Measurement of short-circuit impedance (principal tapping, when applicable) and load loss at 50 percent
+    and 100 percent load [IS 2026 (Part 1)].
+ d) Measurement of no-load loss and current [IS 2026 (Part 1)].
+ e) Measurement of insulation resistance [IS 2026 (Part 1)].
+ f) Induced over-voltage withstand test [IS 2026 (Part 3)].
+ g) Separate-source voltage withstand test [IS 2026 (Part 3)].
+ h) Pressure test (see 21.5).
+ j) Oil leakage test (see 21.5).
+
+21.3 Type Tests (to be conducted on one unit):
+ a) Lightning impulse test [IS 2026 (Part 3)].
+ b) Temperature-rise test [IS 2026 (Part 2)].
+ c) Short-circuit withstand test [IS 2026 (Part 5)] (up to 200 kVA).
+ d) Pressure test (see 21.5).
+
+21.4 Special Tests (to be conducted on one unit, by mutual agreement):
+ a) Determination of sound levels [IS 2026 (Part 10)].
+ b) Short-circuit withstand test [IS 2026 (Part 5)] (above 200 kVA).
+ c) No load current at 112.5 percent voltage.
+ d) Paint adhesion tests per ASTM D3359 (Tape test).
+ e) BDV and moisture content of oil in the transformer (IS 335).
+
+21.5 Pressure and Oil Leakage Test
+21.5.1 For Transformers up to 200 kVA
+21.5.1.1 Pressure test (type test): air pressure of 80 kPa for 30 min and vacuum of 250 mm mercury for 30 min.
+  Permanent deflection of flat plates: Up to 750 mm → 5 mm; 751 to 1 250 mm → 6.5 mm.
+21.5.1.2 Pressure (routine test): a) Non-sealed plain tanks 35 kPa for 10 min; b) Corrugated tanks 15 kPa for
+  10 min; c) Sealed type 80 kPa for 10 min. No leakage.
+21.5.1.3 Oil leakage test (routine test): twice normal head at base for 8 h; corrugated 15 kPa at top for 6 h.
+
+21.5.2 For Transformers Above 200 kVA and Up to Including 2 500 kVA
+21.5.2.1 Pressure test (Type test): 80 kPa for 30 min and vacuum of 500 mm mercury for 30 min.
+  Permanent deflection: Up to 750 mm → 5.0 mm; 751 to 1 250 mm → 6.5 mm; 1 251 to 1 750 mm → 8.0 mm;
+  Above 1 751 mm → 9.0 mm.
+21.5.2.2 Pressure test (routine test): a) Plain tanks 35 kPa for 10 min; b) Corrugated tanks 15 kPa for 10 min.
+21.5.2.3 Oil leakage test (routine test): twice normal head at base for 8 h; corrugated 15 kPa at top for 6 h.
+
+21.5.3 For Single Phase Distribution Transformers Up to Including 25 kVA
+21.5.3.1 Pressure test (type test): air pressure of 100 kPa above atmospheric for 30 min. No leakage/deformation.
+21.5.3.2 Pressure (routine test): 35 kPa above atmosphere for 10 min. No leakage.
+21.5.3.3 Oil leakage test (routine test): twice normal head at base for 6 h; corrugated 15 kPa at top for 6 h.
+
+22 INFORMATION REQUIRED WITH ENQUIRY AND ORDER — per Annex D.
+
+===================================================================
+ANNEX A (Clause 2) LIST OF REFERRED INDIAN STANDARDS
+IS 191:2007 Copper; IS 335:1993 New insulating oils; IS 554:1999 Pipe threads; IS 1576:1992 Solid pressboard;
+IS 1608:2005 Mechanical testing of metals — Tensile testing; IS 1747:1972 Nitrogen; IS 1885 (Part 38):1993;
+IS 1897:2008 Copper strip; IS 2026 Power transformers [(Part 1):2011 General; (Part 2):2010 Temperature rise;
+(Part 3):2009 Insulation levels, dielectric tests; (Part 5):2011 Ability to withstand short circuit; (Part 8):2009
+Application guide; (Part 10):2009 Determination of sound levels]; IS 2099:1986 Bushings; IS 3024:2006 GO steel;
+IS 3347 Porcelain transformer bushings; IS 3639:1966 Fittings and accessories; IS 4253 (Part 2):2008;
+IS 6162; IS 7404; IS 7421:1988; IS 8999:2003; IS 9335; IS 11149:1984; IS 12444:1988; IS 13730; IS 16081:2013.
+
+ANNEX B (Clause 18) METHOD OF DECLARING EFFICIENCY — Efficiency (η) = Output/Input = (Input – Total Losses)/Input.
+ANNEX C (Clause 18) CALCULATION OF INHERENT VOLTAGE REGULATION.
+ANNEX D (Clause 22.1) INFORMATION REQUIRED WITH ENQUIRY AND ORDER.
+
+===================================================================
+PARAMETERIZATION DIMENSIONS FOR THIS STANDARD:
+This standard varies limits by:
+  category — one of: "3ph<=200kVA", "3ph>200kVA", "1ph<=25kVA"
+  rating (kVA) — the standard rating
+  energyLevel — one of: "Level 1", "Level 2", "Level 3" (corresponding to 3-star, 4-star, 5-star)
+  voltageClass — one of: "upto 11 kV", "above 11 upto 22 kV", "above 22 upto 33 kV"
+
+Category "3ph<=200kVA" ratings (Table 3): 16, 25, 63, 100, 160, 200
+Category "3ph>200kVA" ratings (Table 6): 250, 315, 400, 500, 630, 1000, 1250, 1600, 2000, 2500
+Category "1ph<=25kVA" ratings (Table 9): 5, 10, 16, 25
+
+Voltage class loss adders:
+  3ph categories: above 11 upto 22 kV = +5%; above 22 upto 33 kV = +7.5% over 11 kV base loss.
+  1ph category: above 11 upto 22 kV = +7.5%; above 22 upto 33 kV = +10% over 11 kV base loss.
+
+BIL by voltage (kVp): 3.3→40, 6.6→60, 11→75, 22→125, 33→170.

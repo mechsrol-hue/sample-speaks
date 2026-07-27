@@ -1,0 +1,3744 @@
+{
+  "isNumber": "IS 1180 (Part 1) : 2014",
+  "title": "Outdoor Type Oil Immersed Distribution Transformers Upto and Including 2 500 kVA, 33 kV — Specification, Part 1 Mineral Oil Immersed",
+  "revision": "Fourth Revision (Amalgamating IS 1180 (Part 2) : 1989)",
+  "parameterizationDims": [
+    "category",
+    "rating",
+    "energyLevel",
+    "voltageClass",
+    "systemVoltage"
+  ],
+  "dimensionOptions": {
+    "category": [
+      "3ph<=200kVA",
+      "3ph>200kVA",
+      "1ph<=25kVA"
+    ],
+    "rating": [
+      5,
+      10,
+      16,
+      25,
+      63,
+      100,
+      160,
+      200,
+      250,
+      315,
+      400,
+      500,
+      630,
+      1000,
+      1250,
+      1600,
+      2000,
+      2500
+    ],
+    "energyLevel": [
+      "Level 1",
+      "Level 2",
+      "Level 3"
+    ],
+    "voltageClass": [
+      "upto 11 kV",
+      "above 11 upto 22 kV",
+      "above 22 upto 33 kV"
+    ],
+    "systemVoltage": [
+      "3.3",
+      "6.6",
+      "11",
+      "22",
+      "33"
+    ]
+  },
+  "defaults": {
+    "category": "3ph<=200kVA",
+    "rating": 200,
+    "energyLevel": "Level 1",
+    "voltageClass": "upto 11 kV",
+    "systemVoltage": "11"
+  },
+  "parameters": [
+    {
+      "clauseRef": "Cl 6.8.1 / 7.8.1 / 8.8.1",
+      "section": "Losses",
+      "parameterName": "Maximum total losses at 50% rated load (no-load + load loss at 75°C)",
+      "unit": "W",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "category",
+        "rating",
+        "energyLevel",
+        "voltageClass"
+      ],
+      "sourceTable": "Table 3 / Table 6 / Table 9",
+      "testMethod": "IS 2026 (Part 1)",
+      "note": "Base values (up to 11 kV) from Tables 3/6/9. For 3-phase: +5% above 11 up to 22 kV, +7.5% above 22 up to 33 kV. For single-phase: +7.5% above 11 up to 22 kV, +10% above 22 up to 33 kV. Combinations not offered by the standard are marked accordingly.",
+      "valueTable": {
+        "3ph<=200kVA|5|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|16|Level 1|upto 11 kV": {
+          "max": 150
+        },
+        "3ph<=200kVA|16|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|16|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|16|Level 2|upto 11 kV": {
+          "max": 135
+        },
+        "3ph<=200kVA|16|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|16|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|16|Level 3|upto 11 kV": {
+          "max": 120
+        },
+        "3ph<=200kVA|16|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|16|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|25|Level 1|upto 11 kV": {
+          "max": 210
+        },
+        "3ph<=200kVA|25|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|25|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|25|Level 2|upto 11 kV": {
+          "max": 190
+        },
+        "3ph<=200kVA|25|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|25|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|25|Level 3|upto 11 kV": {
+          "max": 175
+        },
+        "3ph<=200kVA|25|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|25|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|63|Level 1|upto 11 kV": {
+          "max": 380
+        },
+        "3ph<=200kVA|63|Level 1|above 11 upto 22 kV": {
+          "max": 399
+        },
+        "3ph<=200kVA|63|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|63|Level 2|upto 11 kV": {
+          "max": 340
+        },
+        "3ph<=200kVA|63|Level 2|above 11 upto 22 kV": {
+          "max": 357
+        },
+        "3ph<=200kVA|63|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|63|Level 3|upto 11 kV": {
+          "max": 300
+        },
+        "3ph<=200kVA|63|Level 3|above 11 upto 22 kV": {
+          "max": 315
+        },
+        "3ph<=200kVA|63|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|100|Level 1|upto 11 kV": {
+          "max": 520
+        },
+        "3ph<=200kVA|100|Level 1|above 11 upto 22 kV": {
+          "max": 546
+        },
+        "3ph<=200kVA|100|Level 1|above 22 upto 33 kV": {
+          "max": 559
+        },
+        "3ph<=200kVA|100|Level 2|upto 11 kV": {
+          "max": 475
+        },
+        "3ph<=200kVA|100|Level 2|above 11 upto 22 kV": {
+          "max": 499
+        },
+        "3ph<=200kVA|100|Level 2|above 22 upto 33 kV": {
+          "max": 511
+        },
+        "3ph<=200kVA|100|Level 3|upto 11 kV": {
+          "max": 435
+        },
+        "3ph<=200kVA|100|Level 3|above 11 upto 22 kV": {
+          "max": 457
+        },
+        "3ph<=200kVA|100|Level 3|above 22 upto 33 kV": {
+          "max": 468
+        },
+        "3ph<=200kVA|160|Level 1|upto 11 kV": {
+          "max": 770
+        },
+        "3ph<=200kVA|160|Level 1|above 11 upto 22 kV": {
+          "max": 809
+        },
+        "3ph<=200kVA|160|Level 1|above 22 upto 33 kV": {
+          "max": 828
+        },
+        "3ph<=200kVA|160|Level 2|upto 11 kV": {
+          "max": 670
+        },
+        "3ph<=200kVA|160|Level 2|above 11 upto 22 kV": {
+          "max": 704
+        },
+        "3ph<=200kVA|160|Level 2|above 22 upto 33 kV": {
+          "max": 720
+        },
+        "3ph<=200kVA|160|Level 3|upto 11 kV": {
+          "max": 570
+        },
+        "3ph<=200kVA|160|Level 3|above 11 upto 22 kV": {
+          "max": 599
+        },
+        "3ph<=200kVA|160|Level 3|above 22 upto 33 kV": {
+          "max": 613
+        },
+        "3ph<=200kVA|200|Level 1|upto 11 kV": {
+          "max": 890
+        },
+        "3ph<=200kVA|200|Level 1|above 11 upto 22 kV": {
+          "max": 935
+        },
+        "3ph<=200kVA|200|Level 1|above 22 upto 33 kV": {
+          "max": 957
+        },
+        "3ph<=200kVA|200|Level 2|upto 11 kV": {
+          "max": 780
+        },
+        "3ph<=200kVA|200|Level 2|above 11 upto 22 kV": {
+          "max": 819
+        },
+        "3ph<=200kVA|200|Level 2|above 22 upto 33 kV": {
+          "max": 839
+        },
+        "3ph<=200kVA|200|Level 3|upto 11 kV": {
+          "max": 670
+        },
+        "3ph<=200kVA|200|Level 3|above 11 upto 22 kV": {
+          "max": 704
+        },
+        "3ph<=200kVA|200|Level 3|above 22 upto 33 kV": {
+          "max": 720
+        },
+        "3ph<=200kVA|250|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|250|Level 1|upto 11 kV": {
+          "max": 1050
+        },
+        "3ph>200kVA|250|Level 1|above 11 upto 22 kV": {
+          "max": 1103
+        },
+        "3ph>200kVA|250|Level 1|above 22 upto 33 kV": {
+          "max": 1129
+        },
+        "3ph>200kVA|250|Level 2|upto 11 kV": {
+          "max": 980
+        },
+        "3ph>200kVA|250|Level 2|above 11 upto 22 kV": {
+          "max": 1029
+        },
+        "3ph>200kVA|250|Level 2|above 22 upto 33 kV": {
+          "max": 1054
+        },
+        "3ph>200kVA|250|Level 3|upto 11 kV": {
+          "max": 920
+        },
+        "3ph>200kVA|250|Level 3|above 11 upto 22 kV": {
+          "max": 966
+        },
+        "3ph>200kVA|250|Level 3|above 22 upto 33 kV": {
+          "max": 989
+        },
+        "3ph>200kVA|315|Level 1|upto 11 kV": {
+          "max": 1100
+        },
+        "3ph>200kVA|315|Level 1|above 11 upto 22 kV": {
+          "max": 1155
+        },
+        "3ph>200kVA|315|Level 1|above 22 upto 33 kV": {
+          "max": 1183
+        },
+        "3ph>200kVA|315|Level 2|upto 11 kV": {
+          "max": 1025
+        },
+        "3ph>200kVA|315|Level 2|above 11 upto 22 kV": {
+          "max": 1076
+        },
+        "3ph>200kVA|315|Level 2|above 22 upto 33 kV": {
+          "max": 1102
+        },
+        "3ph>200kVA|315|Level 3|upto 11 kV": {
+          "max": 955
+        },
+        "3ph>200kVA|315|Level 3|above 11 upto 22 kV": {
+          "max": 1003
+        },
+        "3ph>200kVA|315|Level 3|above 22 upto 33 kV": {
+          "max": 1027
+        },
+        "3ph>200kVA|400|Level 1|upto 11 kV": {
+          "max": 1300
+        },
+        "3ph>200kVA|400|Level 1|above 11 upto 22 kV": {
+          "max": 1365
+        },
+        "3ph>200kVA|400|Level 1|above 22 upto 33 kV": {
+          "max": 1398
+        },
+        "3ph>200kVA|400|Level 2|upto 11 kV": {
+          "max": 1225
+        },
+        "3ph>200kVA|400|Level 2|above 11 upto 22 kV": {
+          "max": 1286
+        },
+        "3ph>200kVA|400|Level 2|above 22 upto 33 kV": {
+          "max": 1317
+        },
+        "3ph>200kVA|400|Level 3|upto 11 kV": {
+          "max": 1150
+        },
+        "3ph>200kVA|400|Level 3|above 11 upto 22 kV": {
+          "max": 1208
+        },
+        "3ph>200kVA|400|Level 3|above 22 upto 33 kV": {
+          "max": 1236
+        },
+        "3ph>200kVA|500|Level 1|upto 11 kV": {
+          "max": 1600
+        },
+        "3ph>200kVA|500|Level 1|above 11 upto 22 kV": {
+          "max": 1680
+        },
+        "3ph>200kVA|500|Level 1|above 22 upto 33 kV": {
+          "max": 1720
+        },
+        "3ph>200kVA|500|Level 2|upto 11 kV": {
+          "max": 1510
+        },
+        "3ph>200kVA|500|Level 2|above 11 upto 22 kV": {
+          "max": 1586
+        },
+        "3ph>200kVA|500|Level 2|above 22 upto 33 kV": {
+          "max": 1623
+        },
+        "3ph>200kVA|500|Level 3|upto 11 kV": {
+          "max": 1430
+        },
+        "3ph>200kVA|500|Level 3|above 11 upto 22 kV": {
+          "max": 1502
+        },
+        "3ph>200kVA|500|Level 3|above 22 upto 33 kV": {
+          "max": 1537
+        },
+        "3ph>200kVA|630|Level 1|upto 11 kV": {
+          "max": 2000
+        },
+        "3ph>200kVA|630|Level 1|above 11 upto 22 kV": {
+          "max": 2100
+        },
+        "3ph>200kVA|630|Level 1|above 22 upto 33 kV": {
+          "max": 2150
+        },
+        "3ph>200kVA|630|Level 2|upto 11 kV": {
+          "max": 1860
+        },
+        "3ph>200kVA|630|Level 2|above 11 upto 22 kV": {
+          "max": 1953
+        },
+        "3ph>200kVA|630|Level 2|above 22 upto 33 kV": {
+          "max": 2000
+        },
+        "3ph>200kVA|630|Level 3|upto 11 kV": {
+          "max": 1745
+        },
+        "3ph>200kVA|630|Level 3|above 11 upto 22 kV": {
+          "max": 1832
+        },
+        "3ph>200kVA|630|Level 3|above 22 upto 33 kV": {
+          "max": 1876
+        },
+        "3ph>200kVA|1000|Level 1|upto 11 kV": {
+          "max": 3000
+        },
+        "3ph>200kVA|1000|Level 1|above 11 upto 22 kV": {
+          "max": 3150
+        },
+        "3ph>200kVA|1000|Level 1|above 22 upto 33 kV": {
+          "max": 3225
+        },
+        "3ph>200kVA|1000|Level 2|upto 11 kV": {
+          "max": 2790
+        },
+        "3ph>200kVA|1000|Level 2|above 11 upto 22 kV": {
+          "max": 2930
+        },
+        "3ph>200kVA|1000|Level 2|above 22 upto 33 kV": {
+          "max": 2999
+        },
+        "3ph>200kVA|1000|Level 3|upto 11 kV": {
+          "max": 2620
+        },
+        "3ph>200kVA|1000|Level 3|above 11 upto 22 kV": {
+          "max": 2751
+        },
+        "3ph>200kVA|1000|Level 3|above 22 upto 33 kV": {
+          "max": 2817
+        },
+        "3ph>200kVA|1250|Level 1|upto 11 kV": {
+          "max": 3600
+        },
+        "3ph>200kVA|1250|Level 1|above 11 upto 22 kV": {
+          "max": 3780
+        },
+        "3ph>200kVA|1250|Level 1|above 22 upto 33 kV": {
+          "max": 3870
+        },
+        "3ph>200kVA|1250|Level 2|upto 11 kV": {
+          "max": 3300
+        },
+        "3ph>200kVA|1250|Level 2|above 11 upto 22 kV": {
+          "max": 3465
+        },
+        "3ph>200kVA|1250|Level 2|above 22 upto 33 kV": {
+          "max": 3548
+        },
+        "3ph>200kVA|1250|Level 3|upto 11 kV": {
+          "max": 3220
+        },
+        "3ph>200kVA|1250|Level 3|above 11 upto 22 kV": {
+          "max": 3381
+        },
+        "3ph>200kVA|1250|Level 3|above 22 upto 33 kV": {
+          "max": 3462
+        },
+        "3ph>200kVA|1600|Level 1|upto 11 kV": {
+          "max": 4500
+        },
+        "3ph>200kVA|1600|Level 1|above 11 upto 22 kV": {
+          "max": 4725
+        },
+        "3ph>200kVA|1600|Level 1|above 22 upto 33 kV": {
+          "max": 4838
+        },
+        "3ph>200kVA|1600|Level 2|upto 11 kV": {
+          "max": 4200
+        },
+        "3ph>200kVA|1600|Level 2|above 11 upto 22 kV": {
+          "max": 4410
+        },
+        "3ph>200kVA|1600|Level 2|above 22 upto 33 kV": {
+          "max": 4515
+        },
+        "3ph>200kVA|1600|Level 3|upto 11 kV": {
+          "max": 3970
+        },
+        "3ph>200kVA|1600|Level 3|above 11 upto 22 kV": {
+          "max": 4169
+        },
+        "3ph>200kVA|1600|Level 3|above 22 upto 33 kV": {
+          "max": 4268
+        },
+        "3ph>200kVA|2000|Level 1|upto 11 kV": {
+          "max": 5400
+        },
+        "3ph>200kVA|2000|Level 1|above 11 upto 22 kV": {
+          "max": 5670
+        },
+        "3ph>200kVA|2000|Level 1|above 22 upto 33 kV": {
+          "max": 5805
+        },
+        "3ph>200kVA|2000|Level 2|upto 11 kV": {
+          "max": 5050
+        },
+        "3ph>200kVA|2000|Level 2|above 11 upto 22 kV": {
+          "max": 5303
+        },
+        "3ph>200kVA|2000|Level 2|above 22 upto 33 kV": {
+          "max": 5429
+        },
+        "3ph>200kVA|2000|Level 3|upto 11 kV": {
+          "max": 4790
+        },
+        "3ph>200kVA|2000|Level 3|above 11 upto 22 kV": {
+          "max": 5030
+        },
+        "3ph>200kVA|2000|Level 3|above 22 upto 33 kV": {
+          "max": 5149
+        },
+        "3ph>200kVA|2500|Level 1|upto 11 kV": {
+          "max": 6500
+        },
+        "3ph>200kVA|2500|Level 1|above 11 upto 22 kV": {
+          "max": 6825
+        },
+        "3ph>200kVA|2500|Level 1|above 22 upto 33 kV": {
+          "max": 6988
+        },
+        "3ph>200kVA|2500|Level 2|upto 11 kV": {
+          "max": 6150
+        },
+        "3ph>200kVA|2500|Level 2|above 11 upto 22 kV": {
+          "max": 6458
+        },
+        "3ph>200kVA|2500|Level 2|above 22 upto 33 kV": {
+          "max": 6611
+        },
+        "3ph>200kVA|2500|Level 3|upto 11 kV": {
+          "max": 5900
+        },
+        "3ph>200kVA|2500|Level 3|above 11 upto 22 kV": {
+          "max": 6195
+        },
+        "3ph>200kVA|2500|Level 3|above 22 upto 33 kV": {
+          "max": 6343
+        },
+        "1ph<=25kVA|5|Level 1|upto 11 kV": {
+          "max": 40
+        },
+        "1ph<=25kVA|5|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|5|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|5|Level 2|upto 11 kV": {
+          "max": 35
+        },
+        "1ph<=25kVA|5|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|5|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|5|Level 3|upto 11 kV": {
+          "max": 30
+        },
+        "1ph<=25kVA|5|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|5|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|10|Level 1|upto 11 kV": {
+          "max": 70
+        },
+        "1ph<=25kVA|10|Level 1|above 11 upto 22 kV": {
+          "max": 75
+        },
+        "1ph<=25kVA|10|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|10|Level 2|upto 11 kV": {
+          "max": 60
+        },
+        "1ph<=25kVA|10|Level 2|above 11 upto 22 kV": {
+          "max": 65
+        },
+        "1ph<=25kVA|10|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|10|Level 3|upto 11 kV": {
+          "max": 55
+        },
+        "1ph<=25kVA|10|Level 3|above 11 upto 22 kV": {
+          "max": 59
+        },
+        "1ph<=25kVA|10|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|16|Level 1|upto 11 kV": {
+          "max": 95
+        },
+        "1ph<=25kVA|16|Level 1|above 11 upto 22 kV": {
+          "max": 102
+        },
+        "1ph<=25kVA|16|Level 1|above 22 upto 33 kV": {
+          "max": 105
+        },
+        "1ph<=25kVA|16|Level 2|upto 11 kV": {
+          "max": 82
+        },
+        "1ph<=25kVA|16|Level 2|above 11 upto 22 kV": {
+          "max": 88
+        },
+        "1ph<=25kVA|16|Level 2|above 22 upto 33 kV": {
+          "max": 90
+        },
+        "1ph<=25kVA|16|Level 3|upto 11 kV": {
+          "max": 63
+        },
+        "1ph<=25kVA|16|Level 3|above 11 upto 22 kV": {
+          "max": 68
+        },
+        "1ph<=25kVA|16|Level 3|above 22 upto 33 kV": {
+          "max": 69
+        },
+        "1ph<=25kVA|25|Level 1|upto 11 kV": {
+          "max": 125
+        },
+        "1ph<=25kVA|25|Level 1|above 11 upto 22 kV": {
+          "max": 134
+        },
+        "1ph<=25kVA|25|Level 1|above 22 upto 33 kV": {
+          "max": 138
+        },
+        "1ph<=25kVA|25|Level 2|upto 11 kV": {
+          "max": 110
+        },
+        "1ph<=25kVA|25|Level 2|above 11 upto 22 kV": {
+          "max": 118
+        },
+        "1ph<=25kVA|25|Level 2|above 22 upto 33 kV": {
+          "max": 121
+        },
+        "1ph<=25kVA|25|Level 3|upto 11 kV": {
+          "max": 95
+        },
+        "1ph<=25kVA|25|Level 3|above 11 upto 22 kV": {
+          "max": 102
+        },
+        "1ph<=25kVA|25|Level 3|above 22 upto 33 kV": {
+          "max": 105
+        },
+        "1ph<=25kVA|63|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 6.8.1 / 7.8.1 / 8.8.1",
+      "section": "Losses",
+      "parameterName": "Maximum total losses at 100% rated load (no-load + load loss at 75°C)",
+      "unit": "W",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "category",
+        "rating",
+        "energyLevel",
+        "voltageClass"
+      ],
+      "sourceTable": "Table 3 / Table 6 / Table 9",
+      "testMethod": "IS 2026 (Part 1)",
+      "note": "Same voltage-class adders as 50% load losses.",
+      "valueTable": {
+        "3ph<=200kVA|5|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|5|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|16|Level 1|upto 11 kV": {
+          "max": 480
+        },
+        "3ph<=200kVA|16|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|16|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|16|Level 2|upto 11 kV": {
+          "max": 440
+        },
+        "3ph<=200kVA|16|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|16|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|16|Level 3|upto 11 kV": {
+          "max": 400
+        },
+        "3ph<=200kVA|16|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|16|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|25|Level 1|upto 11 kV": {
+          "max": 695
+        },
+        "3ph<=200kVA|25|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|25|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|25|Level 2|upto 11 kV": {
+          "max": 635
+        },
+        "3ph<=200kVA|25|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|25|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|25|Level 3|upto 11 kV": {
+          "max": 595
+        },
+        "3ph<=200kVA|25|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|25|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|63|Level 1|upto 11 kV": {
+          "max": 1250
+        },
+        "3ph<=200kVA|63|Level 1|above 11 upto 22 kV": {
+          "max": 1313
+        },
+        "3ph<=200kVA|63|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|63|Level 2|upto 11 kV": {
+          "max": 1140
+        },
+        "3ph<=200kVA|63|Level 2|above 11 upto 22 kV": {
+          "max": 1197
+        },
+        "3ph<=200kVA|63|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|63|Level 3|upto 11 kV": {
+          "max": 1050
+        },
+        "3ph<=200kVA|63|Level 3|above 11 upto 22 kV": {
+          "max": 1103
+        },
+        "3ph<=200kVA|63|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|100|Level 1|upto 11 kV": {
+          "max": 1800
+        },
+        "3ph<=200kVA|100|Level 1|above 11 upto 22 kV": {
+          "max": 1890
+        },
+        "3ph<=200kVA|100|Level 1|above 22 upto 33 kV": {
+          "max": 1935
+        },
+        "3ph<=200kVA|100|Level 2|upto 11 kV": {
+          "max": 1650
+        },
+        "3ph<=200kVA|100|Level 2|above 11 upto 22 kV": {
+          "max": 1733
+        },
+        "3ph<=200kVA|100|Level 2|above 22 upto 33 kV": {
+          "max": 1774
+        },
+        "3ph<=200kVA|100|Level 3|upto 11 kV": {
+          "max": 1500
+        },
+        "3ph<=200kVA|100|Level 3|above 11 upto 22 kV": {
+          "max": 1575
+        },
+        "3ph<=200kVA|100|Level 3|above 22 upto 33 kV": {
+          "max": 1613
+        },
+        "3ph<=200kVA|160|Level 1|upto 11 kV": {
+          "max": 2200
+        },
+        "3ph<=200kVA|160|Level 1|above 11 upto 22 kV": {
+          "max": 2310
+        },
+        "3ph<=200kVA|160|Level 1|above 22 upto 33 kV": {
+          "max": 2365
+        },
+        "3ph<=200kVA|160|Level 2|upto 11 kV": {
+          "max": 1950
+        },
+        "3ph<=200kVA|160|Level 2|above 11 upto 22 kV": {
+          "max": 2048
+        },
+        "3ph<=200kVA|160|Level 2|above 22 upto 33 kV": {
+          "max": 2096
+        },
+        "3ph<=200kVA|160|Level 3|upto 11 kV": {
+          "max": 1700
+        },
+        "3ph<=200kVA|160|Level 3|above 11 upto 22 kV": {
+          "max": 1785
+        },
+        "3ph<=200kVA|160|Level 3|above 22 upto 33 kV": {
+          "max": 1828
+        },
+        "3ph<=200kVA|200|Level 1|upto 11 kV": {
+          "max": 2700
+        },
+        "3ph<=200kVA|200|Level 1|above 11 upto 22 kV": {
+          "max": 2835
+        },
+        "3ph<=200kVA|200|Level 1|above 22 upto 33 kV": {
+          "max": 2903
+        },
+        "3ph<=200kVA|200|Level 2|upto 11 kV": {
+          "max": 2300
+        },
+        "3ph<=200kVA|200|Level 2|above 11 upto 22 kV": {
+          "max": 2415
+        },
+        "3ph<=200kVA|200|Level 2|above 22 upto 33 kV": {
+          "max": 2473
+        },
+        "3ph<=200kVA|200|Level 3|upto 11 kV": {
+          "max": 2100
+        },
+        "3ph<=200kVA|200|Level 3|above 11 upto 22 kV": {
+          "max": 2205
+        },
+        "3ph<=200kVA|200|Level 3|above 22 upto 33 kV": {
+          "max": 2258
+        },
+        "3ph<=200kVA|250|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|250|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|250|Level 1|upto 11 kV": {
+          "max": 3150
+        },
+        "3ph>200kVA|250|Level 1|above 11 upto 22 kV": {
+          "max": 3308
+        },
+        "3ph>200kVA|250|Level 1|above 22 upto 33 kV": {
+          "max": 3386
+        },
+        "3ph>200kVA|250|Level 2|upto 11 kV": {
+          "max": 2930
+        },
+        "3ph>200kVA|250|Level 2|above 11 upto 22 kV": {
+          "max": 3077
+        },
+        "3ph>200kVA|250|Level 2|above 22 upto 33 kV": {
+          "max": 3150
+        },
+        "3ph>200kVA|250|Level 3|upto 11 kV": {
+          "max": 2700
+        },
+        "3ph>200kVA|250|Level 3|above 11 upto 22 kV": {
+          "max": 2835
+        },
+        "3ph>200kVA|250|Level 3|above 22 upto 33 kV": {
+          "max": 2903
+        },
+        "3ph>200kVA|315|Level 1|upto 11 kV": {
+          "max": 3275
+        },
+        "3ph>200kVA|315|Level 1|above 11 upto 22 kV": {
+          "max": 3439
+        },
+        "3ph>200kVA|315|Level 1|above 22 upto 33 kV": {
+          "max": 3521
+        },
+        "3ph>200kVA|315|Level 2|upto 11 kV": {
+          "max": 3100
+        },
+        "3ph>200kVA|315|Level 2|above 11 upto 22 kV": {
+          "max": 3255
+        },
+        "3ph>200kVA|315|Level 2|above 22 upto 33 kV": {
+          "max": 3333
+        },
+        "3ph>200kVA|315|Level 3|upto 11 kV": {
+          "max": 2750
+        },
+        "3ph>200kVA|315|Level 3|above 11 upto 22 kV": {
+          "max": 2888
+        },
+        "3ph>200kVA|315|Level 3|above 22 upto 33 kV": {
+          "max": 2956
+        },
+        "3ph>200kVA|400|Level 1|upto 11 kV": {
+          "max": 3875
+        },
+        "3ph>200kVA|400|Level 1|above 11 upto 22 kV": {
+          "max": 4069
+        },
+        "3ph>200kVA|400|Level 1|above 22 upto 33 kV": {
+          "max": 4166
+        },
+        "3ph>200kVA|400|Level 2|upto 11 kV": {
+          "max": 3450
+        },
+        "3ph>200kVA|400|Level 2|above 11 upto 22 kV": {
+          "max": 3623
+        },
+        "3ph>200kVA|400|Level 2|above 22 upto 33 kV": {
+          "max": 3709
+        },
+        "3ph>200kVA|400|Level 3|upto 11 kV": {
+          "max": 3330
+        },
+        "3ph>200kVA|400|Level 3|above 11 upto 22 kV": {
+          "max": 3497
+        },
+        "3ph>200kVA|400|Level 3|above 22 upto 33 kV": {
+          "max": 3580
+        },
+        "3ph>200kVA|500|Level 1|upto 11 kV": {
+          "max": 4750
+        },
+        "3ph>200kVA|500|Level 1|above 11 upto 22 kV": {
+          "max": 4988
+        },
+        "3ph>200kVA|500|Level 1|above 22 upto 33 kV": {
+          "max": 5106
+        },
+        "3ph>200kVA|500|Level 2|upto 11 kV": {
+          "max": 4300
+        },
+        "3ph>200kVA|500|Level 2|above 11 upto 22 kV": {
+          "max": 4515
+        },
+        "3ph>200kVA|500|Level 2|above 22 upto 33 kV": {
+          "max": 4623
+        },
+        "3ph>200kVA|500|Level 3|upto 11 kV": {
+          "max": 4100
+        },
+        "3ph>200kVA|500|Level 3|above 11 upto 22 kV": {
+          "max": 4305
+        },
+        "3ph>200kVA|500|Level 3|above 22 upto 33 kV": {
+          "max": 4408
+        },
+        "3ph>200kVA|630|Level 1|upto 11 kV": {
+          "max": 5855
+        },
+        "3ph>200kVA|630|Level 1|above 11 upto 22 kV": {
+          "max": 6148
+        },
+        "3ph>200kVA|630|Level 1|above 22 upto 33 kV": {
+          "max": 6294
+        },
+        "3ph>200kVA|630|Level 2|upto 11 kV": {
+          "max": 5300
+        },
+        "3ph>200kVA|630|Level 2|above 11 upto 22 kV": {
+          "max": 5565
+        },
+        "3ph>200kVA|630|Level 2|above 22 upto 33 kV": {
+          "max": 5698
+        },
+        "3ph>200kVA|630|Level 3|upto 11 kV": {
+          "max": 4850
+        },
+        "3ph>200kVA|630|Level 3|above 11 upto 22 kV": {
+          "max": 5093
+        },
+        "3ph>200kVA|630|Level 3|above 22 upto 33 kV": {
+          "max": 5214
+        },
+        "3ph>200kVA|1000|Level 1|upto 11 kV": {
+          "max": 9000
+        },
+        "3ph>200kVA|1000|Level 1|above 11 upto 22 kV": {
+          "max": 9450
+        },
+        "3ph>200kVA|1000|Level 1|above 22 upto 33 kV": {
+          "max": 9675
+        },
+        "3ph>200kVA|1000|Level 2|upto 11 kV": {
+          "max": 7700
+        },
+        "3ph>200kVA|1000|Level 2|above 11 upto 22 kV": {
+          "max": 8085
+        },
+        "3ph>200kVA|1000|Level 2|above 22 upto 33 kV": {
+          "max": 8278
+        },
+        "3ph>200kVA|1000|Level 3|upto 11 kV": {
+          "max": 7000
+        },
+        "3ph>200kVA|1000|Level 3|above 11 upto 22 kV": {
+          "max": 7350
+        },
+        "3ph>200kVA|1000|Level 3|above 22 upto 33 kV": {
+          "max": 7525
+        },
+        "3ph>200kVA|1250|Level 1|upto 11 kV": {
+          "max": 10750
+        },
+        "3ph>200kVA|1250|Level 1|above 11 upto 22 kV": {
+          "max": 11288
+        },
+        "3ph>200kVA|1250|Level 1|above 22 upto 33 kV": {
+          "max": 11556
+        },
+        "3ph>200kVA|1250|Level 2|upto 11 kV": {
+          "max": 9200
+        },
+        "3ph>200kVA|1250|Level 2|above 11 upto 22 kV": {
+          "max": 9660
+        },
+        "3ph>200kVA|1250|Level 2|above 22 upto 33 kV": {
+          "max": 9890
+        },
+        "3ph>200kVA|1250|Level 3|upto 11 kV": {
+          "max": 8400
+        },
+        "3ph>200kVA|1250|Level 3|above 11 upto 22 kV": {
+          "max": 8820
+        },
+        "3ph>200kVA|1250|Level 3|above 22 upto 33 kV": {
+          "max": 9030
+        },
+        "3ph>200kVA|1600|Level 1|upto 11 kV": {
+          "max": 13500
+        },
+        "3ph>200kVA|1600|Level 1|above 11 upto 22 kV": {
+          "max": 14175
+        },
+        "3ph>200kVA|1600|Level 1|above 22 upto 33 kV": {
+          "max": 14513
+        },
+        "3ph>200kVA|1600|Level 2|upto 11 kV": {
+          "max": 11800
+        },
+        "3ph>200kVA|1600|Level 2|above 11 upto 22 kV": {
+          "max": 12390
+        },
+        "3ph>200kVA|1600|Level 2|above 22 upto 33 kV": {
+          "max": 12685
+        },
+        "3ph>200kVA|1600|Level 3|upto 11 kV": {
+          "max": 11300
+        },
+        "3ph>200kVA|1600|Level 3|above 11 upto 22 kV": {
+          "max": 11865
+        },
+        "3ph>200kVA|1600|Level 3|above 22 upto 33 kV": {
+          "max": 12148
+        },
+        "3ph>200kVA|2000|Level 1|upto 11 kV": {
+          "max": 17000
+        },
+        "3ph>200kVA|2000|Level 1|above 11 upto 22 kV": {
+          "max": 17850
+        },
+        "3ph>200kVA|2000|Level 1|above 22 upto 33 kV": {
+          "max": 18275
+        },
+        "3ph>200kVA|2000|Level 2|upto 11 kV": {
+          "max": 15000
+        },
+        "3ph>200kVA|2000|Level 2|above 11 upto 22 kV": {
+          "max": 15750
+        },
+        "3ph>200kVA|2000|Level 2|above 22 upto 33 kV": {
+          "max": 16125
+        },
+        "3ph>200kVA|2000|Level 3|upto 11 kV": {
+          "max": 14100
+        },
+        "3ph>200kVA|2000|Level 3|above 11 upto 22 kV": {
+          "max": 14805
+        },
+        "3ph>200kVA|2000|Level 3|above 22 upto 33 kV": {
+          "max": 15158
+        },
+        "3ph>200kVA|2500|Level 1|upto 11 kV": {
+          "max": 20000
+        },
+        "3ph>200kVA|2500|Level 1|above 11 upto 22 kV": {
+          "max": 21000
+        },
+        "3ph>200kVA|2500|Level 1|above 22 upto 33 kV": {
+          "max": 21500
+        },
+        "3ph>200kVA|2500|Level 2|upto 11 kV": {
+          "max": 18500
+        },
+        "3ph>200kVA|2500|Level 2|above 11 upto 22 kV": {
+          "max": 19425
+        },
+        "3ph>200kVA|2500|Level 2|above 22 upto 33 kV": {
+          "max": 19888
+        },
+        "3ph>200kVA|2500|Level 3|upto 11 kV": {
+          "max": 17500
+        },
+        "3ph>200kVA|2500|Level 3|above 11 upto 22 kV": {
+          "max": 18375
+        },
+        "3ph>200kVA|2500|Level 3|above 22 upto 33 kV": {
+          "max": 18813
+        },
+        "1ph<=25kVA|5|Level 1|upto 11 kV": {
+          "max": 115
+        },
+        "1ph<=25kVA|5|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|5|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|5|Level 2|upto 11 kV": {
+          "max": 95
+        },
+        "1ph<=25kVA|5|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|5|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|5|Level 3|upto 11 kV": {
+          "max": 75
+        },
+        "1ph<=25kVA|5|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|5|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|10|Level 1|upto 11 kV": {
+          "max": 190
+        },
+        "1ph<=25kVA|10|Level 1|above 11 upto 22 kV": {
+          "max": 204
+        },
+        "1ph<=25kVA|10|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|10|Level 2|upto 11 kV": {
+          "max": 170
+        },
+        "1ph<=25kVA|10|Level 2|above 11 upto 22 kV": {
+          "max": 183
+        },
+        "1ph<=25kVA|10|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|10|Level 3|upto 11 kV": {
+          "max": 150
+        },
+        "1ph<=25kVA|10|Level 3|above 11 upto 22 kV": {
+          "max": 161
+        },
+        "1ph<=25kVA|10|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|16|Level 1|upto 11 kV": {
+          "max": 265
+        },
+        "1ph<=25kVA|16|Level 1|above 11 upto 22 kV": {
+          "max": 285
+        },
+        "1ph<=25kVA|16|Level 1|above 22 upto 33 kV": {
+          "max": 292
+        },
+        "1ph<=25kVA|16|Level 2|upto 11 kV": {
+          "max": 224
+        },
+        "1ph<=25kVA|16|Level 2|above 11 upto 22 kV": {
+          "max": 241
+        },
+        "1ph<=25kVA|16|Level 2|above 22 upto 33 kV": {
+          "max": 246
+        },
+        "1ph<=25kVA|16|Level 3|upto 11 kV": {
+          "max": 190
+        },
+        "1ph<=25kVA|16|Level 3|above 11 upto 22 kV": {
+          "max": 204
+        },
+        "1ph<=25kVA|16|Level 3|above 22 upto 33 kV": {
+          "max": 209
+        },
+        "1ph<=25kVA|25|Level 1|upto 11 kV": {
+          "max": 340
+        },
+        "1ph<=25kVA|25|Level 1|above 11 upto 22 kV": {
+          "max": 366
+        },
+        "1ph<=25kVA|25|Level 1|above 22 upto 33 kV": {
+          "max": 374
+        },
+        "1ph<=25kVA|25|Level 2|upto 11 kV": {
+          "max": 300
+        },
+        "1ph<=25kVA|25|Level 2|above 11 upto 22 kV": {
+          "max": 323
+        },
+        "1ph<=25kVA|25|Level 2|above 22 upto 33 kV": {
+          "max": 330
+        },
+        "1ph<=25kVA|25|Level 3|upto 11 kV": {
+          "max": 260
+        },
+        "1ph<=25kVA|25|Level 3|above 11 upto 22 kV": {
+          "max": 280
+        },
+        "1ph<=25kVA|25|Level 3|above 22 upto 33 kV": {
+          "max": 286
+        },
+        "1ph<=25kVA|63|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|63|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 1|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 1|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 1|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 2|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 2|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 2|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 3|upto 11 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 3|above 11 upto 22 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500|Level 3|above 22 upto 33 kV": {
+          "value": "Not specified in IS (combination not offered)"
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 6.8.2 / 7.8.2 / 8.8.2",
+      "section": "Losses",
+      "parameterName": "Recommended percent impedance at 75°C",
+      "unit": "%",
+      "limitType": "text",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "category",
+        "rating"
+      ],
+      "sourceTable": "Table 3 / Table 6 / Table 9",
+      "testMethod": "IS 2026 (Part 1)",
+      "note": "Recommended values.",
+      "valueTable": {
+        "3ph<=200kVA|5": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|10": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|16": {
+          "value": 4.5
+        },
+        "3ph<=200kVA|25": {
+          "value": 4.5
+        },
+        "3ph<=200kVA|63": {
+          "value": 4.5
+        },
+        "3ph<=200kVA|100": {
+          "value": 4.5
+        },
+        "3ph<=200kVA|160": {
+          "value": 4.5
+        },
+        "3ph<=200kVA|200": {
+          "value": 4.5
+        },
+        "3ph<=200kVA|250": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|315": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|400": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|500": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|630": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1000": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1250": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|1600": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2000": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph<=200kVA|2500": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|5": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|10": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|16": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|25": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|63": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|100": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|160": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|200": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "3ph>200kVA|250": {
+          "value": 4.5
+        },
+        "3ph>200kVA|315": {
+          "value": 4.5
+        },
+        "3ph>200kVA|400": {
+          "value": 4.5
+        },
+        "3ph>200kVA|500": {
+          "value": 4.5
+        },
+        "3ph>200kVA|630": {
+          "value": 4.5
+        },
+        "3ph>200kVA|1000": {
+          "value": 5
+        },
+        "3ph>200kVA|1250": {
+          "value": 5
+        },
+        "3ph>200kVA|1600": {
+          "value": 6.25
+        },
+        "3ph>200kVA|2000": {
+          "value": 6.25
+        },
+        "3ph>200kVA|2500": {
+          "value": 6.25
+        },
+        "1ph<=25kVA|5": {
+          "value": 2.5
+        },
+        "1ph<=25kVA|10": {
+          "value": 4
+        },
+        "1ph<=25kVA|16": {
+          "value": 4
+        },
+        "1ph<=25kVA|25": {
+          "value": 4
+        },
+        "1ph<=25kVA|63": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|100": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|160": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|200": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|250": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|315": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|400": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|500": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|630": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1000": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1250": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|1600": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2000": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "1ph<=25kVA|2500": {
+          "value": "Not specified in IS (combination not offered)"
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 6.4 / 7.4 / 8.4",
+      "section": "Insulation",
+      "parameterName": "Rated Basic Insulation Level (BIL)",
+      "unit": "kVp",
+      "limitType": "text",
+      "acceptanceOrType": "type",
+      "variesBy": [
+        "systemVoltage"
+      ],
+      "sourceTable": "Table 2 / Table 5 / Table 8",
+      "testMethod": "IS 2026 (Part 3)",
+      "valueTable": {
+        "11": {
+          "value": 75
+        },
+        "22": {
+          "value": 125
+        },
+        "33": {
+          "value": 170
+        },
+        "3.3": {
+          "value": 40
+        },
+        "6.6": {
+          "value": 60
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 11",
+      "section": "Clearances",
+      "parameterName": "External (air) phase-to-phase clearance between bushings",
+      "unit": "mm",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "systemVoltage"
+      ],
+      "sourceTable": "Table 10",
+      "note": "Table 10 keyed by nominal system voltage (Up to 1.1 kV / 11 / 22 / 33 kV). Report systemVoltage 3.3 and 6.6 kV map to the 'Up to 1.1 kV' row not being applicable — Table 10 lists only 1.1, 11, 22, 33 kV; 3.3 and 6.6 treated as not tabulated.",
+      "valueTable": {
+        "11": {
+          "min": 255
+        },
+        "22": {
+          "min": 330
+        },
+        "33": {
+          "min": 350
+        },
+        "3.3": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "6.6": {
+          "value": "Not specified in IS (combination not offered)"
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 11",
+      "section": "Clearances",
+      "parameterName": "External (air) phase-to-earth clearance between bushings",
+      "unit": "mm",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "systemVoltage"
+      ],
+      "sourceTable": "Table 10",
+      "valueTable": {
+        "11": {
+          "min": 140
+        },
+        "22": {
+          "min": 230
+        },
+        "33": {
+          "min": 320
+        },
+        "3.3": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "6.6": {
+          "value": "Not specified in IS (combination not offered)"
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 11.1",
+      "section": "Clearances",
+      "parameterName": "Air clearance in cable box, phase-to-phase",
+      "unit": "mm",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "systemVoltage"
+      ],
+      "sourceTable": "Table 11",
+      "valueTable": {
+        "11": {
+          "min": 130
+        },
+        "22": {
+          "min": 240
+        },
+        "33": {
+          "min": 350
+        },
+        "3.3": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "6.6": {
+          "value": "Not specified in IS (combination not offered)"
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 11.1",
+      "section": "Clearances",
+      "parameterName": "Air clearance in cable box, phase-to-earth",
+      "unit": "mm",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "systemVoltage"
+      ],
+      "sourceTable": "Table 11",
+      "valueTable": {
+        "11": {
+          "min": 80
+        },
+        "22": {
+          "min": 140
+        },
+        "33": {
+          "min": 220
+        },
+        "3.3": {
+          "value": "Not specified in IS (combination not offered)"
+        },
+        "6.6": {
+          "value": "Not specified in IS (combination not offered)"
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 6.10.2 / 7.10.2 / 8.10.2",
+      "section": "Temperature-rise",
+      "parameterName": "Winding temperature-rise (by resistance method), Max",
+      "unit": "°C",
+      "limitType": "max",
+      "acceptanceOrType": "type",
+      "variesBy": [
+        "category"
+      ],
+      "testMethod": "IS 2026 (Part 2)",
+      "valueTable": {
+        "3ph<=200kVA": {
+          "max": 40
+        },
+        "3ph>200kVA": {
+          "max": 45
+        },
+        "1ph<=25kVA": {
+          "max": 40
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 6.10.2 / 7.10.2 / 8.10.2",
+      "section": "Temperature-rise",
+      "parameterName": "Top oil temperature-rise (by thermometer), Max",
+      "unit": "°C",
+      "limitType": "max",
+      "acceptanceOrType": "type",
+      "variesBy": [
+        "category"
+      ],
+      "testMethod": "IS 2026 (Part 2)",
+      "valueTable": {
+        "3ph<=200kVA": {
+          "max": 35
+        },
+        "3ph>200kVA": {
+          "max": 40
+        },
+        "1ph<=25kVA": {
+          "max": 35
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 6.9.2 / 7.9.2 / 8.9.2",
+      "section": "Magnetic",
+      "parameterName": "No-load current, Max (% of full load current)",
+      "unit": "%",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [
+        "category"
+      ],
+      "testMethod": "IS 2026 (Part 1)",
+      "valueTable": {
+        "3ph<=200kVA": {
+          "max": 3
+        },
+        "3ph>200kVA": {
+          "max": 2
+        },
+        "1ph<=25kVA": {
+          "max": 3
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 6.9.2 / 7.9.2 / 8.9.2",
+      "section": "Magnetic",
+      "parameterName": "Max increase of no-load current at +12.5% rated voltage (% of full load current)",
+      "unit": "%",
+      "limitType": "max",
+      "acceptanceOrType": "special",
+      "variesBy": [
+        "category"
+      ],
+      "valueTable": {
+        "3ph<=200kVA": {
+          "max": 6
+        },
+        "3ph>200kVA": {
+          "max": 5
+        },
+        "1ph<=25kVA": {
+          "max": 6
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 21.5.1.1 / 21.5.2.1 / 21.5.3.1",
+      "section": "Pressure & Leakage",
+      "parameterName": "Pressure test (type test) applied air pressure",
+      "unit": "kPa",
+      "limitType": "min",
+      "acceptanceOrType": "type",
+      "variesBy": [
+        "category"
+      ],
+      "valueTable": {
+        "3ph<=200kVA": {
+          "value": 80
+        },
+        "3ph>200kVA": {
+          "value": 80
+        },
+        "1ph<=25kVA": {
+          "value": 100
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 21.5.1.1 / 21.5.2.1",
+      "section": "Pressure & Leakage",
+      "parameterName": "Pressure test (type test) applied vacuum",
+      "unit": "mm Hg",
+      "limitType": "min",
+      "acceptanceOrType": "type",
+      "variesBy": [
+        "category"
+      ],
+      "valueTable": {
+        "3ph<=200kVA": {
+          "value": 250
+        },
+        "3ph>200kVA": {
+          "value": 500
+        },
+        "1ph<=25kVA": {
+          "value": 760
+        }
+      }
+    },
+    {
+      "clauseRef": "Cl 6.2 / 7.2 / 8.2",
+      "section": "General",
+      "parameterName": "Rated frequency",
+      "unit": "Hz",
+      "limitType": "text",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "specText": "50 Hz"
+    },
+    {
+      "clauseRef": "Cl 6.9.1 / 7.9.1 / 8.9.1",
+      "section": "Magnetic",
+      "parameterName": "Maximum flux density at +12.5% combined voltage/frequency variation, Max",
+      "unit": "Tesla",
+      "limitType": "max",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "max": 1.9
+    },
+    {
+      "clauseRef": "Cl 6.6 / 7.6",
+      "section": "General",
+      "parameterName": "Winding connection and phase displacement (three-phase)",
+      "limitType": "text",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "specText": "Primary delta, secondary star, Dyn 11 (alternatively Dyn1); +30° positive phase displacement"
+    },
+    {
+      "clauseRef": "Cl 21.2 (a)",
+      "section": "Routine Tests",
+      "parameterName": "Measurement of winding resistance",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "testMethod": "IS 2026 (Part 1)",
+      "expected": "Measured and recorded per IS 2026 (Part 1)"
+    },
+    {
+      "clauseRef": "Cl 21.2 (b)",
+      "section": "Routine Tests",
+      "parameterName": "Measurement of voltage ratio and check of phase displacement",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "testMethod": "IS 2026 (Part 1)",
+      "expected": "Voltage ratio and phase displacement within tolerance of IS 2026 (Part 1)"
+    },
+    {
+      "clauseRef": "Cl 21.2 (c)",
+      "section": "Routine Tests",
+      "parameterName": "Measurement of short-circuit impedance and load loss at 50% and 100% load",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "testMethod": "IS 2026 (Part 1)",
+      "expected": "Load loss within declared loss levels (see loss parameters)"
+    },
+    {
+      "clauseRef": "Cl 21.2 (d)",
+      "section": "Routine Tests",
+      "parameterName": "Measurement of no-load loss and current",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "testMethod": "IS 2026 (Part 1)",
+      "expected": "No-load loss and current within declared limits"
+    },
+    {
+      "clauseRef": "Cl 21.2 (e)",
+      "section": "Routine Tests",
+      "parameterName": "Measurement of insulation resistance",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "testMethod": "IS 2026 (Part 1)",
+      "expected": "Measured and recorded per IS 2026 (Part 1)"
+    },
+    {
+      "clauseRef": "Cl 21.2 (f)",
+      "section": "Routine Tests",
+      "parameterName": "Induced over-voltage withstand test",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "testMethod": "IS 2026 (Part 3)",
+      "expected": "Withstands induced over-voltage without failure"
+    },
+    {
+      "clauseRef": "Cl 21.2 (g)",
+      "section": "Routine Tests",
+      "parameterName": "Separate-source voltage withstand test",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "testMethod": "IS 2026 (Part 3)",
+      "expected": "Withstands separate-source voltage without failure"
+    },
+    {
+      "clauseRef": "Cl 21.3 (a)",
+      "section": "Type Tests",
+      "parameterName": "Lightning impulse test",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": [],
+      "testMethod": "IS 2026 (Part 3)",
+      "expected": "Withstands rated lightning impulse (BIL) without failure"
+    },
+    {
+      "clauseRef": "Cl 21.3 (b)",
+      "section": "Type Tests",
+      "parameterName": "Temperature-rise test",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": [],
+      "testMethod": "IS 2026 (Part 2)",
+      "expected": "Temperature-rise within limits (see winding/oil temperature-rise parameters)"
+    },
+    {
+      "clauseRef": "Cl 21.3 (c)",
+      "section": "Type Tests",
+      "parameterName": "Short-circuit withstand test (up to 200 kVA)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "type",
+      "variesBy": [],
+      "testMethod": "IS 2026 (Part 5)",
+      "expected": "Withstands short circuit; routine tests before/after per IS 2026 (Part 1)"
+    },
+    {
+      "clauseRef": "Cl 21.4 (a)",
+      "section": "Special Tests",
+      "parameterName": "Determination of sound levels",
+      "limitType": "qualitative",
+      "acceptanceOrType": "special",
+      "variesBy": [],
+      "testMethod": "IS 2026 (Part 10)",
+      "expected": "By mutual agreement between user and supplier"
+    },
+    {
+      "clauseRef": "Cl 21.4 (b)",
+      "section": "Special Tests",
+      "parameterName": "Short-circuit withstand test (above 200 kVA)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "special",
+      "variesBy": [],
+      "testMethod": "IS 2026 (Part 5)",
+      "expected": "Withstands short circuit; by mutual agreement"
+    },
+    {
+      "clauseRef": "Cl 21.4 (c)",
+      "section": "Special Tests",
+      "parameterName": "No load current at 112.5 percent voltage",
+      "limitType": "qualitative",
+      "acceptanceOrType": "special",
+      "variesBy": [],
+      "expected": "Measured at 112.5% voltage; increase within limits (see no-load current increase parameter)"
+    },
+    {
+      "clauseRef": "Cl 21.4 (d)",
+      "section": "Special Tests",
+      "parameterName": "Paint adhesion test",
+      "limitType": "qualitative",
+      "acceptanceOrType": "special",
+      "variesBy": [],
+      "testMethod": "ASTM D3359 (Tape test)",
+      "expected": "Adhesion acceptable per ASTM D3359"
+    },
+    {
+      "clauseRef": "Cl 21.4 (e)",
+      "section": "Special Tests",
+      "parameterName": "BDV and moisture content of oil",
+      "limitType": "qualitative",
+      "acceptanceOrType": "special",
+      "variesBy": [],
+      "testMethod": "IS 335",
+      "expected": "Within limits of IS 335"
+    },
+    {
+      "clauseRef": "Cl 21.2 (h) / 21.5",
+      "section": "Pressure & Leakage",
+      "parameterName": "Pressure test (routine) — plain/non-sealed tank",
+      "unit": "kPa",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 35,
+      "expected": "35 kPa above atmosphere for 10 min; no leakage"
+    },
+    {
+      "clauseRef": "Cl 21.5",
+      "section": "Pressure & Leakage",
+      "parameterName": "Pressure test (routine) — corrugated tank",
+      "unit": "kPa",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 15,
+      "expected": "15 kPa above atmosphere for 10 min; no leakage"
+    },
+    {
+      "clauseRef": "Cl 21.5.1.2(c)",
+      "section": "Pressure & Leakage",
+      "parameterName": "Pressure test (routine) — sealed type welded cover",
+      "unit": "kPa",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 80,
+      "expected": "80 kPa above atmosphere for 10 min; no leakage"
+    },
+    {
+      "clauseRef": "Cl 21.2 (j) / 21.5",
+      "section": "Pressure & Leakage",
+      "parameterName": "Oil leakage test (routine)",
+      "limitType": "qualitative",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "expected": "Twice normal head at base for 8 h (6 h for single phase); corrugated 15 kPa at top for 6 h; no leakage"
+    },
+    {
+      "clauseRef": "Cl 15.5",
+      "section": "Construction",
+      "parameterName": "Paint total dry film thickness — thermo setting powder, inside, Min",
+      "unit": "microns",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 30,
+      "sourceTable": "Table 12"
+    },
+    {
+      "clauseRef": "Cl 15.5",
+      "section": "Construction",
+      "parameterName": "Paint total dry film thickness — thermo setting powder, outside, Min",
+      "unit": "microns",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 60,
+      "sourceTable": "Table 12"
+    },
+    {
+      "clauseRef": "Cl 15.5",
+      "section": "Construction",
+      "parameterName": "Paint total dry film thickness — epoxy primer, outside, Min",
+      "unit": "microns",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 30,
+      "sourceTable": "Table 12"
+    },
+    {
+      "clauseRef": "Cl 15.5",
+      "section": "Construction",
+      "parameterName": "Paint total dry film thickness — polyurethane finish, outside (each of 2 coats), Min",
+      "unit": "microns",
+      "limitType": "min",
+      "acceptanceOrType": "acceptance",
+      "variesBy": [],
+      "min": 25,
+      "sourceTable": "Table 12"
+    }
+  ]
+}

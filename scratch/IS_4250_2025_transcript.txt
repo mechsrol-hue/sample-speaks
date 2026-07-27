@@ -1,0 +1,490 @@
+IS 4250 : 2025
+Indian Standard
+ELECTRIC FOOD-MIXERS (LIQUIDIZERS AND GRINDERS) AND CENTRIFUGAL JUICERS — SPECIFICATION
+( Second Revision )
+ICS 97.040.50
+© BIS 2025 — March 2025 — Price Group 7
+Electrical Appliances Sectional Committee, ETD 32
+
+FOREWORD
+This Indian Standard (Second Revision) was adopted by the Bureau of Indian Standards, after the draft finalized
+by the Electrical Appliances Sectional Committee had been approved by the Electrotechnical Division Council.
+This standard covers the performance requirements of electric food-mixers and centrifugal juicers used for
+mixing liquids, making slurries or pulps of food, for pulverizing dry food stuffs and extracting juice from
+fruits and vegetables on the principle of centrifugal system.
+This standard was first published in 1967 and subsequently revised in 1980. This revision has been undertaken
+due to the following:
+a) To align the safety requirements with the latest version of IS 302 (Part 2/Sec 14) 'Safety of household and
+   similar electrical appliances: Part 2 Particular requirements, Section 14 Electric kitchen machines';
+b) New methodology for endurance test of motors is added; and
+c) No limitations on the power input value.
+The composition of the Committee responsible for the formulation of this standard is given in Annex D.
+For the purpose of deciding whether a particular requirement of this Standard is complied with, the final value,
+observed or calculated, expressing the result of a test or analysis shall be rounded off in accordance with
+IS 2 : 2022 'Rules for rounding off numerical values (second revision)'. The number of significant places retained
+in the rounded off value should be the same as that of the specified value in this Standard.
+
+1 SCOPE
+This standard covers electric motor-driven food-mixers (grinders and liquidizers) and centrifugal juicers
+intended for household and similar use and designed for operation at voltages not exceeding 250 V a.c.
+Any other attachments agreed between the buyers and manufacturers are also covered within the scope
+of this standard provided it meets all the relevant requirements mentioned in the standard for example,
+blenders, food processer attachment etc.
+
+2 REFERENCES
+The standards given below contain provisions which, through reference in this text, constitute provisions
+of this standard. At the time of publication, the editions indicated were valid. All standards are
+subject to revision, and parties to agreements based on this standard are encouraged to investigate the
+possibility of applying the most recent edition of these standards:
+IS No. — Title
+IS 302 — Safety of household and similar electrical appliances:
+(Part 1) : 2024 — General requirements (seventh revision)
+(Part 2/Sec 14) : 2009 — Particular requirements, Section 14 Electric kitchen machines (first revision)
+IS 460 (Part 1) : 2020 — Test sieves — Specification: Part 1 Wire cloth test sieves (fourth revision)
+IS 3077 : 2022 — Roasted and ground coffee — Specification (third revision)
+
+3 TERMINOLOGY
+For the purpose of this standard, the following definitions in addition to those given in 3 of
+IS 302 (Part 2/Sec 14) shall apply.
+3.1 Food-Mixer — Appliance intended for mixing food ingredients.
+NOTE — A appliance that can do the functions indicated in 3.2 and 3.3.
+3.2 Grinder — A portable appliance which by operation of high-speed blades or cutters is intended
+primarily for pulverizing or powdering dry foodstuffs either raw or roasted, such as coffee seeds, cereals, grains, etc.
+3.3 Liquidizer — A portable appliance that by operation of high-speed blades or cutters is designed
+either for mixing liquids or for converting foods with or without the presence of water (or vegetable
+oils) depending on the type of food, into forms of slurry or pulps.
+3.3.1 Blender — Appliance intended to pulverize solids, such as ice, vegetables, or fruit, and to
+combine them into a blend, or to merge liquids and solids into a blend (food blenders) or to combine
+liquids only (liquid blenders).
+3.4 Food Processor Attachments — Attachments intended to finely chop batches of meat, cheese, and
+vegetables by means of cutting blades rotating in a container or meant for wheat flour kneading.
+NOTE — One or more of attachments doing functions such as chopping, kneading, grating, slicing, etc are examples of
+the food processer attachments.
+3.5 Centrifugal Juicer — An appliance or attachment designed to extract juice from fruits or
+vegetables by cutting into pieces and by centrifugal action.
+3.6 Cycle of Operation — The operations of juice extraction, dismantling for removal of fluff (waste),
+cleaning and reassembly.
+3.7 Batch Operation — The operation of a juicer where the quantity of input of the fruits or vegetables
+is limited by the capacity of the vessel provided for the collection of either the juice extracted or the fluff
+(waste) without overflowing.
+3.8 Continuous Operation — The operation of a juicer where the quantity of input of the fruits or
+vegetables is not limited by the capacity of the vessel provided for the collection of either the juice
+extracted or the fluff (waste).
+3.9 Rated Capacity — The rated capacity declared by the manufacturer shall be the maximum specified
+quantity handled by the unit for each complete cycle of operation.
+3.10 Rated Input — Power input assigned to the appliance by the manufacturer.
+3.11 Normal Load
+3.11.1 For the Food Mixers — Denotes the load obtained when the appliance is operated under the
+load indicated in the instruction's booklet in terms of recipes (can be different for grinder and
+liquidizer) or the load necessary to attain the rated input (including the tolerance) at the rated voltage in
+case the actual load in terms of recipes is not indicated by the manufacturer in the instruction's booklet.
+NOTE — In case the input differs with various kinds of recipes indicated in the instruction's booklet, the normal load
+shall correspond to the highest input.
+3.11.2 For the Juicers — The load necessary to attain rated input at rated voltage.
+3.12 Nominal Capacity — The nominal capacity or capacity shall be the maximum specified quantity of
+the vessels. This value shall be declared by the manufacturer.
+
+4 GENERAL REQUIREMENTS
+4.1 The relevant provisions of 4 of IS 302 (Part 2/Sec 14) shall apply in addition to 4.2.
+4.2 The external finish used on metal components shall be of heat and moisture-resisting nature and
+shall not be adversely affected by variations in temperature occurring under normal operating
+conditions or during the endurance test. The external finish of the body of the food mixer shall
+not become stained due to spillage of foodstuff from the bowl of the food mixer.
+
+5 GENERAL CONDITIONS FOR THE TESTS
+5.1 The relevant provisions of 5 of IS 302 (Part 2/Sec 14) shall apply except as stated
+otherwise in individual tests.
+5.2 Endurance test (9) shall be carried out after the operation test (10).
+
+6 CLASSIFICATION
+The relevant provisions of 6 of IS 302 (Part 2/Sec 14) shall apply.
+
+7 MARKING
+7.1 The relevant provisions of 7 of IS 302 (Part 2/Sec 14) shall apply in addition to those
+indicated in 7.2 to 7.5.
+7.2 Each appliance shall be accompanied by a digital and/or physical instruction booklet containing the
+following information:
+a) Precautions
+   1) While positioning of the appliance, and
+   2) Before switching on the appliance.
+b) Warning
+   1) About the parts of the appliance which shall not be brought into contact with liquids;
+   2) About keeping away from moving parts; and
+   3) About running the appliance empty, if necessary.
+c) Instructions
+   1) For assembling and dismantling the bowl for cleaning and servicing;
+   2) Type of supply to which the appliance may be connected and instructions for electrical connections;
+   3) Don't insert finger or any other object when the machine is in operation or connected with supply mains;
+   4) Instructions to the affect that after every use of food-mixer/juicers, pour warm water into the bowl to
+      remove left over material, especially sticky substances, so that the cutter will rotate freely during the
+      subsequent use; and
+   5) The manufacturer may include instructions stating that the machine may be overhauled at least once in a year
+      so that its useful life is increased.
+d) Directions to switch off when the motor stalls or smoke emanates from the appliance, and.
+e) Guide for operation, giving maximum quantity per loading and in the case of multi-speed appliances
+   speed/control positions suitable for various operations.
+7.3 If the appliance is delivered with alternative accessories, the rated input shall correspond to the
+most unfavorable accessories, and speed setting.
+7.4 Marking of Control Switch
+The 'on' or 'off' or both positions of the control switch shall be clearly marked. If any speed control
+device is provided, the various positions shall be clearly and indelibly marked.
+7.5 Accessories sold separately by the appliance manufacturer shall be accompanied by an
+instructions sheet giving all relevant information unless it is included in the manufacturer's
+instructions for the appliance.
+7.6 BIS Certification Marking
+The product(s) conforming to the requirements of this standard may be certified as per the conformity
+assessment schemes under the provisions of the Bureau of Indian Standards Act, 2016 and the Rules
+and Regulations framed thereunder, and the products may be marked with the Standard Mark.
+
+8 SAFETY REQUIREMENTS
+The relevant provisions of 8 to 32 of IS 302 (Part 2/Sec 14) shall apply. However, tests of 11, 20, 22
+and 24 of IS 302 (Part 2/Sec 14) shall be carried out in accordance with the procedure given in Annex A.
+
+9 ENDURANCE FOR MOTOR AND BASE ASSEMBLY
+The food mixer/juicer unit (excluding jars) is operated at rated input. To obtain rated input, food
+mixers/juicer unit shall be operated with the generator load which can provide constant loading
+consistently. Detail test set up is given in Annex B of this standard.
+The food mixer/juicer unit is operated for 24 ON hours at rated input at 1.06 times the rated voltage in
+cycles of ON and OFF periods and then for 24 ON hours at rated input at 0.94 times the rated voltage in
+cycles of ON and OFF periods.
+a) Food mixers for short-time operation having rated 'ON' time less than 5 minutes. The
+   operation being carried out 6 times, the period of operation is 3 min ON and 2 min
+   OFF then adequate rest time to cool down the appliances to room temperature which is not
+   more than 60 min.
+b) Food mixers for short operation having rated 'ON' time more than or equal to 5 min. The
+   operation being carried out 6 times, the period of operation is 5 min ON and 2 min
+   OFF then adequate rest time to cool down the appliances to room temperature which is not
+   more than 60 min.
+c) For food mixers for short time operation having rated 'ON' time of more than 30 min.
+   The operation being carried out with number of times calculated by dividing declared rated
+   ON time by 5 (rounded off to nearest integer). The period of operation is 5 min ON
+   and 2 min OFF then adequate rest time to cool down the appliances to room
+   temperature which is not more than 60 min.
+d) For food mixers for continuous operation, the operation being carried out is at least
+   10 times or until steady conditions are established, whichever is more. The period of
+   operation is 5 min ON and 2 min OFF then adequate rest time to cool down the
+   appliances to room temperature which is not more than 60 min.
+The addition of ON time of all cycles shall be equal to the required 48 ON hours.
+NOTES
+1 The adequate rest period shall be the period enough to bring the appliance to the room temperature. Forced cooling
+can be applied during this off period without opening the food mixer unit.
+2 The food mixers tested under the rated input condition, any control like OLP (overload protector) that limits the
+rated input loading during the test shall be short-circuited.
+3 Food-mixer/juicer which can be operated at different speeds shall be operated at the highest speed setting.
+4 Consumable item like coupler are subjected to replace incase of breakage due to fitment in fixture hence excluded
+from the failure mode. Additional coupler has to be provided by the manufacturer to address its breakage due to
+fitment in fixture during testing.
+After this test, the food mixer shall withstand the electric strength test of 16.3 of IS 302-1.
+
+10 OPERATIONAL TESTS
+10.1 The food-mixers shall be subjected to such of the following operational tests for which it is
+declared suitable by the manufacturer with the mixer connected in a circuit with a watt-meter and supplied
+with maximum rated voltage. The tests with the recipes shall generally be conducted as per the
+method specified in the instruction's booklet supplied by the manufacturer for the corresponding
+recipes. However, with respect to tests of grinding coffee, whisking egg whites and Idli batter, they
+shall be as per 10.2, 10.3 and 10.4. The total time of actual operation of the machine in each test shall be
+noted and recorded with a stopwatch or a similar device.
+10.2 Grinding Coffee (for Machines that Have a Dry Grinding Arrangement)
+Freshly roasted coffee seeds corresponding to the grading 'light roast' of IS 3077 shall be used for this
+test. The weight of seeds in grams shall be 40 percent of the rated capacity of the grinder bowl
+of the machine under test. The seeds shall be ground for an operational time of 3 min or less and the total
+time including periods of rest shall not exceed 5 min. If required, the material adhering to the sides and
+cover may be scrapped and loosened with a spoon, once during the test, when the machine is at rest. At
+the end of the test, the material shall be removed and weighed. The result of grinding shall be assessed by
+sieve as per IS 460 (Part 1) successively through the following Indian Standard sieves: 710 microns,
+500 microns and 355 microns.
+The method of sieving indicated in IS 3077 shall be used. The material retained on each of the first two
+sieves shall not be more than 20 percent of the weight obtained at the end of the test. The material
+passing through the third sieve shall not be less than 30 percent of the same weight.
+NOTES
+1 It is recommended that coffee seeds of the 'pea bury' variety supplied by the coffee board, are used for this test.
+2 The sieving may also be done manually, provided it meets the requirements of this standard.
+10.3 Whisking Egg Whites (for Machines that have Whisking Egg Arrangement)
+Fresh eggs shall be used for this test. The whites shall be carefully separated and used at once. The
+weight in grams of the egg whites used in a test shall be 20 percent of the rated capacity of the liquidizer
+bowl in milliliters. The egg whites shall be initially at room temperature. They shall be whisked in the
+machine to produce a stiff froth. The actual operational time required shall not exceed 3 min and
+the total time including periods of rest shall not exceed 5 min. The result shall be considered
+satisfactory if the bowl is inverted for 5 s and the material remains in the bowl.
+10.4 Idli Batter
+The general procedure for preparing the Idli batter is to take decuticled black gram (Urad dal) and
+parboiled rice in the proportions 1 : 2 by mass, soak them separately in the required quantity of water for
+12 h and then grind them separately before mixing them together. The black gram is ground to a smooth
+and frothy consistency and the rice is ground to fine semolina in water.
+For the purpose of this test, the solid ingredients shall be taken in the weights specified below for
+different sizes of liquidizer bowls and soaked in the quantity of water shown against each mass of solid.
+The soaked solid with the unabsorbed water shall then be transferred to the bowl and ground. Excess
+water to the extent of 20 percent can be added as and when needed for achieving smooth grinding results
+during grinding.
+Sl No. | Rated Capacity of Bowl (Litre) | Black Gram Solids (g) | Black Gram Water (ml) | Parboiled Rice Solids (g) | Parboiled Rice Water (ml)
+i) | 0.5 | 100 | 225 | 100 | 113
+ii) | 1.0 | 200 | 450 | 200 | 225
+iii) | 1.5 | 300 | 675 | 300 | 338
+NOTE — For other capacities the quantity of solid ingredients shall be fixed by interpolation.
+The maximum operational time for grinding each ingredient shall be 6 min with a period of rest as
+recommended by the manufacturer.
+NOTE — To prepare a batter with the black gram and rice in the proportions 1 : 2 requires two batches of rice to be ground
+for every batch of black gram. For the present test one batch of each will suffice as the results of grinding are assessed
+without completing the mixture and cooking it in the form of Idlis.
+The results of grinding the black gram are assessed by working the mixture between the thumb and
+fingers. The mixture shall be smooth and frothy and no lumps shall be detected.
+The results of grinding the rice shall be assessed by diluting the ground mixture with a sufficient
+quantity of clean Water and sieving it successively through the following Indian Standard sieves:
+1.40 mm, 1.00 mm and 500 microns.
+The ground material from the bowl is recovered as fully as possible by rinsing it with water, the same
+water being then used for dilution. After sieving, the water from the material retained by each sieve shall
+be allowed to drain away for 5 min and the material shall then be recovered and weighed.
+The grinding shall be considered satisfactory if not more than 10 percent of the mass of rice originally
+taken is retained by the 1.40 mm sieve; not more than 15 percent by the 1 mm sieve and not more than
+70 percent by the 0.5 mm sieve.
+10.5 Operational Tests for Juicers
+10.5.1 A suitable quantity of washed and cleaned carrots or fresh seasonal fruits shall be taken and
+soaked in water at room temperature for 24 h. The top and tail shall be cut off. These shall be cut into
+smaller pieces approximately 20 mm thick and weighed. Fruit which is known to be suitable for
+juice extraction should be selected.
+The juicer shall be operated at the rated voltage as per the operating instructions given by the
+manufacturer. For juicers designed for batch operation, a quantity of about 350 g of carrots/fresh
+seasonal fruits shall be used for each cycle of operation. The juicer shall be operated for 5 cycles
+of operation. The juicers designed for continuous operation shall be operated for 5 min or the rated
+operating time of the juicer whichever is less.
+In either case, the juice extracted shall be filtered through a 0.25 mm sieve and the total quantity of
+juice weighed. The total time for juice extraction which is measured from the moments, the feeding of
+fruits is started till the juice stops coming out and excludes the time required for dismantling, cleaning
+and reassembly is noted. In the case of juicers designed for batch operation, this time is the sum of
+time for juice extraction for five cycles for which the juicer is to be operated. The amount of juice
+extracted shall then be calculated, expressed as a percentage of the carrots taken [(B/A) × 100].
+where
+B = the total amount, in g, of juice extracted; and
+A = the total quantity, in g, of carrots taken.
+The juice pouring out of the vent provided for the purpose should have an even flow. The amount of
+juice extracted shall not be less than 50 percent.
+10.5.2 The juicer shall be dismantled, cleaned and inspected. There shall be no spillage/leakage from
+the centrifugal mesh to such parts of the juicer which do not form the flow path of the extracted juice.
+
+11 TEMPERATURE WITHSTAND TEST FOR BOWL
+Boiling water shall be poured into the bowl at room temperature rapidly to fill it to its capacity.
+After the test the bowl shall be emptied and brought back to room temperature. The test shall be repeated
+five times. The bowl shall not show any sign of cracks and deformation and shall properly fit into
+the holder after the test.
+NOTE — This test is not applicable in case the bowl is made of metal.
+
+12 TEST FOR CONTROLS
+12.1 Test for Switches
+Controlling switches for overload protection shall be capable of breaking the stalled motor current at the
+maximum rated voltage six times without failure. For the purpose of these tests the rated capacity shall
+be taken as equivalent to the rated input of the machine.
+
+13 STRENGTH OF ASSEMBLY
+The bowl shall be assembled and mounted on the motor housing under the following controlled
+conditions six times. There shall be no chipping, cracking, or visible denting on the mounting
+surfaces:
+a) Press fit joints using a force of 25 kgf; and
+b) Screwed on joints using a screwing couple of 25 kgf.cm.
+Any other joint is allowed, provided it means the requirements of this standard.
+
+14 SCHEDULE OF TESTS
+14.1 Type Tests
+The tests specified in Table 1 shall constitute the type tests and shall be carried out on one sample of
+food-mixer/juicer selected preferably at random from a regular production lot.
+14.1.1 Criteria of Acceptance
+The sample shall successfully pass all the type tests for proving conformity with the requirements of
+this specification. If any of the samples should fail in any of the type tests, the testing authority, at its
+discretion, may call for fresh samples not exceeding twice the original number and subject them to all
+the tests or the test(s) in which the failure(s) occurred. No failure shall be permitted in the repeat
+test(s).
+14.2 Acceptance Tests
+Table 2 shall constitute acceptance tests.
+14.3 Routine Tests
+Table 3 shall constitute routine tests.
+
+Table 1 Type Tests
+(Clause 14.1)
+Sl No. | Tests | Clause Reference
+i) | Safety requirements | 8
+ii) | Endurance for motor and base assembly | 9
+iii) | Operational tests | 10
+iv) | Temperature withstand test for bowl | 11
+v) | Test for controls | 12
+vi) | Strength of assembly | 13
+
+Table 2 Acceptance Tests
+(Clause 14.2)
+Sl No. | Tests | Clause Reference
+i) | Protection against access to live parts | 8 of IS 302 (Part 2/Sec 14)
+ii) | Power input and current | 10 of IS 302 (Part 2/Sec 14)
+iii) | Leakage current and electric strength at operating temperature | 13 of IS 302 (Part 2/Sec 14)
+iv) | Moisture resistance | 15 of IS 302 (Part 2/Sec 14)
+v) | Leakage current and electric strength | 16 of IS 302 (Part 2/Sec 14)
+vi) | Provision for earthing | 27 of IS 302 (Part 2/Sec 14)
+vii) | Operational tests | 10
+viii) | Temperature withstand test for bowl | 11
+
+Table 3 Routine Tests
+(Clause 14.3 and Annex C)
+Sl No. | Tests | Clause Reference
+i) | Protection against access to live parts | 8 of IS 302 (Part 2/Sec 14)
+ii) | Leakage current and electric strength at operating temperature | 13 of IS 302 (Part 2/Sec 14)
+iii) | Provision for earthing | 27 of IS 302 (Part 2/Sec 14)
+NOTE — A simple running test to verify satisfactory functioning shall be conducted on every food-mixer/juicer.
+
+ANNEX A
+(Clause 8)
+ADDITIONAL SAFETY REQUIREMENTS
+A-1 HEATING
+Test under 11 of IS 302 (Part 2/Sec 14) to be checked as per methodology given in Annex C.
+A-2 STABILITY AND MECHANICAL HAZARDS
+The relevant provisions of 20 of IS 302 (Part 2/Sec 14) shall apply except that tests specified
+at 20.104, 20.112, 20.113 and 20.114 of IS 302 (Part 2/Sec 14) shall be kept in abeyance for a period
+of 36 months from the date of publication of this standard.
+A-3 CONSTRUCTION
+The relevant provisions of 22 of IS 302 (Part 2/Sec 14) shall apply in addition to those
+specified in A-3.1 to A-3.9.
+A-3.1 The machine shall be compact, self-contained, and of rigid construction.
+A-3.2 All parts required to be cleaned and kept in a hygienic condition shall be readily accessible
+without the use of special tools.
+A-3.3 All castings and other materials required to be handled shall be smooth, round-edged, and free
+from blow holes, pits, foreign matter, and surface imperfections.
+A-3.4 Machined and formed parts shall be made to ensure complete interchangeability and parts subject
+to wear shall easily replaceable.
+A-3.5 In the case of liquidizers, a lid shall be provided to retain food during preparation. When
+jars are provided with a lid, the lid shall be held firmly either by hand or other adequate means while
+operating. A breather incorporated in the lid shall also be provided.
+NOTE — For the lid placement on the jars, suitable caution is to be provided by the manufacturer on the lid and in the
+instruction booklet/manual.
+A-3.6 In the case of grinder with the bowl of the open type, a lid shall be provided.
+A-3.7 The design shall ensure that no accidental bodily contact is made with the cutters or blades
+during the normal operation of the machine.
+A-3.8 The machine shall be designed to ensure that lubricants do not contaminate the food and that food
+is prevented from reaching the moving parts of the machine except blades and cutters.
+A-3.9 The cutters and such other exposed parts of the machine in contact with food shall be of such
+material as to prevent fouling of foodstuffs and to resist corrosion and rusting. Stainless steel is one
+such material that can meet the above requirements.
+A-4 COMPONENTS
+The relevant provisions of 24 of IS 302 (Part 2/Sec 14) shall apply in addition to those
+specified in A-4.1 to A-4.6.
+A-4.1 Body or the Motor Housing
+It shall be made of cast iron, cast aluminum, sheet metal, high-impact thermosetting plastics or
+thermoplastics like acrylonitrile-butadiene-styrene (ABS) and polypropylene, etc, of adequate strength
+and shall provide stability to the machine and shall also withstand all stresses encountered during
+normal use. Openings for ventilation of the motor shall be properly screened to ensure that no water
+gets into the appliance due to spillage.
+A-4.2 Mechanical Power Coupling
+The coupling shall be flexible and shall be fabricated out of materials that shall not deteriorate with the
+extended normal use of 48 h as indicated in 9. It shall be able to withstand shock and vibrations of power
+transmission and speed changes (in the case of the multispeed machine). It shall be easily replaceable.
+A-4.3 Bearings
+The bearings may be of the sleeve or ball type. They shall be permanently lubricated. The bearings shall
+have a life of at least 48 h as indicated in 9.
+A-4.4 Bowl
+The container or the bowl in which food is converted into slurry, pulp, or other liquids or in which dry
+food is pulverized shall be made out of materials that are neutral to food acids and salts, which do not
+deteriorate with age, and which can withstand temperatures up to 100 °C without change in their
+physical, mechanical and chemical structures, and properties. Preferred materials are clear or
+colored milky glass, clear or colored high-impact thermosetting plastic, or stainless steel. The bowl
+shall be easily removable from the machine and shall be free from pits, cracks, and crevices. It shall
+be smooth and shall not have corners and niches, to facilitate cleaning. The fixing arrangement of the
+bowl shall be adequately strong to stand repeated operations. It may be fitted with handling grips.
+A-4.5 Assembly
+The bowl shall have arrangements for its stable and easy mounting on the motor housing without the use
+of any tools. Accurate guides shall be provided to ensure correct mounting. Where the bowl is
+detachable from the base plate, a proper gasket shall be provided, and also mechanical seal for leakproof
+assembly shall be provided. It shall be possible to remove the bowl with the base plate if provided
+separately as one assembly for the purposes of emptying the contents.
+A-4.6 Blades of Cutters
+The material of the blades of cutters shall be stainless steel.
+
+ANNEX B
+(Clause 9 and Annex C)
+GENERATOR LOAD SETUP
+B-1 PROCEDURE OF FIXING OF APPLIANCES ON THE FIXTURE
+a) Prepare a fixture as shown in Fig. 1;
+b) The fixture unit consist of a base of metal surface, stand consist of adjuster (1), knob
+   adjusters (2 to 13), springs (14 to 17) and clamp (18);
+c) The generator load (G) is attached at the top centre of fixture as shown in Fig. 1;
+d) The clamp (18) is used to fix the testing appliance (for example, mixer grinder);
+e) The adjuster (1) is used to adjust the height (up and down movement) of the generator load (G);
+f) The knob adjusters (6, 7, 8, 9) are used to adjust the left and right movement of the generator load (G);
+g) The knob adjusters (10, 11, 12, 13) are used to adjust the To and Fro movement of the generator load (G);
+h) The load generator (G) is attached at the top of the testing appliance and fixed with
+   coupler-to-coupler engagement (60 percent to 80 percent engagement);
+j) The knob adjusters (2, 3, 4, 5) are used to stable the whole setup after all the adjustments/movements are fixed;
+k) To create load, the common wire and high speed wire of generator (G) is connected with load bulbs; and
+m) The load bulbs are connected in parallel assembly and the load can be varied as per the requirement.
+NOTE — The load can be created with resistive elements other than bulbs.
+B-2 PROCEDURE OF FIXING OF APPLIANCES WITHOUT FIXTURE
+a) Prepare a setup as shown in Fig. 2;
+b) The generator load (G) consist of a motor with replaceable collar;
+c) The collar is attached to the bottom of the generator load (G) with the help of screws and bolts;
+d) The spacers are used to adjust the height of the collar with respect to the appliance;
+e) The generator load (G) is mounted on the appliance for testing;
+f) To create load, the common wire and high-speed wire of generator (G) is connected with load bulbs; and
+g) The load bulbs are connected in parallel assembly and the load can be varied as per the requirement.
+NOTE — The load can be created with resistive elements other than bulbs.
+FIG. 1 MOTOR UNIT WITH GENERATOR LOAD WITH A FIXTURE
+NOTE — The fixture is designed such that the variable generator load is attached on the appliance. The movement (x-axis, y-axis and
+z-axis) of the fixture is adjustable in accordance with the appliance. The bulbs can be used to adjust/maintain the load.
+FIG. 2 MOTOR UNIT WITH GENERATOR LOAD WITHOUT A FIXTURE
+NOTE — A suitable jar collar (as per appliance model) is mounted with the mixer motor top bracket to make the generator, and lock
+the generator on the top of the appliance unit. The bulbs can be used to adjust/maintain the load.
+
+ANNEX C
+(Annex A)
+HEATING TEST
+C-1 The test will be done by the following method:
+The test procedure shall be followed by either of the method given in accordance with Fig. 1 or Fig. 2 of Annex B.
+The appliance shall be operated using generator load as shown in Fig. 1 or Fig. 2 or any other means,
+which can continuously provide consistent load.
+Temperature rises of windings are determined by the resistance method unless the windings are
+non-uniform or if it is difficult to make the necessary connections, in which case the temperature rise is
+determined by means of thermocouples.
+The temperature rise of a winding is calculated from the formula:
+Δt = ((R₂ − R₁)/R₁)(k + t₁) − (t₂ − t₁)
+where
+Δt = temperature rise of the winding;
+R₂ = resistance at the end of the test;
+R₁ = resistance at the beginning of the test;
+k = 234.5 for copper windings and 225 for aluminum windings;
+t₁ = room temperature at the beginning of the test; and
+t₂ = room temperature at the end of the test.
+At the beginning of the test, the windings are to be at room temperature. It is recommended that the
+resistance of windings at the end of the test be determined by taking resistance measurements as
+soon as possible after switching off and then at short intervals so that a curve of resistance against time
+can be plotted for ascertaining the resistance at the instant of switching off.
+Follow the instructions for testing procedure.
+a) Adjust the generator load setup in accordance with the appliance (for example, mixer grinder) model;
+b) A generator with variable resistive load is placed on the appliance;
+c) The appliance shall be operated under specified (generator) load and supplied with
+   the most unfavorable voltage between 0.94 times and 1.06 times the rated voltage; and
+d) The appliance shall be operated at rated power input with the specified (generator)
+   load or any other means, which can provide constant load consistently. The Food Mixers
+   tested under the rated input condition, any control like OLP that limits the rated input
+   loading during the test shall be short-circuited.
+The appliance will be operated as follows:
+a) Food mixers for short-time operation having rated 'ON' time less than 5 min. The
+   operation being carried out 6 times, the period of operation is 3 min ON and 2 min
+   OFF then adequate rest time to cool down the appliances to room temperature which is not
+   more than 60 min.
+b) Food mixers for short operation having rated 'ON' time more than or equal to 5 min. The
+   operation being carried out 6 times, the period of operation is 5 min ON and 2 min
+   OFF then adequate rest time to cool down the appliances to room temperature which is not
+   more than 60 min.
+c) For food mixers for short time operation having rated 'ON' time of more than 30 min.
+   The operation being carried out with number of times calculated by dividing declared rated
+   ON time by 5 (rounded off to nearest integer). The period of operation is 5 min ON
+   and 2 min OFF then adequate rest time to cool down the appliances to room
+   temperature which is not more than 60 min.
+d) For food mixers for continuous operation, The operation being carried out is at least
+   10 times or until steady conditions are established, whichever is more. The period of
+   operation is 5 min ON and 2 min OFF then adequate rest time to cool down the
+   appliances to room temperature which is not more than 60 min.
+Appliances that can be operated at different speeds shall be operated at the highest speed.
+During the test, the temperature rises are monitored continuously and shall not exceed the values shown
+in Table 3 in accordance with 11 of IS 302-1.
+
+ANNEX D
+(Foreword)
+COMMITTEE COMPOSITION
+Electrical Appliances Sectional Committee, ETD 32
+[Committee member list — organizations and representatives as printed in the standard.]
+
+This Indian Standard has been developed from Doc No.: ETD 32 (23559).
