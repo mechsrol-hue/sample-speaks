@@ -20,8 +20,51 @@ var _pdfImportParsed = [];
 
 let currentUser = null;
 
+// Session token from /api/login. Only the destructive IS Intelligence routes require
+// it — everything else in the app is unchanged. Kept in sessionStorage so a page
+// refresh doesn't silently drop the ability to retire or link a standard.
+function setSessionToken(token) {
+    if (!token) return;
+    try { sessionStorage.setItem('ss_session_token', token); } catch (e) {}
+}
+function getSessionToken() {
+    try { return sessionStorage.getItem('ss_session_token') || ''; } catch (e) { return ''; }
+}
+function clearSessionToken() {
+    try { sessionStorage.removeItem('ss_session_token'); } catch (e) {}
+}
+function authHeaders(extra) {
+    return Object.assign({ 'x-session-token': getSessionToken() }, extra || {});
+}
+// Turn the guard's 401/403 into something the user can act on, instead of a raw error.
+function describeAuthFailure(status, serverMessage) {
+    if (status === 401) {
+        // No token at all means demo mode or a signed-out tab — a different problem
+        // from a token the server rejected, and it needs a different instruction.
+        return getSessionToken()
+            ? 'Your admin session expired. Sign out and sign in again to continue.'
+            : 'Sign in with an admin account to do this — demo mode cannot change stored standards.';
+    }
+    if (status === 403) return serverMessage || 'This action is restricted to admin accounts.';
+    return serverMessage || 'Request failed.';
+}
+
 function isSuperAdmin() { return currentUser && (currentUser.role === 'admin_sample_cell' || currentUser.role === 'super_admin'); }
 function isAdminOrSuperAdmin() { return currentUser && (currentUser.role === 'admin' || currentUser.role === 'admin_sample_cell' || currentUser.role === 'super_admin'); }
+// AI assistant (Nigrani copilot) is restricted to the SSD account only.
+function canUseAiAssistant() {
+    return !!(currentUser && String(currentUser.username || '').trim().toUpperCase() === 'SSD');
+}
+function updateAiAssistantAccess() {
+    const widget = document.getElementById('ai-copilot-widget');
+    if (!widget) return;
+    const allowed = canUseAiAssistant();
+    widget.style.display = allowed ? '' : 'none';
+    if (!allowed) {
+        const panel = document.getElementById('ai-copilot-panel');
+        if (panel) panel.classList.add('copilot-panel-hidden');
+    }
+}
 let allSamples = [];
 let currentSubmitId = null;
 let pendingFreshSamples = [];
@@ -286,37 +329,46 @@ async function login() {
         const res = await fetch('/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username: String(username).trim(), password })
         });
         const data = await res.json();
-        if (res.ok) {
-            currentUser = data.user;
+        if (!res.ok) {
+            showToast(data.error || 'Login failed', 'error');
+            return;
+        }
+
+        currentUser = data.user;
+        setSessionToken(data.token);
+
+        // Always enter the app shell first — later UI hooks must not look like a failed login.
+        try {
             document.getElementById('auth-container').classList.remove('active');
             document.getElementById('dashboard-container').classList.add('active');
             const displayRole = (currentUser.role === 'admin_sample_cell' || currentUser.role === 'super_admin') ? 'Super Admin' : currentUser.role === 'admin' ? 'Mechanical OIC' : 'TP';
             const userWelcomeEl = document.getElementById('user-welcome');
             if (userWelcomeEl) userWelcomeEl.textContent = `Welcome, ${currentUser.username} (${displayRole})`;
-            
-            document.getElementById('sidebar-nav').style.display = 'flex';
-            
-            toggleAdminViews();
-            updateProfileUI(); // Populate avatar + profile page immediately on login
-            // SRL: Land on New Sample Receive (Newly Received Queue) immediately after login
-            // Side nav menus stay collapsed on login — user expands them manually.
-            switchTab('tab-new-sample-receive');
-
-            if (isSuperAdmin()) {
-                loadSampleCellData();
-                fetchScAuditLog();
-            }
-            
-            showToast(`Welcome back, ${currentUser.username}!`, 'success');
-            fetchSamples();
-            loadPreferences();
-            fetchTPUsers();
-        } else {
-            showToast(data.error || 'Login failed', 'error');
+            const sidebar = document.getElementById('sidebar-nav');
+            if (sidebar) sidebar.style.display = 'flex';
+        } catch (shellErr) {
+            console.error('[login] shell transition failed', shellErr);
         }
+
+        try { toggleAdminViews(); } catch (e) { console.error('[login] toggleAdminViews', e); }
+        try { updateProfileUI(); } catch (e) { console.error('[login] updateProfileUI', e); }
+        try { updateAiAssistantAccess(); } catch (e) { console.error('[login] updateAiAssistantAccess', e); }
+        try { switchTab('tab-dashboard'); } catch (e) { console.error('[login] switchTab', e); }
+
+        if (isSuperAdmin()) {
+            try { loadSampleCellData(); } catch (e) { console.error(e); }
+            try { fetchScAuditLog(); } catch (e) { console.error(e); }
+        }
+
+        showToast(`Welcome back, ${currentUser.username}!`, 'success');
+        try { fetchSamples(); } catch (e) { console.error(e); }
+        try { loadPreferences(); } catch (e) { console.error(e); }
+        try { fetchTPUsers(); } catch (e) { console.error(e); }
+        try { if (typeof renderRoleDashboards === 'function') renderRoleDashboards(); } catch (e) { console.error(e); }
+        try { if (typeof refreshNigraniBell === 'function') refreshNigraniBell(); } catch (e) { console.error(e); }
     } catch (e) { 
         console.error(e); 
         showToast('Network Error: Is the server running?', 'error');
@@ -325,7 +377,9 @@ async function login() {
 
 function logout() {
     currentUser = null;
+    clearSessionToken();
     toggleAdminViews();
+    updateAiAssistantAccess();
     document.getElementById('dashboard-container').classList.remove('active');
     document.getElementById('auth-container').classList.add('active');
     document.getElementById('sidebar-nav').style.display = 'none';
@@ -455,6 +509,93 @@ function refreshProfileStats() {
     if (isAdminOrSuperAdmin()) {
         checkDisposalReminders();
     }
+    if (typeof renderRoleDashboards === 'function') renderRoleDashboards();
+}
+
+// Separate TP vs Admin dashboard panels on tab-dashboard
+function renderRoleDashboards() {
+    const tpSection = document.getElementById('tp-test-now-section');
+    const adminSection = document.getElementById('pendency-monitor-section');
+    const navDash = document.getElementById('nav-dashboard');
+    if (!currentUser) {
+        if (tpSection) tpSection.style.display = 'none';
+        if (adminSection) adminSection.style.display = '';
+        return;
+    }
+
+    const isAdmin = isAdminOrSuperAdmin();
+    if (tpSection) tpSection.style.display = isAdmin ? 'none' : 'block';
+    if (adminSection) {
+        adminSection.style.display = isAdmin ? 'block' : 'none';
+        adminSection.style.marginTop = '8px';
+    }
+    if (navDash) {
+        navDash.innerHTML = isAdmin
+            ? '<i class="fas fa-tachometer-alt main-icon"></i> Dashboard'
+            : '<i class="fas fa-flask main-icon"></i> My Test Queue';
+    }
+    if (!isAdmin) renderTpTestNowQueue();
+}
+
+function renderTpTestNowQueue() {
+    if (!currentUser || isAdminOrSuperAdmin()) return;
+    const me = String(currentUser.username || '').trim().toLowerCase();
+    const mine = (allSamples || []).filter(s =>
+        (s.appStatus === 'Pending' || s.appStatus === 'PendingAccount') &&
+        String(s.assignedTo || '').trim().toLowerCase() === me
+    );
+    const immediate = mine
+        .filter(isImmediateToTestSample)
+        .slice()
+        .sort((a, b) => {
+            const ap = isTopPriority(a) ? 0 : 1;
+            const bp = isTopPriority(b) ? 0 : 1;
+            if (ap !== bp) return ap - bp;
+            return calculateDaysOld(b.receivedOn || b.forwardedOn) - calculateDaysOld(a.receivedOn || a.forwardedOn);
+        });
+    const priorityCount = mine.filter(isTopPriority).length;
+
+    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    setEl('tp-kpi-assigned', mine.length);
+    setEl('tp-kpi-immediate', immediate.length);
+    setEl('tp-kpi-priority', priorityCount);
+
+    const host = document.getElementById('tp-test-now-list');
+    if (!host) return;
+    if (!immediate.length) {
+        host.innerHTML = `<div style="padding:28px 18px; color:#64748b; text-align:center;">No urgent samples right now. You're clear.</div>`;
+        return;
+    }
+    host.innerHTML = `
+        <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
+            <thead>
+                <tr style="background:#f8fafc; text-align:left; color:#64748b; font-size:0.75rem; text-transform:uppercase;">
+                    <th style="padding:10px 14px;">Sample</th>
+                    <th style="padding:10px 14px;">IS</th>
+                    <th style="padding:10px 14px;">Age</th>
+                    <th style="padding:10px 14px;">Why now</th>
+                    <th style="padding:10px 14px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                ${immediate.slice(0, 40).map(s => {
+                    const age = calculateDaysOld(s.receivedOn || s.forwardedOn);
+                    const priority = isTopPriority(s);
+                    const why = priority ? 'Priority' : (age >= 5 ? `Due / aging (${age}d)` : 'Test now');
+                    return `<tr style="border-top:1px solid #e2e8f0;">
+                        <td style="padding:10px 14px; font-weight:700; color:#0f172a;">${s.encodedCode || '—'}</td>
+                        <td style="padding:10px 14px; color:#334155;">${s.isNumber || '—'}</td>
+                        <td style="padding:10px 14px; color:#334155;">${age}d</td>
+                        <td style="padding:10px 14px;"><span style="background:${priority ? '#fef2f2' : '#fff7ed'}; color:${priority ? '#b91c1c' : '#c2410c'}; padding:3px 8px; border-radius:999px; font-size:0.75rem; font-weight:700;">${why}</span></td>
+                        <td style="padding:10px 14px; text-align:right;">
+                            <button onclick="switchTab('tab-new-sample-receive')"
+                                style="background:#2563eb; color:white; border:none; padding:6px 10px; border-radius:6px; font-size:0.78rem; font-weight:600; cursor:pointer;">Open queue</button>
+                        </td>
+                    </tr>`;
+                }).join('')}
+            </tbody>
+        </table>
+    `;
 }
 
 // --- SKILL GRAPHIFY ---
@@ -621,6 +762,17 @@ function switchTab(tabId) {
         tabId = 'tab-new-sample-receive';
     }
 
+    // The IS manager can retire a standard and re-link Master Templates, so hiding the
+    // nav entry isn't enough — a bookmark or #hash deep-link has to bounce too.
+    if (tabId === 'tab-is-manager' && !isAdminOrSuperAdmin()) {
+        showToast('IS Standards & Report Formats is restricted to admin accounts.', 'error');
+        return;
+    }
+    if (tabId === 'tab-is-scope-admin' && !isAdminOrSuperAdmin()) {
+        showToast('IS Scope Control is restricted to admin accounts.', 'error');
+        return;
+    }
+
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 
@@ -631,9 +783,8 @@ function switchTab(tabId) {
     if (btn) btn.classList.add('active');
 
     // Load data specific to tabs
-    if (tabId === 'tab-lims') {
-        populateLimsISSelector().then(() => onLimsISChange());
-        renderTestParametersTable();
+    if (tabId === 'tab-liis') {
+        populateLiisISSelector().then(() => loadLisReport());
     } else if (tabId === 'tab-employees') {
         loadEmployees();
         loadLeaves();
@@ -648,6 +799,7 @@ function switchTab(tabId) {
     } else if (tabId === 'tab-preferences') {
         loadPreferencesUI();
     } else if (tabId === 'tab-dashboard') {
+        if (typeof renderRoleDashboards === 'function') renderRoleDashboards();
         if (typeof renderAnalytics === 'function') renderAnalytics();
     } else if (tabId === 'tab-super-admin') {
         loadSampleCellData();
@@ -677,6 +829,12 @@ function switchTab(tabId) {
     } else if (tabId === 'tab-equipment') {
         fetchAndRenderEquipments();
         fetchEquipmentStats();
+    } else if (tabId === 'tab-is-manager') {
+        loadISManager();
+    } else if (tabId === 'tab-my-is-scope') {
+        loadMyISScope();
+    } else if (tabId === 'tab-is-scope-admin') {
+        loadScopeAdmin();
     }
 
 }
@@ -1410,6 +1568,8 @@ async function fetchSamples() {
             populateSampleCodeDatalist();
             if (typeof renderAnalytics === 'function') renderAnalytics();
             refreshProfileStats(); // Keep profile in sync after data refresh
+            if (typeof renderRoleDashboards === 'function') renderRoleDashboards();
+            if (typeof refreshNigraniBell === 'function') refreshNigraniBell();
         }
     } catch (e) { console.error(e); }
 }
@@ -1477,10 +1637,10 @@ function renderPendencyMonitor() {
     const notAllotted = pending.length - allotted;
     makeDonut('pm-allotted-chart', ['Allotted', 'Not Allotted'], [allotted, notAllotted], ['#10b981', '#94a3b8'], 'pm-allotted-legend');
 
-    // (vii) Testing Started vs Not Started
-    const testingStarted = allSamples.filter(s => s.appStatus === 'Testing' || s.appStatus === 'Submitted').length;
-    const notStarted = allSamples.filter(s => s.appStatus === 'Pending' || s.appStatus === 'PendingAccount').length;
-    makeDonut('pm-testing-chart', ['Testing Done', 'Not Started'], [testingStarted, notStarted], ['#8b5cf6', '#e2e8f0'], 'pm-testing-legend');
+    // (vii) Under Testing vs Fresh Samples
+    const underTesting = allSamples.filter(s => s.appStatus === 'Testing' || s.appStatus === 'Submitted').length;
+    const freshSamples = allSamples.filter(s => s.appStatus === 'Pending' || s.appStatus === 'PendingAccount').length;
+    makeDonut('pm-testing-chart', ['Under Testing', 'Fresh Samples'], [underTesting, freshSamples], ['#8b5cf6', '#e2e8f0'], 'pm-testing-legend');
 
     // (iii) Received Date Wise — monthly
     const monthCounts = {};
@@ -1572,13 +1732,13 @@ function populateSampleCodeDatalist() {
     });
 }
 
-function autoFillLimsDetails() {
-    const codeInput = document.getElementById('lims-sample-code').value;
+function autoFillLiisDetails() {
+    const codeInput = document.getElementById('liis-sample-code').value;
     if (!codeInput) return;
     
     const matchedSample = allSamples.find(s => s.encodedCode === codeInput);
     if (matchedSample && matchedSample.isNumber) {
-        setLimsISValue(`IS ${matchedSample.isNumber}`);
+        setLiisISValue(`IS ${matchedSample.isNumber}`);
         // Note: Size is not stored in DB, so user still selects size manually
     }
 }
@@ -1824,7 +1984,16 @@ function calculateDaysOld(dateStr) {
 // Support encoded codes ending in 'p' automatically as Priority
 function isTopPriority(sample) {
     const p = (sample.priorityLevel || '').toLowerCase();
-    return p === 'priority' || p === 'top priority';
+    return p === 'priority' || p === 'top priority' || p === 'high'
+        || String(sample.encodedCode || '').toLowerCase().endsWith('p');
+}
+
+function isImmediateToTestSample(sample) {
+    if (!sample) return false;
+    if (isTopPriority(sample)) return true;
+    // Align with server default TAT=7 and due-soon window daysLeft <= 2 → age >= 5
+    const age = calculateDaysOld(sample.receivedOn || sample.forwardedOn);
+    return age >= 5;
 }
 
 function toggleKpiFilter(filterName) {
@@ -2180,11 +2349,11 @@ function renderTable() {
 }
 
 async function startTesting(id, code) {
-    if (!confirm(`Mark "${code}" as Testing Started?`)) return;
+    if (!confirm(`Mark "${code}" as Under Testing?`)) return;
     try {
         const res = await fetch(`/api/samples/${id}/start-testing`, { method: 'POST' });
         if (!res.ok) throw new Error((await res.json()).error || 'Failed');
-        showToast(`Testing started for ${code}`, 'success');
+        showToast(`${code} moved to Under Testing`, 'success');
         await fetchSamples();
     } catch (e) {
         showToast(e.message, 'error');
@@ -2314,7 +2483,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAmendments();
     initializeDragAndDrop();
     toggleAdminViews();
-    checkActiveLimsOnLoad();
+    checkActiveLiisOnLoad();
     loadIS4985LimitsOverride();
     setupCustomDropdowns();
 
@@ -2458,11 +2627,28 @@ function toggleAdminViews() {
     const superAdminBtn = document.getElementById('tab-btn-super-admin');
     if (superAdminBtn) superAdminBtn.style.display = isSuper ? 'block' : 'none';
 
-    const limsBtn = document.getElementById('tab-btn-lims');
-    if (limsBtn) limsBtn.style.display = isAdmin ? 'block' : 'none';
+    const lisBtn = document.getElementById('tab-btn-lis');
+    if (lisBtn) lisBtn.style.display = isAdmin ? 'block' : 'none';
+
+    // Report ▸ IS Standards & Report Formats — admin only (it can retire a standard
+    // and re-link Master Templates, which changes what the whole lab tests against).
+    const isManagerBtn = document.getElementById('tab-btn-is-manager');
+    // '' (not 'block') so the sub-nav item keeps the stylesheet's flex layout.
+    if (isManagerBtn) isManagerBtn.style.display = isAdmin ? '' : 'none';
+
+    // "My IS Scope" is the inverse: every account EXCEPT admins has to complete it.
+    const myScopeBtn = document.getElementById('tab-btn-my-is-scope');
+    if (myScopeBtn) myScopeBtn.style.display = (currentUser && !isAdmin) ? '' : 'none';
+    const scopeAdminBtn = document.getElementById('tab-btn-is-scope-admin');
+    if (scopeAdminBtn) scopeAdminBtn.style.display = isAdmin ? '' : 'none';
+    if (currentUser && !isAdmin) updateScopeNavBadge();
+    if (isAdmin && typeof loadScopeSubmissions === 'function') { try { loadScopeSubmissions(); } catch (e) {} }
 
     const adminCategory = document.getElementById('nav-admin-category');
     if (adminCategory) adminCategory.style.display = isSuper ? 'flex' : 'none';
+
+    updateAiAssistantAccess();
+    if (typeof renderRoleDashboards === 'function') renderRoleDashboards();
 }
 
 function toggleSelectAllSamples(masterCheckbox) {
@@ -2629,16 +2815,16 @@ async function resetDatabase() {
     }
 }
 
-// --- LIMS Automation Controls ---
+// --- LIIS Automation Controls ---
 
-// ─── Generic IS report: drive the LIMS report from the IS Intelligence vault ───
-function limsEsc(s) {
+// ─── Generic IS report: drive the LIIS report from the IS Intelligence vault ───
+function lisEsc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // Populate the IS dropdown from the vault only — IS Intelligence is the single source of truth.
-async function populateLimsISSelector() {
-    const sel = document.getElementById('lims-is-no');
+async function populateLiisISSelector() {
+    const sel = document.getElementById('liis-is-no');
     if (!sel) return;
     const current = sel.value;
     let vault = [];
@@ -2646,35 +2832,50 @@ async function populateLimsISSelector() {
     const opts = vault.map(v => v.isNumber).filter(Boolean);
     if (!opts.length) opts.push('— Upload an IS standard in IS Intelligence —');
     const selected = current && opts.includes(current) ? current : opts[0];
-    sel.innerHTML = opts.map(o => `<option value="${limsEsc(o)}"${o === selected ? ' selected' : ''}>${limsEsc(o)}</option>`).join('');
+    sel.innerHTML = opts.map(o => `<option value="${lisEsc(o)}"${o === selected ? ' selected' : ''}>${lisEsc(o)}</option>`).join('');
 }
 
 // Set the IS value programmatically (e.g. from a matched sample), adding the option if missing.
-function setLimsISValue(val) {
-    const sel = document.getElementById('lims-is-no');
+function setLiisISValue(val) {
+    const sel = document.getElementById('liis-is-no');
     if (!sel) return;
     if (![...sel.options].some(o => o.value === val)) sel.add(new Option(val, val));
     sel.value = val;
-    onLimsISChange();
+    onLiisISChange();
 }
 
-// IS changed → always read from IS Intelligence vault (single source of truth).
-function onLimsISChange() {
-    const sel = document.getElementById('lims-is-no');
+// IS / dimension changed → load via the single dispatcher (no more dual-render race).
+function onLiisISChange() { loadLisReport(); }
+
+// Single dispatcher for the LIIS report table — mirrors IS Intelligence's openISReport priority:
+// IS 4985 → canonical specs_db rows (kept as the verified reference); any other standard → the
+// vault (Agent SDK output, the single extraction input). Replaces the old race where switchTab
+// ran BOTH renderVaultReport and renderTestParametersTable into #liis-parameters-tbody at once.
+function loadLisReport() {
+    const sel = document.getElementById('liis-is-no');
     const is = sel ? sel.value : '';
-    if (is && !is.startsWith('—')) renderVaultReport(is);
+    const tbody = document.getElementById('liis-parameters-tbody');
+    if (!is || is.startsWith('—')) {
+        if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="padding:14px;color:var(--text-muted);">Select an IS standard — upload one in IS Intelligence first.</td></tr>';
+        return;
+    }
+    if (/4985/.test(is) && typeof IS_4985_SPECS !== 'undefined') {
+        renderTestParametersTable();   // canonical IS 4985 from specs_db (reference)
+    } else {
+        renderVaultReport(is);         // every other standard from the vault (agent output)
+    }
 }
 
 // Render the report rows from saved IS Intelligence data (the "change IS → report appears" flow).
 async function renderVaultReport(isNumber) {
-    const tbody = document.getElementById('lims-parameters-tbody');
+    const tbody = document.getElementById('liis-parameters-tbody');
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="5" style="padding:14px;color:var(--text-muted);">Loading parameters from IS Intelligence…</td></tr>';
     try {
         const res = await fetch(`/api/is-intelligence/params/${encodeURIComponent(isNumber)}`);
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.found) {
-            tbody.innerHTML = `<tr><td colspan="5" style="padding:14px;color:#e06c75;">No saved data for ${limsEsc(isNumber)} — upload it in IS Intelligence first.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="padding:14px;color:#e06c75;">No saved data for ${lisEsc(isNumber)} — upload it in IS Intelligence first.</td></tr>`;
             return;
         }
         const params = data.test_parameters || [];
@@ -2692,26 +2893,26 @@ async function renderVaultReport(isNumber) {
             let inputHtml;
             if (isQual) {
                 const opts = ['', p.expected, 'Satisfactory', 'Unsatisfactory', 'Fail', 'Not Done', 'NA'].filter((v, i, a) => v != null && a.indexOf(v) === i);
-                inputHtml = `<select class="lims-param-input" data-idx="${idx}" data-min="" data-max="" onchange="validateObservation(this)" style="width:100%;border-radius:4px;padding:6px;background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);color:white;">${opts.map(o => `<option value="${limsEsc(o)}">${limsEsc(o || '—')}</option>`).join('')}</select>`;
+                inputHtml = `<select class="liis-param-input" data-idx="${idx}" data-min="" data-max="" onchange="validateObservation(this)" style="width:100%;border-radius:4px;padding:6px;background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);color:white;">${opts.map(o => `<option value="${lisEsc(o)}">${lisEsc(o || '—')}</option>`).join('')}</select>`;
             } else {
-                inputHtml = `<input type="number" step="0.01" class="lims-param-input" data-idx="${idx}" data-min="${limsEsc(min)}" data-max="${limsEsc(max)}" oninput="validateObservation(this)" style="width:100%;border-radius:4px;padding:6px;background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);color:white;" placeholder="Enter value">`;
+                inputHtml = `<input type="number" step="0.01" class="liis-param-input" data-idx="${idx}" data-min="${lisEsc(min)}" data-max="${lisEsc(max)}" oninput="validateObservation(this)" style="width:100%;border-radius:4px;padding:6px;background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);color:white;" placeholder="Enter value">`;
             }
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);">${limsEsc(p.clause)}</td>`
-                + `<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);">${limsEsc(p.param)}</td>`
-                + `<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);">${limsEsc(spec)}</td>`
-                + `<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);">${limsEsc(type)}</td>`
+            tr.innerHTML = `<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);">${lisEsc(p.clause)}</td>`
+                + `<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);">${lisEsc(p.param)}</td>`
+                + `<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);">${lisEsc(spec)}</td>`
+                + `<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);">${lisEsc(type)}</td>`
                 + `<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);">${inputHtml}</td>`;
             tbody.appendChild(tr);
         });
     } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="5" style="padding:14px;color:#e06c75;">Failed to load: ${limsEsc(e.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:14px;color:#e06c75;">Failed to load: ${lisEsc(e.message)}</td></tr>`;
     }
 }
 
 // Add a custom/missing parameter row to the report (editable: clause, name, min, max, observed).
-function addLimsParameterRow() {
-    const tbody = document.getElementById('lims-parameters-tbody');
+function addLiisParameterRow() {
+    const tbody = document.getElementById('liis-parameters-tbody');
     if (!tbody) { showToast('Open a report first.', 'error'); return; }
     const cs = 'padding:6px; border-bottom:1px solid rgba(255,255,255,0.05);';
     const is = 'padding:5px; background:rgba(0,0,0,0.25); border:1px solid var(--glass-border); border-radius:4px; color:#e1e4e8; font-size:0.8rem;';
@@ -2721,8 +2922,8 @@ function addLimsParameterRow() {
         + `<td style="${cs}"><input placeholder="Parameter name" style="width:100%; ${is}"></td>`
         + `<td style="${cs}"><span style="display:flex; gap:4px;"><input class="lim-spec-min" placeholder="Min" style="width:50%; ${is}"><input class="lim-spec-max" placeholder="Max" style="width:50%; ${is}"></span></td>`
         + `<td style="${cs} color:var(--text-muted);">Quantitative</td>`
-        + `<td style="${cs}"><span style="display:flex; gap:6px; align-items:center;"><input type="number" step="0.01" class="lims-param-input" data-min="" data-max="" oninput="validateObservation(this)" placeholder="Observed" style="flex:1; ${is}"><span onclick="this.closest('tr').remove()" title="Remove parameter" style="cursor:pointer; color:#e06c75; font-weight:700; padding:0 4px;">&times;</span></span></td>`;
-    const obs = tr.querySelector('.lims-param-input');
+        + `<td style="${cs}"><span style="display:flex; gap:6px; align-items:center;"><input type="number" step="0.01" class="liis-param-input" data-min="" data-max="" oninput="validateObservation(this)" placeholder="Observed" style="flex:1; ${is}"><span onclick="this.closest('tr').remove()" title="Remove parameter" style="cursor:pointer; color:#e06c75; font-weight:700; padding:0 4px;">&times;</span></span></td>`;
+    const obs = tr.querySelector('.liis-param-input');
     const mn = tr.querySelector('.lim-spec-min');
     const mx = tr.querySelector('.lim-spec-max');
     const sync = () => { obs.setAttribute('data-min', mn.value); obs.setAttribute('data-max', mx.value); validateObservation(obs); };
@@ -2733,10 +2934,10 @@ function addLimsParameterRow() {
 }
 
 function renderTestParametersTable() {
-    const sizeSelect = document.getElementById('lims-size-select');
-    const classSelect = document.getElementById('lims-class-select');
-    const typeSelect = document.getElementById('lims-type-select');
-    const tbody = document.getElementById('lims-parameters-tbody');
+    const sizeSelect = document.getElementById('liis-size-select');
+    const classSelect = document.getElementById('liis-class-select');
+    const typeSelect = document.getElementById('liis-type-select');
+    const tbody = document.getElementById('liis-parameters-tbody');
     if (!sizeSelect || !classSelect || !typeSelect || !tbody) return;
 
     if (typeof IS_4985_SPECS === 'undefined') {
@@ -2747,13 +2948,13 @@ function renderTestParametersTable() {
     const size = sizeSelect.value;
     const pipeClass = classSelect.value;
     const pipeType = typeSelect.value;
-    const isPlumbingSelect = document.getElementById('lims-plumbing-select');
+    const isPlumbingSelect = document.getElementById('liis-plumbing-select');
     const isPlumbing = isPlumbingSelect ? isPlumbingSelect.value : 'No';
 
     // Extract dirty values before overwriting
     let dirtyValues = {};
     if (tbody) {
-        const currentInputs = tbody.querySelectorAll('.lims-param-input');
+        const currentInputs = tbody.querySelectorAll('.liis-param-input');
         currentInputs.forEach(input => {
             if (input.getAttribute('data-dirty') === 'true') {
                 const paramName = input.closest('tr').cells[1].innerText.trim();
@@ -2788,7 +2989,7 @@ function renderTestParametersTable() {
             });
 
             inputHtml = `
-                <select class="lims-param-input" data-idx="${idx}" data-min="" data-max="" onchange="validateObservation(this)" ${dirtyAttr} style="width: 100%; border-radius: 4px; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: white;">
+                <select class="liis-param-input" data-idx="${idx}" data-min="" data-max="" onchange="validateObservation(this)" ${dirtyAttr} style="width: 100%; border-radius: 4px; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: white;">
                     ${optionsHtml}
                 </select>
             `;
@@ -2801,14 +3002,14 @@ function renderTestParametersTable() {
             }
             let valAttr = valToUse ? `value="${valToUse}"` : '';
             inputHtml = `
-                <input type="text" list="datalist-${idx}" ${valAttr} class="lims-param-input" data-idx="${idx}" data-min="${row.min}" data-max="${row.max}" oninput="validateObservation(this)" onclick="try{this.showPicker()}catch(e){}" ${dirtyAttr} style="width: 100%; border-radius: 4px; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: white;" placeholder="Type value or pick option">
+                <input type="text" list="datalist-${idx}" ${valAttr} class="liis-param-input" data-idx="${idx}" data-min="${row.min}" data-max="${row.max}" oninput="validateObservation(this)" onclick="try{this.showPicker()}catch(e){}" ${dirtyAttr} style="width: 100%; border-radius: 4px; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: white;" placeholder="Type value or pick option">
                 <datalist id="datalist-${idx}">
                     ${customOpts}
                 </datalist>
             `;
         } else {
             let valAttr = valToUse ? `value="${valToUse}"` : '';
-            inputHtml = `<input type="number" step="0.01" ${valAttr} class="lims-param-input" data-idx="${idx}" data-min="${row.min}" data-max="${row.max}" oninput="validateObservation(this)" ${dirtyAttr} style="width: 100%; border-radius: 4px; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: white;" placeholder="Enter value">`;
+            inputHtml = `<input type="number" step="0.01" ${valAttr} class="liis-param-input" data-idx="${idx}" data-min="${row.min}" data-max="${row.max}" oninput="validateObservation(this)" ${dirtyAttr} style="width: 100%; border-radius: 4px; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: white;" placeholder="Enter value">`;
         }
 
         tr.innerHTML = `
@@ -2823,7 +3024,7 @@ function renderTestParametersTable() {
 
     // Re-validate dirty inputs to restore their border colors and dependencies
     setTimeout(() => {
-        const inputs = tbody.querySelectorAll('.lims-param-input');
+        const inputs = tbody.querySelectorAll('.liis-param-input');
         inputs.forEach(input => {
             if (input.getAttribute('data-dirty') === 'true') {
                 validateObservation(input);
@@ -2832,7 +3033,7 @@ function renderTestParametersTable() {
     }, 0);
 
     // ── Keyboard Navigation: Enter / ArrowDown = next row, ArrowUp = previous row ──
-    const allInputs = Array.from(tbody.querySelectorAll('.lims-param-input'));
+    const allInputs = Array.from(tbody.querySelectorAll('.liis-param-input'));
     allInputs.forEach((el, i) => {
         el.addEventListener('keydown', (e) => {
             const goNext = e.key === 'Enter' || e.key === 'ArrowDown';
@@ -2851,56 +3052,57 @@ function renderTestParametersTable() {
         });
     });
 
-    // ── Restore saved LIMS credentials from API ──
-    const userEl = document.getElementById('lims-username-input');
-    const passEl = document.getElementById('lims-password-input');
-    fetch('/api/profile/lims-credentials')
+    // ── Restore saved LIIS credentials from API ──
+    const userEl = document.getElementById('liis-username-input');
+    const passEl = document.getElementById('liis-password-input');
+    fetch('/api/profile/liis-credentials')
         .then(res => res.json())
         .then(data => {
             if (data.limsUsername && userEl && !userEl.value) userEl.value = data.limsUsername;
             if (data.limsPassword && passEl && !passEl.value) passEl.value = data.limsPassword;
-        }).catch(err => console.error("Failed to load LIMS credentials", err));
+        }).catch(err => console.error("Failed to load LIIS credentials", err));
+}
+
+// ── Shared out-of-zone evaluator ─────────────────────────────────────────────
+// ONE pass/fail rule used by the live input glow (validateObservation) AND both printable
+// reports (previewLiisPdf, printVaultISReport), so the LIIS Automator and IS Intelligence
+// classify out-of-zone values identically. Uses isNaN() bound guards (not truthiness), so a
+// min/max of 0 is honored — the old `if (min && …)` silently skipped a 0 lower bound.
+const OBS_COLORS = {
+    glowPass: '#98c379', glowFail: '#e06c75',                              // live input glow
+    printPass: '#16a34a', printFail: '#dc2626', printNeutral: '#94a3b8',   // print Result column
+};
+function evaluateObservation(observed, min, max, isSelect) {
+    const val = observed == null ? '' : String(observed).trim();
+    if (val === '') return 'neutral';
+    if (isSelect) return /unsatisfactory|fail/i.test(val) ? 'fail' : 'pass';
+    const v = parseFloat(val);
+    if (isNaN(v)) return 'pass'; // free-text value with nothing numeric to compare
+    let ok = true;
+    const mn = parseFloat(min), mx = parseFloat(max);
+    if (!isNaN(mn) && v < mn) ok = false;
+    if (!isNaN(mx) && v > mx) ok = false;
+    return ok ? 'pass' : 'fail';
 }
 
 function validateObservation(inputEl) {
     inputEl.setAttribute('data-dirty', 'true');
-    const min = inputEl.getAttribute('data-min');
-    const max = inputEl.getAttribute('data-max');
-    const val = inputEl.value;
+    const isSelect = inputEl.tagName.toLowerCase() === 'select';
+    const state = evaluateObservation(inputEl.value, inputEl.getAttribute('data-min'), inputEl.getAttribute('data-max'), isSelect);
 
-    inputEl.style.boxShadow = 'none';
-    inputEl.style.borderColor = 'var(--glass-border)';
-
-    if (val === '') return;
-
-    if (inputEl.tagName.toLowerCase() === 'select') {
-        if (val.toLowerCase().includes('unsatisfactory') || val.toLowerCase().includes('fail')) {
-            inputEl.style.boxShadow = '0 0 5px #e06c75';
-            inputEl.style.borderColor = '#e06c75';
-        } else {
-            inputEl.style.boxShadow = '0 0 5px #98c379';
-            inputEl.style.borderColor = '#98c379';
-        }
-        return;
-    }
-
-    const numVal = parseFloat(val);
-    let valid = true;
-    if (min && numVal < parseFloat(min)) valid = false;
-    if (max && numVal > parseFloat(max)) valid = false;
-
-    if (valid) {
-        inputEl.style.boxShadow = '0 0 5px #98c379';
-        inputEl.style.borderColor = '#98c379';
+    if (state === 'neutral') {
+        inputEl.style.boxShadow = 'none';
+        inputEl.style.borderColor = 'var(--glass-border)';
     } else {
-        inputEl.style.boxShadow = '0 0 5px #e06c75';
-        inputEl.style.borderColor = '#e06c75';
+        const color = state === 'fail' ? OBS_COLORS.glowFail : OBS_COLORS.glowPass;
+        inputEl.style.boxShadow = '0 0 5px ' + color;
+        inputEl.style.borderColor = color;
     }
 
     // Custom dependency for DIMENSIONS-Socket
     const rowIdx = parseInt(inputEl.getAttribute('data-idx'), 10);
     if (!isNaN(rowIdx)) {
-        const tbody = document.getElementById('lims-parameters-tbody');
+        const tbody = document.getElementById('liis-parameters-tbody');
         if (tbody) {
             const rows = Array.from(tbody.querySelectorAll('tr'));
             let lengthInput = null;
@@ -2910,9 +3112,9 @@ function validateObservation(inputEl) {
                 if (paramCell) {
                     const paramText = paramCell.innerText;
                     if (paramText.includes("DIMENSIONS-Socket-Sockets for solvent cement jointing-Minimum Length")) {
-                        lengthInput = tr.querySelector('.lims-param-input');
+                        lengthInput = tr.querySelector('.liis-param-input');
                     } else if (paramText === "DIMENSIONS-Socket") {
-                        socketSelect = tr.querySelector('.lims-param-input');
+                        socketSelect = tr.querySelector('.liis-param-input');
                     }
                 }
             });
@@ -2927,26 +3129,26 @@ function validateObservation(inputEl) {
     }
 }
 
-let limsPollingInterval = null;
+let liisPollingInterval = null;
 let lastLogCount = 0;
 
 // Build a clean printable report preview from the on-screen table (works for any IS).
 // No browser automation — shows a real document you can Save as PDF.
-async function previewLimsPdf() {
+async function previewLiisPdf() {
     try {
         const meta = {
-            sampleCode: (document.getElementById('lims-sample-code') || {}).value || '',
-            isNo: (document.getElementById('lims-is-no') || {}).value || 'IS 4985 (2021)',
-            size: (document.getElementById('lims-size-select') || {}).value || '',
-            pipeClass: (document.getElementById('lims-class-select') || {}).value || '',
-            type: (document.getElementById('lims-type-select') || {}).value || '',
+            sampleCode: (document.getElementById('liis-sample-code') || {}).value || '',
+            isNo: (document.getElementById('liis-is-no') || {}).value || 'IS 4985 (2021)',
+            size: (document.getElementById('liis-size-select') || {}).value || '',
+            pipeClass: (document.getElementById('liis-class-select') || {}).value || '',
+            type: (document.getElementById('liis-type-select') || {}).value || '',
         };
         if (!meta.sampleCode) {
             showToast('Please enter a Sample Code before previewing.', 'error');
             return;
         }
 
-        const tbody = document.getElementById('lims-parameters-tbody');
+        const tbody = document.getElementById('liis-parameters-tbody');
         const rows = tbody ? [...tbody.querySelectorAll('tr')] : [];
         if (!rows.length) { showToast('No parameters to preview — load a standard first.', 'error'); return; }
 
@@ -2956,28 +3158,18 @@ async function previewLimsPdf() {
             const clause = c[0] ? c[0].textContent.trim() : '';
             const param = c[1] ? c[1].textContent.trim() : '';
             const spec = c[2] ? c[2].textContent.trim() : '';
-            const input = tr.querySelector('.lims-param-input');
+            const input = tr.querySelector('.liis-param-input');
             const observed = input ? (input.value || '') : '';
-            let result = '—', color = '#64748b';
-            if (observed !== '') {
-                if (input && input.tagName.toLowerCase() === 'select') {
-                    const bad = /unsatisfactory|fail/i.test(observed);
-                    result = bad ? 'Fail' : 'Pass'; color = bad ? '#dc2626' : '#16a34a';
-                } else {
-                    const v = parseFloat(observed);
-                    const mn = input ? parseFloat(input.getAttribute('data-min')) : NaN;
-                    const mx = input ? parseFloat(input.getAttribute('data-max')) : NaN;
-                    let ok = true;
-                    if (!isNaN(mn) && v < mn) ok = false;
-                    if (!isNaN(mx) && v > mx) ok = false;
-                    result = ok ? 'Pass' : 'Fail'; color = ok ? '#16a34a' : '#dc2626';
-                }
-            }
-            bodyRows += `<tr><td>${limsEsc(clause)}</td><td>${limsEsc(param)}</td><td>${limsEsc(spec)}</td><td>${limsEsc(observed) || '<span style="color:#94a3b8">—</span>'}</td><td style="color:${color};font-weight:700;">${result}</td></tr>`;
+            const isSelect = input && input.tagName.toLowerCase() === 'select';
+            const state = evaluateObservation(observed, input ? input.getAttribute('data-min') : '', input ? input.getAttribute('data-max') : '', isSelect);
+            let result = '—', color = OBS_COLORS.printNeutral;
+            if (state === 'pass') { result = 'Pass'; color = OBS_COLORS.printPass; }
+            else if (state === 'fail') { result = 'Fail'; color = OBS_COLORS.printFail; }
+            bodyRows += `<tr><td>${lisEsc(clause)}</td><td>${lisEsc(param)}</td><td>${lisEsc(spec)}</td><td>${lisEsc(observed) || '<span style="color:#94a3b8">—</span>'}</td><td style="color:${color};font-weight:700;">${result}</td></tr>`;
         });
 
         const now = new Date().toLocaleString();
-        const html = `<!doctype html><html><head><meta charset="utf-8"><title>Test Report ${limsEsc(meta.sampleCode)}</title>
+        const html = `<!doctype html><html><head><meta charset="utf-8"><title>Test Report ${lisEsc(meta.sampleCode)}</title>
 <style>
   body{font-family:-apple-system,'Segoe UI',sans-serif;color:#1a1a2e;padding:28px;}
   h2{margin:0 0 4px;color:#2957A3;font-size:20px;}
@@ -2990,8 +3182,8 @@ async function previewLimsPdf() {
   tr:nth-child(even) td{background:#f8fafc;}
 </style></head><body>
   <h2>Bureau of Indian Standards — Test Report</h2>
-  <div class="sub">${limsEsc(meta.isNo)}</div>
-  <div class="meta"><span><b>Sample Code:</b> ${limsEsc(meta.sampleCode)}</span><span><b>Size (DN):</b> ${limsEsc(meta.size)}</span><span><b>Class:</b> ${limsEsc(meta.pipeClass)}</span><span><b>Type:</b> ${limsEsc(meta.type)}</span><span><b>Generated:</b> ${limsEsc(now)}</span></div>
+  <div class="sub">${lisEsc(meta.isNo)}</div>
+  <div class="meta"><span><b>Sample Code:</b> ${lisEsc(meta.sampleCode)}</span><span><b>Size (DN):</b> ${lisEsc(meta.size)}</span><span><b>Class:</b> ${lisEsc(meta.pipeClass)}</span><span><b>Type:</b> ${lisEsc(meta.type)}</span><span><b>Generated:</b> ${lisEsc(now)}</span></div>
   <table><thead><tr><th>Clause</th><th>Test Parameter</th><th>Specified Value</th><th>Observed</th><th>Result</th></tr></thead><tbody>${bodyRows}</tbody></table>
 </body></html>`;
 
@@ -3023,24 +3215,24 @@ function closePdfModal() {
     if (iframe) iframe.src = '';
 }
 
-async function startLimsAutomation() {
+async function startLiisAutomation() {
     try {
-        const usernameInput = document.getElementById('lims-username-input');
-        const passwordInput = document.getElementById('lims-password-input');
+        const usernameInput = document.getElementById('liis-username-input');
+        const passwordInput = document.getElementById('liis-password-input');
         
         if (!usernameInput.value || !passwordInput.value) {
-            showToast('Please enter your LIMS Username and Password.', 'error');
+            showToast('Please enter your LIIS Username and Password.', 'error');
             return;
         }
 
         // Gather Metadata
         const meta = {
-            sampleCode: document.getElementById('lims-sample-code').value,
-            isNo: document.getElementById('lims-is-no').value,
-            size: document.getElementById('lims-size-select').value,
-            pipeClass: document.getElementById('lims-class-select').value,
-            type: document.getElementById('lims-type-select').value,
-            isPlumbing: document.getElementById('lims-plumbing-select') ? document.getElementById('lims-plumbing-select').value : 'No'
+            sampleCode: document.getElementById('liis-sample-code').value,
+            isNo: document.getElementById('liis-is-no').value,
+            size: document.getElementById('liis-size-select').value,
+            pipeClass: document.getElementById('liis-class-select').value,
+            type: document.getElementById('liis-type-select').value,
+            isPlumbing: document.getElementById('liis-plumbing-select') ? document.getElementById('liis-plumbing-select').value : 'No'
         };
 
         if (!meta.sampleCode) {
@@ -3048,30 +3240,45 @@ async function startLimsAutomation() {
             return;
         }
 
-        // Gather Table Parameters
-        const tbody = document.getElementById('lims-parameters-tbody');
-        const rows = IS_4985_SPECS.generateTestParameters(meta.size, meta.pipeClass, meta.type, meta.isPlumbing);
-        const inputs = tbody.querySelectorAll('.lims-param-input');
-        
+        // Gather Table Parameters from whatever renderer drew the table (specs_db IS 4985 OR the
+        // vault report), reading each row's cells + input directly. The old code ALWAYS rebuilt
+        // rows from IS_4985_SPECS and zipped them positionally with the inputs, which mis-mapped
+        // observed values to the wrong clause/param (and dropped rows) for any non-4985 standard.
+        // Reading the DOM keeps the upload payload correct for every standard.
+        const tbody = document.getElementById('liis-parameters-tbody');
+        const domRows = tbody ? [...tbody.querySelectorAll('tr')] : [];
+
         let tableData = [];
         let validationFailed = false;
 
-        inputs.forEach((input, i) => {
-            const rowDef = rows[i];
+        domRows.forEach(tr => {
+            const input = tr.querySelector('.liis-param-input');
+            if (!input) return; // skip message/placeholder rows that have no observed input
+            const c = tr.children;
+            const clause = c[0] ? c[0].textContent.trim() : '';
+            const param = c[1] ? c[1].textContent.trim() : '';
+            const spec = c[2] ? c[2].textContent.trim() : '';
+            const type = c[3] ? c[3].textContent.trim() : 'Quantitative';
             const val = input.value;
             if (!val) validationFailed = true;
 
             tableData.push([
                 val, // Observed value goes first as expected by script logic
-                rowDef.clause,
-                rowDef.param,
-                rowDef.spec_val,
+                clause,
+                param,
+                spec,
                 val,
-                rowDef.type,
-                rowDef.min,
-                rowDef.max
+                type,
+                input.getAttribute('data-min') || '',
+                input.getAttribute('data-max') || ''
             ]);
         });
+
+        if (!tableData.length) {
+            showToast('No parameters to upload — load a standard first.', 'error');
+            const bs = document.getElementById('btn-start-liis'); if (bs) bs.disabled = false;
+            return;
+        }
 
         if (validationFailed) {
             const proceed = confirm("Some test parameters have empty observed values. Are you sure you want to proceed?");
@@ -3079,22 +3286,22 @@ async function startLimsAutomation() {
         }
 
         const payload = {
-            lims_user: usernameInput.value,
-            lims_pass: passwordInput.value,
+            lis_user: usernameInput.value,
+            lis_pass: passwordInput.value,
             metadata: meta,
             table_rows: tableData
         };
 
         // Save credentials via API so they pre-fill next time
-        fetch('/api/profile/lims-credentials', {
+        fetch('/api/profile/liis-credentials', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ limsUsername: usernameInput.value, limsPassword: passwordInput.value })
-        }).catch(err => console.error("Failed to save LIMS credentials", err));
+        }).catch(err => console.error("Failed to save LIIS credentials", err));
 
         // Disable Start button, enable Stop button
-        const btnStart = document.getElementById('btn-start-lims');
-        const btnStop = document.getElementById('btn-stop-lims');
+        const btnStart = document.getElementById('btn-start-liis');
+        const btnStop = document.getElementById('btn-stop-liis');
         if (btnStart) btnStart.disabled = true;
         if (btnStop) btnStop.disabled = false;
         
@@ -3102,7 +3309,7 @@ async function startLimsAutomation() {
         appendConsoleLog('[SYSTEM] Sending local UI payload to backend for automation execution...');
         
         try {
-            const res = await fetch('/api/lims/start', {
+            const res = await fetch('/api/liis/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -3110,9 +3317,9 @@ async function startLimsAutomation() {
             const data = await res.json();
             
             if (res.ok) {
-                showToast(data.message || 'LIMS Automation started!', 'success');
+                showToast(data.message || 'LIIS Automation started!', 'success');
                 // Start polling status and logs
-                startLimsPolling();
+                startLiisPolling();
             } else {
                 showToast(data.error || 'Failed to start automation.', 'error');
                 if (btnStart) btnStart.disabled = false;
@@ -3120,21 +3327,21 @@ async function startLimsAutomation() {
             }
         } catch (e) {
             console.error(e);
-            showToast('Network error while starting LIMS automator.', 'error');
+            showToast('Network error while starting LIIS automator.', 'error');
             if (btnStart) btnStart.disabled = false;
             if (btnStop) btnStop.disabled = true;
         }
     } catch (globalErr) {
-        alert("Frontend Error in startLimsAutomation: " + globalErr.message + "\n" + globalErr.stack);
+        alert("Frontend Error in startLiisAutomation: " + globalErr.message + "\n" + globalErr.stack);
         console.error(globalErr);
     }
 }
 
-async function stopLimsAutomation() {
+async function stopLiisAutomation() {
     appendConsoleLog('[SYSTEM] Stopping automation process...');
     
     try {
-        const res = await fetch('/api/lims/stop', {
+        const res = await fetch('/api/liis/stop', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -3142,44 +3349,44 @@ async function stopLimsAutomation() {
         
         if (res.ok) {
             showToast(data.message || 'Automation stopped.', 'info');
-            stopLimsPolling();
-            updateLimsUI('idle');
+            stopLiisPolling();
+            updateLiisUI('idle');
         } else {
             showToast(data.error || 'Failed to stop automation.', 'error');
         }
     } catch (e) {
         console.error(e);
-        showToast('Network error while stopping LIMS automator.', 'error');
+        showToast('Network error while stopping LIIS automator.', 'error');
     }
 }
 
-function startLimsPolling() {
-    if (limsPollingInterval) clearInterval(limsPollingInterval);
+function startLiisPolling() {
+    if (liisPollingInterval) clearInterval(liisPollingInterval);
     // Poll immediately, then every 1500ms
-    pollLimsStatusAndLogs();
-    limsPollingInterval = setInterval(pollLimsStatusAndLogs, 1500);
+    pollLiisStatusAndLogs();
+    liisPollingInterval = setInterval(pollLiisStatusAndLogs, 1500);
 }
 
-function stopLimsPolling() {
-    if (limsPollingInterval) {
-        clearInterval(limsPollingInterval);
-        limsPollingInterval = null;
+function stopLiisPolling() {
+    if (liisPollingInterval) {
+        clearInterval(liisPollingInterval);
+        liisPollingInterval = null;
     }
 }
 
-async function pollLimsStatusAndLogs() {
+async function pollLiisStatusAndLogs() {
     try {
         // Poll status
-        const statusRes = await fetch('/api/lims/status');
+        const statusRes = await fetch('/api/liis/status');
         const statusData = await statusRes.json();
         const status = statusData.status;
         
         // Poll logs
-        const logsRes = await fetch('/api/lims/logs');
+        const logsRes = await fetch('/api/liis/logs');
         const logsData = await logsRes.json();
         const logs = logsData.logs || [];
         
-        updateLimsUI(status);
+        updateLiisUI(status);
         
         // Update console logs
         if (logs.length > lastLogCount) {
@@ -3190,28 +3397,28 @@ async function pollLimsStatusAndLogs() {
         
         // If system is idle, stop polling
         if (status === 'idle') {
-            stopLimsPolling();
+            stopLiisPolling();
             lastLogCount = 0;
-            const btnStart = document.getElementById('btn-start-lims');
-            const btnStop = document.getElementById('btn-stop-lims');
+            const btnStart = document.getElementById('btn-start-liis');
+            const btnStop = document.getElementById('btn-stop-liis');
             if (btnStart) btnStart.disabled = false;
             if (btnStop) btnStop.disabled = true;
             fetchSamples(); // Refresh master list to show Submitted status
         }
     } catch (e) {
-        console.error('Error polling LIMS status/logs:', e);
+        console.error('Error polling LIIS status/logs:', e);
     }
 }
 
-function updateLimsUI(status) {
-    const badge = document.getElementById('lims-status-badge');
-    const textSpan = document.getElementById('lims-status-text');
-    const actionBanner = document.getElementById('lims-action-banner');
+function updateLiisUI(status) {
+    const badge = document.getElementById('liis-status-badge');
+    const textSpan = document.getElementById('liis-status-text');
+    const actionBanner = document.getElementById('liis-action-banner');
     
     if (!badge || !textSpan) return;
     
     // Clear old status classes
-    badge.className = 'lims-badge';
+    badge.className = 'liis-badge';
     
     if (status === 'idle') {
         badge.classList.add('badge-idle');
@@ -3229,7 +3436,7 @@ function updateLimsUI(status) {
 }
 
 function clearConsole() {
-    const consoleDiv = document.getElementById('lims-console');
+    const consoleDiv = document.getElementById('liis-console');
     if (consoleDiv) {
         consoleDiv.innerHTML = '';
         lastLogCount = 0;
@@ -3237,7 +3444,7 @@ function clearConsole() {
 }
 
 function appendConsoleLog(line) {
-    const consoleDiv = document.getElementById('lims-console');
+    const consoleDiv = document.getElementById('liis-console');
     if (!consoleDiv) return;
     
     const div = document.createElement('div');
@@ -3263,22 +3470,22 @@ function appendConsoleLog(line) {
     consoleDiv.scrollTop = consoleDiv.scrollHeight;
 }
 
-async function checkActiveLimsOnLoad() {
+async function checkActiveLiisOnLoad() {
     try {
-        const res = await fetch('/api/lims/status');
+        const res = await fetch('/api/liis/status');
         const data = await res.json();
         if (data.status && data.status !== 'idle') {
-            // LIMS is active on backend, let's set UI buttons and start polling
-            const btnStart = document.getElementById('btn-start-lims');
-            const btnStop = document.getElementById('btn-stop-lims');
+            // LIIS is active on backend, let's set UI buttons and start polling
+            const btnStart = document.getElementById('btn-start-liis');
+            const btnStop = document.getElementById('btn-stop-liis');
             if (btnStart) btnStart.disabled = true;
             if (btnStop) btnStop.disabled = false;
             
             // Poll for logs and status
-            startLimsPolling();
+            startLiisPolling();
         }
     } catch (e) {
-        console.error('Failed to check active LIMS on load:', e);
+        console.error('Failed to check active LIIS on load:', e);
     }
 }
 
@@ -3896,7 +4103,8 @@ async function directAssignSample(sampleId, tpName) {
             showToast(`Assigned to ${tpName}`, 'success');
             loadUnassignedPool();
             fetchSamples(); // Sync with Master List
-            triggerExcelDownloadAndPrint([sampleId]);
+            // No auto-download/print on assign — print on demand from Assignment History.
+            if (typeof loadAssignmentHistory === 'function') loadAssignmentHistory();
         } else {
             const data = await res.json();
             showToast(data.error || 'Failed to assign.', 'error');
@@ -4198,6 +4406,8 @@ function switchAssignerSubtab(tab) {
 }
 
 // --- Assignment History ---
+let _assignmentHistoryIds = [];
+
 async function loadAssignmentHistory() {
     const tbody = document.getElementById('history-pool-tbody');
     if (!tbody) return;
@@ -4209,6 +4419,7 @@ async function loadAssignmentHistory() {
         const data = await res.json();
         if (res.ok) {
             tbody.innerHTML = '';
+            _assignmentHistoryIds = (data.history || []).map(h => h.id).filter(v => v != null);
             if (!data.history || data.history.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-muted);">No assignment history found.</td></tr>`;
                 return;
@@ -4220,7 +4431,11 @@ async function loadAssignmentHistory() {
                     <td>${getISNumberHtml(h.isNumber)}</td>
                     <td><span class="badge-premium pulse-indigo">${h.assignedTo}</span></td>
                     <td>
-                        <button class="btn-premium" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);" onclick="revokeAssignment(${h.id})">Revoke</button>
+                        <span style="display:inline-flex; gap:6px; flex-wrap:wrap;">
+                            <button class="btn-premium" title="Print allotment slip" style="background: rgba(59,130,246,0.15); color:#3b82f6; border:1px solid rgba(59,130,246,0.3); padding:5px 10px; font-size:0.78rem;" onclick="printAssignmentSlip(${h.id})">🖨️ Print</button>
+                            <button class="btn-premium" title="Download Excel slip" style="background: rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); padding:5px 10px; font-size:0.78rem;" onclick="triggerExcelDownload([${h.id}])">⬇ Excel</button>
+                            <button class="btn-premium" title="Revoke assignment" style="background: rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); padding:5px 10px; font-size:0.78rem;" onclick="revokeAssignment(${h.id})">Revoke</button>
+                        </span>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -4253,6 +4468,28 @@ async function revokeAssignment(sampleId) {
     }
 }
 
+// Print/download allotment slips ON DEMAND from Assignment History (approving no longer auto-downloads).
+async function printAssignmentSlip(sampleId) {
+    try {
+        const res = await fetch('/api/samples-by-ids', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sampleIds: [sampleId] }) });
+        if (res.ok) { const d = await res.json(); if (d.samples && d.samples.length) printAllotmentSlips(d.samples); else showToast('Sample not found', 'error'); }
+        else showToast('Could not load sample for printing', 'error');
+    } catch (e) { console.error(e); showToast('Print failed', 'error'); }
+}
+
+async function printAllAssignmentHistory() {
+    if (!_assignmentHistoryIds.length) { showToast('No history to print', 'info'); return; }
+    try {
+        const res = await fetch('/api/samples-by-ids', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sampleIds: _assignmentHistoryIds }) });
+        if (res.ok) { const d = await res.json(); if (d.samples && d.samples.length) printAllotmentSlips(d.samples); }
+    } catch (e) { console.error(e); showToast('Print failed', 'error'); }
+}
+
+async function downloadAllAssignmentHistory() {
+    if (!_assignmentHistoryIds.length) { showToast('No history to download', 'info'); return; }
+    await triggerExcelDownload(_assignmentHistoryIds);
+}
+
 async function runAutoAssigner() {
     showToast('Running Smart Assigner...', 'info');
     try {
@@ -4282,12 +4519,10 @@ async function approveRecommendation(id) {
         const res = await fetch(`/api/approve-assignment/${id}`, { method: 'POST' });
         if (res.ok) {
             showToast('Assignment Approved', 'success');
-            const data = await res.json();
             loadRecommendations();
             loadUnassignedPool();
-            if (data.sampleId) {
-                triggerExcelDownloadAndPrint([data.sampleId]);
-            }
+            // No auto-download/print on approve — print on demand from Assignment History.
+            if (typeof loadAssignmentHistory === 'function') loadAssignmentHistory();
         }
     } catch (err) { console.error(err); }
 }
@@ -4340,7 +4575,8 @@ async function confirmManualAssign() {
             showToast(`Assigned manually to ${tpName}`, 'success');
             closeManualAssignModal();
             loadUnassignedPool();
-            triggerExcelDownloadAndPrint([parseInt(sampleId)]);
+            // No auto-download/print on assign — print on demand from Assignment History.
+            if (typeof loadAssignmentHistory === 'function') loadAssignmentHistory();
         } else {
             showToast('Failed to assign manually.', 'error');
         }
@@ -4949,10 +5185,961 @@ function renderISVault() {
 async function syncISToMaster(isNumber) {
     if (!isNumber) return;
     try {
-        const res = await fetch(`/api/is-intelligence/sync-to-master/${encodeURIComponent(isNumber)}`, { method: 'POST' });
+        const res = await fetch(`/api/is-intelligence/sync-to-master/${encodeURIComponent(isNumber)}`, {
+            method: 'POST',
+            headers: authHeaders()
+        });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Link failed');
+        if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Link failed'));
         showToast(`${data.isNumber}: ${data.paramsMatchedToHours}/${data.paramsInIntelligence} params matched to hours · ${data.limitsSynced} limits`, 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+// ═══ IS Scope ═══════════════════════════════════════════════════════════════════
+// Two screens over one dataset: TPs declare what they test ("My IS Scope"), admins
+// file the standards into sections and approve the declarations ("IS Scope Control").
+// Approval is what writes employee_competencies — the table the auto-assigner reads.
+let scopeCatalogue = { sections: [], standards: [], unfiled: 0 };
+let scopeMine = null;                 // this TP's saved submission
+let scopeChosenSections = new Set();
+let scopeChosenIS = new Set();
+
+// ── TP screen ──────────────────────────────────────────────────────────────────
+async function loadMyISScope() {
+    try {
+        const [catRes, mineRes] = await Promise.all([
+            fetch('/api/is-scope/catalogue'),
+            fetch(`/api/is-scope/mine/${currentUser ? currentUser.id : 0}`)
+        ]);
+        scopeCatalogue = await catRes.json();
+        scopeMine = (await mineRes.json()).submission || null;
+
+        // Re-open the saved answers so a returning TP edits rather than starts over.
+        scopeChosenSections = new Set(scopeMine ? scopeMine.sections : []);
+        scopeChosenIS = new Set(scopeMine ? scopeMine.isNumbers : []);
+        const noteEl = document.getElementById('scope-note');
+        if (noteEl && scopeMine) noteEl.value = scopeMine.note || '';
+        const otherEl = document.getElementById('scope-other-section');
+        if (otherEl && scopeMine) otherEl.value = scopeMine.proposedSection || '';
+
+        renderScopeStatus();
+        renderScopeSections();
+        renderScopeStandards();
+        renderScopeAllStandards();
+    } catch (e) {
+        showToast('Could not load your IS scope.', 'error');
+    }
+}
+
+function renderScopeStatus() {
+    const el = document.getElementById('scope-status-banner');
+    if (!el) return;
+    if (!scopeMine) { el.style.display = 'none'; return; }
+    const box = (bg, border, color, title, body) =>
+        `<div style="background:${bg}; border:1px solid ${border}; border-radius:10px; padding:13px 16px;">
+            <div style="font-weight:700; color:${color}; font-size:0.92rem;">${title}</div>
+            <div style="font-size:0.83rem; color:#334155; margin-top:3px;">${body}</div>
+         </div>`;
+    const when = scopeMine.reviewedAt ? new Date(scopeMine.reviewedAt).toLocaleString('en-IN') : '';
+    const note = scopeMine.reviewNote ? ` — “${escapeHtml(scopeMine.reviewNote)}”` : '';
+    el.style.display = 'block';
+    if (scopeMine.status === 'pending') {
+        el.innerHTML = box('#fffbeb', '#fde68a', '#92400e', '⏳ Waiting for your OIC to approve',
+            `Submitted ${new Date(scopeMine.submittedAt).toLocaleString('en-IN')}. You can still change your answers and submit again.`);
+    } else if (scopeMine.status === 'approved') {
+        el.innerHTML = box('#f0fdf4', '#bbf7d0', '#166534', '✓ Approved',
+            `Approved by ${escapeHtml(scopeMine.reviewedBy || 'your OIC')} on ${when}${note}. ${scopeMine.competenciesAdded || 0} standard(s) added to your competencies.`);
+    } else if (scopeMine.status === 'rejected') {
+        el.innerHTML = box('#fef2f2', '#fecaca', '#b91c1c', '✕ Sent back by your OIC',
+            `Reviewed by ${escapeHtml(scopeMine.reviewedBy || 'your OIC')} on ${when}${note}. Update your selection and submit again.`);
+    } else { el.style.display = 'none'; }
+}
+
+function renderScopeSections() {
+    const el = document.getElementById('scope-sections');
+    if (!el) return;
+    el.innerHTML = (scopeCatalogue.sections || []).map(sec => {
+        const on = scopeChosenSections.has(sec);
+        const count = (scopeCatalogue.standards || []).filter(s => s.section === sec).length;
+        return `<button onclick="toggleScopeSection('${escapeHtml(sec)}')" style="
+            background:${on ? '#3b82f6' : '#fff'}; color:${on ? '#fff' : '#334155'};
+            border:1px solid ${on ? '#3b82f6' : '#e2e8f0'}; border-radius:999px;
+            padding:8px 16px; font-size:0.86rem; font-weight:600; cursor:pointer;">
+            ${on ? '✓ ' : ''}${escapeHtml(sec)} <span style="opacity:0.7; font-size:0.76rem;">(${count})</span>
+        </button>`;
+    }).join('') || '<span style="font-size:0.85rem; color:var(--text-muted);">No sections set up yet — ask your OIC to configure IS Scope Control.</span>';
+}
+
+function toggleScopeSection(sec) {
+    if (scopeChosenSections.has(sec)) {
+        scopeChosenSections.delete(sec);
+        // Drop standards that belonged only to the section just removed, so the
+        // submission can never contain an IS the TP can no longer see.
+        for (const isNum of [...scopeChosenIS]) {
+            const std = (scopeCatalogue.standards || []).find(s => s.isNumber === isNum);
+            if (std && !scopeChosenSections.has(std.section)) scopeChosenIS.delete(isNum);
+        }
+    } else {
+        scopeChosenSections.add(sec);
+    }
+    renderScopeSections();
+    renderScopeStandards();
+    renderScopeAllStandards();
+}
+
+function renderScopeStandards() {
+    const el = document.getElementById('scope-standards');
+    const countEl = document.getElementById('scope-selected-count');
+    if (!el) return;
+
+    if (!scopeChosenSections.size) {
+        el.innerHTML = '<div style="padding:26px; text-align:center; color:var(--text-muted); font-size:0.88rem;">Pick a section above to see the standards filed under it.</div>';
+        if (countEl) countEl.textContent = '';
+        return;
+    }
+
+    const visible = (scopeCatalogue.standards || []).filter(s => scopeChosenSections.has(s.section));
+    if (countEl) countEl.textContent = `${scopeChosenIS.size} of ${visible.length} selected`;
+
+    if (!visible.length) {
+        el.innerHTML = '<div style="padding:26px; text-align:center; color:var(--text-muted); font-size:0.88rem;">No standards are filed under your section(s) yet. Your OIC files them in IS Scope Control.</div>';
+        return;
+    }
+
+    const bySection = {};
+    for (const s of visible) (bySection[s.section] = bySection[s.section] || []).push(s);
+
+    el.innerHTML = Object.entries(bySection).map(([sec, list]) => `
+        <div style="padding:10px 12px 4px; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#64748b;">${escapeHtml(sec)}</div>
+        ${list.map(s => {
+            const on = scopeChosenIS.has(s.isNumber);
+            return `<label style="display:flex; align-items:center; gap:11px; padding:9px 12px; border-radius:8px; cursor:pointer; background:${on ? '#eff6ff' : 'transparent'};">
+                <input type="checkbox" ${on ? 'checked' : ''} onchange="toggleScopeIS('${escapeHtml(s.isNumber)}')" style="width:17px; height:17px; cursor:pointer;">
+                <span style="font-weight:700; font-size:0.87rem; white-space:nowrap;">${escapeHtml(s.isNumber)}</span>
+                <span style="font-size:0.82rem; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(s.title)}</span>
+            </label>`;
+        }).join('')}
+    `).join('');
+}
+
+function toggleScopeIS(isNumber) {
+    if (scopeChosenIS.has(isNumber)) scopeChosenIS.delete(isNumber); else scopeChosenIS.add(isNumber);
+    renderScopeStandards();
+    renderScopeAllStandards();
+}
+
+// The whole published list, read-only. Selection still happens in step 2 — a TP who
+// finds a standard here that sits outside their sections is told which section to add,
+// rather than being allowed to declare a standard their section list doesn't cover.
+function renderScopeAllStandards() {
+    const listEl = document.getElementById('scope-all-list');
+    const countEl = document.getElementById('scope-all-count');
+    if (!listEl) return;
+
+    const all = scopeCatalogue.standards || [];
+    if (countEl) countEl.textContent = `(${all.length})`;
+
+    const q = (document.getElementById('scope-all-search') || {}).value || '';
+    const needle = q.trim().toLowerCase();
+    const rows = needle
+        ? all.filter(s => `${s.isNumber} ${s.title}`.toLowerCase().includes(needle))
+        : all;
+
+    if (!rows.length) {
+        listEl.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:0.85rem;">Nothing matches that search.</div>';
+        return;
+    }
+
+    const bySection = {};
+    for (const s of rows) (bySection[s.section || 'Not filed yet'] = bySection[s.section || 'Not filed yet'] || []).push(s);
+
+    // The TP's own sections lead — theirs is the part they act on; the rest is reference.
+    const groups = Object.entries(bySection).sort((a, b) => {
+        const am = scopeChosenSections.has(a[0]) ? 0 : 1;
+        const bm = scopeChosenSections.has(b[0]) ? 0 : 1;
+        return am - bm || a[0].localeCompare(b[0]);
+    });
+
+    listEl.innerHTML = groups.map(([sec, list]) => {
+        const mine = scopeChosenSections.has(sec);
+        return `
+        <div style="padding:9px 10px 4px; display:flex; align-items:center; gap:8px;">
+            <span style="font-size:0.74rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#64748b;">${escapeHtml(sec)}</span>
+            ${mine
+                ? '<span style="font-size:0.66rem; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:999px; padding:1px 7px; font-weight:700;">YOUR SECTION</span>'
+                : `<span style="font-size:0.7rem; color:var(--text-muted);">— add this section above to select from it</span>`}
+        </div>
+        ${list.map(s => {
+            const picked = scopeChosenIS.has(s.isNumber);
+            return `<div style="display:flex; align-items:center; gap:10px; padding:7px 12px; font-size:0.83rem; ${picked ? 'background:#f0fdf4;' : ''}">
+                <span style="width:14px; color:#16a34a; font-weight:700;">${picked ? '✓' : ''}</span>
+                <span style="font-weight:700; white-space:nowrap;">${escapeHtml(s.isNumber)}</span>
+                <span style="color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(s.title)}</span>
+            </div>`;
+        }).join('')}`;
+    }).join('');
+}
+
+async function submitMyScope() {
+    if (!scopeChosenSections.size) return showToast('Pick at least one section.', 'error');
+    if (!scopeChosenIS.size) return showToast('Tick at least one standard you test.', 'error');
+    const btn = document.getElementById('scope-submit-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+    try {
+        const res = await fetch('/api/is-scope/mine', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUser.id,
+                username: currentUser.username,
+                sections: [...scopeChosenSections],
+                isNumbers: [...scopeChosenIS],
+                proposedSection: (document.getElementById('scope-other-section') || {}).value || '',
+                note: (document.getElementById('scope-note') || {}).value || ''
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Submit failed');
+        scopeMine = data.submission;
+        renderScopeStatus();
+        updateScopeNavBadge();
+        showToast('Sent to your OIC for approval.', 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Submit for approval'; }
+    }
+}
+
+// Red dot on the sidebar until a TP has submitted — the task is meant to be completed.
+async function updateScopeNavBadge() {
+    const badge = document.getElementById('nav-scope-badge');
+    if (!badge || !currentUser || isAdminOrSuperAdmin()) return;
+    try {
+        const r = await fetch(`/api/is-scope/mine/${currentUser.id}`);
+        const d = await r.json();
+        badge.style.display = d.submission ? 'none' : 'inline-block';
+    } catch (e) {}
+}
+
+// ── Admin screen ───────────────────────────────────────────────────────────────
+let scopeAdminSections = [];
+let scopeAdminMap = {};
+let scopeSubmissions = { submissions: [], outstanding: [], counts: {} };
+// Filing edits live in memory until "Save filing" — without this flag a whole
+// afternoon of re-filing disappears silently on a tab switch.
+let scopeDirty = false;
+
+function switchScopeAdminTab(which) {
+    const filing = which === 'filing';
+    document.getElementById('scopeadm-panel-filing').style.display = filing ? 'block' : 'none';
+    document.getElementById('scopeadm-panel-review').style.display = filing ? 'none' : 'block';
+    document.getElementById('scopeadm-tab-filing').style.borderBottomColor = filing ? '#3b82f6' : 'transparent';
+    document.getElementById('scopeadm-tab-filing').style.color = filing ? '#0f172a' : '#64748b';
+    document.getElementById('scopeadm-tab-review').style.borderBottomColor = filing ? 'transparent' : '#3b82f6';
+    document.getElementById('scopeadm-tab-review').style.color = filing ? '#64748b' : '#0f172a';
+    if (!filing) loadScopeSubmissions();
+}
+
+async function loadScopeAdmin() {
+    try {
+        const res = await fetch('/api/is-scope/catalogue');
+        const cat = await res.json();
+        scopeAdminSections = cat.sections || [];
+        scopeAdminMap = {};
+        for (const s of (cat.standards || [])) if (s.section) scopeAdminMap[s.isNumber] = s.section;
+        scopeCatalogue = cat;
+        renderScopeAdminSections();
+        renderScopeFilingTable();
+        loadScopeSubmissions();
+    } catch (e) {
+        showToast('Could not load IS Scope Control.', 'error');
+    }
+}
+
+function renderScopeAdminSections() {
+    const el = document.getElementById('scopeadm-sections');
+    if (!el) return;
+    el.innerHTML = scopeAdminSections.map(sec => `
+        <span style="display:inline-flex; align-items:center; gap:6px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:999px; padding:5px 8px 5px 13px; font-size:0.83rem; font-weight:600;">
+            ${escapeHtml(sec)}
+            <button onclick="removeScopeSection('${escapeHtml(sec)}')" title="Remove this section" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:0.95rem; line-height:1; padding:0 2px;">×</button>
+        </span>`).join('');
+}
+
+function addScopeSection() {
+    const input = document.getElementById('scopeadm-new-section');
+    const name = (input.value || '').trim();
+    if (!name) return;
+    if (scopeAdminSections.some(s => s.toLowerCase() === name.toLowerCase())) {
+        return showToast('That section already exists.', 'error');
+    }
+    scopeAdminSections.push(name);
+    input.value = '';
+    scopeDirty = true;
+    renderScopeAdminSections();
+    renderScopeFilingTable();
+}
+
+function removeScopeSection(sec) {
+    const filed = Object.values(scopeAdminMap).filter(v => v === sec).length;
+    if (filed && !confirm(`${filed} standard(s) are filed under “${sec}”. Removing it will leave them unfiled. Continue?`)) return;
+    scopeAdminSections = scopeAdminSections.filter(s => s !== sec);
+    for (const [k, v] of Object.entries(scopeAdminMap)) if (v === sec) delete scopeAdminMap[k];
+    renderScopeAdminSections();
+    renderScopeFilingTable();
+    renderScopeBySection();
+}
+
+function renderScopeFilingTable() {
+    const tbody = document.getElementById('scopeadm-filing-tbody');
+    const warn = document.getElementById('scopeadm-unfiled-warning');
+    if (!tbody) return;
+    const standards = scopeCatalogue.standards || [];
+
+    tbody.innerHTML = standards.map(s => {
+        const cur = scopeAdminMap[s.isNumber] || '';
+        return `<tr>
+            <td style="font-weight:700; white-space:nowrap;">${escapeHtml(s.isNumber)}</td>
+            <td style="font-size:0.85rem; color:#475569;">${escapeHtml(s.title)}</td>
+            <td>
+                <select onchange="setScopeFiling('${escapeHtml(s.isNumber)}', this.value)"
+                        style="width:100%; padding:7px 9px; border:1px solid ${cur ? '#e2e8f0' : '#fcd34d'}; border-radius:7px; font-size:0.84rem; background:${cur ? '#fff' : '#fffbeb'}; color:#0f172a;">
+                    <option value="">— unfiled —</option>
+                    ${scopeAdminSections.map(sec => `<option value="${escapeHtml(sec)}"${sec === cur ? ' selected' : ''}>${escapeHtml(sec)}</option>`).join('')}
+                </select>
+            </td>
+        </tr>`;
+    }).join('') || '<tr><td colspan="3" style="text-align:center; padding:26px; color:var(--text-muted);">No standards in IS Intelligence yet.</td></tr>';
+
+    renderScopeBySection();
+
+    const saveBtn = document.getElementById('scopeadm-save-btn');
+    if (saveBtn) {
+        saveBtn.textContent = scopeDirty ? '● Save filing — unsaved changes' : 'Save filing';
+        saveBtn.style.background = scopeDirty ? '#f59e0b' : '#3b82f6';
+    }
+
+    // An unfiled standard is invisible to every TP, so it can't be a silent state.
+    const unfiled = standards.filter(s => !scopeAdminMap[s.isNumber]).length;
+    if (warn) {
+        warn.style.display = unfiled ? 'block' : 'none';
+        warn.innerHTML = unfiled
+            ? `<div style="background:#fffbeb; border:1px solid #fde68a; border-radius:9px; padding:11px 14px; font-size:0.85rem; color:#92400e;">
+                 <strong>${unfiled} standard${unfiled === 1 ? '' : 's'} not filed yet.</strong> Unfiled standards do not appear to any TP.
+               </div>` : '';
+    }
+}
+
+// One card per section listing the standards filed under it — including empty
+// sections, which are the ones worth noticing: an empty section is a button a TP
+// can pick that then shows them nothing.
+function renderScopeBySection() {
+    const el = document.getElementById('scopeadm-by-section');
+    if (!el) return;
+    const standards = scopeCatalogue.standards || [];
+    const titleOf = {};
+    standards.forEach(s => { titleOf[s.isNumber] = s.title || ''; });
+
+    const groups = scopeAdminSections.map(sec => ({
+        section: sec,
+        items: Object.keys(scopeAdminMap).filter(k => scopeAdminMap[k] === sec).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+    }));
+    const unfiled = standards.filter(s => !scopeAdminMap[s.isNumber]).map(s => s.isNumber);
+    if (unfiled.length) groups.push({ section: 'Not filed yet', items: unfiled, warn: true });
+
+    el.innerHTML = groups.map(g => `
+        <div style="border:1px solid ${g.warn ? '#fde68a' : '#e2e8f0'}; background:${g.warn ? '#fffbeb' : '#fff'}; border-radius:11px; padding:14px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:9px;">
+                <strong style="font-size:0.92rem; color:${g.warn ? '#92400e' : '#0f172a'};">${escapeHtml(g.section)}</strong>
+                <span style="display:flex; align-items:center; gap:7px;">
+                    <span style="font-size:0.72rem; font-weight:700; background:${g.warn ? '#fef3c7' : '#f1f5f9'}; color:${g.warn ? '#92400e' : '#475569'}; border-radius:999px; padding:2px 9px;">${g.items.length}</span>
+                    ${g.warn ? '' : `<button onclick="openScopeAddModal('${escapeHtml(g.section)}')" title="Add standards to ${escapeHtml(g.section)}" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:7px; padding:3px 9px; font-size:0.73rem; font-weight:700; cursor:pointer;">＋ Add</button>`}
+                </span>
+            </div>
+            ${g.items.length
+                ? g.items.map(n => `<div style="display:flex; gap:8px; padding:3px 0; font-size:0.8rem;">
+                        <span style="font-weight:700; white-space:nowrap;">${escapeHtml(n)}</span>
+                        <span style="color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(titleOf[n] || '')}</span>
+                   </div>`).join('')
+                : '<div style="font-size:0.78rem; color:#b45309;">Empty — a TP who picks this section will see nothing.</div>'}
+        </div>`).join('');
+}
+
+function setScopeFiling(isNumber, section) {
+    if (section) scopeAdminMap[isNumber] = section; else delete scopeAdminMap[isNumber];
+    scopeDirty = true;
+    renderScopeFilingTable();
+}
+
+// ── "Add standards to <section>" picker ────────────────────────────────────────
+let scopeAddSection = null;
+let scopeAddPicked = new Set();
+
+function openScopeAddModal(section) {
+    scopeAddSection = section;
+    scopeAddPicked = new Set();
+    const search = document.getElementById('scope-add-search');
+    if (search) search.value = '';
+    document.getElementById('scope-add-title').textContent = `Add standards to ${section}`;
+    document.getElementById('scope-add-sub').textContent =
+        `Everything not already in ${section}. Its current section is shown on the right — adding moves it.`;
+    renderScopeAddList();
+    document.getElementById('scope-add-modal').classList.add('active');
+}
+
+function closeScopeAddModal() {
+    document.getElementById('scope-add-modal').classList.remove('active');
+    scopeAddSection = null;
+}
+
+function renderScopeAddList() {
+    const el = document.getElementById('scope-add-list');
+    if (!el || !scopeAddSection) return;
+    const q = ((document.getElementById('scope-add-search') || {}).value || '').trim().toLowerCase();
+
+    const candidates = (scopeCatalogue.standards || [])
+        .filter(s => scopeAdminMap[s.isNumber] !== scopeAddSection)
+        .filter(s => !q || `${s.isNumber} ${s.title}`.toLowerCase().includes(q))
+        // Unfiled first — those are the ones with no home at all.
+        .sort((a, b) => {
+            const au = scopeAdminMap[a.isNumber] ? 1 : 0, bu = scopeAdminMap[b.isNumber] ? 1 : 0;
+            return au - bu || a.isNumber.localeCompare(b.isNumber, undefined, { numeric: true });
+        });
+
+    if (!candidates.length) {
+        el.innerHTML = `<div style="padding:24px; text-align:center; color:var(--text-muted); font-size:0.86rem;">
+            ${q ? 'Nothing matches that search.' : `Every standard is already in ${escapeHtml(scopeAddSection)}.`}</div>`;
+        return;
+    }
+
+    el.innerHTML = candidates.map(s => {
+        const cur = scopeAdminMap[s.isNumber];
+        const on = scopeAddPicked.has(s.isNumber);
+        return `<label style="display:flex; align-items:center; gap:11px; padding:9px 12px; cursor:pointer; border-bottom:1px solid #f1f5f9; background:${on ? '#eff6ff' : 'transparent'};">
+            <input type="checkbox" ${on ? 'checked' : ''} onchange="toggleScopeAddPick('${escapeHtml(s.isNumber)}')" style="width:16px; height:16px; cursor:pointer;">
+            <span style="font-weight:700; font-size:0.85rem; white-space:nowrap;">${escapeHtml(s.isNumber)}</span>
+            <span style="font-size:0.81rem; color:var(--text-muted); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(s.title)}</span>
+            <span style="font-size:0.7rem; font-weight:600; white-space:nowrap; border-radius:6px; padding:2px 8px; ${cur ? 'background:#f1f5f9; color:#475569;' : 'background:#fffbeb; color:#92400e; border:1px solid #fde68a;'}">${cur ? escapeHtml(cur) : 'unfiled'}</span>
+        </label>`;
+    }).join('');
+
+    const btn = document.getElementById('scope-add-confirm');
+    if (btn) btn.textContent = scopeAddPicked.size ? `Add ${scopeAddPicked.size} to ${scopeAddSection}` : 'Add selected';
+}
+
+// ── Manual entry: add a standard by name, no PDF ───────────────────────────────
+function openNewStandardModal(presetSection) {
+    closeScopeAddModal();
+    const sel = document.getElementById('new-std-section');
+    sel.innerHTML = '<option value="">— unfiled —</option>' +
+        scopeAdminSections.map(s => `<option value="${escapeHtml(s)}"${s === presetSection ? ' selected' : ''}>${escapeHtml(s)}</option>`).join('');
+    document.getElementById('new-std-number').value = '';
+    document.getElementById('new-std-title').value = '';
+    document.getElementById('new-std-bulk-text').value = '';
+    setNewStandardMode('one');
+    document.getElementById('scope-new-std-modal').classList.add('active');
+    setTimeout(() => document.getElementById('new-std-number').focus(), 50);
+}
+
+function closeNewStandardModal() {
+    document.getElementById('scope-new-std-modal').classList.remove('active');
+}
+
+let newStandardMode = 'one';
+function setNewStandardMode(mode) {
+    newStandardMode = mode;
+    const one = mode === 'one';
+    document.getElementById('new-std-one-pane').style.display = one ? 'block' : 'none';
+    document.getElementById('new-std-bulk-pane').style.display = one ? 'none' : 'block';
+    const on = (el, active) => {
+        el.style.background = active ? '#fff' : 'none';
+        el.style.borderColor = active ? '#e2e8f0' : 'transparent';
+        el.style.color = active ? '#0f172a' : '#64748b';
+    };
+    on(document.getElementById('new-std-mode-one'), one);
+    on(document.getElementById('new-std-mode-bulk'), !one);
+    document.getElementById('new-std-save').textContent = one ? 'Add standard' : 'Add all';
+    if (!one) renderBulkPreview();
+}
+
+// Split each line into number + title on the FIRST tab, pipe or comma only — titles
+// routinely contain commas ("Pipes for Soil and Waste, Part 2"), so splitting on all
+// of them would shred them. Tab first, so an Excel paste works untouched.
+function parseBulkStandards(text) {
+    return String(text || '').split(/\r?\n/)
+        .map(l => l.trim())
+        .filter(Boolean)
+        .map(line => {
+            const m = line.match(/^([^\t|,]+)[\t|,]\s*(.*)$/);
+            const isNumber = (m ? m[1] : line).trim().replace(/[,\s]+$/, '');
+            const title = m ? m[2].trim() : '';
+            return { isNumber, title };
+        });
+}
+
+function renderBulkPreview() {
+    const el = document.getElementById('new-std-bulk-preview');
+    if (!el) return;
+    const rows = parseBulkStandards(document.getElementById('new-std-bulk-text').value);
+    if (!rows.length) { el.innerHTML = ''; return; }
+
+    // Flag problems before submitting rather than reporting them afterwards. Matching
+    // ignores punctuation so a LIMS paste ("IS 4985 (2021)") recognises the standard we
+    // already hold as "IS 4985:2021"; the year is kept so revisions stay distinct.
+    const key = s => String(s || '').toUpperCase().replace(/[()\[\]:,.]/g, ' ')
+        .replace(/\bPART\s+/g, 'PART').replace(/\s+/g, ' ').trim();
+    const known = new Map((scopeCatalogue.standards || []).map(s => [key(s.isNumber), s.isNumber]));
+    const seen = new Set();
+    let ok = 0;
+    const body = rows.map(r => {
+        const k = key(r.isNumber);
+        let issue = null;
+        if (!/\d/.test(r.isNumber)) issue = 'not an IS number';
+        else if (known.has(k)) issue = `have it as ${known.get(k)}`;
+        else if (seen.has(k)) issue = 'repeated above';
+        else { seen.add(k); ok++; }
+        return `<div style="display:flex; align-items:center; gap:9px; padding:5px 10px; font-size:0.79rem; border-bottom:1px solid #f1f5f9; ${issue ? 'background:#fffbeb;' : ''}">
+            <span style="width:13px; color:${issue ? '#b45309' : '#16a34a'}; font-weight:700;">${issue ? '!' : '✓'}</span>
+            <span style="font-weight:700; white-space:nowrap;">${escapeHtml(r.isNumber)}</span>
+            <span style="color:var(--text-muted); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(r.title)}</span>
+            ${issue ? `<span style="font-size:0.7rem; color:#92400e; white-space:nowrap;">${issue}</span>` : ''}
+        </div>`;
+    }).join('');
+
+    const skipped = rows.length - ok;
+    el.innerHTML = `
+        <div style="font-size:0.79rem; font-weight:700; color:#334155; margin-bottom:5px;">
+            ${ok} to add${skipped ? ` · <span style="color:#b45309;">${skipped} will be skipped</span>` : ''}
+        </div>
+        <div style="border:1px solid #e2e8f0; border-radius:8px; max-height:190px; overflow-y:auto;">${body}</div>`;
+
+    const btn = document.getElementById('new-std-save');
+    if (btn) btn.textContent = ok ? `Add ${ok} standard${ok === 1 ? '' : 's'}` : 'Add all';
+}
+
+async function saveBulkStandards() {
+    const items = parseBulkStandards(document.getElementById('new-std-bulk-text').value);
+    if (!items.length) return showToast('Paste at least one standard.', 'error');
+    const section = document.getElementById('new-std-section').value || '';
+
+    const btn = document.getElementById('new-std-save');
+    btn.disabled = true; btn.textContent = 'Adding…';
+    try {
+        const res = await fetch('/api/is-scope/standards/bulk', {
+            method: 'POST',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ items, section })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Bulk add failed'));
+
+        // Merge locally so unsaved filing edits on the screen behind survive.
+        scopeCatalogue.standards = (scopeCatalogue.standards || [])
+            .concat(data.added.map(a => ({ isNumber: a.isNumber, title: a.title, section: data.section })))
+            .sort((a, b) => String(a.isNumber).localeCompare(String(b.isNumber), undefined, { numeric: true }));
+        if (data.section) for (const a of data.added) scopeAdminMap[a.isNumber] = data.section;
+
+        closeNewStandardModal();
+        renderScopeFilingTable();
+        const msg = `${data.added.length} added${data.section ? ` to ${data.section}` : ' (unfiled)'}`
+            + (data.skipped.length ? ` · ${data.skipped.length} skipped` : '');
+        showToast(msg, data.added.length ? 'success' : 'error');
+        if (data.skipped.length) console.info('[IS Scope] skipped:', data.skipped);
+    } catch (e) {
+        showToast(e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        setNewStandardMode('bulk');
+    }
+}
+
+async function saveNewStandard() {
+    if (newStandardMode === 'bulk') return saveBulkStandards();
+    const isNumber = (document.getElementById('new-std-number').value || '').trim();
+    const title = (document.getElementById('new-std-title').value || '').trim();
+    const section = document.getElementById('new-std-section').value || '';
+    if (!isNumber) return showToast('Enter the IS number.', 'error');
+
+    const btn = document.getElementById('new-std-save');
+    btn.disabled = true; btn.textContent = 'Adding…';
+    try {
+        const res = await fetch('/api/is-scope/standards', {
+            method: 'POST',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ isNumber, title, section })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Could not add'));
+
+        // Merge locally instead of reloading — a reload would throw away any unsaved
+        // filing edits the OIC has in progress on this screen.
+        scopeCatalogue.standards = (scopeCatalogue.standards || []).concat([{ isNumber: data.isNumber, title: data.title, section: data.section }])
+            .sort((a, b) => String(a.isNumber).localeCompare(String(b.isNumber), undefined, { numeric: true }));
+        if (data.section) scopeAdminMap[data.isNumber] = data.section;
+
+        closeNewStandardModal();
+        renderScopeFilingTable();
+        showToast(`${data.isNumber} added${data.section ? ` to ${data.section}` : ' (unfiled)'}.`, 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Add standard';
+    }
+}
+
+function toggleScopeAddPick(isNumber) {
+    if (scopeAddPicked.has(isNumber)) scopeAddPicked.delete(isNumber); else scopeAddPicked.add(isNumber);
+    renderScopeAddList();
+}
+
+function confirmScopeAdd() {
+    if (!scopeAddPicked.size) return showToast('Tick at least one standard.', 'error');
+    const n = scopeAddPicked.size, sec = scopeAddSection;
+    for (const isNumber of scopeAddPicked) scopeAdminMap[isNumber] = sec;
+    scopeDirty = true;
+    closeScopeAddModal();
+    renderScopeFilingTable();
+    showToast(`${n} standard(s) moved into ${sec} — press “Save filing” to apply.`, 'success');
+}
+
+async function saveScopeCatalogue() {
+    try {
+        const res = await fetch('/api/is-scope/catalogue', {
+            method: 'POST',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ sections: scopeAdminSections, sectionMap: scopeAdminMap })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Save failed'));
+        scopeDirty = false;
+        showToast(`Saved — ${data.filed} standard(s) filed across ${data.sections.length} section(s).`, 'success');
+        loadScopeAdmin();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function loadScopeSubmissions() {
+    const listEl = document.getElementById('scopeadm-review-list');
+    try {
+        const res = await fetch('/api/is-scope/submissions', { headers: authHeaders() });
+        const data = await res.json();
+        if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Load failed'));
+        scopeSubmissions = data;
+        renderScopeSubmissions();
+    } catch (e) {
+        if (listEl) listEl.innerHTML = `<div style="padding:20px; color:var(--danger); font-size:0.88rem;">${escapeHtml(e.message)}</div>`;
+    }
+}
+
+function renderScopeSubmissions() {
+    const kpiEl = document.getElementById('scopeadm-review-kpis');
+    const listEl = document.getElementById('scopeadm-review-list');
+    const outEl = document.getElementById('scopeadm-outstanding');
+    const c = scopeSubmissions.counts || {};
+
+    if (kpiEl) {
+        const card = (n, label, color) => `<div class="glass-panel" style="padding:13px; text-align:center; border-top:4px solid ${color};">
+            <div style="font-size:1.5rem; font-weight:800; color:#0f172a;">${n || 0}</div>
+            <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:#334155;">${label}</div></div>`;
+        kpiEl.innerHTML = card(c.pending, 'Pending', '#f59e0b') + card(c.approved, 'Approved', '#10b981')
+            + card(c.rejected, 'Sent back', '#ef4444') + card(c.outstanding, 'Not responded', '#94a3b8');
+    }
+
+    const pill = (s) => s === 'pending' ? '<span style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; border-radius:999px; padding:2px 9px; font-size:0.7rem; font-weight:700;">PENDING</span>'
+        : s === 'approved' ? '<span style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; border-radius:999px; padding:2px 9px; font-size:0.7rem; font-weight:700;">APPROVED</span>'
+        : '<span style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:999px; padding:2px 9px; font-size:0.7rem; font-weight:700;">SENT BACK</span>';
+
+    if (listEl) {
+        const subs = scopeSubmissions.submissions || [];
+        listEl.innerHTML = subs.length ? subs.map(s => `
+            <div style="border:1px solid #e2e8f0; border-radius:11px; padding:15px; margin-bottom:11px; background:#fff;">
+                <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:9px;">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <strong style="font-size:0.98rem;">${escapeHtml(s.username || ('User #' + s.userId))}</strong>
+                        ${pill(s.status)}
+                        <span style="font-size:0.76rem; color:var(--text-muted);">${s.submittedAt ? new Date(s.submittedAt).toLocaleString('en-IN') : ''}</span>
+                    </div>
+                    ${s.status === 'pending' ? `<div style="display:flex; gap:7px;">
+                        <button onclick="decideScope(${s.userId},'approve')" style="background:#10b981; color:#fff; border:none; border-radius:7px; padding:7px 15px; font-size:0.82rem; font-weight:700; cursor:pointer;">✓ Approve</button>
+                        <button onclick="decideScope(${s.userId},'reject')" style="background:#fff; color:#b91c1c; border:1px solid #fecaca; border-radius:7px; padding:7px 15px; font-size:0.82rem; font-weight:700; cursor:pointer;">Send back</button>
+                    </div>` : `<span style="font-size:0.76rem; color:var(--text-muted);">${s.reviewedBy ? `by ${escapeHtml(s.reviewedBy)}` : ''}${s.competenciesAdded ? ` · +${s.competenciesAdded} competencies` : ''}</span>`}
+                </div>
+                <div style="font-size:0.83rem; color:#475569; margin-bottom:7px;">
+                    <strong>Sections:</strong> ${s.sections.map(x => escapeHtml(x)).join(', ')}
+                    ${s.proposedSection ? ` · <span style="color:#b45309;">proposed new section: “${escapeHtml(s.proposedSection)}”</span>` : ''}
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                    ${s.isNumbers.map(n => `<span style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:6px; padding:3px 8px; font-size:0.76rem; font-weight:600;">${escapeHtml(n)}</span>`).join('')}
+                </div>
+                ${s.note ? `<div style="margin-top:8px; font-size:0.81rem; color:#64748b; font-style:italic;">“${escapeHtml(s.note)}”</div>` : ''}
+                ${s.reviewNote ? `<div style="margin-top:6px; font-size:0.81rem; color:#334155;"><strong>Review note:</strong> ${escapeHtml(s.reviewNote)}</div>` : ''}
+            </div>`).join('')
+            : '<div style="padding:26px; text-align:center; color:var(--text-muted); font-size:0.88rem;">No submissions yet.</div>';
+    }
+
+    if (outEl) {
+        const out = scopeSubmissions.outstanding || [];
+        outEl.innerHTML = out.length ? `
+            <div style="border:1px solid #e2e8f0; border-radius:11px; padding:15px; background:#f8fafc;">
+                <div style="font-weight:700; font-size:0.9rem; margin-bottom:8px;">Not responded yet — ${out.length}</div>
+                <div style="display:flex; flex-wrap:wrap; gap:7px;">
+                    ${out.map(o => `<span style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px 10px; font-size:0.79rem;">${escapeHtml(o.fullName || ('User #' + o.userId))}</span>`).join('')}
+                </div>
+            </div>` : '';
+    }
+
+    const pendingPill = document.getElementById('scopeadm-pending-pill');
+    if (pendingPill) {
+        pendingPill.style.display = c.pending ? 'inline-block' : 'none';
+        pendingPill.textContent = c.pending || '';
+    }
+    const navBadge = document.getElementById('nav-scope-admin-badge');
+    if (navBadge) {
+        navBadge.style.display = c.pending ? 'inline-block' : 'none';
+        navBadge.textContent = c.pending || '';
+    }
+}
+
+async function decideScope(userId, decision) {
+    const note = decision === 'reject'
+        ? (prompt('Tell the TP what to change (optional):') || '')
+        : (prompt('Note for the record (optional):') || '');
+    try {
+        const res = await fetch(`/api/is-scope/submissions/${userId}/decide`, {
+            method: 'POST',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ decision, note })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Decision failed'));
+        showToast(decision === 'approve'
+            ? `Approved — ${data.competenciesAdded} competency row(s) added.`
+            : 'Sent back to the TP.', 'success');
+        loadScopeSubmissions();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+// ─── IS Standards & Report Formats manager (Report ▸ IS Standards & Report Formats) ───
+// A single screen over everything the lab holds for a standard: the extraction
+// (IS Intelligence vault) and the report format it drives (public/is_templates/*.json).
+// It only calls endpoints that already existed, plus /api/is-intelligence/standards
+// which joins them server-side, so nothing here can diverge from the vault.
+let ismData = { standards: [], orphanFormats: [], summary: null };
+let ismExpanded = new Set();
+
+async function loadISManager() {
+    const tbody = document.getElementById('ism-tbody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:26px; color:var(--text-muted);">Loading standards…</td></tr>';
+    try {
+        // Amendment badges next to each IS number come from the same map the rest of the app uses.
+        if (typeof loadAmendments === 'function' && !Object.keys(isAmendmentsMap || {}).length) {
+            try { await loadAmendments(); } catch (e) {}
+        }
+        const res = await fetch('/api/is-intelligence/standards');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load standards');
+        ismData = data;
+        renderISManager();
+    } catch (e) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:26px; color:var(--danger);">${escapeHtml(e.message)}</td></tr>`;
+    }
+}
+
+function ismFiltered() {
+    const q = (document.getElementById('ism-search')?.value || '').trim().toLowerCase();
+    const f = document.getElementById('ism-filter')?.value || 'all';
+    return (ismData.standards || []).filter(s => {
+        if (q) {
+            const hay = `${s.isNumber} ${s.title} ${s.pdfFileName}`.toLowerCase();
+            if (!hay.includes(q)) return false;
+        }
+        if (f === 'format') return !!s.reportFormat;
+        if (f === 'noformat') return !s.reportFormat;
+        if (f === 'linked') return !!s.masterLink;
+        if (f === 'unlinked') return !s.masterLink;
+        if (f === 'flags') return s.openFlags > 0;
+        return true;
+    });
+}
+
+function ismKpiCard(label, value, color, hint) {
+    return `<div class="glass-panel" style="padding:14px; text-align:center; border-top:4px solid ${color};">
+        <div style="font-size:1.6rem; font-weight:800; color:#0f172a;">${value}</div>
+        <div style="font-size:0.78rem; font-weight:700; color:#334155; text-transform:uppercase; letter-spacing:0.4px; margin-top:2px;">${label}</div>
+        <div style="font-size:0.7rem; color:var(--text-muted); margin-top:3px;">${hint}</div>
+    </div>`;
+}
+
+function renderISManager() {
+    const tbody = document.getElementById('ism-tbody');
+    const kpis = document.getElementById('ism-kpis');
+    if (!tbody) return;
+
+    const sum = ismData.summary || { total: 0, withFormat: 0, linkedToMaster: 0, needsReview: 0, totalParameters: 0 };
+    if (kpis) {
+        kpis.innerHTML = [
+            ismKpiCard('Standards', sum.total, '#3b82f6', 'in IS Intelligence'),
+            ismKpiCard('Report Formats', sum.withFormat, '#10b981', 'clause-by-clause templates'),
+            ismKpiCard('Linked to Master', sum.linkedToMaster, '#6366f1', 'man-hours matched'),
+            ismKpiCard('Needs Review', sum.needsReview, sum.needsReview ? '#f59e0b' : '#94a3b8', 'unresolved flags'),
+            ismKpiCard('Parameters', sum.totalParameters, '#a855f7', 'testable rows total')
+        ].join('');
+    }
+
+    const rows = ismFiltered();
+    const countEl = document.getElementById('ism-result-count');
+    if (countEl) countEl.textContent = `${rows.length} of ${(ismData.standards || []).length} shown`;
+
+    if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">
+            ${(ismData.standards || []).length ? 'No standard matches this filter.' : 'No standards yet — use “Add / Extract a Standard”.'}
+        </td></tr>`;
+    } else {
+        tbody.innerHTML = rows.map(s => ismRowHtml(s)).join('');
+    }
+
+    const orphanEl = document.getElementById('ism-orphans');
+    if (orphanEl) {
+        const orphans = ismData.orphanFormats || [];
+        orphanEl.style.display = orphans.length ? 'block' : 'none';
+        orphanEl.innerHTML = orphans.length ? `
+            <div style="border:1px solid #fde68a; background:#fffbeb; border-radius:10px; padding:14px;">
+                <div style="font-weight:700; color:#92400e; font-size:0.9rem; margin-bottom:6px;">⚠ ${orphans.length} report format${orphans.length === 1 ? '' : 's'} on disk with no standard behind ${orphans.length === 1 ? 'it' : 'them'}</div>
+                <div style="font-size:0.82rem; color:#78350f;">These render reports that can't be traced back to an extraction. Re-extract the standard, or remove the file.</div>
+                <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:8px;">
+                    ${orphans.map(o => `<a href="${escapeHtml(o.url)}" target="_blank" style="font-size:0.78rem; background:#fff; border:1px solid #fcd34d; color:#92400e; padding:4px 9px; border-radius:6px; text-decoration:none;">${escapeHtml(o.file)}</a>`).join('')}
+                </div>
+            </div>` : '';
+    }
+}
+
+function ismRowHtml(s) {
+    const fmt = s.reportFormat;
+    const open = ismExpanded.has(s.id);
+    const date = s.uploadedAt ? new Date(s.uploadedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' }) : '—';
+
+    // Format + parameter count share one column: on this screen they're a single
+    // question — "what does this standard's report look like, and how big is it?"
+    const formatCell = fmt
+        ? (fmt.broken
+            ? `<span style="color:var(--danger); font-weight:600; font-size:0.8rem;">⚠ Unreadable JSON</span>`
+            : `<div style="font-size:0.82rem; font-weight:600; color:#0f9d58;">✓ Template · <span style="color:#0f172a;">${fmt.paramCount} params</span></div>
+               <div style="font-size:0.72rem; color:var(--text-muted);">${fmt.dims.length ? `${escapeHtml(fmt.dims.join(' × '))} · ${fmt.variableParams} vary` : 'no dropdowns'}</div>`)
+        : `<div style="font-size:0.82rem; color:#b45309; font-weight:600;">— no template —</div>
+           <div style="font-size:0.72rem; color:var(--text-muted);">${s.vaultParamCount} params from vault</div>`;
+
+    const badges = [];
+    badges.push(s.openFlags > 0
+        ? `<span class="is-badge is-badge-medium">⚠ ${s.openFlags} flag${s.openFlags === 1 ? '' : 's'}</span>`
+        : `<span class="is-badge is-badge-high">✓ Ready</span>`);
+    if (s.masterLink) {
+        badges.push(`<span style="font-size:0.68rem; background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; border-radius:5px; padding:2px 6px; font-weight:600;" title="${s.masterLink.matchedToHours}/${s.masterLink.totalParams} parameters matched to testing-charges hours">↪ Linked</span>`);
+    }
+    if (s.amendments.total) {
+        badges.push(`<span style="font-size:0.68rem; background:${s.amendments.fresh ? '#fef2f2' : '#f8fafc'}; color:${s.amendments.fresh ? '#b91c1c' : '#475569'}; border:1px solid ${s.amendments.fresh ? '#fecaca' : '#e2e8f0'}; border-radius:5px; padding:2px 6px; font-weight:600;">${s.amendments.total} amd</span>`);
+    }
+
+    // Only the primary action carries a label — the rest are icon-only with tooltips,
+    // so the row still fits without a horizontal scroll on a laptop screen.
+    const btn = (label, onclick, style, title) =>
+        `<button onclick="event.stopPropagation(); ${onclick}" title="${title}" style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:5px 8px; font-size:0.75rem; font-weight:600; cursor:pointer; line-height:1.2; ${style}">${label}</button>`;
+
+    const main = `
+        <tr onclick="ismToggleDetail(${s.id})" style="cursor:pointer;">
+            <td style="text-align:center; color:var(--text-muted);">${open ? '▾' : '▸'}</td>
+            <td style="font-weight:700; white-space:nowrap;">${getISNumberHtml(s.isNumber)}</td>
+            <td style="max-width:300px;">${escapeHtml(s.title || '—')}</td>
+            <td>${formatCell}</td>
+            <td><div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center;">${badges.join('')}</div></td>
+            <td style="white-space:nowrap; font-size:0.8rem; color:var(--text-muted);">${date}</td>
+            <td style="text-align:right; white-space:nowrap;">
+                <div style="display:inline-flex; gap:5px;">
+                    ${btn('📄 Report', `ismGenerateReport(${s.id})`, 'color:#1d4ed8; border-color:#bfdbfe;', 'Open the live test report for this standard')}
+                    ${btn('🔎', `ismOpenInIntelligence(${s.id})`, 'color:#334155;', 'Open in IS Intelligence — clauses, flags, ask-the-standard')}
+                    ${btn('↪', `ismLink('${escapeHtml(s.isNumber)}')`, 'color:#4338ca; border-color:#c7d2fe;', 'Link to Master: match testing-charges man-hours and refresh conformance limits from this standard')}
+                    ${btn('🗑', `ismDelete(${s.id}, '${escapeHtml(s.isNumber)}')`, 'color:#b91c1c; border-color:#fecaca;', 'Remove this standard (its report format is archived, not erased)')}
+                </div>
+            </td>
+        </tr>`;
+
+    if (!open) return main;
+
+    const dl = fmt && !fmt.broken
+        ? `<a href="${escapeHtml(fmt.url)}" target="_blank" style="color:#1d4ed8; font-weight:600; text-decoration:none;">⬇ ${escapeHtml(fmt.file)}</a> · ${fmt.sizeKb} KB · updated ${new Date(fmt.updatedAt).toLocaleString('en-IN')}`
+        : '<span style="color:var(--text-muted);">No report format file — “Generate Report” falls back to the vault parameters.</span>';
+
+    const cell = (label, value) =>
+        `<div><div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.4px; color:var(--text-muted); font-weight:700;">${label}</div>
+         <div style="font-size:0.85rem; color:#0f172a; margin-top:2px;">${value}</div></div>`;
+
+    return main + `
+        <tr>
+            <td colspan="7" style="background:#f8fafc; padding:16px 20px;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:12px;">
+                    ${cell('Source PDF', escapeHtml(s.pdfFileName || '—'))}
+                    ${cell('Clauses / Tables', `${s.clauseCount} / ${s.tableCount}`)}
+                    ${cell('Vault parameters', s.vaultParamCount || '<span style="color:#b45309;">0 — not projected into the vault</span>')}
+                    ${cell('Confidence', s.confidenceScore != null ? `${Math.round(s.confidenceScore * 100)}%` : '—')}
+                    ${cell('Master link', s.masterLink ? `${s.masterLink.matchedToHours}/${s.masterLink.totalParams} params matched to hours` : 'Not linked')}
+                    ${cell('Report sections', fmt && fmt.sections && fmt.sections.length ? escapeHtml(fmt.sections.join(', ')) : '—')}
+                </div>
+                <div style="font-size:0.82rem;">${dl}</div>
+            </td>
+        </tr>`;
+}
+
+function ismToggleDetail(id) {
+    if (ismExpanded.has(id)) ismExpanded.delete(id); else ismExpanded.add(id);
+    renderISManager();
+}
+
+// Both actions below reuse the existing IS Intelligence flow verbatim — they only
+// pre-select the document so the manager can act as a launcher.
+async function ismOpenInIntelligence(id) {
+    switchTab('tab-is-intelligence');
+    await fetchISVault();
+    await selectISDocument(id);
+}
+
+async function ismGenerateReport(id) {
+    try {
+        const res = await fetch(`/api/is-intelligence/vault/${id}`);
+        const doc = await res.json();
+        if (doc.error) throw new Error(doc.error);
+        isActiveDocument = doc;
+        isUncertainItems = doc.uncertainItems || [];
+        isParsedClauses = doc.clauses || [];
+        await openISReport();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function ismLink(isNumber) {
+    await syncISToMaster(isNumber);
+    loadISManager();
+}
+
+async function ismDelete(id, isNumber) {
+    if (!confirm(`Remove ${isNumber} from IS Intelligence?\n\nThe extracted standard and its conformance limits are deleted. The report format JSON is archived to is_templates/_deleted/ so the extraction can be restored.`)) return;
+    try {
+        const res = await fetch(`/api/is-intelligence/standards/${id}`, {
+            method: 'DELETE',
+            headers: authHeaders()
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Delete failed'));
+        showToast(`${data.removed} removed${data.formatArchived ? ' · report format archived' : ''}`, 'success');
+        ismExpanded.delete(id);
+        loadISManager();
+        if (isActiveDocument && isActiveDocument.id === id) isActiveDocument = null;
+        fetchISVault();
     } catch (e) {
         showToast(e.message, 'error');
     }
@@ -5118,7 +6305,7 @@ function renderISSimpleResults() {
 }
 
 // --- Test Report (opened from the vault screen's "Generate Report" button) ---
-// For IS 4985 this replicates the LIMS auto-uploader report: Size/Class/Type/Plumbing
+// For IS 4985 this replicates the LIIS auto-uploader report: Size/Class/Type/Plumbing
 // selectors drive the 31 computed rows from specs_db.generateTestParameters, with the same
 // type-aware observed-value inputs and green/red glow validation (validateObservation).
 // Other standards fall back to the pipeline's extracted parameters in the same 5-column shape.
@@ -5342,7 +6529,7 @@ function renderTemplateRowsToTbody(rows) {
 }
 
 // Build the observed-value input for a parameter row — mirrors renderTestParametersTable
-// so the vault report behaves identically to the LIMS table (green/red glow on input).
+// so the vault report behaves identically to the LIIS table (green/red glow on input).
 function vaultObservedInputHtml(row, idx) {
     const val = row.expected || '';
     if (row.type === 'Qualitative') {
@@ -5412,14 +6599,14 @@ async function renderVaultISReportFallback(doc) {
     }
 }
 
-// Print a clean BIS Test Report document — same layout the LIMS uploader uses (previewLimsPdf).
+// Print a clean BIS Test Report document — same layout the LIIS uploader uses (previewLiisPdf).
 function printVaultISReport() {
     const doc = isActiveDocument || {};
     const tbody = document.getElementById('is-report-tbody');
     const rows = tbody ? [...tbody.querySelectorAll('tr')] : [];
     if (!rows.length) { showToast('Nothing to print yet.', 'error'); return; }
 
-    const esc = (typeof limsEsc === 'function') ? limsEsc : escapeHtml;
+    const esc = (typeof lisEsc === 'function') ? lisEsc : escapeHtml;
     const showMeta = isVaultReport4985();
     const meta = {
         sampleCode: (document.getElementById('is-report-sample') || {}).value || '',
@@ -5438,21 +6625,11 @@ function printVaultISReport() {
         const spec = c[2] ? c[2].textContent.trim() : '';
         const input = tr.querySelector('.vault-report-input');
         const observed = input ? (input.value || '') : (c[c.length - 1] ? c[c.length - 1].textContent.trim() : '');
-        let result = '—', color = '#64748b';
-        if (observed !== '') {
-            if (input && input.tagName.toLowerCase() === 'select') {
-                const bad = /unsatisfactory|fail/i.test(observed);
-                result = bad ? 'Fail' : 'Pass'; color = bad ? '#dc2626' : '#16a34a';
-            } else {
-                const v = parseFloat(observed);
-                const mn = input ? parseFloat(input.getAttribute('data-min')) : NaN;
-                const mx = input ? parseFloat(input.getAttribute('data-max')) : NaN;
-                let ok = true;
-                if (!isNaN(mn) && v < mn) ok = false;
-                if (!isNaN(mx) && v > mx) ok = false;
-                result = ok ? 'Pass' : 'Fail'; color = ok ? '#16a34a' : '#dc2626';
-            }
-        }
+        const isSelect = input && input.tagName.toLowerCase() === 'select';
+        const state = evaluateObservation(observed, input ? input.getAttribute('data-min') : '', input ? input.getAttribute('data-max') : '', isSelect);
+        let result = '—', color = OBS_COLORS.printNeutral;
+        if (state === 'pass') { result = 'Pass'; color = OBS_COLORS.printPass; }
+        else if (state === 'fail') { result = 'Fail'; color = OBS_COLORS.printFail; }
         bodyRows += `<tr><td>${esc(clause)}</td><td>${esc(param)}</td><td>${esc(spec)}</td><td>${esc(observed) || '<span style="color:#94a3b8">—</span>'}</td><td style="color:${color};font-weight:700;">${result}</td></tr>`;
     });
 
@@ -6233,83 +7410,9 @@ async function pollAgentJob(jobId, setStatus) {
     }).finally(() => { if (activeAgentPollJobId === jobId) activeAgentPollJobId = null; });
 }
 
-async function pollPipelineJob(jobId, setStatus, phaseLabels) {
-    const POLL_INTERVAL = 2500;
-    const MAX_POLLS = 240; // 10 minutes max
-    let polls = 0;
-
-    return new Promise(resolve => {
-        async function poll() {
-            polls++;
-            if (polls > MAX_POLLS) {
-                setStatus('Pipeline timed out — please check server logs', 0, true);
-                showToast('Pipeline timed out after 10 minutes', 'error');
-                return resolve(null);
-            }
-
-            let job;
-            try {
-                const res = await fetch('/api/is-intelligence/pipeline/' + jobId);
-                job = await res.json();
-            } catch (e) {
-                setTimeout(poll, POLL_INTERVAL);
-                return;
-            }
-
-            if (job.error && job.status !== 'error') {
-                // 404 or network issue — keep retrying briefly
-                setTimeout(poll, POLL_INTERVAL);
-                return;
-            }
-
-            const label = phaseLabels[Math.min(job.phase, phaseLabels.length - 1)];
-            const pct = Math.max(3, job.progress || 0);
-
-            if (job.status === 'running') {
-                setStatus(label + ' ' + (job.phaseLabel || ''), pct, false);
-                setTimeout(poll, POLL_INTERVAL);
-                return;
-            }
-
-            if (job.status === 'error') {
-                setStatus('Error in ' + (job.phaseLabel || 'pipeline') + ': ' + (job.error || ''), pct, true);
-                showToast('Pipeline failed: ' + (job.error || 'unknown error'), 'error');
-                return resolve(null);
-            }
-
-            if (job.status === 'done' && job.result) {
-                const r = job.result;
-                const statusEl = document.getElementById('is-parse-status-bar');
-                if (statusEl) {
-                    statusEl.style.display = 'flex';
-                    statusEl.className = 'is-parse-status success';
-                    statusEl.innerHTML = `
-                        <span style="font-size:1.2rem;">✅</span>
-                        <div class="is-parse-progress">
-                            <div style="font-size:0.88rem; font-weight:600; color:var(--success);">
-                                ${escapeHtml(r.isNumber)} — Pipeline Complete
-                            </div>
-                            <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">
-                                ${r.pagesProcessed}/${r.pagesTotal} pages · ${r.tablesFound} tables · ${r.paramsExtracted} params · ${Math.round((r.agreementRate || 0) * 100)}% reader agreement
-                                ${r.uncertainCount > 0 ? ` · <span style="color:var(--warning);">⚠ ${r.uncertainCount} items need confirm</span>` : ' · <span style="color:var(--success);">✓ all agreed</span>'}
-                            </div>
-                            <div class="is-parse-progress-bar" style="margin-top:6px;"><div class="is-parse-progress-fill" style="width:100%;"></div></div>
-                            ${r.calibration ? `<div style="font-size:0.75rem; margin-top:4px; color:${r.calibration.accuracy >= 95 ? 'var(--success)' : 'var(--warning)'};">📊 IS 4985 calibration: ${r.calibration.accuracy}% vs specs_db.js</div>` : ''}
-                        </div>
-                    `;
-                }
-
-                showToast(`✅ ${r.isNumber} extracted — ${r.paramsExtracted} params, ${r.uncertainCount} flags`, 'success');
-                await fetchISVault();
-                await selectISDocument(r.vaultId);
-                return resolve(r);
-            }
-
-            setTimeout(poll, POLL_INTERVAL);
-        }
-        setTimeout(poll, 1000); // first poll after 1s
-    });
-}
+// pollPipelineJob() removed 2026-06-24 — the OpenRouter 6-phase pipeline was retired as an
+// IS Intelligence input. Extraction now polls the Agent SDK job via pollAgentJob(). This
+// function had zero callers and was the last UI reference to /api/is-intelligence/pipeline/.
 
 
 // --- Helper: Escape HTML ---
@@ -6423,6 +7526,21 @@ async function fetchTemplates() {
     }
 }
 
+// Decode a vault `variety` key into a readable chip using the standard's parameterizationDims +
+// dimensionOptions ("16|41" -> "size 16 · SDR 41", "Fe 500" -> "grade Fe 500", "" -> all variants).
+function decodeVariety(variety, dimData) {
+    if (variety == null || variety === '') return '';
+    const dims = (dimData && dimData.parameterizationDims) || [];
+    const opts = (dimData && dimData.dimensionOptions) || {};
+    const labelFor = (val) => {
+        const dim = dims.find(d => (opts[d] || []).map(String).includes(String(val)));
+        return dim ? `${dim} ${val}` : String(val);
+    };
+    const parts = String(variety).split('|');
+    if (parts.length === 1) return labelFor(parts[0]);
+    return parts.map((p, i) => (dims[i] ? `${dims[i]} ${p}` : labelFor(p))).join(' · ');
+}
+
 async function loadTemplateForIS() {
     const tbody = document.getElementById('template-params-tbody');
     if (!tbody) return;
@@ -6432,119 +7550,111 @@ async function loadTemplateForIS() {
     const isNumber = isSelect.value;
     if (!isNumber) return;
 
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Loading from IS Intelligence vault…</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">Loading from IS Intelligence vault…</td></tr>';
 
-    let clauses = [];
+    let rows = [];        // one entry per parameter × variety (full granularity)
+    let dimData = {};
     try {
         const res = await fetch(`/api/is-intelligence/params/${encodeURIComponent(isNumber)}`);
         const data = await res.json().catch(() => ({}));
+        dimData = data.dimension_data || {};
         if (res.ok && data.found && data.test_parameters && data.test_parameters.length) {
-            // Deduplicate by clause — one row per clause in the template
+            // One row PER PARAMETER × VARIETY — every grade/type/size/class the IS actually defines.
+            // Data-driven (iterate the distinct variety keys present), NOT a dimension cross-product,
+            // so we never invent invalid combos (e.g. IS 4985 omits some size/class pairs).
             const seen = new Set();
             data.test_parameters.forEach(p => {
-                if (!seen.has(p.clause)) {
-                    seen.add(p.clause);
-                    clauses.push({ clause: p.clause, param: p.param, hours: 1.0 });
-                }
+                const variety = p.variety || '';
+                const key = `${p.clause}|${p.param}|${variety}`;
+                if (!seen.has(key)) { seen.add(key); rows.push({ clause: p.clause, param: p.param, variety }); }
             });
         }
     } catch (e) { console.error('Failed to load params from vault:', e); }
 
-    if (!clauses.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#e06c75;">No parameters found for <strong>${isNumber}</strong> in IS Intelligence vault. Upload the IS standard PDF in IS Intelligence first.</td></tr>`;
+    const badge = document.getElementById('template-is-badge');
+    if (badge) badge.textContent = isNumber || '—';
+
+    if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#e06c75;">No parameters found for <strong>${isNumber}</strong> in IS Intelligence vault. Upload the IS standard PDF in IS Intelligence first.</td></tr>`;
         return;
     }
 
     try {
-
         tbody.innerHTML = '';
-        
-        if (!clauses || clauses.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No clauses found for ${isNumber}.</td></tr>`;
-            return;
-        }
-        
+
         const savedTemplate = currentTemplates[isNumber] || {};
-        const activeClauses = savedTemplate.activeClauses || {};
+        const saved = savedTemplate.activeClauses || {};
 
         const tatInput = document.getElementById('template-tat-days');
         if (tatInput) tatInput.value = savedTemplate.tatDays || 7;
 
         let totalHrs = 0;
+        const clauseCounted = new Set();   // man-hours are PER CLAUSE — count each active clause once (variants don't multiply it)
+        const cell = 'padding: 12px 16px; vertical-align: top;';
+        const inp = 'background:white; border:1px solid #cbd5e1; color:#0f172a; border-radius:6px; font-size:0.85rem; padding:8px 10px; outline:none;';
+        const esc = (s) => String(s == null ? '' : s).replace(/"/g, '&quot;');
 
-        clauses.forEach(c => {
-            let isChecked = true;
-            let equipment = '';
-            let passiveHrs = 0;
-            let stdActiveHrs = c.hours || (typeof RAW_MAN_HOURS_DB !== 'undefined' ? RAW_MAN_HOURS_DB[c.clause] : 1.0) || 1.0;
-            let activeHrs = stdActiveHrs;
+        rows.forEach(c => {
+            const variety = c.variety || '';
+            const variantKey = `${c.clause}|${c.param}|${variety}`;
+            const paramKey = `${c.clause}|${c.param}`;
+            // saved record: per-variant first, then per-param, then legacy clause-only.
+            const rec = (typeof saved[variantKey] === 'object' ? saved[variantKey]
+                        : typeof saved[paramKey] === 'object' ? saved[paramKey]
+                        : typeof saved[c.clause] === 'object' ? saved[c.clause] : null) || {};
 
-            if (activeClauses && activeClauses.hasOwnProperty(c.clause)) {
-                const savedC = activeClauses[c.clause];
-                if (typeof savedC === 'object') {
-                    isChecked = savedC.active;
-                    if (savedC.useSource) {
-                        activeHrs = savedC.useSource === 'custom' ? (savedC.customHours || stdActiveHrs) : stdActiveHrs;
-                    } else {
-                        activeHrs = savedC.activeHours !== undefined ? savedC.activeHours : stdActiveHrs;
-                    }
-                    passiveHrs = savedC.passiveHours || 0;
-                    equipment = savedC.equipment || '';
-                } else {
-                    isChecked = savedC; // legacy boolean
-                }
+            const isChecked = rec.active !== undefined ? rec.active : true;
+            const machine = rec.equipment || '';
+            const machineHrs = rec.passiveHours != null ? rec.passiveHours : 0;
+            const samplesPerCycle = rec.samplesPerCycle != null ? rec.samplesPerCycle : 1;
+
+            // Man-hours from the testing charges (per clause): saved value → charges DB → "no match".
+            const chargeDbHrs = (typeof RAW_MAN_HOURS_DB !== 'undefined' && RAW_MAN_HOURS_DB[c.clause] != null)
+                ? RAW_MAN_HOURS_DB[c.clause] : null;
+            const chargeHrs = rec.activeHours != null ? rec.activeHours : chargeDbHrs;
+            const manHours = chargeHrs != null ? chargeHrs : '';
+            const tag = chargeHrs != null
+                ? `<div style="font-size:0.68rem; color:#10b981; margin-top:3px;">✓ charges</div>`
+                : `<div style="font-size:0.68rem; color:#d97706; margin-top:3px;">⚠ no match</div>`;
+
+            if (isChecked && manHours !== '' && !clauseCounted.has(c.clause)) {
+                clauseCounted.add(c.clause);
+                totalHrs += parseFloat(manHours) || 0;
             }
-            
-            if (isChecked) totalHrs += activeHrs;
+
+            const chip = decodeVariety(variety, dimData);
+            const chipHtml = chip
+                ? `<span style="display:inline-block; margin-top:4px; font-size:0.7rem; background:#eef2ff; color:#4338ca; border:1px solid #e0e7ff; border-radius:10px; padding:1px 8px;">${esc(chip)}</span>`
+                : `<span style="display:inline-block; margin-top:4px; font-size:0.7rem; color:#94a3b8;">all variants</span>`;
 
             const tr = document.createElement('tr');
-            tr.style.cssText = "border-bottom: 1px solid #f1f5f9; transition: background 0.2s ease;";
+            tr.style.cssText = "border-bottom: 1px solid #f1f5f9;";
             tr.onmouseover = () => tr.style.background = '#f8fafc';
             tr.onmouseout = () => tr.style.background = 'transparent';
-            
-            // Custom designed animated checkbox for a premium look
-            const checkboxHtml = `
-                <div style="display: flex; justify-content: center;">
-                    <label style="position: relative; cursor: pointer; display: flex; align-items: center;">
-                        <input type="checkbox" class="template-clause-chk" data-clause="${c.clause}" ${isChecked ? 'checked' : ''} onchange="this.nextElementSibling.style.opacity = this.checked ? '1' : '0'; this.nextElementSibling.style.transform = this.checked ? 'scale(1)' : 'scale(0.5)'; this.style.borderColor = this.checked ? '#3b82f6' : '#cbd5e1'; this.style.background = this.checked ? '#3b82f6' : 'white'; this.style.boxShadow = this.checked ? '0 2px 5px rgba(59,130,246,0.3)' : 'none'; updateTemplateTotal()" style="appearance: none; width: 22px; height: 22px; border: 2px solid ${isChecked ? '#3b82f6' : '#cbd5e1'}; border-radius: 6px; background: ${isChecked ? '#3b82f6' : 'white'}; cursor: pointer; transition: all 0.2s ease; margin: 0; box-shadow: ${isChecked ? '0 2px 5px rgba(59,130,246,0.3)' : 'none'};">
-                        <svg style="position: absolute; left: 4px; top: 4px; pointer-events: none; opacity: ${isChecked ? '1' : '0'}; transform: scale(${isChecked ? '1' : '0.5'}); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    </label>
-                </div>
-            `;
 
-            tr.innerHTML = `
-                <td style="padding: 14px 16px;">${checkboxHtml}</td>
-                <td style="padding: 14px 16px;">
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <span style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">Clause ${c.clause}</span>
-                        <span style="color: #64748b; font-size: 0.85rem; font-weight: 500;">${c.param}</span>
-                    </div>
-                </td>
-                <td style="padding: 14px 16px;">
-                    <input type="text" class="template-equip-input" value="${equipment}" placeholder="e.g. UTM, Oven" style="width: 100%; padding: 8px 10px; background: white; border: 1px solid #cbd5e1; color: #0f172a; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; outline: none; box-shadow: 0 1px 2px rgba(0,0,0,0.03);" onchange="saveTemplateForIS()" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='0 1px 2px rgba(0,0,0,0.03)';">
-                </td>
-                <td style="padding: 14px 16px; text-align: center;">
-                    <span class="template-std-hrs" data-val="${stdActiveHrs}" style="font-weight: 700; color: #64748b; font-size: 0.9rem;">${stdActiveHrs}</span>
-                </td>
-                <td style="padding: 14px 16px; text-align: center;">
-                    <input type="number" class="template-passive-hrs-input" value="${passiveHrs}" step="0.5" style="width: 70px; padding: 8px; background: white; border: 1px solid #cbd5e1; color: #0f172a; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: center; transition: all 0.2s; outline: none; box-shadow: 0 1px 2px rgba(0,0,0,0.03);" onchange="saveTemplateForIS()" onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)';" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='0 1px 2px rgba(0,0,0,0.03)';">
-                </td>
-            `;
+            tr.innerHTML =
+                `<td style="${cell} text-align:center;"><input type="checkbox" class="template-clause-chk" data-clause="${esc(c.clause)}" data-param="${esc(c.param)}" data-variety="${esc(variety)}" ${isChecked ? 'checked' : ''} onchange="updateTemplateTotal()" style="width:18px; height:18px; cursor:pointer; accent-color:#3b82f6;"></td>`
+                + `<td style="${cell}"><div style="font-weight:700; color:#0f172a; font-size:0.9rem;">Clause ${esc(c.clause)}</div><div style="color:#64748b; font-size:0.82rem;">${esc(c.param)}</div>${chipHtml}</td>`
+                + `<td style="${cell}"><input type="text" class="template-equip-input" value="${esc(machine)}" placeholder="e.g. UTM, oven" style="width:100%; ${inp}" onchange="updateTemplateTotal()"></td>`
+                + `<td style="${cell} text-align:center;"><input type="number" class="template-passive-hrs-input" value="${machineHrs}" step="0.5" min="0" style="width:76px; text-align:center; ${inp}" onchange="updateTemplateTotal()"></td>`
+                + `<td style="${cell} text-align:center;"><input type="number" class="template-samples-input" value="${samplesPerCycle}" step="1" min="1" style="width:64px; text-align:center; ${inp}" onchange="updateTemplateTotal()"></td>`
+                + `<td style="${cell} text-align:center;"><input type="number" class="template-manhours-input" value="${manHours}" step="0.1" min="0" placeholder="—" data-charge="${chargeHrs != null ? chargeHrs : ''}" style="width:76px; text-align:center; ${inp}" onchange="updateTemplateTotal()">${tag}</td>`;
             tbody.appendChild(tr);
         });
 
         const totalEl = document.getElementById('template-total-hours');
-        if (totalEl) totalEl.textContent = totalHrs.toFixed(1) + ' hrs';
-        
+        if (totalEl) totalEl.textContent = totalHrs.toFixed(1);
+
         try {
             renderManHoursChart();
             if (typeof updateTemplateCoverage === 'function') updateTemplateCoverage();
+            if (typeof updateTemplateCapacity === 'function') updateTemplateCapacity();
         } catch (chartErr) {
             console.error("Chart render error", chartErr);
         }
-        
+
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="5" style="color:red; padding:20px; font-weight:bold;">Debug Error: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="color:red; padding:20px; font-weight:bold;">Debug Error: ${err.message}</td></tr>`;
         console.error(err);
     }
 }
@@ -6564,15 +7674,19 @@ function renderManHoursChart() {
     const chartColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f43f5e', '#6366f1', '#facc15', '#a855f7'];
     let cIdx = 0;
 
+    const seenClause = new Set();   // man-hours are per clause — one slice per clause, not per variant
     trs.forEach(tr => {
         const chk = tr.querySelector('.template-clause-chk');
-        const activeInput = tr.querySelector('.template-std-hrs');
+        const mhInput = tr.querySelector('.template-manhours-input');
 
-        if (chk && chk.checked && activeInput) {
-            let hrs = parseFloat(activeInput.dataset.val) || parseFloat(activeInput.textContent) || 0;
+        if (chk && chk.checked && mhInput) {
+            const clauseKey = chk.getAttribute('data-clause');
+            if (seenClause.has(clauseKey)) return;
+            let hrs = parseFloat(mhInput.value) || 0;
 
             if (hrs > 0) {
-                let labelText = chk.getAttribute('data-clause');
+                seenClause.add(clauseKey);
+                let labelText = clauseKey;
                 labels.push(labelText);
                 data.push(hrs);
                 colors.push(chartColors[cIdx % chartColors.length]);
@@ -6684,18 +7798,52 @@ function updateTemplateCoverage() {
 function updateTemplateTotal() {
     const trs = document.querySelectorAll('#template-params-tbody tr');
     let totalHrs = 0;
+    const clauseCounted = new Set();   // man-hours are per clause — count each active clause once (not per variant)
     trs.forEach(tr => {
         const chk = tr.querySelector('.template-clause-chk');
-        const activeInput = tr.querySelector('.template-std-hrs');
-
-        if (chk && chk.checked && activeInput) {
-            totalHrs += parseFloat(activeInput.dataset.val) || parseFloat(activeInput.textContent) || 0;
+        const mh = tr.querySelector('.template-manhours-input');
+        if (chk && chk.checked && mh) {
+            const clause = chk.dataset.clause;
+            if (!clauseCounted.has(clause)) { clauseCounted.add(clause); totalHrs += parseFloat(mh.value) || 0; }
         }
     });
-    document.getElementById('template-total-hours').textContent = totalHrs.toFixed(1) + ' hrs';
+    const el = document.getElementById('template-total-hours');
+    if (el) el.textContent = totalHrs.toFixed(1);
     renderManHoursChart();
     if (typeof updateTemplateCoverage === 'function') updateTemplateCoverage();
+    if (typeof updateTemplateCapacity === 'function') updateTemplateCapacity();
     saveTemplateForIS(); // Auto-save on change
+}
+
+// Capacity signals for the auto-assigner: distinct machines in use, the equipment bottleneck
+// (longest machine-hours ÷ samples-per-cycle across active params), and charge-match coverage.
+function updateTemplateCapacity() {
+    const trs = document.querySelectorAll('#template-params-tbody tr');
+    const machines = new Set();
+    let bottleneck = 0, matched = 0, totalParams = 0;
+    trs.forEach(tr => {
+        const chk = tr.querySelector('.template-clause-chk');
+        if (!chk) return;
+        totalParams++;
+        const mh = tr.querySelector('.template-manhours-input');
+        const charge = mh ? mh.getAttribute('data-charge') : '';
+        if (charge !== '' && charge != null) matched++;
+        if (!chk.checked) return;
+        const equip = tr.querySelector('.template-equip-input');
+        if (equip && equip.value.trim()) machines.add(equip.value.trim().toLowerCase());
+        const passive = tr.querySelector('.template-passive-hrs-input');
+        const samples = tr.querySelector('.template-samples-input');
+        const p = passive ? (parseFloat(passive.value) || 0) : 0;
+        const n = samples ? Math.max(1, parseInt(samples.value) || 1) : 1;
+        const perSample = p / n;
+        if (perSample > bottleneck) bottleneck = perSample;
+    });
+    const mEl = document.getElementById('cap-machines');
+    const bEl = document.getElementById('cap-bottleneck');
+    const cEl = document.getElementById('cap-matched');
+    if (mEl) mEl.textContent = machines.size;
+    if (bEl) bEl.textContent = bottleneck > 0 ? bottleneck.toFixed(1) + ' h' : '—';
+    if (cEl) cEl.textContent = `${matched} / ${totalParams}`;
 }
 
 async function saveTemplateForIS() {
@@ -6705,35 +7853,49 @@ async function saveTemplateForIS() {
     
     let activeClauses = {};
     let totalHours = 0;
-    
+    const clauseCounted = new Set();
+
     trs.forEach(tr => {
         const chk = tr.querySelector('.template-clause-chk');
-        const activeInput = tr.querySelector('.template-std-hrs');
-        const passiveInput = tr.querySelector('.template-passive-hrs-input');
-        const equipInput = tr.querySelector('.template-equip-input');
-        
         if (!chk) return;
-        
         const clause = chk.dataset.clause;
-        const isActive = chk.checked;
-        const activeHrs = activeInput ? (parseFloat(activeInput.dataset.val) || parseFloat(activeInput.textContent) || 0) : 0;
-        const passiveHrs = passiveInput ? (parseFloat(passiveInput.value) || 0) : 0;
-        const equip = equipInput ? (equipInput.value || '') : '';
+        const param = chk.dataset.param || '';
+        const variety = chk.dataset.variety || '';
+        const mh = tr.querySelector('.template-manhours-input');
+        const passiveInput = tr.querySelector('.template-passive-hrs-input');
+        const samplesInput = tr.querySelector('.template-samples-input');
+        const equipInput = tr.querySelector('.template-equip-input');
 
-        activeClauses[clause] = {
+        const isActive = chk.checked;
+        const activeHrs = mh ? (parseFloat(mh.value) || 0) : 0;                        // man-hours (active, per clause)
+        const passiveHrs = passiveInput ? (parseFloat(passiveInput.value) || 0) : 0;   // machine time / cycle
+        const samplesPerCycle = samplesInput ? (parseInt(samplesInput.value) || 1) : 1;
+        const equip = equipInput ? (equipInput.value || '') : '';                      // machine / equipment
+
+        // Key PER PARAMETER × VARIETY. Values keep {active, activeHours, passiveHours, equipment}
+        // so the auto-assigner (which iterates Object.values) stays back-compatible; variety +
+        // samplesPerCycle are new. NOTE for the deferred auto-assigner work: equipmentLoadMap will
+        // now see one entry per variant — dedupe per clause there, and map a sample→variant before
+        // using per-variant machine time (samples currently carry no size/grade).
+        activeClauses[`${clause}|${param}|${variety}`] = {
             active: isActive,
+            clause,
+            param,
+            variety,
             activeHours: activeHrs,
             passiveHours: passiveHrs,
-            equipment: equip
+            equipment: equip,
+            samplesPerCycle
         };
-        
-        if (isActive) totalHours += activeHrs;
+
+        // man-hours are per clause — total counts each active clause once (variants don't multiply it)
+        if (isActive && !clauseCounted.has(clause)) { clauseCounted.add(clause); totalHours += activeHrs; }
     });
 
-    const templateData = { 
+    const templateData = {
         tatDays: tatInput ? parseFloat(tatInput.value) : 7,
-        activeClauses, 
-        totalHours 
+        activeClauses,
+        totalHours
     };
 
     try {
@@ -6744,8 +7906,7 @@ async function saveTemplateForIS() {
         });
         const data = await res.json();
         if (res.ok) {
-            showToast('Template saved successfully!', 'success');
-            currentTemplates[isNumber] = templateData;
+            currentTemplates[isNumber] = templateData;   // silent auto-save (no toast on every edit)
         } else {
             showToast('Failed to save template: ' + (data.error || 'Unknown database error'), 'error');
         }
@@ -6908,8 +8069,8 @@ function openPreviewModal() {
             const clause = chk.dataset.clause;
             const param = tr.querySelector('td:nth-child(2)').textContent.trim();
             const equip = tr.querySelector('.template-equip-input').value;
-            const activeInput = tr.querySelector('.template-std-hrs');
-            const activeHrs = activeInput ? (parseFloat(activeInput.dataset.val) || parseFloat(activeInput.textContent) || 0) : 0;
+            const activeInput = tr.querySelector('.template-manhours-input');
+            const activeHrs = activeInput ? (parseFloat(activeInput.value) || 0) : 0;
             const passiveHrs = parseFloat(tr.querySelector('.template-passive-hrs-input').value) || 0;
             
             totalHrs += activeHrs;
@@ -6949,7 +8110,7 @@ function loadIS4985LimitsOverride() {
 
 function limCell(dn, field, value, width) {
     const v = (value === null || value === undefined) ? '' : value;
-    return `<td style="border:1px solid #e2e8f0; padding:3px;"><input class="lim-cell" data-dn="${dn}" data-field="${field}" value="${limsEsc(v)}" style="width:${width || 56}px; padding:5px; text-align:center; background:#ffffff; border:1px solid #cbd5e1; border-radius:4px; color:#1a1a2e; font-size:0.8rem;"></td>`;
+    return `<td style="border:1px solid #e2e8f0; padding:3px;"><input class="lim-cell" data-dn="${dn}" data-field="${field}" value="${lisEsc(v)}" style="width:${width || 56}px; padding:5px; text-align:center; background:#ffffff; border:1px solid #cbd5e1; border-radius:4px; color:#1a1a2e; font-size:0.8rem;"></td>`;
 }
 
 function openIS4985LimitsModal() {
@@ -7083,6 +8244,10 @@ function switchNsrSubTab(subTabId) {
 var copilotHistory = [];
 
 function toggleCopilot() {
+    if (!canUseAiAssistant()) {
+        updateAiAssistantAccess();
+        return;
+    }
     const panel = document.getElementById('ai-copilot-panel');
     const badge = document.getElementById('ai-copilot-badge');
     const input = document.getElementById('ai-copilot-input');
@@ -7132,6 +8297,10 @@ function sendCopilotChip(text) {
 }
 
 async function sendCopilotMessage() {
+    if (!canUseAiAssistant()) {
+        updateAiAssistantAccess();
+        return;
+    }
     const inputEl = document.getElementById('ai-copilot-input');
     if (!inputEl) { console.error('[Copilot] ai-copilot-input not found!'); return; }
     const text = inputEl.value.trim();
@@ -7319,7 +8488,10 @@ async function approveCopilotAction(actionId, btnEl) {
         const res = await fetch('/api/copilot/action', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ actionId })
+            body: JSON.stringify({
+                actionId,
+                userName: (typeof currentUser === 'object' && currentUser) ? (currentUser.username || '') : ''
+            })
         });
         const data = await res.json();
         
@@ -8074,7 +9246,7 @@ function printMasterList() {
             }
         </style>
     </head><body>
-        <h2>Namoona Paridarshan — Master Sample List</h2>
+        <h2>LIIS — Master Sample List</h2>
         <div class="meta">Printed: ${now} &nbsp;|&nbsp; Total Records: ${filtered.length}</div>
         <table>
             <thead><tr>
@@ -8192,7 +9364,7 @@ function printAllotmentSlips(samples) {
 }
 
 // =============================================================================
-// DISHA AGENT — bell + slide-out panel (Phase 1–3: notification + execution)
+// NIGRANI AGENT — bell + slide-out panel (Phase 1–3: notification + execution)
 // =============================================================================
 (function () {
     const POLL_MS = 30_000;
@@ -8276,7 +9448,15 @@ function printAllotmentSlips(samples) {
         const sub = document.getElementById('Nigrani-bell-sub');
         if (!silent && sub) sub.textContent = 'Refreshing…';
         try {
-            const resp = await fetch(`/api/notifications?status=${encodeURIComponent(currentFilter)}&limit=50`);
+            const qs = new URLSearchParams({
+                status: currentFilter,
+                limit: '50',
+            });
+            if (typeof currentUser === 'object' && currentUser) {
+                if (currentUser.username) qs.set('username', currentUser.username);
+                if (currentUser.role) qs.set('role', currentUser.role);
+            }
+            const resp = await fetch(`/api/notifications?${qs.toString()}`);
             const json = await resp.json().catch(() => ({}));
             if (!resp.ok) throw new Error(json.error || `HTTP ${resp.status}`);
             const list = json.notifications || [];
@@ -8292,7 +9472,7 @@ function printAllotmentSlips(samples) {
         }
     }
 
-    window.toggleDishaBell = function (forceState) {
+    window.toggleNigraniBell = function (forceState) {
         const panel = document.getElementById('Nigrani-bell-panel');
         const overlay = document.getElementById('Nigrani-bell-overlay');
         if (!panel || !overlay) return;
@@ -8302,7 +9482,6 @@ function printAllotmentSlips(samples) {
         panel.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
         if (shouldOpen) fetchAndRender();
     };
-    window.toggleNigraniBell = window.toggleDishaBell;
 
     window.refreshNigraniBell = async function (force) {
         if (force) {
@@ -8319,7 +9498,7 @@ function printAllotmentSlips(samples) {
         fetchAndRender();
     };
 
-    window.dishaAct = async function (id, action) {
+    window.NigraniAct = async function (id, action) {
         const body = action === 'snooze' ? { hours: 4 } : {};
         try {
             const r = await fetch(`/api/notifications/${id}/${action}`, {
@@ -8344,11 +9523,10 @@ function printAllotmentSlips(samples) {
 
             await fetchAndRender({ silent: true });
         } catch (err) {
-            console.warn('[Disha bell] action failed', err);
+            console.warn('[Nigrani bell] action failed', err);
             showToast('Action failed: ' + err.message, 'error');
         }
     };
-    window.NigraniAct = window.dishaAct;
 
     function initNigraniBell() {
         // Light background poll for the badge — every 30s while page is open.
@@ -8789,3 +9967,75 @@ switchISInnerTab = function(tabId) {
         if (typeof loadAdminLimits === 'function') loadAdminLimits();
     }
 };
+
+/* ===========================================================================
+   BIS demo deep-link
+   ---------------------------------------------------------------------------
+   Lets the offline bis.gov.in mirror open this app straight on a given tab,
+   optionally skipping the login screen, so a proposal demo can go from the BIS
+   "Laboratory Services > Draft Test Request and Test Report Formats" page into
+   IS Intelligence in one click.
+
+       ?demo=1#tab-is-intelligence   -> skip auth, land on IS Standards Vault
+       #tab-is-intelligence          -> normal login, then land on that tab
+
+   Deliberately restricted to loopback hosts. On any real hostname the flag is
+   ignored and the normal login runs, so this cannot become an auth hole if the
+   app is ever served off localhost.
+   =========================================================================== */
+const BIS_DEMO_LOOPBACK_HOSTS = ['localhost', '127.0.0.1', '::1', ''];
+
+function bisDemoIsLoopback() {
+    return BIS_DEMO_LOOPBACK_HOSTS.includes(location.hostname);
+}
+
+// Mirrors the post-login side effects in login() above, but with a local demo
+// identity instead of a /api/login response. Nothing is persisted.
+function bisDemoEnterAsDemoUser(tabId) {
+    currentUser = { username: 'BIS Demo', role: 'super_admin', designation: 'Demo' };
+
+    const auth = document.getElementById('auth-container');
+    const dash = document.getElementById('dashboard-container');
+    if (auth) auth.classList.remove('active');
+    if (dash) dash.classList.add('active');
+
+    const welcome = document.getElementById('user-welcome');
+    if (welcome) welcome.textContent = 'Welcome, BIS Demo (Super Admin)';
+
+    const nav = document.getElementById('sidebar-nav');
+    if (nav) nav.style.display = 'flex';
+
+    if (typeof toggleAdminViews === 'function') toggleAdminViews();
+    if (typeof updateProfileUI === 'function') updateProfileUI();
+
+    switchTab(tabId);
+}
+
+function bisDemoInit() {
+    const params = new URLSearchParams(location.search);
+    const wantsDemo = params.get('demo') === '1';
+    // Accept "#tab-is-intelligence" and the shorthand "#is-intelligence".
+    let hash = (location.hash || '').replace(/^#/, '');
+    if (hash && !hash.startsWith('tab-')) hash = 'tab-' + hash;
+    const targetTab = hash || 'tab-is-intelligence';
+
+    if (!hash && !wantsDemo) return; // untouched normal startup
+
+    if (!bisDemoIsLoopback()) {
+        console.warn('[bis-demo] ignored — deep-link is loopback-only, host is', location.hostname);
+        return;
+    }
+
+    if (!document.getElementById(targetTab)) {
+        console.warn('[bis-demo] no such tab:', targetTab);
+        return;
+    }
+
+    if (wantsDemo) {
+        bisDemoEnterAsDemoUser(targetTab);
+    } else if (currentUser) {
+        switchTab(targetTab);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', bisDemoInit);

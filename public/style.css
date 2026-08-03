@@ -822,9 +822,9 @@ tr:hover td {
     box-shadow: 0 4px 8px rgba(217, 48, 37, 0.4);
 }
 
-/* --- LIMS Automator Premium Console Styles --- */
+/* --- LIIS Automator Premium Console Styles --- */
 
-.lims-badge {
+.liis-badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -837,7 +837,7 @@ tr:hover td {
     transition: all 0.3s ease;
 }
 
-.lims-badge .status-dot {
+.liis-badge .status-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -3720,3 +3720,19 @@ html {
     }
 }
 
+
+/* Nav items that open the "coming soon" dialog — labelled so the sidebar tells the
+   truth about what is built, instead of every user discovering it by clicking. */
+.nav-soon-badge {
+    margin-left: 8px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    background: rgba(148, 163, 184, 0.22);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    vertical-align: middle;
+}

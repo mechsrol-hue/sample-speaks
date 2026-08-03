@@ -8,7 +8,10 @@ const supabase = require('./database-supabase');
 const path = require('path');
 const fs = require('fs');
 const hoursModel = require('./server/ml/hours-model');
-const isPipeline = require('./server/pipeline/is-pipeline');
+// IS Intelligence single input = Claude Agent SDK path (/api/is-intelligence/agent-extract).
+// The OpenRouter 6-phase pipeline (server/pipeline/is-pipeline.js) was retired as an input on
+// 2026-06-24; the file stays on disk (unreferenced) for reversibility. specs_db.js is kept only
+// as the canonical IS 4985 report reference, never as an extraction input.
 
 const app = express();
 app.use(cors());
@@ -17,6 +20,53 @@ app.use(express.static('public'));
 
 const upload = multer({ storage: multer.memoryStorage() });
 const MASTER_LIST_FILE = path.join(__dirname, 'Sample Speaks.xlsx');
+
+// ── Admin sessions ─────────────────────────────────────────────────────────────
+// Scope: the destructive IS Intelligence routes only (retire a standard, re-link a
+// standard to the Master Templates). Those change what the whole lab tests against,
+// so a hidden nav item is not a control — the server has to decide.
+//
+// /api/login mints an unguessable token; the protected routes require it. Nothing
+// else in the app is touched, so no existing flow can break on a missing token.
+// Deliberately NOT a general auth layer: every other endpoint remains unauthenticated,
+// and this does not pretend otherwise.
+//
+// Tokens live in memory: a server restart signs everyone out of these two actions
+// (the client then asks the user to sign in again). Acceptable at this scale, and it
+// keeps the token off disk.
+// require inline — `crypto` is already declared further down this file.
+const SESSIONS = new Map();               // token -> { userId, username, role, expiresAt }
+const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
+const ADMIN_ROLES = new Set(['admin', 'admin_sample_cell', 'super_admin']);
+
+function issueSession(user) {
+    const token = require('crypto').randomBytes(32).toString('hex');
+    SESSIONS.set(token, {
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+        expiresAt: Date.now() + SESSION_TTL_MS
+    });
+    // Opportunistic sweep — no timer, so this can't keep the process alive.
+    for (const [t, s] of SESSIONS) if (s.expiresAt <= Date.now()) SESSIONS.delete(t);
+    return token;
+}
+
+// 401 = "you are not signed in / your session expired", 403 = "signed in, wrong role".
+// The client distinguishes them so it can tell the user which one actually happened.
+function requireAdmin(req, res, next) {
+    const token = req.get('x-session-token') || '';
+    const session = SESSIONS.get(token);
+    if (!session || session.expiresAt <= Date.now()) {
+        SESSIONS.delete(token);
+        return res.status(401).json({ error: 'Sign in as an admin to perform this action.' });
+    }
+    if (!ADMIN_ROLES.has(session.role)) {
+        return res.status(403).json({ error: `${session.username} is not an admin account.` });
+    }
+    req.sessionUser = session;
+    next();
+}
 
 // --- Universal Name Standardizer ---
 function cleanName(name) {
@@ -381,7 +431,9 @@ app.post('/api/register', async (req, res) => {
 });
 
 app.post('/api/login', async (req, res) => {
-    const username = cleanName(req.body.username);
+    // Do NOT Title-Case usernames (cleanName turns "SSD" into "Ssd").
+    // Login is case-insensitive against the stored username.
+    const username = String(req.body.username || '').trim();
     const password = req.body.password;
     if (!username || !password) return res.status(400).json({ error: 'Username and password are required.' });
 
@@ -390,10 +442,11 @@ app.post('/api/login', async (req, res) => {
         .select('*')
         .ilike('username', username)
         .eq('password', password)
-        .single();
+        .maybeSingle();
 
     if (error || !row) return res.status(401).json({ error: 'Invalid credentials.' });
-    res.json({ message: 'Login successful', user: { id: row.id, username: row.username, role: row.role } });
+    const token = issueSession(row);
+    res.json({ message: 'Login successful', token, user: { id: row.id, username: row.username, role: row.role } });
 });
 
 // Change Password
@@ -843,16 +896,26 @@ app.get('/api/batch-details/:batchId', async (req, res) => {
 
 // Get Samples for User
 app.get('/api/samples/:tpName', async (req, res) => {
-    const tpName = cleanName(req.params.tpName);
+    // Preserve original casing (e.g. "SSD") — cleanName Title-Cases and breaks all-caps usernames.
+    const tpNameRaw = String(req.params.tpName || '').trim();
+    const tpNameClean = cleanName(tpNameRaw);
     const { role } = req.query;
 
     const isAdmin = role === 'admin' || role === 'admin_sample_cell' || role === 'super_admin';
 
     let query = supabase.from('samples').select('*');
 
-    // TP users can ONLY see samples assigned to them
+    // TP users can ONLY see samples assigned to them (match raw or cleaned name, case-insensitive)
     if (!isAdmin) {
-        query = query.eq('assignedTo', tpName);
+        const { data, error } = await query;
+        if (error) return res.status(500).json({ error: error.message });
+        const meKeys = new Set(
+            [tpNameRaw, tpNameClean]
+                .filter(Boolean)
+                .map(v => String(v).trim().toLowerCase())
+        );
+        const samples = (data || []).filter(s => meKeys.has(String(s.assignedTo || '').trim().toLowerCase()));
+        return res.json({ samples });
     }
 
     const { data, error } = await query;
@@ -982,7 +1045,7 @@ app.post('/api/samples/:id/start-testing', async (req, res) => {
     // ML: mark the start of active testing — the clock for actual man-hours.
     hoursModel.appendEvent({ sampleId: id, isNumber: sample.isNumber, taName: sample.assignedTo, event: 'testing_started' });
 
-    res.json({ message: 'Testing started' });
+    res.json({ message: 'Moved to Under Testing' });
 });
 
 app.delete('/api/samples/:id', async (req, res) => {
@@ -992,43 +1055,43 @@ app.delete('/api/samples/:id', async (req, res) => {
     res.json({ message: 'Sample deleted successfully.' });
 });
 
-// --- LIMS Automation Routes ---
+// --- LIIS Automation Routes ---
 const { spawn } = require('child_process');
-let activeLimsProcess = null;
-let limsLogs = [];
-let limsStatus = 'idle'; // 'idle', 'running', 'waiting_for_login', 'waiting_for_captcha'
+let activeLiisProcess = null;
+let liisLogs = [];
+let lisStatus = 'idle'; // 'idle', 'running', 'waiting_for_login', 'waiting_for_captcha'
 
-app.post('/api/lims/start', (req, res) => {
+app.post('/api/liis/start', (req, res) => {
     const payload = req.body;
     
-    if (!payload || !payload.lims_user || !payload.lims_pass) {
-        return res.status(400).json({ error: 'LIMS credentials are required.' });
+    if (!payload || !payload.lis_user || !payload.lis_pass) {
+        return res.status(400).json({ error: 'LIIS credentials are required.' });
     }
     
-    if (activeLimsProcess) {
+    if (activeLiisProcess) {
         return res.status(400).json({ error: 'An automation process is already running.' });
     }
     
-    limsLogs = [];
-    limsStatus = 'running';
-    limsLogs.push(`[SYSTEM] Initializing Native LIMS automator for sample: ${payload.metadata.sampleCode}...`);
+    liisLogs = [];
+    lisStatus = 'running';
+    liisLogs.push(`[SYSTEM] Initializing Native LIIS automator for sample: ${payload.metadata.sampleCode}...`);
     
-    console.log(`Spawning LIMS uploader with payload for: ${payload.metadata.sampleCode}`);
+    console.log(`Spawning LIIS uploader with payload for: ${payload.metadata.sampleCode}`);
     
     const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
-    activeLimsProcess = spawn(pythonCmd, ['lims_uploader_is4985.py', '--payload', '-']);
-    activeLimsProcess.stdin.write(JSON.stringify(payload));
-    activeLimsProcess.stdin.end();
+    activeLiisProcess = spawn(pythonCmd, ['lims_uploader_is4985.py', '--payload', '-']);
+    activeLiisProcess.stdin.write(JSON.stringify(payload));
+    activeLiisProcess.stdin.end();
     
-    activeLimsProcess.stdout.on('data', (data) => {
+    activeLiisProcess.stdout.on('data', (data) => {
         const text = data.toString();
         // Parse logs to detect status
         if (text.includes('[AUTOMATION_WAITING_FOR_CAPTCHA]')) {
-            limsStatus = 'waiting_for_captcha';
+            lisStatus = 'waiting_for_captcha';
         } else if (text.includes('[AUTOMATION_WAITING_FOR_LOGIN]')) {
-            limsStatus = 'waiting_for_login';
+            lisStatus = 'waiting_for_login';
         } else if (text.includes('[SUCCESS] Login detected')) {
-            limsStatus = 'running';
+            lisStatus = 'running';
         } else if (text.includes('[[SUBMITTED_SAMPLE]]:')) {
             const matches = text.match(/\[\[SUBMITTED_SAMPLE\]\]:(.+)/);
             if (matches && matches[1]) {
@@ -1042,30 +1105,30 @@ app.post('/api/lims/start', (req, res) => {
         
         // Add to log lines
         const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.includes('[[SUBMITTED_SAMPLE]]:'));
-        limsLogs.push(...lines);
+        liisLogs.push(...lines);
     });
     
-    activeLimsProcess.stderr.on('data', (data) => {
+    activeLiisProcess.stderr.on('data', (data) => {
         const text = data.toString();
         const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-        limsLogs.push(...lines.map(line => `[ERROR] ${line}`));
+        liisLogs.push(...lines.map(line => `[ERROR] ${line}`));
     });
     
-    activeLimsProcess.on('close', (code) => {
-        console.log(`LIMS uploader process exited with code ${code}`);
-        limsStatus = 'idle';
-        activeLimsProcess = null;
-        limsLogs.push(`[SYSTEM] Automation completed. Process exited with code ${code}`);
+    activeLiisProcess.on('close', (code) => {
+        console.log(`LIIS uploader process exited with code ${code}`);
+        lisStatus = 'idle';
+        activeLiisProcess = null;
+        liisLogs.push(`[SYSTEM] Automation completed. Process exited with code ${code}`);
     });
     
     res.json({ message: 'Automation started successfully.' });
 });
 
-app.post('/api/lims/preview', (req, res) => {
+app.post('/api/liis/preview', (req, res) => {
     const payload = req.body;
     
     const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
-    // We don't track this in activeLimsProcess because it's just a fast preview generator
+    // We don't track this in activeLiisProcess because it's just a fast preview generator
     const previewProcess = spawn(pythonCmd, ['lims_uploader_is4985.py', '--payload', '-', '--preview']);
     previewProcess.stdin.write(JSON.stringify(payload));
     previewProcess.stdin.end();
@@ -1091,24 +1154,24 @@ app.post('/api/lims/preview', (req, res) => {
     });
 });
 
-app.get('/api/lims/status', (req, res) => {
-    res.json({ status: limsStatus });
+app.get('/api/liis/status', (req, res) => {
+    res.json({ status: lisStatus });
 });
 
-app.get('/api/lims/logs', (req, res) => {
-    res.json({ logs: limsLogs });
+app.get('/api/liis/logs', (req, res) => {
+    res.json({ logs: liisLogs });
 });
 
-app.post('/api/lims/stop', (req, res) => {
-    if (!activeLimsProcess) {
+app.post('/api/liis/stop', (req, res) => {
+    if (!activeLiisProcess) {
         return res.status(400).json({ error: 'No active automation process to stop.' });
     }
     
     try {
-        activeLimsProcess.kill();
-        limsStatus = 'idle';
-        activeLimsProcess = null;
-        limsLogs.push('[SYSTEM] Automation manually stopped by user.');
+        activeLiisProcess.kill();
+        lisStatus = 'idle';
+        activeLiisProcess = null;
+        liisLogs.push('[SYSTEM] Automation manually stopped by user.');
         res.json({ message: 'Automation process stopped successfully.' });
     } catch (e) {
         res.status(500).json({ error: `Failed to stop automation: ${e.message}` });
@@ -1172,9 +1235,20 @@ app.put('/api/admin/employees/:id', async (req, res) => {
     if (!fullName) return res.status(400).json({ error: 'Full Name is required.' });
 
     try {
-        // Fetch the employee to get the associated userId
-        const { data: emp, error: fetchErr } = await supabase.from('employee_profiles').select('userId').eq('id', empId).single();
+        // Fetch the employee to get the associated userId + old name
+        const { data: emp, error: fetchErr } = await supabase
+            .from('employee_profiles')
+            .select('userId, fullName')
+            .eq('id', empId)
+            .single();
         if (fetchErr) throw fetchErr;
+
+        const oldName = emp && emp.fullName ? String(emp.fullName).trim() : '';
+        let oldUsername = oldName;
+        if (emp && emp.userId) {
+            const { data: u } = await supabase.from('users').select('username').eq('id', emp.userId).maybeSingle();
+            if (u && u.username) oldUsername = String(u.username).trim();
+        }
 
         const { error } = await supabase
             .from('employee_profiles')
@@ -1186,6 +1260,13 @@ app.put('/api/admin/employees/:id', async (req, res) => {
         // Also update the username in the users table to keep them synced for login
         if (emp && emp.userId) {
             await supabase.from('users').update({ username: fullName }).eq('id', emp.userId);
+        }
+
+        // Keep sample assignments in sync when the display/login name changes
+        const namesToRewrite = [...new Set([oldName, oldUsername].filter(Boolean))];
+        for (const prev of namesToRewrite) {
+            if (prev.toLowerCase() === String(fullName).trim().toLowerCase()) continue;
+            await supabase.from('samples').update({ assignedTo: fullName }).eq('assignedTo', prev);
         }
 
         res.json({ message: 'Employee profile updated successfully.' });
@@ -2508,9 +2589,22 @@ app.get('/api/admin/employees/:id/capacity', async (req, res) => {
         const { data: emp } = await supabase.from('employee_profiles').select('*').eq('id', empId).single();
         if (!emp) return res.status(404).json({ error: 'Employee not found' });
         
-        // Count live pending samples
-        const { data: samples } = await supabase.from('samples').select('id').eq('assignedTo', emp.fullName).in('appStatus', ['Pending']);
-        const currentLoad = samples ? samples.length : 0;
+        // Count live pending samples (assignedTo stores username, which may differ from fullName)
+        let assigneeKeys = [emp.fullName].filter(Boolean);
+        if (emp.userId) {
+            const { data: u } = await supabase.from('users').select('username').eq('id', emp.userId).maybeSingle();
+            if (u && u.username) assigneeKeys.push(u.username);
+        }
+        assigneeKeys = [...new Set(assigneeKeys.map(k => String(k).trim()).filter(Boolean))];
+        let currentLoad = 0;
+        if (assigneeKeys.length) {
+            const { data: samples } = await supabase
+                .from('samples')
+                .select('id, assignedTo')
+                .in('appStatus', ['Pending', 'PendingAccount']);
+            const keySet = new Set(assigneeKeys.map(k => k.toLowerCase()));
+            currentLoad = (samples || []).filter(s => keySet.has(String(s.assignedTo || '').trim().toLowerCase())).length;
+        }
         
         // Get competencies
         const { data: competencies } = await supabase.from('employee_competencies').select('*').eq('employeeId', empId);
@@ -2894,6 +2988,515 @@ app.get('/api/is-intelligence/vault/:id', async (req, res) => {
     }
 });
 
+// ── IS & Report Formats manager ────────────────────────────────────────────────
+// One call that answers "what standards do we hold, and what does each one's
+// report look like?". It JOINS three places that already exist independently:
+//   1. is_standards_vault      — the extracted standard (params, clauses, flags)
+//   2. public/is_templates/*   — the on-disk report FORMAT (clause-by-clause template)
+//   3. system_preferences      — the master-template link marker written by /sync-to-master
+// Nothing is written here; this is a read-only projection for the manager screen.
+const IS_TEMPLATE_DIR = path.join(__dirname, 'public', 'is_templates');
+const isTemplateSlug = (isNumber) =>
+    String(isNumber || '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
+
+function readISReportFormat(isNumber) {
+    const slug = isTemplateSlug(isNumber);
+    if (!slug) return null;
+    const file = path.join(IS_TEMPLATE_DIR, `${slug}.json`);
+    if (!fs.existsSync(file)) return null;
+    try {
+        const tpl = JSON.parse(fs.readFileSync(file, 'utf8'));
+        const params = Array.isArray(tpl.parameters) ? tpl.parameters : [];
+        const stat = fs.statSync(file);
+        return {
+            file: `${slug}.json`,
+            url: `/is_templates/${slug}.json`,
+            title: tpl.title || '',
+            paramCount: params.length,
+            dims: Array.isArray(tpl.parameterizationDims) ? tpl.parameterizationDims : [],
+            sections: [...new Set(params.map(p => p.section).filter(Boolean))],
+            variableParams: params.filter(p => p.valueTable && Object.keys(p.valueTable).length).length,
+            sizeKb: Math.round(stat.size / 1024),
+            updatedAt: stat.mtime.toISOString()
+        };
+    } catch (e) {
+        return { file: `${slug}.json`, url: `/is_templates/${slug}.json`, broken: e.message, paramCount: 0, dims: [], sections: [] };
+    }
+}
+
+app.get('/api/is-intelligence/standards', async (req, res) => {
+    try {
+        const { data: rows, error } = await supabase
+            .from('is_standards_vault')
+            .select('id, isNumber, title, pdfFileName, uncertainItems, extractedClauses, extractedTables, testParameters, dimensionData, confidenceScore, uploadedAt');
+        if (error) throw error;
+
+        // Amendments per standard (best effort — table may not be migrated).
+        const amendments = {};
+        try {
+            const { data: am } = await supabase.from('is_amendments').select('isNumber, isNew');
+            for (const a of (am || [])) {
+                const k = normalizeISNumber(a.isNumber);
+                amendments[k] = amendments[k] || { total: 0, fresh: 0 };
+                amendments[k].total++;
+                if (a.isNew === true || a.isNew === 1) amendments[k].fresh++;
+            }
+        } catch (_) {}
+
+        // Master-template link markers written by /sync-to-master.
+        const linked = {};
+        try {
+            const { data: prefs } = await supabase.from('system_preferences').select('key, value').like('key', 'template_%');
+            for (const p of (prefs || [])) {
+                let v = {};
+                try { v = JSON.parse(p.value || '{}'); } catch (_) {}
+                if (v.paramsSource === 'is_intelligence') {
+                    linked[p.key.replace(/^template_/, '')] = {
+                        matchedToHours: (v.hoursMatch && v.hoursMatch.matchedToHours) || 0,
+                        totalParams: (v.hoursMatch && v.hoursMatch.totalParams) || 0,
+                        syncedAt: (v.hoursMatch && v.hoursMatch.syncedAt) || null
+                    };
+                }
+            }
+        } catch (_) {}
+
+        const parseJson = (v, fallback) => {
+            try { return typeof v === 'string' ? JSON.parse(v || 'null') : v; } catch (_) { return fallback; }
+        };
+        const len = (v) => { const a = parseJson(v, []); return Array.isArray(a) ? a.length : 0; };
+
+        const standards = (rows || []).map(r => {
+            const uncertain = parseJson(r.uncertainItems, []) || [];
+            const openFlags = Array.isArray(uncertain) ? uncertain.filter(u => !u.resolved).length : 0;
+            const tp = parseJson(r.testParameters, null);
+            const flat = Array.isArray(tp) ? tp : ((tp && tp.flat) || []);
+            const key = normalizeISNumber(r.isNumber);
+            return {
+                id: r.id,
+                isNumber: r.isNumber,
+                normalizedIS: key,
+                title: r.title || '',
+                pdfFileName: r.pdfFileName || '',
+                uploadedAt: r.uploadedAt,
+                confidenceScore: r.confidenceScore,
+                clauseCount: len(r.extractedClauses),
+                tableCount: len(r.extractedTables),
+                vaultParamCount: flat.length,
+                openFlags,
+                status: openFlags > 0 ? 'has_uncertainties' : 'parsed',
+                reportFormat: readISReportFormat(r.isNumber),
+                amendments: amendments[key] || { total: 0, fresh: 0 },
+                masterLink: linked[key] || null
+            };
+        }).sort((a, b) => String(a.isNumber).localeCompare(String(b.isNumber), undefined, { numeric: true }));
+
+        // Report formats sitting on disk with no vault row behind them — these would
+        // silently render reports nobody can trace back to an extraction, so surface them.
+        const known = new Set(standards.map(s => isTemplateSlug(s.isNumber)));
+        let orphanFormats = [];
+        try {
+            orphanFormats = fs.readdirSync(IS_TEMPLATE_DIR)
+                .filter(f => f.endsWith('.json') && !known.has(f.replace(/\.json$/, '')))
+                .map(f => ({ file: f, url: `/is_templates/${f}`, isNumber: f.replace(/\.json$/, '').replace(/_/g, ' ') }));
+        } catch (_) {}
+
+        res.json({
+            standards,
+            orphanFormats,
+            summary: {
+                total: standards.length,
+                withFormat: standards.filter(s => s.reportFormat).length,
+                linkedToMaster: standards.filter(s => s.masterLink).length,
+                needsReview: standards.filter(s => s.openFlags > 0).length,
+                totalParameters: standards.reduce((n, s) => n + (s.reportFormat ? s.reportFormat.paramCount : s.vaultParamCount), 0)
+            }
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Remove a standard from the manager. The vault row and its derived conformance
+// limits go; the report-format JSON is ARCHIVED (moved to is_templates/_deleted/),
+// never unlinked — an extraction takes minutes of agent time to reproduce.
+app.delete('/api/is-intelligence/standards/:id', requireAdmin, async (req, res) => {
+    try {
+        const { data: row, error } = await supabase
+            .from('is_standards_vault').select('id, isNumber').eq('id', req.params.id).single();
+        if (error || !row) return res.status(404).json({ error: 'Standard not found.' });
+
+        let limitsRemoved = 0;
+        try {
+            const { data: del } = await supabase.from('is_conformance_limits')
+                .delete().eq('isNumber', row.isNumber).select('id');
+            limitsRemoved = (del || []).length;
+        } catch (_) {}
+
+        let formatArchived = null;
+        const slug = isTemplateSlug(row.isNumber);
+        const src = path.join(IS_TEMPLATE_DIR, `${slug}.json`);
+        if (slug && fs.existsSync(src)) {
+            const archiveDir = path.join(IS_TEMPLATE_DIR, '_deleted');
+            try {
+                fs.mkdirSync(archiveDir, { recursive: true });
+                const dest = path.join(archiveDir, `${slug}.${Date.now()}.json`);
+                fs.renameSync(src, dest);
+                formatArchived = path.relative(__dirname, dest);
+            } catch (e) {
+                return res.status(500).json({ error: `Could not archive the report format: ${e.message}` });
+            }
+        }
+
+        const { error: delErr } = await supabase.from('is_standards_vault').delete().eq('id', row.id);
+        if (delErr) throw delErr;
+
+        res.json({ removed: row.isNumber, limitsRemoved, formatArchived });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ── IS Scope: publish the standards to TPs, collect what each one tests ────────
+// Flow: admin files every IS under a section (Plastic / Metal / …) → each TP picks
+// the sections they work in, then ticks the ISs they actually test → admin approves
+// → the approved list is written to employee_competencies, which is what the
+// auto-assigner already reads. There is deliberately no second competency store:
+// a self-declared list that the assigner ignored would be worse than no list.
+//
+// Approval is the control point. A TP tick alone must never make someone assignable
+// for a standard — it becomes competency only when an admin says so, and the
+// approving account is recorded on the submission.
+//
+// Stored in system_preferences (key/value) rather than new tables: the volume is a
+// few dozen rows, the table already exists, and it needs no migration to deploy.
+const SCOPE_SECTIONS_KEY = 'is_scope_sections';
+const SCOPE_MAP_KEY = 'is_scope_section_map';
+const SCOPE_TP_PREFIX = 'is_scope_tp_';
+const DEFAULT_SECTIONS = ['Plastic', 'Metal', 'Gas Stove', 'Cement', 'Miscellaneous'];
+// New competencies start as Trainee, not Standard: Trainee is excluded from priority
+// samples and weighted 0.6, so an approval can't silently put an untested declaration
+// at full weight. Admin promotes from the Employee Hub as usual.
+const SCOPE_DEFAULT_PROFICIENCY = 'Trainee';
+
+// Same standard, different house style: LIMS exports "IS 4985 (2021)" and
+// "IS 3196 : Part 1 (2013)"; the vault holds "IS 4985:2021" and "IS 3196 (Part 1) : 2013".
+// Compare on punctuation-free uppercase so a bulk paste from LIMS doesn't create a second
+// copy of a standard we already have. The YEAR is deliberately kept — IS 4246 (2002) and
+// IS 4246 (2025) are different revisions and must stay distinct.
+function isNumberKey(s) {
+    return String(s || '').toUpperCase()
+        .replace(/[()\[\]:,.]/g, ' ')
+        .replace(/\bPART\s+/g, 'PART')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+async function readPref(key, fallback) {
+    try {
+        const { data } = await supabase.from('system_preferences').select('value').eq('key', key).maybeSingle();
+        if (!data || !data.value) return fallback;
+        return JSON.parse(data.value);
+    } catch (e) { return fallback; }
+}
+async function writePref(key, value) {
+    const { error } = await supabase.from('system_preferences')
+        .upsert({ key, value: JSON.stringify(value) }, { onConflict: 'key' });
+    if (error) throw new Error(error.message);
+}
+
+// Everything a TP or admin needs to render the picker: the section list, the
+// IS→section filing, and every standard currently in IS Intelligence.
+app.get('/api/is-scope/catalogue', async (req, res) => {
+    try {
+        const sections = await readPref(SCOPE_SECTIONS_KEY, DEFAULT_SECTIONS);
+        const sectionMap = await readPref(SCOPE_MAP_KEY, {});
+        const { data: rows, error } = await supabase
+            .from('is_standards_vault').select('isNumber, title');
+        if (error) throw error;
+        const standards = (rows || [])
+            .map(r => ({ isNumber: r.isNumber, title: r.title || '', section: sectionMap[r.isNumber] || null }))
+            .sort((a, b) => String(a.isNumber).localeCompare(String(b.isNumber), undefined, { numeric: true }));
+        res.json({
+            sections,
+            standards,
+            unfiled: standards.filter(s => !s.section).length
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Admin files the standards and maintains the section list ("fill the data").
+app.post('/api/is-scope/catalogue', requireAdmin, async (req, res) => {
+    try {
+        const { sections, sectionMap } = req.body || {};
+        if (!Array.isArray(sections) || !sections.length) {
+            return res.status(400).json({ error: 'At least one section is required.' });
+        }
+        const cleanSections = [...new Set(sections.map(s => String(s).trim()).filter(Boolean))];
+        const cleanMap = {};
+        for (const [isNumber, section] of Object.entries(sectionMap || {})) {
+            // Drop filings that point at a section that no longer exists, otherwise a
+            // renamed section would leave standards invisible to every TP.
+            if (section && cleanSections.includes(section)) cleanMap[isNumber] = section;
+        }
+        await writePref(SCOPE_SECTIONS_KEY, cleanSections);
+        await writePref(SCOPE_MAP_KEY, cleanMap);
+        res.json({ sections: cleanSections, filed: Object.keys(cleanMap).length, savedBy: req.sessionUser.username });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Add a standard straight from IS Scope Control, without an extraction.
+//
+// The scope exercise asks "which ISs do you test" — that does not need the standard's
+// clauses, limits or report format. Requiring a PDF + minutes of agent time just to
+// put an IS in front of TPs would leave real standards unlistable, so this creates a
+// name-only vault row and files it in one step.
+//
+// The row is deliberately marked as un-extracted (`pdfFileName` says so, no parameters,
+// no confidence score) so the manager screen shows it as "— no template —" rather than
+// implying an extraction happened. Running the normal extraction later updates the same
+// isNumber in place.
+app.post('/api/is-scope/standards', requireAdmin, async (req, res) => {
+    try {
+        const isNumber = String((req.body || {}).isNumber || '').trim();
+        const title = String((req.body || {}).title || '').trim();
+        const section = String((req.body || {}).section || '').trim();
+        if (!isNumber) return res.status(400).json({ error: 'IS number is required.' });
+        if (!/\d/.test(isNumber)) return res.status(400).json({ error: 'That does not look like an IS number.' });
+
+        const { data: allRows } = await supabase.from('is_standards_vault').select('isNumber');
+        const clash = (allRows || []).find(r => isNumberKey(r.isNumber) === isNumberKey(isNumber));
+        if (clash) {
+            return res.status(409).json({
+                error: `Already in the system as "${clash.isNumber}" — file it from the section picker instead.`
+            });
+        }
+
+        const row = {
+            isNumber,
+            title: title || isNumber,
+            pdfFileName: '(added manually — not extracted)',
+            uploadedAt: new Date().toISOString(),
+            confidenceScore: null,
+            testParameters: JSON.stringify({ flat: [], sections: [], referenced_standards: [] }),
+            uncertainItems: JSON.stringify([]),
+            extractedClauses: JSON.stringify([]),
+            extractedTables: JSON.stringify([]),
+            isFullyResolved: false
+        };
+        const { error } = await supabase.from('is_standards_vault').insert(row);
+        if (error) throw new Error(error.message);
+
+        // File it immediately, merging into the stored map so a concurrent edit
+        // elsewhere in the filing screen is not overwritten.
+        let filedInto = null;
+        if (section) {
+            const sections = await readPref(SCOPE_SECTIONS_KEY, DEFAULT_SECTIONS);
+            if (sections.includes(section)) {
+                const map = await readPref(SCOPE_MAP_KEY, {});
+                map[isNumber] = section;
+                await writePref(SCOPE_MAP_KEY, map);
+                filedInto = section;
+            }
+        }
+        res.json({ isNumber, title: row.title, section: filedInto, addedBy: req.sessionUser.username });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Bulk version of the above — one paste instead of one form per standard.
+// Partial success is the normal case (a pasted list usually contains a few the lab
+// already has), so this never fails the whole batch: each item comes back as added
+// or skipped-with-a-reason, and the caller shows both.
+app.post('/api/is-scope/standards/bulk', requireAdmin, async (req, res) => {
+    try {
+        const items = Array.isArray((req.body || {}).items) ? req.body.items : [];
+        const section = String((req.body || {}).section || '').trim();
+        if (!items.length) return res.status(400).json({ error: 'Nothing to add.' });
+        if (items.length > 500) return res.status(400).json({ error: 'Too many at once — split into batches of 500.' });
+
+        const { data: existingRows } = await supabase.from('is_standards_vault').select('isNumber');
+        const existing = new Map((existingRows || []).map(r => [isNumberKey(r.isNumber), r.isNumber]));
+
+        const sections = await readPref(SCOPE_SECTIONS_KEY, DEFAULT_SECTIONS);
+        const validSection = section && sections.includes(section) ? section : null;
+
+        const added = [], skipped = [], toInsert = [];
+        const seenInBatch = new Set();
+        const now = new Date().toISOString();
+
+        for (const raw of items) {
+            const isNumber = String((raw && raw.isNumber) || '').trim();
+            const title = String((raw && raw.title) || '').trim();
+            if (!isNumber) { skipped.push({ isNumber: '(blank)', reason: 'No IS number' }); continue; }
+            if (!/\d/.test(isNumber)) { skipped.push({ isNumber, reason: 'Not an IS number' }); continue; }
+            const k = isNumberKey(isNumber);
+            if (existing.has(k)) { skipped.push({ isNumber, reason: `Already in the system as "${existing.get(k)}"` }); continue; }
+            if (seenInBatch.has(k)) { skipped.push({ isNumber, reason: 'Duplicate in your list' }); continue; }
+            seenInBatch.add(k);
+            toInsert.push({
+                isNumber,
+                title: title || isNumber,
+                pdfFileName: '(added manually — not extracted)',
+                uploadedAt: now,
+                confidenceScore: null,
+                testParameters: JSON.stringify({ flat: [], sections: [], referenced_standards: [] }),
+                uncertainItems: JSON.stringify([]),
+                extractedClauses: JSON.stringify([]),
+                extractedTables: JSON.stringify([]),
+                isFullyResolved: false
+            });
+            added.push({ isNumber, title: title || isNumber });
+        }
+
+        if (toInsert.length) {
+            const { error } = await supabase.from('is_standards_vault').insert(toInsert);
+            if (error) throw new Error(error.message);
+        }
+
+        // File the whole batch in one map write, merged so nothing already filed is lost.
+        if (validSection && added.length) {
+            const map = await readPref(SCOPE_MAP_KEY, {});
+            for (const a of added) map[a.isNumber] = validSection;
+            await writePref(SCOPE_MAP_KEY, map);
+        }
+
+        res.json({ added, skipped, section: validSection, addedBy: req.sessionUser.username });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// A TP's own submission.
+app.get('/api/is-scope/mine/:userId', async (req, res) => {
+    try {
+        const sub = await readPref(SCOPE_TP_PREFIX + req.params.userId, null);
+        res.json({ submission: sub });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/is-scope/mine', async (req, res) => {
+    try {
+        const { userId, username, sections, isNumbers, proposedSection, note } = req.body || {};
+        if (!userId) return res.status(400).json({ error: 'Missing user.' });
+        if (!Array.isArray(sections) || !sections.length) {
+            return res.status(400).json({ error: 'Select at least one section.' });
+        }
+        if (!Array.isArray(isNumbers) || !isNumbers.length) {
+            return res.status(400).json({ error: 'Select at least one standard you test.' });
+        }
+        const prev = await readPref(SCOPE_TP_PREFIX + userId, null);
+        const submission = {
+            userId,
+            username: username || (prev && prev.username) || '',
+            sections: [...new Set(sections.map(String))],
+            isNumbers: [...new Set(isNumbers.map(String))],
+            proposedSection: String(proposedSection || '').trim(),
+            note: String(note || '').trim(),
+            status: 'pending',
+            submittedAt: new Date().toISOString(),
+            // Re-submitting after a decision clears the old verdict but keeps the history.
+            previousStatus: prev ? prev.status : null,
+            reviewedBy: null,
+            reviewedAt: null,
+            reviewNote: ''
+        };
+        await writePref(SCOPE_TP_PREFIX + userId, submission);
+        res.json({ submission });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Admin review queue. Read-only, so no admin token required — it exposes nothing
+// beyond what /api/admin/employees already returns, and gating it would make the
+// queue invisible in demo mode for no security gain. The DECISION below is guarded.
+app.get('/api/is-scope/submissions', async (req, res) => {
+    try {
+        const { data: prefs, error } = await supabase
+            .from('system_preferences').select('key, value').like('key', `${SCOPE_TP_PREFIX}%`);
+        if (error) throw error;
+
+        const submissions = [];
+        for (const p of (prefs || [])) {
+            try { submissions.push(JSON.parse(p.value)); } catch (_) {}
+        }
+
+        // Who hasn't responded yet — the point of the exercise is completion, so the
+        // outstanding list matters as much as the queue.
+        const { data: profiles } = await supabase
+            .from('employee_profiles').select('id, userId, fullName, designation, isActive');
+        const responded = new Set(submissions.map(s => String(s.userId)));
+        const outstanding = (profiles || [])
+            .filter(p => p.isActive && !responded.has(String(p.userId)))
+            .map(p => ({ userId: p.userId, fullName: p.fullName, designation: p.designation }));
+
+        submissions.sort((a, b) => String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));
+        res.json({
+            submissions,
+            outstanding,
+            counts: {
+                pending: submissions.filter(s => s.status === 'pending').length,
+                approved: submissions.filter(s => s.status === 'approved').length,
+                rejected: submissions.filter(s => s.status === 'rejected').length,
+                outstanding: outstanding.length
+            }
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, res) => {
+    try {
+        const { decision, note } = req.body || {};
+        if (!['approve', 'reject'].includes(decision)) {
+            return res.status(400).json({ error: 'decision must be "approve" or "reject".' });
+        }
+        const key = SCOPE_TP_PREFIX + req.params.userId;
+        const sub = await readPref(key, null);
+        if (!sub) return res.status(404).json({ error: 'No submission from that user.' });
+
+        let competenciesAdded = 0;
+        if (decision === 'approve') {
+            // employee_competencies is keyed by employee_profiles.id, not users.id.
+            const { data: profile } = await supabase
+                .from('employee_profiles').select('id').eq('userId', sub.userId).maybeSingle();
+            if (!profile) {
+                return res.status(400).json({ error: `${sub.username || 'That user'} has no employee profile, so competencies cannot be recorded. Create the profile in Employee Hub first.` });
+            }
+            const { data: existing } = await supabase
+                .from('employee_competencies').select('isNumber').eq('employeeId', profile.id);
+            const have = new Set((existing || []).map(c => normalizeISNumber(c.isNumber)));
+            const toAdd = [...new Set(sub.isNumbers.map(normalizeISNumber))]
+                .filter(n => n && !have.has(n))
+                .map(n => ({ employeeId: profile.id, isNumber: n, proficiencyLevel: SCOPE_DEFAULT_PROFICIENCY, avgTestDurationHours: 8 }));
+            if (toAdd.length) {
+                const { error } = await supabase.from('employee_competencies').insert(toAdd);
+                if (error) throw new Error(`Competency write failed: ${error.message}`);
+                competenciesAdded = toAdd.length;
+            }
+        }
+
+        sub.status = decision === 'approve' ? 'approved' : 'rejected';
+        sub.reviewedBy = req.sessionUser.username;
+        sub.reviewedAt = new Date().toISOString();
+        sub.reviewNote = String(note || '').trim();
+        sub.competenciesAdded = competenciesAdded;
+        await writePref(key, sub);
+
+        res.json({ submission: sub, competenciesAdded });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // 2. Upload and Parse IS Standard
 // Call LM Studio with a vision (image) message — for reading table images
 async function callLMStudioVision(systemPrompt, textPrompt, imageBase64) {
@@ -3010,7 +3613,7 @@ async function callOpenRouter(model, messages, opts = {}) {
             'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
             'Content-Type': 'application/json',
             'HTTP-Referer': 'http://localhost:3005',
-            'X-Title': 'SampleSpeaks',
+            'X-Title': 'LIIS',
         },
         body: JSON.stringify({
             model,
@@ -3081,36 +3684,26 @@ async function extractISTablesWithPython(buffer, originalName) {
     });
 }
 
-// ── IS Pipeline: upload → start async 6-phase job → return jobId ──────────────
-app.post('/api/is-intelligence/upload', upload.single('pdf'), async (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: 'No PDF file uploaded' });
-    }
-    if (!req.file.originalname.toLowerCase().endsWith('.pdf')) {
-        return res.status(400).json({ error: 'Only PDF files are accepted' });
-    }
-    try {
-        // Start the async 6-phase pipeline — returns immediately with a jobId.
-        // The client polls GET /api/is-intelligence/pipeline/:jobId for progress.
-        const jobId = isPipeline.startPipeline(req.file.buffer, req.file.originalname);
-        console.log(`[IS Pipeline] Job started: ${jobId} for ${req.file.originalname}`);
-        res.json({ jobId, filename: req.file.originalname, message: 'Pipeline started — poll /api/is-intelligence/pipeline/' + jobId });
-    } catch (e) {
-        console.error('IS pipeline start error:', e.message);
-        res.status(500).json({ error: e.message });
-    }
+// ── RETIRED 2026-06-24: the OpenRouter 6-phase pipeline is no longer an input. ──
+// IS Intelligence has a single input source now: POST /api/is-intelligence/agent-extract
+// (Claude Agent SDK). These two routes are kept registered (not 404) so any stale client
+// gets a clear redirect instead of a confusing not-found.
+app.post('/api/is-intelligence/upload', (req, res) => {
+    res.status(410).json({ error: 'IS pipeline retired. Use POST /api/is-intelligence/agent-extract.' });
 });
 
-// ── Pipeline job status (polled by frontend) ──────────────────────────────────
 app.get('/api/is-intelligence/pipeline/:jobId', (req, res) => {
-    const job = isPipeline.getJob(req.params.jobId);
-    if (!job) return res.status(404).json({ error: 'Job not found' });
-    res.json(job);
+    res.status(410).json({ error: 'IS pipeline retired. Use POST /api/is-intelligence/agent-extract.' });
 });
 
 // ── Agent SDK extraction: upload PDF → Claude Agent reads it & writes the template ──
 // Runs the SAME agent loop Claude Code uses, in-process. Needs ANTHROPIC_API_KEY.
 const agentJobs = new Map();
+// Projects an agent template (per-combo valueTable) into the vault's v3 testParameters shape,
+// so IS Intelligence is the single source of truth for /params, /sync-to-master, conformance,
+// and the report-from-vault fallback. See server/agent/template-to-vault.js.
+const { agentTemplateToVaultParams } = require('./server/agent/template-to-vault');
+
 app.post('/api/is-intelligence/agent-extract', upload.single('pdf'), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No PDF file uploaded' });
     if (!req.file.originalname.toLowerCase().endsWith('.pdf')) return res.status(400).json({ error: 'Only PDF files are accepted' });
@@ -3141,6 +3734,17 @@ app.post('/api/is-intelligence/agent-extract', upload.single('pdf'), async (req,
             try {
                 const tpl = JSON.parse(fs.readFileSync(path.join(__dirname, out.templatePath), 'utf8'));
                 const isNumber = out.isNumber || tpl.isNumber || '';
+                // Persist the clause-by-clause data INTO the vault (not only the on-disk template),
+                // so IS Intelligence is the single source of truth for downstream consumers.
+                const vaultParams = agentTemplateToVaultParams(tpl);
+                // Retain the whole-doc transcription the agent wrote (scratch/<SLUG>_transcript.txt)
+                // as fullText, so the RAG layer can chunk + embed it. Best-effort.
+                let fullText = '';
+                try {
+                    const slug = path.basename(out.templatePath).replace(/\.json$/i, '');
+                    const tp = path.join(__dirname, 'scratch', `${slug}_transcript.txt`);
+                    if (fs.existsSync(tp)) fullText = fs.readFileSync(tp, 'utf8');
+                } catch (_) {}
                 const vaultRow = {
                     isNumber,
                     title: tpl.title || '',
@@ -3148,7 +3752,20 @@ app.post('/api/is-intelligence/agent-extract', upload.single('pdf'), async (req,
                     confidenceScore: 1.0,
                     isFullyResolved: true,
                     uploadedAt: new Date().toISOString(),
+                    testParameters: JSON.stringify({
+                        version: 3,
+                        flat: vaultParams.flat,
+                        sections: vaultParams.sections,
+                        referenced_standards: vaultParams.referenced_standards,
+                    }),
+                    dimensionData: JSON.stringify({
+                        parameterizationDims: tpl.parameterizationDims || [],
+                        dimensionOptions: tpl.dimensionOptions || {},
+                        defaults: tpl.defaults || {},
+                    }),
+                    ...(fullText ? { fullText } : {}),
                 };
+                console.log(`[agent] projected ${vaultParams.flat.length} flat param rows from template (${(tpl.parameters || []).length} parameters) for ${isNumber}`);
                 const { data: existing, error: selErr } = await supabase.from('is_standards_vault').select('id').eq('isNumber', isNumber).limit(1);
                 if (selErr) throw selErr;
                 if (existing && existing.length) {
@@ -3254,7 +3871,7 @@ app.get('/api/is-intelligence/params/:isNumber', async (req, res) => {
 // Man-hours/equipment are NOT in IS Intelligence (they come from the BIS testing-
 // charges PDF) and are preserved untouched — IS Intelligence is the source for
 // WHAT is tested + the limits; testing-charges stays the source for HOW LONG.
-app.post('/api/is-intelligence/sync-to-master/:isNumber', async (req, res) => {
+app.post('/api/is-intelligence/sync-to-master/:isNumber', requireAdmin, async (req, res) => {
     try {
         const isNum = decodeURIComponent(req.params.isNumber).trim();
         const { data: row, error } = await supabase
@@ -3495,8 +4112,8 @@ Respond strictly in JSON format wrapped in a \`\`\`json ... \`\`\` block with th
 
 // Export for Vercel serverless + listen locally
 
-// --- LIMS Credentials API ---
-app.get('/api/profile/lims-credentials', async (req, res) => {
+// --- LIIS Credentials API ---
+app.get('/api/profile/liis-credentials', async (req, res) => {
     try {
         const { data: user, error } = await supabase.from('users').select('limsUsername, limsPassword').eq('id', req.query.userId || 1).single();
         if (error || !user) return res.status(404).json({ error: 'User not found' });
@@ -3506,7 +4123,7 @@ app.get('/api/profile/lims-credentials', async (req, res) => {
     }
 });
 
-app.post('/api/profile/lims-credentials', async (req, res) => {
+app.post('/api/profile/liis-credentials', async (req, res) => {
     try {
         const { userId, limsUsername, limsPassword } = req.body;
         const targetUserId = userId || 1; // Fallback to 1 if not provided
@@ -3518,8 +4135,8 @@ app.post('/api/profile/lims-credentials', async (req, res) => {
     }
 });
 
-// --- LIMS Submitted Samples API ---
-app.get('/api/lims/submitted', async (req, res) => {
+// --- LIIS Submitted Samples API ---
+app.get('/api/liis/submitted', async (req, res) => {
     try {
         const { data: samples, error } = await supabase.from('lims_submitted_samples').select('sampleCode, submittedDate');
         if (error) throw error;
@@ -3538,13 +4155,17 @@ const pendingCopilotActions = new Map();
 
 app.post('/api/copilot/chat', async (req, res) => {
     try {
-        const { message, history } = req.body;
+        const { message, history, userName } = req.body;
+        // AI assistant is restricted to the SSD account only.
+        if (String(userName || '').trim().toUpperCase() !== 'SSD') {
+            return res.status(403).json({ error: 'AI assistant is only available for the SSD account.' });
+        }
         if (!message) return res.status(400).json({ error: 'Message is required' });
 
         const anthropicApiKey = process.env.ANTHROPIC_API_KEY; // Claude (Sonnet 4.6) powers Nigrani
 
-        const { normalizeTaName, normalizeIS: _normIS, getOicPreferences } = require('./server/agent/disha-utils');
-        const dishaTools = require('./server/agent/disha-tools');
+        const { normalizeTaName, normalizeIS: _normIS, getOicPreferences } = require('./server/agent/nigrani-assistant-utils');
+        const nigraniTools = require('./server/agent/nigrani-assistant-tools');
 
         // 1. Fetch live DB context — all queries run in parallel (latency = slowest one, not the sum)
         const tDb = Date.now();
@@ -3636,15 +4257,21 @@ app.post('/api/copilot/chat', async (req, res) => {
 
         // Aging buckets (days since receivedOn)
         const now = Date.now();
+        // A3 fix: receivedOn is DD-MM-YYYY; raw new Date() reads it as MM-DD-YYYY (US order),
+        // turning valid May dates into future Nov/Sep dates → negative ages. Parse the real order.
         const ageDays = (iso) => {
             if (!iso) return null;
-            const d = new Date(iso).getTime();
+            const p = String(iso).replace(/[\/.]/g, '-').trim().split('-');
+            let d;
+            if (p.length === 3 && p[0].length === 4) d = new Date(`${p[0]}-${p[1]}-${p[2]}T00:00:00`).getTime();      // yyyy-mm-dd
+            else if (p.length === 3 && p[2].length === 4) d = new Date(`${p[2]}-${p[1]}-${p[0]}T00:00:00`).getTime(); // dd-mm-yyyy
+            else d = new Date(iso).getTime();
             return Number.isFinite(d) ? Math.floor((now - d) / 86400000) : null;
         };
         const buckets = { '0-15': 0, '16-30': 0, '31-45': 0, '46-90': 0, '90+': 0, 'unknown': 0 };
         (allPending || []).forEach(s => {
             const age = ageDays(s.receivedOn);
-            if (age === null) buckets['unknown']++;
+            if (age === null || age < 0) buckets['unknown']++;  // A3: future-dated/unparseable → unknown, not 0-15
             else if (age <= 15) buckets['0-15']++;
             else if (age <= 30) buckets['16-30']++;
             else if (age <= 45) buckets['31-45']++;
@@ -3712,16 +4339,27 @@ THE NO-ASSUMPTION RULE (most important):
 - If you don't know, say which table or which tool would have the answer. Then offer to call the tool.
 
 TOOLS YOU CAN CALL (function calling):
+Lab operations:
 - get_workload_snapshot() — per-TA load + median + overload/capacity flags
-- get_sample({sampleCode}) — full row for one sample
+- get_sample({sampleId}) — full row for one sample
 - find_competent_tas({isNumber}) — TAs marked competent for an IS, with proficiency
 - get_aging_breakdown() — age buckets + 5 oldest
-- get_audit_log({sampleCode?, limit?}) — Nigrani's audit trail
+- get_audit_log({limit?, actionType?}) — Nigrani's audit trail
 - get_open_notifications() — current bell items
-- get_template({isNumber}) — template details (tatDays, totalHours, active clauses, equipment per clause)
+- get_template({isNumber}) — testing-charges template (tatDays, totalHours, active clauses, equipment per clause)
 - list_pending_recommendations() — auto-assigner / Nigrani proposals awaiting OIC approval
 - count_distinct_is() — distinct IS standards among pending samples
-Use a tool whenever the answer is not already in LIVE LAB DATA below.
+IS standards knowledge (IS Intelligence — your eyes into the actual standards):
+- list_standards() — every IS standard available in the vault (call this first to get the exact isNumber)
+- read_standard({isNumber}) — full document text + every extracted parameter (clause, limits, unit). Read this before answering ANY question about what a standard says.
+- get_limit({isNumber, size?, grade?, class?, type?, parameter?}) — the exact specified min/max/unit/clause for a size/grade. Use for any limit/tolerance/value question so the number is authoritative.
+
+STANDARDS RULES (as strict as the no-assumption rule):
+- NEVER answer a question about an IS standard from memory or training. Call read_standard or get_limit FIRST, then answer ONLY from what it returned.
+- ALWAYS cite the clause (and section/page if given). For a numeric limit, quote the exact value + unit from get_limit — never round or paraphrase it.
+- If the standard isn't in the vault, say so plainly and call list_standards to show what IS available — do not guess.
+
+Use a tool whenever the answer is not already in LIVE LAB DATA below. Prefer DOING the work — call the tool, take the next step, chain several tools if needed — over asking permission.
 
 WHAT YOU CAN AND CANNOT DO:
 - You CAN read every table, propose reassignments (as pending recommendations), and trigger the rules engine.
@@ -3827,7 +4465,7 @@ The OIC will see one row per move in the UI and approve each.`;
                 const CLAUDE_MODEL = 'claude-sonnet-4-6'; // best speed/quality balance for a tool-calling chat; thinking off for snappy latency
 
                 // Anthropic tool defs: TOOLS already carry a clean JSON-schema inputSchema — just rename the key.
-                const anthropicTools = dishaTools.TOOLS.map(t => ({
+                const anthropicTools = nigraniTools.TOOLS.map(t => ({
                     name: t.name,
                     description: t.description,
                     input_schema: t.inputSchema,
@@ -3840,7 +4478,7 @@ The OIC will see one row per move in the UI and approve each.`;
 
                 const callClaude = () => anthropic.messages.create({
                     model: CLAUDE_MODEL,
-                    max_tokens: 2000,
+                    max_tokens: 4096,
                     system: systemPrompt,
                     tools: anthropicTools,
                     messages: claudeMessages,
@@ -3849,7 +4487,7 @@ The OIC will see one row per move in the UI and approve each.`;
                 // Tool-use loop: keep going until Claude stops requesting tools (cap rounds so we never recurse forever).
                 let response = await callClaude();
                 let rounds = 0;
-                while (response.stop_reason === 'tool_use' && rounds < 5) {
+                while (response.stop_reason === 'tool_use' && rounds < 12) {
                     rounds++;
                     const toolUses = response.content.filter(b => b.type === 'tool_use');
                     console.log(`[Copilot] Claude requested ${toolUses.length} tool call(s):`, toolUses.map(b => b.name).join(', '));
@@ -3860,7 +4498,7 @@ The OIC will see one row per move in the UI and approve each.`;
                     const toolResults = await Promise.all(toolUses.map(async b => {
                         let out;
                         try {
-                            out = await dishaTools.callTool(b.name, b.input || {});
+                            out = await nigraniTools.callTool(b.name, b.input || {});
                             toolTrace.push({ name: b.name, args: b.input || {}, ok: !out || !out.error });
                         } catch (e) {
                             out = { error: e.message };
@@ -3914,7 +4552,11 @@ The OIC will see one row per move in the UI and approve each.`;
 
 app.post('/api/copilot/action', async (req, res) => {
     try {
-        const { actionId } = req.body;
+        const { actionId, userName } = req.body;
+        // AI assistant is restricted to the SSD account only.
+        if (String(userName || '').trim().toUpperCase() !== 'SSD') {
+            return res.status(403).json({ error: 'AI assistant is only available for the SSD account.' });
+        }
         if (!actionId || !pendingCopilotActions.has(actionId)) {
             return res.status(400).json({ error: 'Invalid or expired action' });
         }
@@ -4415,29 +5057,69 @@ app.delete('/api/is-intelligence/amendments/:id', async (req, res) => {
 });
 
 // ============================================================================
-// DISHA AGENT — Phases 1–3 (HITL notification queue + executor + agentic)
+// NIGRANI AGENT — Phases 1–3 (HITL notification queue + executor + agentic)
 // ============================================================================
-const dishaMonitor = require('./server/agent/Nigrani-monitor');
-const NigraniMonitor = dishaMonitor;
+const nigraniMonitor = require('./server/agent/Nigrani-monitor');
+const NigraniMonitor = nigraniMonitor;
+const { executeNotification } = require('./server/agent/Nigrani-executor');
 
 app.get('/api/notifications', async (req, res) => {
     try {
         const status = (req.query.status || 'open').toString();
         const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
+        const username = String(req.query.username || '').trim();
+        const role = String(req.query.role || '').trim().toLowerCase();
+        const isAdminViewer = ['admin', 'admin_sample_cell', 'super_admin'].includes(role);
+        const ADMIN_ONLY_TYPES = new Set([
+            'unassigned_backlog', 'workload_imbalance', 'aging_cluster', 'priority_unassigned',
+        ]);
+
+        const norm = (v) => String(v || '').trim().toLowerCase();
+        const me = norm(username);
+
+        // Unauthenticated / unknown non-admin callers get an empty feed (no lab-wide leak).
+        if (!isAdminViewer && !me) {
+            return res.json({ notifications: [], openCount: 0 });
+        }
+
         let q = supabase.from('lab_notifications')
             .select('*')
             .order('created_at', { ascending: false })
-            .limit(limit);
+            .limit(isAdminViewer ? limit : Math.min(limit * 4, 200));
         if (status !== 'all') q = q.eq('status', status);
+        // Never surface the retired testing_not_started type
+        q = q.neq('type', 'testing_not_started');
         const { data, error } = await q;
         if (error) throw error;
 
-        const { count: openCount } = await supabase
-            .from('lab_notifications')
-            .select('id', { count: 'exact', head: true })
-            .eq('status', 'open');
+        const visibleToUser = (n) => {
+            if (isAdminViewer) return true;
+            if (ADMIN_ONLY_TYPES.has(n.type)) return false;
+            const p = n.payload || {};
+            const candidates = [
+                p.targetUser, p.ta, p.assignedTo,
+            ].map(norm).filter(Boolean);
+            return candidates.includes(me);
+        };
 
-        res.json({ notifications: data || [], openCount: openCount || 0 });
+        const filtered = (data || []).filter(visibleToUser).slice(0, limit);
+
+        // Badge open-count is always against OPEN + visibility, independent of the list chip.
+        let openCount = 0;
+        if (status === 'open') {
+            openCount = filtered.filter(n => n.status === 'open').length;
+        } else {
+            let oq = supabase.from('lab_notifications')
+                .select('*')
+                .eq('status', 'open')
+                .neq('type', 'testing_not_started')
+                .order('created_at', { ascending: false })
+                .limit(isAdminViewer ? 200 : 200);
+            const { data: openRows } = await oq;
+            openCount = (openRows || []).filter(visibleToUser).length;
+        }
+
+        res.json({ notifications: filtered, openCount });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -4470,8 +5152,16 @@ app.post('/api/notifications/:id/approve', async (req, res) => {
             acted_by: actor,
             acted_at: new Date().toISOString(),
         });
-        // Phase 1 contract: acknowledge only. No execution on approve.
-        res.json({ notification: approved });
+
+        // Execute the action — workload rebalance, unassigned backlog, shelf-life flag, etc.
+        let executionResult = null;
+        try {
+            executionResult = await executeNotification(approved, { actor });
+        } catch (execErr) {
+            executionResult = { ok: false, error: execErr.message };
+        }
+
+        res.json({ notification: approved, executionResult });
     } catch (err) {
         res.status(err.status || 500).json({ error: err.message });
     }
@@ -4509,7 +5199,7 @@ app.post('/api/notifications/:id/snooze', async (req, res) => {
 // Manual trigger — handy during dev, also used by the bell's "Refresh" button.
 app.post('/api/notifications/run-monitor', async (_req, res) => {
     try {
-        const result = await dishaMonitor.runOnce({ force: true });
+        const result = await nigraniMonitor.runOnce({ force: true });
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -4517,7 +5207,7 @@ app.post('/api/notifications/run-monitor', async (_req, res) => {
 });
 
 // --- Audit log endpoints ---
-app.get('/api/disha/audit', async (req, res) => {
+app.get('/api/nigrani/audit', async (req, res) => {
     try {
         const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
         const actionType = req.query.actionType || null;
@@ -4539,7 +5229,7 @@ app.get('/api/disha/audit', async (req, res) => {
 });
 
 // --- OIC preferences endpoints ---
-app.get('/api/disha/preferences', async (req, res) => {
+app.get('/api/nigrani/preferences', async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('oic_preferences')
@@ -4565,7 +5255,7 @@ app.get('/api/disha/preferences', async (req, res) => {
     }
 });
 
-app.post('/api/disha/preferences/:key', async (req, res) => {
+app.post('/api/nigrani/preferences/:key', async (req, res) => {
     try {
         const key = req.params.key;
         const { value, description } = req.body;
@@ -4762,8 +5452,15 @@ app.post('/api/test-report/:sampleId/observations', async (req, res) => {
 
 const PORT = process.env.PORT || 3005;
 if (!process.env.VERCEL) {
-    app.listen(PORT, () => {
+    // Bind 0.0.0.0 so phones/laptops on the same WiFi can reach this Mac.
+    app.listen(PORT, '0.0.0.0', () => {
+        const os = require('os');
+        const nets = os.networkInterfaces();
+        const lanIps = Object.values(nets).flat()
+            .filter(n => n && n.family === 'IPv4' && !n.internal)
+            .map(n => n.address);
         console.log(`Server running on http://localhost:${PORT}`);
+        lanIps.forEach(ip => console.log(`WiFi / LAN:     http://${ip}:${PORT}`));
         NigraniMonitor.start();
 
         // Local ML: retrain the hours-model from lifecycle history shortly after
