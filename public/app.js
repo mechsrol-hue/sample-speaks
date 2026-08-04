@@ -6538,7 +6538,21 @@ function renderScopeFilingTable() {
     const tbody = document.getElementById('scopeadm-filing-tbody');
     const warn = document.getElementById('scopeadm-unfiled-warning');
     if (!tbody) return;
-    const standards = scopeCatalogue.standards || [];
+    // 264 rows rendered at all times made this a wall to scroll past rather than a
+    // tool. It now starts on the standards that still need filing — the actual work —
+    // with search and a scope switch for everything else.
+    const all = scopeCatalogue.standards || [];
+    const q = (document.getElementById('scopeadm-filing-search')?.value || '').trim().toLowerCase();
+    const scope = document.getElementById('scopeadm-filing-scope')?.value || 'unfiled';
+    const standards = all.filter(s => {
+        if (q && !`${s.isNumber} ${s.title || ''}`.toLowerCase().includes(q)) return false;
+        if (scope === 'unfiled') return !scopeAdminMap[s.isNumber];
+        if (scope === 'filed') return !!scopeAdminMap[s.isNumber];
+        return true;
+    });
+
+    const countEl = document.getElementById('scopeadm-filing-count');
+    if (countEl) countEl.textContent = `${standards.length} of ${all.length}`;
 
     tbody.innerHTML = standards.map(s => {
         const cur = scopeAdminMap[s.isNumber] || '';
@@ -6560,7 +6574,9 @@ function renderScopeFilingTable() {
                     : '<span style="color:#cbd5e1; font-size:0.78rem;">—</span>'}
             </td>
         </tr>`;
-    }).join('') || '<tr><td colspan="4" style="text-align:center; padding:26px; color:var(--text-muted);">No standards in IS Intelligence yet.</td></tr>';
+    }).join('') || `<tr><td colspan="4" style="text-align:center; padding:26px; color:var(--text-muted);">${
+        all.length ? 'Nothing matches that search or filter.' : 'No standards in IS Intelligence yet.'
+    }</td></tr>`;
 
     if (!tbody.dataset.delBound) {
         tbody.dataset.delBound = '1';
@@ -6617,15 +6633,16 @@ function renderScopeBySection() {
     const unfiled = standards.filter(s => !scopeAdminMap[s.isNumber]).map(s => s.isNumber);
     if (unfiled.length) groups.push({ section: 'Not filed yet', items: unfiled, warn: true });
 
+    // Shut by default: seven sections listing 264 standards between them pushed the
+    // filing tool off the screen, and the answer most of the time is just the count.
     el.innerHTML = groups.map(g => `
-        <div style="border:1px solid ${g.warn ? '#fde68a' : '#e2e8f0'}; background:${g.warn ? '#fffbeb' : '#fff'}; border-radius:11px; padding:14px;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:9px;">
-                <strong style="font-size:0.92rem; color:${g.warn ? '#92400e' : '#0f172a'};">${escapeHtml(g.section)}</strong>
-                <span style="display:flex; align-items:center; gap:7px;">
-                    <span style="font-size:0.72rem; font-weight:700; background:${g.warn ? '#fef3c7' : '#f1f5f9'}; color:${g.warn ? '#92400e' : '#475569'}; border-radius:999px; padding:2px 9px;">${g.items.length}</span>
-                    ${g.warn ? '' : `<button onclick="openScopeAddModal('${escapeHtml(g.section)}')" title="Add standards to ${escapeHtml(g.section)}" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:7px; padding:3px 9px; font-size:0.73rem; font-weight:700; cursor:pointer;">＋ Add</button>`}
-                </span>
-            </div>
+        <details class="scopeadm-seccard${g.warn ? ' is-warn' : ''}">
+            <summary>
+                <strong>${escapeHtml(g.section)}</strong>
+                <span class="scopeadm-seccount">${g.items.length}</span>
+                ${g.warn ? '' : `<button onclick="event.preventDefault(); event.stopPropagation(); openScopeAddModal('${escapeHtml(g.section)}')" title="Add standards to ${escapeHtml(g.section)}" class="scopeadm-secadd">＋ Add</button>`}
+            </summary>
+            <div class="scopeadm-secbody">
             ${g.items.length
                 ? g.items.map(n => `<div class="scopeadm-filed-row">
                         <span style="font-weight:700; white-space:nowrap;">${escapeHtml(n)}</span>
@@ -6633,7 +6650,8 @@ function renderScopeBySection() {
                         ${g.warn ? '' : `<button type="button" class="scopeadm-unfile" data-unfile="${escapeHtml(n)}" title="Remove ${escapeHtml(n)} from ${escapeHtml(g.section)}" aria-label="Remove ${escapeHtml(n)} from ${escapeHtml(g.section)}">✕</button>`}
                    </div>`).join('')
                 : '<div style="font-size:0.78rem; color:#b45309;">Empty — a TP who picks this section will see nothing.</div>'}
-        </div>`).join('');
+            </div>
+        </details>`).join('');
 }
 
 // Deleting a standard is not a filing edit — it leaves IS Intelligence entirely,

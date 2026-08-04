@@ -1609,7 +1609,18 @@ window.addEventListener('unhandledrejection', function(e) {
                          alphabetical list could not show. Updates live as filings change. -->
                     <div id="scopeadm-by-section" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; margin-bottom:20px;"></div>
 
-                    <div style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; margin-bottom:8px;">Change a filing</div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
+                        <div style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#64748b;">Change a filing</div>
+                        <input type="text" id="scopeadm-filing-search" oninput="renderScopeFilingTable()" placeholder="Search IS number or title…"
+                               style="flex:1; min-width:200px; padding:8px 11px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.86rem; background:#fff; color:#0f172a;">
+                        <select id="scopeadm-filing-scope" onchange="renderScopeFilingTable()"
+                                style="padding:8px 11px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.86rem; background:#fff; color:#0f172a;">
+                            <option value="unfiled">Not filed yet</option>
+                            <option value="filed">Already filed</option>
+                            <option value="all">All standards</option>
+                        </select>
+                        <span id="scopeadm-filing-count" style="font-size:0.8rem; color:var(--text-muted);"></span>
+                    </div>
                     <div class="premium-table-container" style="overflow-x:auto;">
                         <table class="premium-table">
                             <thead><tr><th>IS Number</th><th>Title</th><th style="width:230px;">Section</th><th style="width:60px; text-align:right;">Delete</th></tr></thead>

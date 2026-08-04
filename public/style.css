@@ -4679,6 +4679,51 @@ html {
 .scopeadm-rec-status.is-approved { color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; }
 .scopeadm-rec-status.is-rejected { color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; }
 
+.scopeadm-seccard {
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+    background: #fff;
+    overflow: hidden;
+}
+.scopeadm-seccard.is-warn { border-color: #fde68a; background: #fffbeb; }
+.scopeadm-seccard > summary {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 14px;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+.scopeadm-seccard > summary::-webkit-details-marker { display: none; }
+.scopeadm-seccard > summary::before { content: '▸'; color: #94a3b8; font-size: 0.75rem; }
+.scopeadm-seccard[open] > summary::before { content: '▾'; }
+.scopeadm-seccard > summary:hover { background: #f8fafc; }
+.scopeadm-seccard.is-warn > summary strong { color: #92400e; }
+.scopeadm-seccard > summary strong { font-size: 0.92rem; color: #0f172a; }
+.scopeadm-seccount {
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 999px;
+    padding: 2px 9px;
+}
+.scopeadm-seccard.is-warn .scopeadm-seccount { background: #fef3c7; color: #92400e; }
+.scopeadm-secadd {
+    margin-left: auto;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    border-radius: 7px;
+    padding: 3px 9px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.scopeadm-secadd:hover { background: #dbeafe; }
+.scopeadm-secbody { padding: 0 14px 12px; max-height: 260px; overflow-y: auto; }
+
 .scopeadm-filed-row {
     display: flex;
     align-items: center;
