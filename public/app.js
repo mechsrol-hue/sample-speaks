@@ -6195,6 +6195,15 @@ function renderScopeFilingTable() {
 function renderScopeBySection() {
     const el = document.getElementById('scopeadm-by-section');
     if (!el) return;
+    if (!el.dataset.bound) {
+        el.dataset.bound = '1';
+        el.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-unfile]');
+            if (!btn) return;
+            e.preventDefault();
+            unfileScopeStandard(btn.getAttribute('data-unfile'));
+        });
+    }
     const standards = scopeCatalogue.standards || [];
     const titleOf = {};
     standards.forEach(s => { titleOf[s.isNumber] = s.title || ''; });
@@ -6216,9 +6225,10 @@ function renderScopeBySection() {
                 </span>
             </div>
             ${g.items.length
-                ? g.items.map(n => `<div style="display:flex; gap:8px; padding:3px 0; font-size:0.8rem;">
+                ? g.items.map(n => `<div class="scopeadm-filed-row">
                         <span style="font-weight:700; white-space:nowrap;">${escapeHtml(n)}</span>
-                        <span style="color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(titleOf[n] || '')}</span>
+                        <span style="color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">${escapeHtml(titleOf[n] || '')}</span>
+                        ${g.warn ? '' : `<button type="button" class="scopeadm-unfile" data-unfile="${escapeHtml(n)}" title="Remove ${escapeHtml(n)} from ${escapeHtml(g.section)}" aria-label="Remove ${escapeHtml(n)} from ${escapeHtml(g.section)}">✕</button>`}
                    </div>`).join('')
                 : '<div style="font-size:0.78rem; color:#b45309;">Empty — a TP who picks this section will see nothing.</div>'}
         </div>`).join('');
@@ -6233,6 +6243,15 @@ function setScopeFiling(isNumber, section) {
 // ── "Add standards to <section>" picker ────────────────────────────────────────
 let scopeAddSection = null;
 let scopeAddPicked = new Set();
+
+// Removing only unfiles the standard — it stays in IS Intelligence and can be filed
+// again. Like every other filing edit it is held in memory until "Save filing".
+function unfileScopeStandard(isNumber) {
+    const from = scopeAdminMap[isNumber];
+    if (!from) return;
+    setScopeFiling(isNumber, '');
+    showToast(`${isNumber} removed from ${from} — press “Save filing” to keep it.`, 'info');
+}
 
 function openScopeAddModal(section) {
     scopeAddSection = section;

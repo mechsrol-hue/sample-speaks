@@ -4400,6 +4400,31 @@ html {
     color: #64748b;
     cursor: not-allowed;
 }
+.scopeadm-filed-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+    font-size: 0.8rem;
+}
+.scopeadm-unfile {
+    flex-shrink: 0;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #cbd5e1;
+    font-size: 0.78rem;
+    line-height: 1;
+    padding: 3px 6px;
+    cursor: pointer;
+    transition: color 0.12s, background 0.12s, border-color 0.12s;
+}
+.scopeadm-filed-row:hover .scopeadm-unfile { color: #94a3b8; }
+.scopeadm-unfile:hover {
+    color: #b91c1c;
+    background: #fef2f2;
+    border-color: #fecaca;
+}
 .myscope-approved {
     margin-bottom: 16px;
     border: 1px solid #bbf7d0;
