@@ -1516,6 +1516,11 @@ window.addEventListener('unhandledrejection', function(e) {
 
                     <div id="scope-status-banner" style="display:none; margin-bottom:16px;"></div>
 
+                    <!-- Standards already approved into this user's competencies. Only one
+                         submission is stored per user, so without this an approved section
+                         vanishes from view the moment they start the next one. -->
+                    <div id="scope-approved-panel" style="display:none;"></div>
+
                     <!-- Step 1: sections -->
                     <section class="myscope-step myscope-step-focus" id="myscope-step-1" aria-labelledby="scope-step1-title">
                         <div class="myscope-step-head">

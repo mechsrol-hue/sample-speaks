@@ -3390,7 +3390,24 @@ app.post('/api/is-scope/standards/bulk', requireAdmin, async (req, res) => {
 app.get('/api/is-scope/mine/:userId', async (req, res) => {
     try {
         const sub = await readPref(SCOPE_TP_PREFIX + req.params.userId, null);
-        res.json({ submission: sub });
+        // Only one submission is kept per user, so an approved declaration is otherwise
+        // invisible the moment they start a new section. The competencies it produced
+        // are the durable record — return them so the TP can see what is already theirs
+        // instead of re-declaring it.
+        let approved = [];
+        const { data: profile } = await supabase
+            .from('employee_profiles').select('id').eq('userId', req.params.userId).maybeSingle();
+        if (profile) {
+            const { data: comps } = await supabase
+                .from('employee_competencies')
+                .select('isNumber, proficiencyLevel')
+                .eq('employeeId', profile.id);
+            approved = (comps || []).map(c => ({
+                isNumber: c.isNumber,
+                proficiencyLevel: c.proficiencyLevel || ''
+            })).sort((a, b) => String(a.isNumber).localeCompare(String(b.isNumber), undefined, { numeric: true }));
+        }
+        res.json({ submission: sub, approved, hasProfile: !!profile });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

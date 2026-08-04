@@ -5328,6 +5328,8 @@ let scopeReasons = {};
 // catalogue. Off by default — showing it automatically made every empty section
 // render the same 270 rows, so the sections looked identical.
 let scopeShowAllCatalogue = false;
+// Standards already written into this user's competencies by a past approval.
+let scopeApproved = [];
 
 function scopeActiveSectionLabel() {
     if (scopeChosenSections.has(SCOPE_OTHER_KEY)) {
@@ -5340,6 +5342,32 @@ function scopeFiledUnderActiveSection() {
     const label = scopeActiveSectionLabel();
     if (!label || !scopeChosenSections.size) return [];
     return (scopeCatalogue.standards || []).filter(s => s.section === label);
+}
+
+function scopeBaseISNumber(isNumber) {
+    const m = String(isNumber || '').match(/IS\s*\d+/i);
+    return m ? m[0].toUpperCase().replace(/\s+/g, ' ') : String(isNumber || '').trim();
+}
+
+function scopeApprovedKeys() {
+    return new Set(scopeApproved.map(a => scopeBaseISNumber(a.isNumber)));
+}
+
+function renderScopeApproved() {
+    const el = document.getElementById('scope-approved-panel');
+    if (!el) return;
+    if (!scopeApproved.length) { el.style.display = 'none'; el.innerHTML = ''; return; }
+    el.style.display = 'block';
+    el.innerHTML = `
+        <details class="myscope-approved" open>
+            <summary>Already in your scope — ${scopeApproved.length} standard(s) approved</summary>
+            <div class="myscope-approved-body">
+                <p>Approved earlier and already counted by auto-assign. You don't need to declare these again.</p>
+                <div class="myscope-approved-chips">
+                    ${scopeApproved.map(a => `<span class="myscope-approved-chip">${escapeHtml(a.isNumber)}${a.proficiencyLevel ? `<em>${escapeHtml(a.proficiencyLevel)}</em>` : ''}</span>`).join('')}
+                </div>
+            </div>
+        </details>`;
 }
 
 function scopeJsStr(value) {
@@ -5390,7 +5418,9 @@ async function loadMyISScope() {
             fetch(`/api/is-scope/mine/${currentUser ? currentUser.id : 0}`)
         ]);
         scopeCatalogue = await catRes.json();
-        scopeMine = (await mineRes.json()).submission || null;
+        const mine = await mineRes.json();
+        scopeMine = mine.submission || null;
+        scopeApproved = mine.approved || [];
 
         // One section per submission. Restore only when editing a pending form;
         // after approval, start clean so they can submit again for another section.
@@ -5424,6 +5454,7 @@ async function loadMyISScope() {
         if (noteEl) noteEl.value = (scopeMine && scopeMine.status === 'pending') ? (scopeMine.note || '') : '';
 
         renderScopeStatus();
+        renderScopeApproved();
         renderScopeSections();
         renderScopeStandards();
         renderScopeShortlist();
@@ -5920,6 +5951,7 @@ function renderScopeStandards(opts = {}) {
         ? `<div class="myscope-notice">Standards are not filed under your section yet — you can still tick what you test. They will be submitted under <strong>${escapeHtml(sectionLabel)}</strong>.</div>`
         : '';
 
+    const approvedKeys = scopeApprovedKeys();
     const bySection = {};
     for (const s of visible) {
         const sec = s.section || scopeLocalFiling[s.isNumber] || sectionLabel || 'Unfiled';
@@ -5936,10 +5968,12 @@ function renderScopeStandards(opts = {}) {
             </div>
             ${list.map(s => {
                 const on = scopeChosenIS.has(s.isNumber);
+                const held = approvedKeys.has(scopeBaseISNumber(s.isNumber));
                 return `<label class="myscope-is-row ${on ? 'is-on' : ''}">
                     <input type="checkbox" ${on ? 'checked' : ''} data-scope-is="${escapeHtml(s.isNumber)}">
                     <span class="myscope-is-code">${escapeHtml(s.isNumber)}</span>
                     <span class="myscope-is-title">${escapeHtml(s.title || '')}</span>
+                    ${held ? '<span class="myscope-is-badge myscope-is-badge-held">already yours</span>' : ''}
                     ${on ? '<span class="myscope-is-badge">I test this</span>' : ''}
                 </label>`;
             }).join('')}
