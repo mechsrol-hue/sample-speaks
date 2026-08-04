@@ -5002,6 +5002,72 @@ tr:hover .scopeadm-del { color: #94a3b8; }
     padding: 4px 9px;
 }
 
+/* Review card: one standard per row, decision at the end. Reading order is
+   who → what → why → decide, so the buttons sit after the evidence rather than
+   above it. */
+.scoperev-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 15px 16px 12px;
+    margin-bottom: 11px;
+    background: #fff;
+}
+.scoperev-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.scoperev-head strong { font-size: 0.98rem; }
+.scoperev-when { font-size: 0.76rem; color: var(--text-muted); }
+.scoperev-meta { font-size: 0.8rem; color: #64748b; margin: 4px 0 10px; }
+
+.scoperev-rows { border-top: 1px solid #f1f5f9; }
+.scoperev-row { padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+.scoperev-row:last-child { border-bottom: 0; }
+.scoperev-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.scoperev-is { font-size: 0.85rem; font-weight: 700; color: #0f172a; }
+.scoperev-row.is-drop .scoperev-is { text-decoration: line-through; color: #b91c1c; }
+.scoperev-star { width: 13px; font-size: 0.82rem; color: #2563eb; text-align: center; }
+.scoperev-star.is-off { color: transparent; }
+.scoperev-tag {
+    font-size: 0.64rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-radius: 999px;
+    padding: 2px 7px;
+}
+.scoperev-tag.is-new { color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; }
+.scoperev-tag.is-kept { color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; }
+.scoperev-tag.is-drop { color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; }
+.scoperev-why {
+    font-size: 0.81rem;
+    color: #334155;
+    line-height: 1.45;
+    margin: 3px 0 0 21px;
+    overflow-wrap: anywhere;
+}
+.scoperev-why.is-none { color: #94a3b8; }
+
+.scoperev-note { margin-top: 10px; font-size: 0.81rem; color: #64748b; font-style: italic; }
+.scoperev-note.is-review { color: #334155; font-style: normal; }
+.scoperev-foot {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 11px;
+    border-top: 1px solid #f1f5f9;
+}
+.scoperev-btn {
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.83rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.scoperev-btn.is-approve { background: #10b981; color: #fff; border: 1px solid #10b981; }
+.scoperev-btn.is-approve:hover { background: #059669; border-color: #059669; }
+.scoperev-btn.is-back { background: #fff; color: #b91c1c; border: 1px solid #fecaca; }
+.scoperev-btn.is-back:hover { background: #fef2f2; }
+
 .scopeadm-kpi-click { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
 .scopeadm-kpi-click:hover { box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08); }
 .scopeadm-kpi-click:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }

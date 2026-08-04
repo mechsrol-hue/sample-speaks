@@ -7158,16 +7158,42 @@ function scopeRecommendationBlock(sub) {
 // Add / kept / remove chips for a submission — built from the live toAdd/toRemove the
 // /submissions endpoint computes, so the OIC sees exactly what Approve will change
 // instead of just the flat pick list.
-function scopeSubmissionDiffChips(s) {
-    const toAdd = new Set(s.toAdd || []);
-    const toRemove = s.toRemove || [];
-    const addChips = (s.isNumbers || []).filter(n => toAdd.has(n)).map(n =>
-        `<span style="background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:6px; padding:3px 8px; font-size:0.76rem; font-weight:600;">+ ${escapeHtml(n)}</span>`).join('');
-    const keptChips = (s.isNumbers || []).filter(n => !toAdd.has(n)).map(n =>
-        `<span style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:6px; padding:3px 8px; font-size:0.76rem; font-weight:600;">${escapeHtml(n)}</span>`).join('');
-    const removeChips = toRemove.map(c =>
-        `<span style="background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; border-radius:6px; padding:3px 8px; font-size:0.76rem; font-weight:600; text-decoration:line-through;">− ${escapeHtml(c.isNumber)}</span>`).join('');
-    return addChips + keptChips + removeChips;
+// One row per standard instead of two lists to cross-reference. The old card showed
+// every declared IS as a chip and then repeated most of them underneath with their
+// reasons, leaving the reader to match them up by eye.
+function scopeSubmissionStandards(sub) {
+    const toAdd = new Set(sub.toAdd || []);
+    const reasons = new Map((sub.recommendations || []).map(r => [r.isNumber, r.reason || '']));
+    const hasRecs = !!(sub.recommendations || []).length;
+
+    const rows = (sub.isNumbers || []).map(n => {
+        const recommended = reasons.has(n);
+        const state = toAdd.has(n)
+            ? '<span class="scoperev-tag is-new">new</span>'
+            : '<span class="scoperev-tag is-kept">already theirs</span>';
+        const why = !hasRecs ? ''
+            : recommended
+                ? `<div class="scoperev-why">${reasons.get(n) ? escapeHtml(reasons.get(n)) : 'Recommended, no reason given.'}</div>`
+                : '<div class="scoperev-why is-none">Not recommended to continue.</div>';
+        return `<div class="scoperev-row${recommended ? ' is-rec' : ''}">
+            <div class="scoperev-line">
+                ${recommended ? '<span class="scoperev-star" title="Recommended to continue testing">★</span>' : '<span class="scoperev-star is-off"></span>'}
+                <span class="scoperev-is">${escapeHtml(n)}</span>
+                ${state}
+            </div>
+            ${why}
+        </div>`;
+    });
+
+    const removals = (sub.toRemove || []).map(c => `<div class="scoperev-row is-drop">
+        <div class="scoperev-line">
+            <span class="scoperev-star is-off"></span>
+            <span class="scoperev-is">${escapeHtml(c.isNumber)}</span>
+            <span class="scoperev-tag is-drop">removing</span>
+        </div>
+    </div>`);
+
+    return rows.join('') + removals.join('');
 }
 
 // The counter is the only way in: the list stays out of the page until asked for,
@@ -7207,30 +7233,32 @@ function renderScopeSubmissions() {
 
     if (listEl) {
         const subs = scopeSubmissions.submissions || [];
-        listEl.innerHTML = subs.length ? subs.map(s => `
-            <div style="border:1px solid #e2e8f0; border-radius:11px; padding:15px; margin-bottom:11px; background:#fff;">
-                <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:9px;">
-                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                        <strong style="font-size:0.98rem;">${escapeHtml(s.username || ('User #' + s.userId))}</strong>
-                        ${pill(s.status)}
-                        <span style="font-size:0.76rem; color:var(--text-muted);">${s.submittedAt ? new Date(s.submittedAt).toLocaleString('en-IN') : ''}</span>
-                    </div>
-                    ${s.status === 'pending' ? `<div style="display:flex; gap:7px;">
-                        <button onclick="decideScope(${s.userId},'approve')" style="background:#10b981; color:#fff; border:none; border-radius:7px; padding:7px 15px; font-size:0.82rem; font-weight:700; cursor:pointer;">✓ Approve</button>
-                        <button onclick="decideScope(${s.userId},'reject')" style="background:#fff; color:#b91c1c; border:1px solid #fecaca; border-radius:7px; padding:7px 15px; font-size:0.82rem; font-weight:700; cursor:pointer;">Send back</button>
-                    </div>` : `<span style="font-size:0.76rem; color:var(--text-muted);">${s.reviewedBy ? `by ${escapeHtml(s.reviewedBy)}` : ''}${(s.competenciesAdded || s.competenciesRemoved) ? ` · +${s.competenciesAdded || 0} / −${s.competenciesRemoved || 0} competencies` : ''}</span>`}
+        listEl.innerHTML = subs.length ? subs.map(s => {
+            const recCount = (s.recommendations || []).length;
+            const total = (s.isNumbers || []).length;
+            return `
+            <div class="scoperev-card">
+                <div class="scoperev-head">
+                    <strong>${escapeHtml(s.username || ('User #' + s.userId))}</strong>
+                    ${pill(s.status)}
+                    <span class="scoperev-when">${s.submittedAt ? new Date(s.submittedAt).toLocaleString('en-IN') : ''}</span>
                 </div>
-                <div style="font-size:0.83rem; color:#475569; margin-bottom:7px;">
-                    <strong>Sections:</strong> ${s.sections.map(x => escapeHtml(x)).join(', ')}
-                    ${s.proposedSection ? ` · <span style="color:#b45309;">proposed new section: “${escapeHtml(s.proposedSection)}”</span>` : ''}
+                <div class="scoperev-meta">
+                    ${s.sections.map(x => escapeHtml(x)).join(', ')} ·
+                    ${total} standard${total === 1 ? '' : 's'}${recCount ? ` · ${recCount} recommended` : ' · no recommendation'}
+                    ${s.proposedSection ? ` · <span style="color:#b45309;">proposed section “${escapeHtml(s.proposedSection)}”</span>` : ''}
                 </div>
-                <div style="display:flex; flex-wrap:wrap; gap:6px;">
-                    ${scopeSubmissionDiffChips(s)}
+                <div class="scoperev-rows">${scopeSubmissionStandards(s)}</div>
+                ${s.note ? `<div class="scoperev-note">“${escapeHtml(s.note)}”</div>` : ''}
+                ${s.reviewNote ? `<div class="scoperev-note is-review"><strong>Review note:</strong> ${escapeHtml(s.reviewNote)}</div>` : ''}
+                <div class="scoperev-foot">
+                    ${s.status === 'pending' ? `
+                        <button onclick="decideScope(${s.userId},'reject')" class="scoperev-btn is-back">Send back</button>
+                        <button onclick="decideScope(${s.userId},'approve')" class="scoperev-btn is-approve">✓ Approve</button>`
+                    : `<span class="scoperev-when">${s.reviewedBy ? `by ${escapeHtml(s.reviewedBy)}` : ''}${(s.competenciesAdded || s.competenciesRemoved) ? ` · +${s.competenciesAdded || 0} / −${s.competenciesRemoved || 0} competencies` : ''}</span>`}
                 </div>
-                ${scopeRecommendationBlock(s)}
-                ${s.note ? `<div style="margin-top:8px; font-size:0.81rem; color:#64748b; font-style:italic;">“${escapeHtml(s.note)}”</div>` : ''}
-                ${s.reviewNote ? `<div style="margin-top:6px; font-size:0.81rem; color:#334155;"><strong>Review note:</strong> ${escapeHtml(s.reviewNote)}</div>` : ''}
-            </div>`).join('')
+            </div>`;
+        }).join('')
             : '<div style="padding:26px; text-align:center; color:var(--text-muted); font-size:0.88rem;">No submissions yet.</div>';
     }
 
