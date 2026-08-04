@@ -6678,6 +6678,12 @@ async function saveScopeCatalogue() {
 }
 
 let scopeCoverage = { sections: [], standards: [], counts: {} };
+let scopeCoverageView = 'rec';   // 'rec' | 'nrec' | 'appr'
+
+function setScopeCoverageView(view) {
+    scopeCoverageView = view;
+    renderScopeCoverage();
+}
 
 // A route the running server doesn't have gets Express's default 404, which is an
 // HTML page — so response.json() dies on "Unexpected token '<'", telling the user
@@ -6727,81 +6733,83 @@ async function loadScopeCoverage() {
 
 function renderScopeCoverage() {
     const listEl = document.getElementById('scopeadm-coverage-list');
+    const navEl = document.getElementById('scopeadm-coverage-nav');
     if (!listEl) return;
 
     const sec = document.getElementById('scopeadm-coverage-section')?.value || '';
     const all = (scopeCoverage.standards || []).filter(s => !sec || s.section === sec);
 
-    // Three answers, in the order an OIC needs them: what am I being asked to keep
-    // testing, what was declared without that backing, and what is already settled.
-    const recommended = all.filter(s => s.recommendations.length);
-    const notRecommended = all.filter(s => s.declaredBy.length && !s.recommendations.length);
-    const approved = all.filter(s => s.holders.length);
+    const views = {
+        rec: {
+            label: 'Recommended',
+            title: 'Recommended to continue testing',
+            hint: 'A TA or LO has asked the lab to carry on testing these, and said why.',
+            empty: 'Nobody has recommended a standard yet.',
+            items: all.filter(s => s.recommendations.length)
+        },
+        nrec: {
+            label: 'Not recommended',
+            title: 'Declared but not recommended',
+            hint: 'Someone says they test these, but nobody argued for keeping them. Worth asking before you approve.',
+            empty: 'Nothing declared without a recommendation.',
+            items: all.filter(s => s.declaredBy.length && !s.recommendations.length)
+        },
+        appr: {
+            label: 'Approved',
+            title: 'Approved to test',
+            hint: 'Competencies auto-assign reads. “via Scope” came through this queue; the rest were set in the Employee Hub or imported from sample history.',
+            empty: 'Nobody is approved to test anything in this section.',
+            items: all.filter(s => s.holders.length)
+        }
+    };
 
-    // Approved competency and an unapproved declaration are different states of the
-    // same claim — showing both on the row is what makes the pipeline legible.
+    if (navEl) {
+        navEl.innerHTML = Object.entries(views).map(([key, v]) => `
+            <button type="button" class="scopecov-tab is-${key} ${scopeCoverageView === key ? 'is-on' : ''}"
+                    onclick="setScopeCoverageView('${key}')">
+                <span class="scopecov-dot"></span>${v.label}
+                <span class="scopecov-count">${v.items.length}</span>
+            </button>`).join('');
+    }
+
+    const view = views[scopeCoverageView] || views.rec;
+
+    // Approved competency and an unapproved declaration are two states of the same
+    // claim — showing both on the row is what makes the pipeline legible.
     const people = (s) => {
         const chips = s.holders.map(h =>
-            `<span class="scopecov-person is-approved" title="Approved competency">${escapeHtml(h.name)}${h.level ? `<em>${escapeHtml(h.level)}</em>` : ''}</span>`);
+            `<span class="scopecov-person is-approved">${escapeHtml(h.name)}<em>${h.viaScope ? 'via scope' : escapeHtml(h.level || 'existing')}</em></span>`);
         for (const d of s.declaredBy) {
             if (d.status === 'approved') continue;   // already shown as a holder
-            chips.push(`<span class="scopecov-person is-${escapeHtml(d.status || 'pending')}" title="Declared, ${escapeHtml(d.status || 'pending')}">${escapeHtml(d.by)}<em>${escapeHtml(d.status || 'pending')}</em></span>`);
+            chips.push(`<span class="scopecov-person is-${escapeHtml(d.status || 'pending')}">${escapeHtml(d.by)}<em>${escapeHtml(d.status || 'pending')}</em></span>`);
         }
         return chips.length
             ? `<div class="scopecov-people">${chips.join('')}</div>`
             : '<div class="scopecov-people"><span class="scopecov-person is-none">Nobody yet</span></div>';
     };
 
-    const row = (s, extra) => `<div class="scopecov-row">
+    const row = (s) => `<div class="scopecov-row">
         <div class="scopecov-head">
             <span class="scopecov-is">${escapeHtml(s.isNumber)}</span>
             ${s.section ? `<span class="scopecov-sec">${escapeHtml(s.section)}</span>` : ''}
         </div>
         <div class="scopecov-title">${escapeHtml(s.title || '')}</div>
         ${people(s)}
-        ${extra || ''}
+        ${scopeCoverageView === 'rec' ? `<div class="scopecov-reasons">
+            ${s.recommendations.map(r => `<blockquote class="scopecov-reason${r.reason ? '' : ' is-empty'}">
+                ${r.reason ? escapeHtml(r.reason) : 'No reason given.'}
+                <cite>${escapeHtml(r.by || 'unknown')}</cite>
+            </blockquote>`).join('')}
+        </div>` : ''}
     </div>`;
 
-    // Open only what needs a decision. "Approved" is reference — a long settled list
-    // that pushes the two lists an OIC has to act on off the screen, so it starts
-    // closed. An empty block collapses to its one line rather than a hollow panel.
-    const block = (title, hint, tone, items, empty, open) => `
-        <details class="scopecov-block is-${tone}" ${open && items.length ? 'open' : ''}>
-            <summary>
-                <span class="scopecov-dot"></span>
-                <span class="scopecov-title-text">${title}</span>
-                <span class="scopecov-count">${items.length}</span>
-            </summary>
-            <p class="scopecov-hint">${hint}</p>
+    listEl.innerHTML = `
+        <section class="scopecov-block is-${scopeCoverageView}">
+            <p class="scopecov-hint">${view.hint}</p>
             <div class="scopecov-rows">
-                ${items.length ? items.join('') : `<div class="scopecov-empty">${empty}</div>`}
+                ${view.items.length ? view.items.map(row).join('') : `<div class="scopecov-empty">${view.empty}</div>`}
             </div>
-        </details>`;
-
-    const summary = `<p class="scopecov-summary">
-        <strong>${recommended.length}</strong> recommended ·
-        <strong>${notRecommended.length}</strong> declared without a recommendation ·
-        <strong>${approved.length}</strong> approved${sec ? ` in ${escapeHtml(sec)}` : ''}
-    </p>`;
-
-    listEl.innerHTML = summary +
-        block('Recommended to continue testing',
-            'A TA or LO has asked the lab to carry on testing these, and said why.', 'rec',
-            recommended.map(s => row(s, `<div class="scopecov-reasons">
-                ${s.recommendations.map(r => `<blockquote class="scopecov-reason${r.reason ? '' : ' is-empty'}">
-                    ${r.reason ? escapeHtml(r.reason) : 'No reason given.'}
-                    <cite>${escapeHtml(r.by || 'unknown')}</cite>
-                </blockquote>`).join('')}
-            </div>`)),
-            'Nothing recommended yet.', true)
-      + block('Declared but not recommended',
-            'Someone says they test these, but nobody argued for keeping them. Worth asking before you approve.', 'nrec',
-            notRecommended.map(s => row(s)),
-            'Nothing outstanding.', true)
-      + block('Approved',
-            'Written into competencies — this is what auto-assign reads.', 'appr',
-            approved.map(s => row(s)),
-            'Nothing approved yet.', false);
+        </section>`;
 }
 
 async function loadScopeSubmissions() {

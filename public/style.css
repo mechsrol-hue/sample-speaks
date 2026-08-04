@@ -4458,43 +4458,43 @@ html {
 /* Approved & recommended — three lists, only the ones needing a decision open.
    One accent colour per block and one text alignment throughout: the point is to
    be scannable, not decorated. */
-.scopecov-summary {
-    margin: 0 0 14px;
-    font-size: 0.86rem;
-    color: #475569;
+.scopecov-nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
 }
-.scopecov-summary strong { color: #0f172a; }
+.scopecov-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.scopecov-tab:hover { background: #f8fafc; }
+.scopecov-tab.is-on { color: #0f172a; background: #f1f5f9; border-color: #cbd5e1; }
+.scopecov-tab.is-rec.is-on { background: #eff6ff; border-color: #bfdbfe; }
+.scopecov-tab.is-nrec.is-on { background: #fffbeb; border-color: #fde68a; }
+.scopecov-tab.is-appr.is-on { background: #f0fdf4; border-color: #bbf7d0; }
 
 .scopecov-block {
     border: 1px solid #e2e8f0;
     border-radius: 12px;
-    margin-bottom: 12px;
     background: #fff;
     overflow: hidden;
+    padding-top: 13px;
 }
-.scopecov-block > summary {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 13px 16px;
-    cursor: pointer;
-    list-style: none;
-    user-select: none;
-}
-.scopecov-block > summary::-webkit-details-marker { display: none; }
-.scopecov-block > summary::after {
-    content: '▸';
-    margin-left: auto;
-    color: #94a3b8;
-    font-size: 0.8rem;
-}
-.scopecov-block[open] > summary::after { content: '▾'; }
-.scopecov-block > summary:hover { background: #f8fafc; }
-.scopecov-title-text { font-size: 0.95rem; font-weight: 700; color: #0f172a; }
 .scopecov-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-.scopecov-block.is-rec .scopecov-dot { background: #3b82f6; }
-.scopecov-block.is-nrec .scopecov-dot { background: #f59e0b; }
-.scopecov-block.is-appr .scopecov-dot { background: #10b981; }
+.scopecov-tab.is-rec .scopecov-dot { background: #3b82f6; }
+.scopecov-tab.is-nrec .scopecov-dot { background: #f59e0b; }
+.scopecov-tab.is-appr .scopecov-dot { background: #10b981; }
 .scopecov-count {
     font-size: 0.74rem;
     font-weight: 800;

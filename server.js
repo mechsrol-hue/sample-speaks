@@ -3169,6 +3169,12 @@ app.delete('/api/is-intelligence/standards/:id', requireAdmin, async (req, res) 
 // for a standard — it becomes competency only when an admin says so, and the
 // approving account is recorded on the submission.
 //
+// A submission's isNumbers is the TP's full desired list for that one section, so
+// approval syncs employee_competencies to match it — adding what's new, removing
+// what was already held but got unticked — rather than only ever adding. The sync is
+// scoped to standards filed under the submitted section, so approving a change to one
+// section can never touch competencies that belong to another.
+//
 // Stored in system_preferences (key/value) rather than new tables: the volume is a
 // few dozen rows, the table already exists, and it needs no migration to deploy.
 const SCOPE_SECTIONS_KEY = 'is_scope_sections';
@@ -3182,6 +3188,16 @@ const { DEFAULT_SECTIONS, defaultSectionFor: scopeDefaultSectionFor } = require(
 // samples and weighted 0.6, so an approval can't silently put an untested declaration
 // at full weight. Admin promotes from the Employee Hub as usual.
 const SCOPE_DEFAULT_PROFICIENCY = 'Trainee';
+
+// seed_is_manager_demo.js stamps vault rows with "(DEMO)" / DEMO_*.pdf. Those must
+// never inflate the Scope Control "Approved" roll-up — they share base numbers with
+// real editions, so a single competency would otherwise light up the demo title too.
+function isDemoVaultStandard(row) {
+    if (!row) return false;
+    const title = String(row.title || '');
+    const pdf = String(row.pdfFileName || '');
+    return /\(DEMO\)/i.test(title) || /^DEMO_/i.test(pdf);
+}
 
 // Same standard, different house style: LIMS exports "IS 4985 (2021)" and
 // "IS 3196 : Part 1 (2013)"; the vault holds "IS 4985:2021" and "IS 3196 (Part 1) : 2013".
@@ -3207,6 +3223,21 @@ async function writePref(key, value) {
     const { error } = await supabase.from('system_preferences')
         .upsert({ key, value: JSON.stringify(value) }, { onConflict: 'key' });
     if (error) throw new Error(error.message);
+}
+
+// Every standard's normalized base IS number → its filed section. Used to scope an
+// approval's competency sync (add + remove) to only the standards that belong to the
+// section actually being submitted, so a change to one section can never reach into
+// competencies filed under a different one.
+async function scopeSectionByBase() {
+    const sectionMap = await readPref(SCOPE_MAP_KEY, {});
+    const { data: rows } = await supabase.from('is_standards_vault').select('isNumber');
+    const byBase = new Map();
+    for (const r of (rows || [])) {
+        const section = sectionMap[r.isNumber] || scopeDefaultSectionFor(r.isNumber) || null;
+        if (section) byBase.set(normalizeISNumber(r.isNumber), section);
+    }
+    return byBase;
 }
 
 // Everything a TP or admin needs to render the picker: the section list, the
@@ -3469,7 +3500,9 @@ app.post('/api/is-scope/mine', async (req, res) => {
             status: 'pending',
             submittedAt: new Date().toISOString(),
             // Re-submitting after a decision clears the old verdict but keeps the history.
-            // Prior approved competencies stay in employee_competencies (approve is additive).
+            // isNumbers here is the full desired list for the section — approval syncs
+            // employee_competencies to match it (see scopeSectionByBase above), so leaving
+            // a previously-held standard off this list is a removal request, not a no-op.
             previousStatus: prev ? prev.status : null,
             reviewedBy: null,
             reviewedAt: null,
@@ -3504,6 +3537,33 @@ app.get('/api/is-scope/submissions', async (req, res) => {
         const outstanding = (profiles || [])
             .filter(p => p.isActive && !responded.has(String(p.userId)))
             .map(p => ({ userId: p.userId, fullName: p.fullName, designation: p.designation }));
+
+        // Attach a live add/remove diff to every submission, scoped to its own section, so
+        // the review card shows exactly what approving will change — not just a flat pick
+        // list. Computed fresh against the DB on every load rather than stored, so it can
+        // never go stale if competencies changed since the TP submitted.
+        const sectionByBase = await scopeSectionByBase();
+        const { data: comps } = await supabase
+            .from('employee_competencies').select('employeeId, isNumber, proficiencyLevel');
+        const profileByUserId = new Map((profiles || []).map(p => [String(p.userId), p]));
+        const compsByEmployee = new Map();
+        for (const c of (comps || [])) {
+            if (!compsByEmployee.has(c.employeeId)) compsByEmployee.set(c.employeeId, []);
+            compsByEmployee.get(c.employeeId).push(c);
+        }
+        for (const sub of submissions) {
+            const section = (sub.sections || [])[0];
+            const profile = profileByUserId.get(String(sub.userId));
+            const sectionComps = profile
+                ? (compsByEmployee.get(profile.id) || []).filter(c => sectionByBase.get(normalizeISNumber(c.isNumber)) === section)
+                : [];
+            const haveBase = new Set(sectionComps.map(c => normalizeISNumber(c.isNumber)));
+            const desiredBase = new Set((sub.isNumbers || []).map(normalizeISNumber));
+            sub.toAdd = (sub.isNumbers || []).filter(n => !haveBase.has(normalizeISNumber(n)));
+            sub.toRemove = sectionComps
+                .filter(c => !desiredBase.has(normalizeISNumber(c.isNumber)))
+                .map(c => ({ isNumber: c.isNumber, proficiencyLevel: c.proficiencyLevel || '' }));
+        }
 
         submissions.sort((a, b) => String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));
         res.json({
@@ -3541,6 +3601,19 @@ app.get('/api/is-scope/coverage', async (req, res) => {
 
         // Competencies are stored under the base number the approval normalises to,
         // so holders are matched on that key rather than the full edition string.
+        // A competency can come from an IS Scope approval or from the Employee Hub /
+        // sample-history import. They look identical in the table, so "approved" reads
+        // as "approved here" when half of them never went through this queue.
+        const scopeApprovedKeys = new Set();
+        for (const p of (prefs || [])) {
+            let sub;
+            try { sub = JSON.parse(p.value); } catch (_) { continue; }
+            if (sub.status !== 'approved') continue;
+            for (const n of (sub.isNumbers || [])) {
+                scopeApprovedKeys.add(`${sub.userId}|${normalizeISNumber(n)}`);
+            }
+        }
+
         const holdersByBase = new Map();
         for (const c of (comps || [])) {
             const p = profileById.get(c.employeeId);
@@ -3550,7 +3623,8 @@ app.get('/api/is-scope/coverage', async (req, res) => {
             holdersByBase.get(base).push({
                 name: (p && p.fullName) || `Employee #${c.employeeId}`,
                 designation: (p && p.designation) || '',
-                level: c.proficiencyLevel || ''
+                level: c.proficiencyLevel || '',
+                viaScope: !!(p && scopeApprovedKeys.has(`${p.userId}|${base}`))
             });
         }
 
@@ -3579,7 +3653,9 @@ app.get('/api/is-scope/coverage', async (req, res) => {
             }
         }
 
-        const standards = (vaultRows || []).map(r => ({
+        const standards = (vaultRows || [])
+            .filter(r => !isDemoVaultStandard(r))
+            .map(r => ({
             isNumber: r.isNumber,
             title: r.title || '',
             section: sectionMap[r.isNumber] || scopeDefaultSectionFor(r.isNumber) || null,
@@ -3615,6 +3691,7 @@ app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, r
         if (!sub) return res.status(404).json({ error: 'No submission from that user.' });
 
         let competenciesAdded = 0;
+        let competenciesRemoved = 0;
         if (decision === 'approve') {
             // employee_competencies is keyed by employee_profiles.id, not users.id.
             const { data: profile } = await supabase
@@ -3623,7 +3700,7 @@ app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, r
                 return res.status(400).json({ error: `${sub.username || 'That user'} has no employee profile, so competencies cannot be recorded. Create the profile in Employee Hub first.` });
             }
             const { data: existing } = await supabase
-                .from('employee_competencies').select('isNumber').eq('employeeId', profile.id);
+                .from('employee_competencies').select('id, isNumber').eq('employeeId', profile.id);
             const have = new Set((existing || []).map(c => normalizeISNumber(c.isNumber)));
             const toAdd = [...new Set(sub.isNumbers.map(normalizeISNumber))]
                 .filter(n => n && !have.has(n))
@@ -3633,6 +3710,20 @@ app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, r
                 if (error) throw new Error(`Competency write failed: ${error.message}`);
                 competenciesAdded = toAdd.length;
             }
+
+            // Anything already held that belongs to this submission's section but isn't in
+            // the desired list is a removal the TP made in step 2 — approving deletes it.
+            // A competency filed under a different section is never touched here.
+            const section = (sub.sections || [])[0];
+            const sectionByBase = await scopeSectionByBase();
+            const desiredBase = new Set(sub.isNumbers.map(normalizeISNumber));
+            const toRemove = (existing || []).filter(c =>
+                sectionByBase.get(normalizeISNumber(c.isNumber)) === section && !desiredBase.has(normalizeISNumber(c.isNumber)));
+            if (toRemove.length) {
+                const { error } = await supabase.from('employee_competencies').delete().in('id', toRemove.map(c => c.id));
+                if (error) throw new Error(`Competency removal failed: ${error.message}`);
+                competenciesRemoved = toRemove.length;
+            }
         }
 
         sub.status = decision === 'approve' ? 'approved' : 'rejected';
@@ -3640,9 +3731,10 @@ app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, r
         sub.reviewedAt = new Date().toISOString();
         sub.reviewNote = String(note || '').trim();
         sub.competenciesAdded = competenciesAdded;
+        sub.competenciesRemoved = competenciesRemoved;
         await writePref(key, sub);
 
-        res.json({ submission: sub, competenciesAdded });
+        res.json({ submission: sub, competenciesAdded, competenciesRemoved });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

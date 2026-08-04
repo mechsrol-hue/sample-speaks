@@ -428,10 +428,26 @@ async function clean() {
     const { error } = await supabase.from('system_preferences').delete().eq('key', 'template_IS 9000');
     if (!error) console.log('  removed link    template_IS 9000');
 
-    // Scope: drop the section config and only the submissions this script created.
-    // A real TP's own submission must survive --clean.
-    await supabase.from('system_preferences').delete().in('key', ['is_scope_sections', 'is_scope_section_map']);
-    console.log('  removed scope   section list + filing');
+    // Scope: unfile only this script's own standards, and only the submissions it
+    // created. Deleting is_scope_sections / is_scope_section_map outright — as this
+    // did — destroys the lab's real filing, which --clean has no business touching.
+    try {
+        const { data: mapRow } = await supabase.from('system_preferences')
+            .select('value').eq('key', 'is_scope_section_map').maybeSingle();
+        if (mapRow && mapRow.value) {
+            const map = JSON.parse(mapRow.value);
+            const demoNumbers = new Set(ALL_IS_NUMBERS);
+            let dropped = 0;
+            for (const k of Object.keys(map)) if (demoNumbers.has(k)) { delete map[k]; dropped++; }
+            if (dropped) {
+                await supabase.from('system_preferences')
+                    .upsert({ key: 'is_scope_section_map', value: JSON.stringify(map) }, { onConflict: 'key' });
+            }
+            console.log(`  removed scope   ${dropped} demo filing(s); the lab's own filing left alone`);
+        }
+    } catch (e) {
+        console.log('  scope   could not update the filing:', e.message);
+    }
     const { data: subs } = await supabase.from('system_preferences').select('key, value').like('key', 'is_scope_tp_%');
     for (const row of (subs || [])) {
         let parsed = null;
@@ -440,6 +456,25 @@ async function clean() {
             await supabase.from('system_preferences').delete().eq('key', row.key);
             console.log(`  removed scope   submission from ${parsed.username}`);
         }
+    }
+
+    // Competencies for DEMO IS numbers (approve-during-demo leftovers). Real editions
+    // of the same base (e.g. IS 269 (2015)) share the base key — we only remove rows
+    // whose stored isNumber matches a DEMO vault edition's base when a DEMO vault
+    // row exists for that base.
+    function norm(s) {
+        const m = String(s || '').match(/IS\s*\d+/i);
+        return m ? m[0].toUpperCase().replace(/\s+/g, ' ') : String(s || '').trim();
+    }
+    const demoBases = new Set(ALL_IS_NUMBERS.map(norm));
+    const { data: comps } = await supabase
+        .from('employee_competencies').select('id, isNumber, employeeId');
+    const demoComps = (comps || []).filter(c => demoBases.has(norm(c.isNumber)));
+    if (demoComps.length) {
+        const { error } = await supabase
+            .from('employee_competencies').delete().in('id', demoComps.map(c => c.id));
+        if (error) console.log(`  comps   skipped (${error.message})`);
+        else console.log(`  removed comps   ${demoComps.length} DEMO-IS competency row(s)`);
     }
 }
 

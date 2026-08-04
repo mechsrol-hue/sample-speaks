@@ -1448,25 +1448,25 @@ window.addEventListener('unhandledrejection', function(e) {
                     </div>
 
                     <nav class="myscope-progress" id="myscope-progress" aria-label="Submission progress">
-                        <div class="myscope-progress-step" data-progress-step="1">
+                        <button type="button" class="myscope-progress-step" data-progress-step="1">
                             <span class="myscope-progress-dot" aria-hidden="true">1</span>
                             <span class="myscope-progress-label">Pick section</span>
-                        </div>
+                        </button>
                         <div class="myscope-progress-line" aria-hidden="true"></div>
-                        <div class="myscope-progress-step" data-progress-step="2">
+                        <button type="button" class="myscope-progress-step" data-progress-step="2">
                             <span class="myscope-progress-dot" aria-hidden="true">2</span>
                             <span class="myscope-progress-label">Tick your IS</span>
-                        </div>
+                        </button>
                         <div class="myscope-progress-line" aria-hidden="true"></div>
-                        <div class="myscope-progress-step" data-progress-step="3">
+                        <button type="button" class="myscope-progress-step" data-progress-step="3">
                             <span class="myscope-progress-dot" aria-hidden="true">3</span>
                             <span class="myscope-progress-label">Recommendation</span>
-                        </div>
+                        </button>
                         <div class="myscope-progress-line" aria-hidden="true"></div>
-                        <div class="myscope-progress-step" data-progress-step="4">
+                        <button type="button" class="myscope-progress-step" data-progress-step="4">
                             <span class="myscope-progress-dot" aria-hidden="true">4</span>
                             <span class="myscope-progress-label">Submit</span>
-                        </div>
+                        </button>
                     </nav>
 
 
@@ -1508,7 +1508,7 @@ window.addEventListener('unhandledrejection', function(e) {
                         <div id="scope-standards" class="myscope-standards-box">
                             <div class="myscope-empty-box myscope-step2-placeholder">
                                 <span class="myscope-empty-icon" aria-hidden="true">①</span>
-                                <strong>Pick a section above</strong>
+                                <strong>Pick a section in step 1</strong>
                                 <span class="myscope-empty-why">The standards filed under it appear here — only after you choose where you work.</span>
                             </div>
                         </div>
@@ -1627,6 +1627,9 @@ window.addEventListener('unhandledrejection', function(e) {
                      around to face the standard instead of the person. Answers "who can
                      test this, and is anyone asking us to keep testing it?" -->
                 <div id="scopeadm-panel-coverage" style="display:none;">
+                    <!-- One list at a time. Three stacked lists meant scrolling past two
+                         answers to reach the third; these switch between them. -->
+                    <div id="scopeadm-coverage-nav" class="scopecov-nav"></div>
                     <div style="display:flex; gap:12px; align-items:center; margin-bottom:16px;">
                         <label style="font-size:0.82rem; font-weight:700; color:#475569;">Section</label>
                         <select id="scopeadm-coverage-section" onchange="renderScopeCoverage()"
@@ -3779,7 +3782,7 @@ window.addEventListener('unhandledrejection', function(e) {
 
 <script src="specs_db.js"></script>
 <script src="standards_db.js?v=2.0"></script>
-<script src="app.js?v=2.6.7"></script>
+<script src="app.js?v=2.6.8"></script>
 </body>
 
 </html>
