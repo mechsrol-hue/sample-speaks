@@ -5524,9 +5524,16 @@ function renderScopeSummary() {
 function renderScopeSections() {
     const el = document.getElementById('scope-sections');
     if (!el) return;
-    const chips = (scopeCatalogue.sections || []).map(sec => {
+    const counts = {};
+    for (const s of (scopeCatalogue.standards || [])) {
+        if (s.section) counts[s.section] = (counts[s.section] || 0) + 1;
+    }
+    // An empty section can only ever show a TP an empty list, so it isn't offered.
+    // The one exception is a section they already have a submission under.
+    const submitted = new Set((scopeMine && scopeMine.sections) || []);
+    const chips = (scopeCatalogue.sections || []).filter(sec => counts[sec] || submitted.has(sec)).map(sec => {
         const on = scopeChosenSections.has(sec);
-        const filedCount = (scopeCatalogue.standards || []).filter(s => s.section === sec).length;
+        const filedCount = counts[sec] || 0;
         const mineCount = [...scopeChosenIS].filter(isNum => scopeSectionForIS(isNum) === sec).length;
         const countLabel = filedCount ? `${mineCount}/${filedCount} IS` : (mineCount ? `${mineCount} picked` : 'pick IS below');
         return `<button type="button" class="myscope-chip ${on ? 'is-on' : ''}" data-scope-section="${escapeHtml(sec)}">
@@ -6089,14 +6096,20 @@ let scopeSubmissions = { submissions: [], outstanding: [], counts: {} };
 let scopeDirty = false;
 
 function switchScopeAdminTab(which) {
-    const filing = which === 'filing';
-    document.getElementById('scopeadm-panel-filing').style.display = filing ? 'block' : 'none';
-    document.getElementById('scopeadm-panel-review').style.display = filing ? 'none' : 'block';
-    document.getElementById('scopeadm-tab-filing').style.borderBottomColor = filing ? '#3b82f6' : 'transparent';
-    document.getElementById('scopeadm-tab-filing').style.color = filing ? '#0f172a' : '#64748b';
-    document.getElementById('scopeadm-tab-review').style.borderBottomColor = filing ? 'transparent' : '#3b82f6';
-    document.getElementById('scopeadm-tab-review').style.color = filing ? '#64748b' : '#0f172a';
-    if (!filing) loadScopeSubmissions();
+    const panels = { filing: 'scopeadm-panel-filing', review: 'scopeadm-panel-review', coverage: 'scopeadm-panel-coverage' };
+    const tabs = { filing: 'scopeadm-tab-filing', review: 'scopeadm-tab-review', coverage: 'scopeadm-tab-coverage' };
+    for (const [key, id] of Object.entries(panels)) {
+        const el = document.getElementById(id);
+        if (el) el.style.display = key === which ? 'block' : 'none';
+    }
+    for (const [key, id] of Object.entries(tabs)) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        el.style.borderBottomColor = key === which ? '#3b82f6' : 'transparent';
+        el.style.color = key === which ? '#0f172a' : '#64748b';
+    }
+    if (which === 'review') loadScopeSubmissions();
+    if (which === 'coverage') loadScopeCoverage();
 }
 
 async function loadScopeAdmin() {
@@ -6497,6 +6510,103 @@ async function saveScopeCatalogue() {
     }
 }
 
+let scopeCoverage = { sections: [], standards: [], counts: {} };
+
+async function loadScopeCoverage() {
+    const listEl = document.getElementById('scopeadm-coverage-list');
+    if (listEl && !scopeCoverage.standards.length) {
+        listEl.innerHTML = '<div style="padding:20px; color:var(--text-muted); font-size:0.88rem;">Loading…</div>';
+    }
+    try {
+        const res = await fetch('/api/is-scope/coverage');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Load failed');
+        scopeCoverage = data;
+
+        const secEl = document.getElementById('scopeadm-coverage-section');
+        if (secEl) {
+            const keep = secEl.value;
+            // Only sections that actually hold standards — an empty one filters to nothing.
+            const inUse = [...new Set(data.standards.map(s => s.section).filter(Boolean))].sort();
+            secEl.innerHTML = '<option value="">All sections</option>' +
+                inUse.map(x => `<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
+            if (keep && inUse.includes(keep)) secEl.value = keep;
+        }
+        renderScopeCoverage();
+    } catch (e) {
+        if (listEl) listEl.innerHTML = `<div style="padding:20px; color:var(--danger); font-size:0.88rem;">${escapeHtml(e.message)}</div>`;
+    }
+}
+
+function renderScopeCoverage() {
+    const listEl = document.getElementById('scopeadm-coverage-list');
+    const kpiEl = document.getElementById('scopeadm-coverage-kpis');
+    const countEl = document.getElementById('scopeadm-coverage-count');
+    if (!listEl) return;
+
+    const c = scopeCoverage.counts || {};
+    if (kpiEl) {
+        const card = (n, label, color, hint) => `<div class="glass-panel" style="padding:13px; text-align:center; border-top:4px solid ${color};">
+            <div style="font-size:1.5rem; font-weight:800; color:#0f172a;">${n || 0}</div>
+            <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:#334155;">${label}</div>
+            <div style="font-size:0.68rem; color:var(--text-muted); margin-top:2px;">${hint}</div></div>`;
+        kpiEl.innerHTML = card(c.covered, 'Have a tester', '#10b981', 'someone is approved')
+            + card(c.singleTester, 'Only one tester', '#f59e0b', 'single point of failure')
+            + card(c.uncovered, 'No tester', '#ef4444', 'filed but nobody approved')
+            + card(c.recommended, 'Recommended', '#3b82f6', 'a TA/LO asked to continue');
+    }
+
+    const q = (document.getElementById('scopeadm-coverage-search')?.value || '').trim().toLowerCase();
+    const sec = document.getElementById('scopeadm-coverage-section')?.value || '';
+    const f = document.getElementById('scopeadm-coverage-filter')?.value || 'filed';
+
+    const rows = (scopeCoverage.standards || []).filter(s => {
+        if (q && !`${s.isNumber} ${s.title}`.toLowerCase().includes(q)) return false;
+        if (sec && s.section !== sec) return false;
+        if (f === 'filed') return !!s.section;
+        if (f === 'recommended') return s.recommendations.length > 0;
+        if (f === 'approved') return s.holders.length > 0;
+        if (f === 'uncovered') return !!s.section && s.holders.length === 0;
+        if (f === 'single') return s.holders.length === 1;
+        return true;
+    });
+
+    if (countEl) countEl.textContent = `${rows.length} of ${(scopeCoverage.standards || []).length} standards`;
+
+    if (!rows.length) {
+        listEl.innerHTML = '<div style="padding:26px; text-align:center; color:var(--text-muted); font-size:0.88rem;">Nothing matches that filter.</div>';
+        return;
+    }
+
+    listEl.innerHTML = rows.map(s => {
+        const holders = s.holders.length
+            ? s.holders.map(h => `<span class="scopeadm-holder">${escapeHtml(h.name)}${h.level ? `<em>${escapeHtml(h.level)}</em>` : ''}</span>`).join('')
+            : '<span class="scopeadm-nobody">No approved tester yet</span>';
+        const recs = s.recommendations.length
+            ? `<div class="scopeadm-cov-recs">
+                    ${s.recommendations.map(r => `<div class="scopeadm-cov-rec">
+                        <div class="scopeadm-cov-rec-head">
+                            <strong>${escapeHtml(r.by || 'unknown')}</strong>
+                            <span class="scopeadm-rec-status is-${escapeHtml(r.status || 'pending')}">${escapeHtml(r.status || 'pending')}</span>
+                        </div>
+                        <div class="scopeadm-cov-rec-why">${r.reason ? escapeHtml(r.reason) : 'No reason given'}</div>
+                    </div>`).join('')}
+               </div>`
+            : '';
+        return `<div class="scopeadm-cov-row${s.holders.length === 1 ? ' is-thin' : ''}${!s.holders.length ? ' is-bare' : ''}">
+            <div class="scopeadm-cov-main">
+                <div>
+                    <strong style="font-size:0.9rem;">${escapeHtml(s.isNumber)}</strong>
+                    ${s.section ? `<span class="scopeadm-cov-sec">${escapeHtml(s.section)}</span>` : '<span class="scopeadm-cov-sec is-unfiled">unfiled</span>'}
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${escapeHtml(s.title || '')}</div>
+                </div>
+                <div class="scopeadm-holders">${holders}</div>
+            </div>
+            ${recs}
+        </div>`;
+    }).join('');
+}
+
 async function loadScopeSubmissions() {
     const listEl = document.getElementById('scopeadm-review-list');
     try {
@@ -6521,13 +6631,13 @@ function scopeRecommendationBlock(sub) {
         </div>`;
     }
     const by = sub.recommendedBy ? ` — by ${escapeHtml(sub.recommendedBy)}` : '';
-    return `<div style="margin-top:11px; border:1px solid #bfdbfe; background:#eff6ff; border-radius:9px; padding:11px 12px;">
-        <div style="font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.4px; color:#1d4ed8; margin-bottom:7px;">
-            Recommended to continue testing (${recs.length})${by}
-        </div>
-        ${recs.map(r => `<div style="display:flex; gap:9px; align-items:baseline; padding:3px 0;">
-            <strong style="font-size:0.81rem; color:#0f172a; white-space:nowrap;">${escapeHtml(r.isNumber)}</strong>
-            <span style="font-size:0.8rem; color:${r.reason ? '#334155' : '#94a3b8'};">${r.reason ? escapeHtml(r.reason) : 'no reason given'}</span>
+    return `<div class="scopeadm-reco">
+        <div class="scopeadm-reco-head">Recommended to continue testing (${recs.length})${by}</div>
+        ${recs.map(r => `<div class="scopeadm-reco-item">
+            <div class="scopeadm-reco-is">${escapeHtml(r.isNumber)}</div>
+            <div class="scopeadm-reco-why${r.reason ? '' : ' is-empty'}">
+                ${r.reason ? escapeHtml(r.reason) : 'No reason given — ask before approving.'}
+            </div>
         </div>`).join('')}
     </div>`;
 }

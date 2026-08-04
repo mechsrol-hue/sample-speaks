@@ -3501,6 +3501,79 @@ app.get('/api/is-scope/submissions', async (req, res) => {
     }
 });
 
+// Per-standard roll-up for the admin's third tab: who is approved to test each
+// standard, and who has recommended the lab keeps testing it. The review queue
+// answers "what is this person asking for"; this answers "where does the lab
+// actually stand" — the question you can't get by reading submissions one by one.
+app.get('/api/is-scope/coverage', async (req, res) => {
+    try {
+        const sectionMap = await readPref(SCOPE_MAP_KEY, {});
+        const sections = await readPref(SCOPE_SECTIONS_KEY, DEFAULT_SECTIONS);
+
+        const [{ data: vaultRows }, { data: profiles }, { data: comps }, { data: prefs }] = await Promise.all([
+            supabase.from('is_standards_vault').select('isNumber, title'),
+            supabase.from('employee_profiles').select('id, userId, fullName, designation, isActive'),
+            supabase.from('employee_competencies').select('employeeId, isNumber, proficiencyLevel'),
+            supabase.from('system_preferences').select('key, value').like('key', `${SCOPE_TP_PREFIX}%`)
+        ]);
+
+        const profileById = new Map((profiles || []).map(p => [p.id, p]));
+
+        // Competencies are stored under the base number the approval normalises to,
+        // so holders are matched on that key rather than the full edition string.
+        const holdersByBase = new Map();
+        for (const c of (comps || [])) {
+            const p = profileById.get(c.employeeId);
+            const base = normalizeISNumber(c.isNumber);
+            if (!base) continue;
+            if (!holdersByBase.has(base)) holdersByBase.set(base, []);
+            holdersByBase.get(base).push({
+                name: (p && p.fullName) || `Employee #${c.employeeId}`,
+                designation: (p && p.designation) || '',
+                level: c.proficiencyLevel || ''
+            });
+        }
+
+        const recsByIS = new Map();
+        for (const p of (prefs || [])) {
+            let sub;
+            try { sub = JSON.parse(p.value); } catch (_) { continue; }
+            for (const r of (sub.recommendations || [])) {
+                if (!recsByIS.has(r.isNumber)) recsByIS.set(r.isNumber, []);
+                recsByIS.get(r.isNumber).push({
+                    by: sub.recommendedBy || sub.username || '',
+                    reason: r.reason || '',
+                    status: sub.status,
+                    section: (sub.sections || [])[0] || ''
+                });
+            }
+        }
+
+        const standards = (vaultRows || []).map(r => ({
+            isNumber: r.isNumber,
+            title: r.title || '',
+            section: sectionMap[r.isNumber] || scopeDefaultSectionFor(r.isNumber) || null,
+            holders: holdersByBase.get(normalizeISNumber(r.isNumber)) || [],
+            recommendations: recsByIS.get(r.isNumber) || []
+        })).sort((a, b) => String(a.isNumber).localeCompare(String(b.isNumber), undefined, { numeric: true }));
+
+        const inUse = [...new Set(standards.map(s => s.section).filter(Boolean))];
+        res.json({
+            sections: [...new Set([...sections, ...inUse])],
+            standards,
+            counts: {
+                total: standards.length,
+                covered: standards.filter(s => s.holders.length).length,
+                uncovered: standards.filter(s => s.section && !s.holders.length).length,
+                singleTester: standards.filter(s => s.holders.length === 1).length,
+                recommended: standards.filter(s => s.recommendations.length).length
+            }
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, res) => {
     try {
         const { decision, note } = req.body || {};

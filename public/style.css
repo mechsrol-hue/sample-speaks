@@ -4400,6 +4400,127 @@ html {
     color: #64748b;
     cursor: not-allowed;
 }
+/* Review queue — the recommendation and its reasons */
+.scopeadm-reco {
+    margin-top: 11px;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    border-radius: 9px;
+    padding: 11px 12px;
+}
+.scopeadm-reco-head {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #1d4ed8;
+    margin-bottom: 8px;
+}
+.scopeadm-reco-item {
+    background: #fff;
+    border: 1px solid #dbeafe;
+    border-radius: 7px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+}
+.scopeadm-reco-item:last-child { margin-bottom: 0; }
+.scopeadm-reco-is {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+.scopeadm-reco-why {
+    font-size: 0.81rem;
+    color: #334155;
+    line-height: 1.45;
+    margin-top: 3px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+.scopeadm-reco-why.is-empty { color: #b45309; font-style: italic; }
+
+/* Approved & recommended tab */
+.scopeadm-cov-row {
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #10b981;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 9px;
+    background: #fff;
+}
+.scopeadm-cov-row.is-thin { border-left-color: #f59e0b; }
+.scopeadm-cov-row.is-bare { border-left-color: #ef4444; }
+.scopeadm-cov-main {
+    display: flex;
+    gap: 14px;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+.scopeadm-cov-sec {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #475569;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    padding: 2px 8px;
+}
+.scopeadm-cov-sec.is-unfiled { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+.scopeadm-holders { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.scopeadm-holder {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #14532d;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 6px;
+    padding: 3px 8px;
+}
+.scopeadm-holder em { font-style: normal; font-weight: 600; font-size: 0.68rem; color: #65a30d; }
+.scopeadm-nobody {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 3px 8px;
+}
+.scopeadm-cov-recs { margin-top: 10px; display: grid; gap: 6px; }
+.scopeadm-cov-rec {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+    padding: 8px 10px;
+}
+.scopeadm-cov-rec-head { display: flex; gap: 8px; align-items: center; font-size: 0.79rem; color: #0f172a; }
+.scopeadm-cov-rec-why {
+    font-size: 0.79rem;
+    color: #475569;
+    margin-top: 3px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+.scopeadm-rec-status {
+    font-size: 0.64rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-radius: 999px;
+    padding: 1px 7px;
+}
+.scopeadm-rec-status.is-pending { color: #92400e; background: #fffbeb; border: 1px solid #fde68a; }
+.scopeadm-rec-status.is-approved { color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; }
+.scopeadm-rec-status.is-rejected { color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; }
+
 .scopeadm-filed-row {
     display: flex;
     align-items: center;
