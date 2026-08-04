@@ -7180,8 +7180,8 @@ function scopeSubmissionStandards(sub) {
         // JS string and terminates it, which silently produced a dead button.
         const actions = (open && !verdict)
             ? `<span class="scoperev-row-actions">
-                   <button class="scoperev-mini is-back" data-decide="reject" data-user="${sub.userId}" data-is="${escapeHtml(n)}" title="Send back only this standard">✕</button>
-                   <button class="scoperev-mini is-ok" data-decide="approve" data-user="${sub.userId}" data-is="${escapeHtml(n)}" title="Approve only this standard">✓</button>
+                   <button class="scoperev-btn is-back is-row" data-decide="reject" data-user="${sub.userId}" data-is="${escapeHtml(n)}">Send back</button>
+                   <button class="scoperev-btn is-approve is-row" data-decide="approve" data-user="${sub.userId}" data-is="${escapeHtml(n)}">✓ Approve</button>
                </span>` : '';
         const why = !hasRecs ? ''
             : recommended
