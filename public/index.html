@@ -1588,7 +1588,7 @@ window.addEventListener('unhandledrejection', function(e) {
                 <div style="display:flex; gap:8px; margin-bottom:18px; border-bottom:2px solid #e2e8f0;">
                     <button id="scopeadm-tab-filing" onclick="switchScopeAdminTab('filing')" class="scopeadm-tab" style="background:none; border:none; border-bottom:3px solid #3b82f6; color:#0f172a; font-weight:700; padding:9px 14px; cursor:pointer; font-size:0.9rem;">1 · File standards</button>
                     <button id="scopeadm-tab-review" onclick="switchScopeAdminTab('review')" class="scopeadm-tab" style="background:none; border:none; border-bottom:3px solid transparent; color:#64748b; font-weight:700; padding:9px 14px; cursor:pointer; font-size:0.9rem;">2 · Review submissions <span id="scopeadm-pending-pill" style="display:none; margin-left:4px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:999px; padding:1px 7px; font-size:0.7rem;"></span></button>
-                    <button id="scopeadm-tab-coverage" onclick="switchScopeAdminTab('coverage')" class="scopeadm-tab" style="background:none; border:none; border-bottom:3px solid transparent; color:#64748b; font-weight:700; padding:9px 14px; cursor:pointer; font-size:0.9rem;">3 · Recommendations</button>
+                    <button id="scopeadm-tab-coverage" onclick="switchScopeAdminTab('coverage')" class="scopeadm-tab" style="background:none; border:none; border-bottom:3px solid transparent; color:#64748b; font-weight:700; padding:9px 14px; cursor:pointer; font-size:0.9rem;">3 · By standard</button>
                 </div>
 
                 <!-- Filing -->
@@ -1632,10 +1632,9 @@ window.addEventListener('unhandledrejection', function(e) {
                 <!-- Approved & recommended: standards a TA/LO asked to keep testing (step 3)
                      that an OIC then approved (step 2 decide). One simple list — the
                      standards the lab is actually continuing with. -->
-                <!-- What TPs asked the lab to keep testing, and what they claimed with
-                     nothing said in its favour. Both are read while deciding, but they
-                     are per-standard rather than per-submission, so they sit apart from
-                     the queue. -->
+                <!-- The same data as the queue, turned around to face the standard
+                     instead of the person: what was argued for, what was claimed with
+                     nothing said in its favour, and what is already approved. -->
                 <div id="scopeadm-panel-coverage" style="display:none;">
                     <div id="scopeadm-coverage-nav" class="scopecov-nav"></div>
                     <div style="display:flex; gap:12px; align-items:center; margin-bottom:16px;">

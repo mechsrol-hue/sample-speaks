@@ -6270,14 +6270,17 @@ async function printScopeRecommendations() {
         if (!(scopeCoverage.standards || []).length) await loadScopeCoverage();
         const sec = document.getElementById('scopeadm-coverage-section')?.value || '';
         const all = (scopeCoverage.standards || []).filter(s => !sec || s.section === sec);
-        const rec = scopeCoverageView !== 'nrec';
-        const items = rec
-            ? all.filter(s => s.recommendations.length)
-            : all.filter(s => s.declaredBy.length && !s.recommendations.length);
+        const key = ['rec', 'nrec', 'appr'].includes(scopeCoverageView) ? scopeCoverageView : 'rec';
+        const rec = key === 'rec';
+        const items = key === 'rec' ? all.filter(s => s.recommendations.length)
+            : key === 'nrec' ? all.filter(s => s.declaredBy.length && !s.recommendations.length)
+            : all.filter(s => s.holders.length);
 
         const now = new Date().toLocaleString('en-IN');
         const appTitle = 'SRL LIIS';
-        const heading = rec ? 'Recommended to continue testing' : 'Declared but not recommended';
+        const heading = key === 'rec' ? 'Recommended to continue testing'
+            : key === 'nrec' ? 'Declared but not recommended'
+            : 'Approved to test';
 
         const bySection = {};
         for (const s of items) (bySection[s.section || 'Unfiled'] = bySection[s.section || 'Unfiled'] || []).push(s);
@@ -6292,11 +6295,13 @@ async function printScopeRecommendations() {
                             ${escapeHtml(s.title || '')}
                             ${rec ? s.recommendations.map(r => `<div class="why"><em>${escapeHtml(r.by || 'unknown')}:</em> ${r.reason ? escapeHtml(r.reason) : 'no reason given'}</div>`).join('') : ''}
                         </td>
-                        <td class="who">${(rec ? s.recommendations.map(r => r.by) : s.declaredBy.map(d => `${d.by} (${d.status})`))
+                        <td class="who">${(key === 'rec' ? s.recommendations.map(r => r.by)
+                            : key === 'nrec' ? s.declaredBy.map(d => `${d.by} (${d.status})`)
+                            : s.holders.map(h => `${h.name}${h.level ? ` (${h.level})` : ''}`))
                             .map(x => escapeHtml(x || '')).join('<br>')}</td>
                     </tr>`).join('')}
                 </table>
-            </section>`).join('') || `<p>${rec ? 'Nothing recommended.' : 'Nothing declared without a recommendation.'}</p>`;
+            </section>`).join('') || `<p>Nothing to show.</p>`;
 
         printHtmlDocument(`<!DOCTYPE html><html><head>
             <title>${escapeHtml(appTitle)} — ${escapeHtml(heading)}</title>
@@ -6985,6 +6990,12 @@ function renderScopeCoverage() {
             hint: 'Someone says they test these, but nobody argued for keeping them. Worth asking before you approve.',
             empty: 'Nothing declared without a recommendation.',
             items: all.filter(s => s.declaredBy.length && !s.recommendations.length)
+        },
+        appr: {
+            label: 'Approved',
+            hint: 'Standards someone is approved to test — this is what auto-assign reads. “via scope” means an approved submission here created it; the rest were set in the Employee Hub or imported from sample history.',
+            empty: 'Nobody is approved to test anything here yet.',
+            items: all.filter(s => s.holders.length)
         }
     };
 
@@ -6997,17 +7008,17 @@ function renderScopeCoverage() {
             </button>`).join('');
     }
 
-    const rec = scopeCoverageView !== 'nrec';
-    const view = rec ? views.rec : views.nrec;
+    const key = views[scopeCoverageView] ? scopeCoverageView : 'rec';
+    const view = views[key];
+    const meta = (s) => key === 'rec' ? `${s.recommendations.length} reason${s.recommendations.length === 1 ? '' : 's'}`
+        : key === 'nrec' ? `${s.declaredBy.length} declared`
+        : `${s.holders.length} tester${s.holders.length === 1 ? '' : 's'}`;
     listEl.innerHTML = `
-        <section class="scopecov-block is-${rec ? 'rec' : 'nrec'}">
+        <section class="scopecov-block is-${key}">
             <p class="scopecov-hint">${view.hint}</p>
             <div class="scopecov-rows">
                 ${view.items.length
-                    ? view.items.map(s => scopeStandardRow(s, {
-                        reasons: rec,
-                        meta: rec ? `${s.recommendations.length} reason${s.recommendations.length === 1 ? '' : 's'}` : `${s.declaredBy.length} declared`
-                      })).join('')
+                    ? view.items.map(s => scopeStandardRow(s, { reasons: key === 'rec', meta: meta(s) })).join('')
                     : `<div class="scopecov-empty">${view.empty}</div>`}
             </div>
         </section>`;
