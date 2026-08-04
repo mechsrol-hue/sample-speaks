@@ -4962,3 +4962,41 @@ html {
     color: #92400e;
     line-height: 1.4;
 }
+
+
+/* These set no colour of their own and inherited a muted grey, so Add and Print
+   read as disabled next to the blue primary beside them. */
+.scopeadm-btn {
+    background: #fff;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 7px 13px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+.scopeadm-btn:hover:not(:disabled) { background: #f8fafc; border-color: #94a3b8; }
+.scopeadm-btn:disabled { color: #94a3b8; background: #f1f5f9; border-color: #e2e8f0; cursor: not-allowed; }
+
+/* Print target. Lives in the page but is only ever visible on paper: printing a
+   popup is blocked and printing an iframe is unreliable, so the print document is
+   injected here and every other top-level node is hidden for the print run. */
+#ss-print-root { display: none; }
+@media print {
+    html.ss-printing body > *:not(#ss-print-root) { display: none !important; }
+    html.ss-printing #ss-print-root {
+        display: block !important;
+        /* The print document's own `body { margin }` targets the real body, which is
+           zeroed above — so the page margin lives here instead. */
+        padding: 10mm;
+    }
+    html.ss-printing, html.ss-printing body {
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        height: auto !important;
+    }
+}

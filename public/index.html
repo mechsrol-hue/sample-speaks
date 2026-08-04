@@ -1537,6 +1537,9 @@ window.addEventListener('unhandledrejection', function(e) {
                             </div>
                         </div>
                         <p class="myscope-step-next" id="scope-step3-next" aria-live="polite"></p>
+                        <div class="myscope-step-actions">
+                            <button type="button" class="myscope-next-btn" id="scope-to-submit-btn" onclick="scopeGoToWizardStep(4)" disabled>Continue to submit</button>
+                        </div>
                     </section>
 
                     <!-- Step 4: submit -->
@@ -1595,8 +1598,9 @@ window.addEventListener('unhandledrejection', function(e) {
                         <div id="scopeadm-sections" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
                         <input type="text" id="scopeadm-new-section" placeholder="Add a section…" onkeydown="if(event.key==='Enter')addScopeSection()"
                                style="padding:7px 11px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.83rem; background:#fff; color:#0f172a;">
-                        <button onclick="addScopeSection()" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:7px 12px; font-size:0.83rem; font-weight:600; cursor:pointer;">＋ Add</button>
-                        <button onclick="openNewStandardModal()" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:8px; padding:7px 13px; font-size:0.83rem; font-weight:700; cursor:pointer; margin-left:auto;">＋ New standard</button>
+                        <button onclick="addScopeSection()" class="scopeadm-btn">＋ Add</button>
+                        <button onclick="printScopeFiledStandards()" class="scopeadm-btn" style="margin-left:auto;">🖨️ Print</button>
+                        <button onclick="openNewStandardModal()" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:8px; padding:7px 13px; font-size:0.83rem; font-weight:700; cursor:pointer;">＋ New standard</button>
                     </div>
                     <div id="scopeadm-unfiled-warning" style="display:none; margin-bottom:12px;"></div>
 
@@ -1621,7 +1625,10 @@ window.addEventListener('unhandledrejection', function(e) {
                     <!-- The queue plus two readings of it. Which standards were argued
                          for, and which were claimed with nothing said in their favour,
                          belong next to the Approve button — not on another tab. -->
-                    <div id="scopeadm-review-nav" class="scopecov-nav"></div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+                        <div id="scopeadm-review-nav" class="scopecov-nav" style="margin-bottom:0;"></div>
+                        <button onclick="printScopeReviewSubmissions()" class="scopeadm-btn" style="margin-left:auto;">🖨️ Print</button>
+                    </div>
                     <div id="scopeadm-review-queue">
                         <div id="scopeadm-review-kpis" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:18px;"></div>
                         <div id="scopeadm-review-list"></div>
@@ -1638,6 +1645,7 @@ window.addEventListener('unhandledrejection', function(e) {
                         <label style="font-size:0.82rem; font-weight:700; color:#475569;">Section</label>
                         <select id="scopeadm-coverage-section" onchange="renderScopeCoverage()"
                                 style="padding:9px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.87rem; background:#fff; color:#0f172a;"></select>
+                        <button onclick="printScopeApproved()" class="scopeadm-btn" style="margin-left:auto;">🖨️ Print</button>
                     </div>
                     <div id="scopeadm-coverage-list"></div>
                 </div>
@@ -3786,7 +3794,7 @@ window.addEventListener('unhandledrejection', function(e) {
 
 <script src="specs_db.js"></script>
 <script src="standards_db.js?v=2.0"></script>
-<script src="app.js?v=2.6.8"></script>
+<script src="app.js?v=2.6.12"></script>
 </body>
 
 </html>

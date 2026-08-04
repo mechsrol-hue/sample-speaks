@@ -6225,37 +6225,95 @@ async function loadScopeAdmin() {
 }
 
 // Print-friendly list of every standard grouped by filing section (plus Unfiled).
-// Printing used to open a blank popup and write into it, which browsers block by
-// default — the button appeared to do nothing at all. A same-origin iframe is not
-// popup-blocked, prints identically, and needs no permission from the user.
+// Printing has to survive a popup blocker AND a browser that refuses to print an
+// iframe. Both were tried; this prints the main window instead. The document is
+// injected into a container that only exists on paper — @media print hides every
+// other top-level node — so nothing can intercept it.
 function printHtmlDocument(html, label) {
     try {
-        const frame = document.createElement('iframe');
-        frame.setAttribute('aria-hidden', 'true');
-        frame.style.cssText = 'position:fixed; right:0; bottom:0; width:0; height:0; border:0; visibility:hidden;';
-        document.body.appendChild(frame);
+        const parsed = new DOMParser().parseFromString(html, 'text/html');
+        let root = document.getElementById('ss-print-root');
+        if (!root) {
+            root = document.createElement('div');
+            root.id = 'ss-print-root';
+            document.body.appendChild(root);
+        }
+        const styles = [...parsed.querySelectorAll('style')].map(el => el.textContent).join('\n');
+        root.innerHTML = `<style>${styles}</style>${parsed.body.innerHTML}`;
 
-        const cleanup = () => { try { frame.remove(); } catch (e) {} };
-        frame.onload = () => {
-            try {
-                frame.contentWindow.focus();
-                frame.contentWindow.print();
-            } catch (e) {
+        document.documentElement.classList.add('ss-printing');
+        const done = () => {
+            document.documentElement.classList.remove('ss-printing');
+            root.innerHTML = '';
+            window.removeEventListener('afterprint', done);
+        };
+        window.addEventListener('afterprint', done);
+
+        // One paint before printing, so the injected markup has been laid out.
+        requestAnimationFrame(() => {
+            try { window.print(); } catch (e) {
+                done();
                 showToast(`Could not print ${label || 'this page'}: ${e.message}`, 'error');
             }
-            // Chrome's print dialog is modal on the frame, so the node can only go
-            // once it closes; a minute is far longer than any dialog stays open.
-            setTimeout(cleanup, 60000);
-        };
-
-        const doc = frame.contentWindow.document;
-        doc.open();
-        doc.write(html);
-        doc.close();
+        });
+        // Safari never fires afterprint in some versions; don't leave the class on.
+        setTimeout(done, 60000);
         return true;
     } catch (e) {
         showToast(`Could not print ${label || 'this page'}: ${e.message}`, 'error');
         return false;
+    }
+}
+
+// Who is approved to test what, as it stands — the paper counterpart of tab 3.
+async function printScopeApproved() {
+    try {
+        if (!(scopeCoverage.standards || []).length) await loadScopeCoverage();
+        const sec = document.getElementById('scopeadm-coverage-section')?.value || '';
+        const items = (scopeCoverage.standards || [])
+            .filter(s => (!sec || s.section === sec) && s.holders.length);
+        const now = new Date().toLocaleString('en-IN');
+        const appTitle = 'SRL LIIS';
+
+        const bySection = {};
+        for (const s of items) (bySection[s.section || 'Unfiled'] = bySection[s.section || 'Unfiled'] || []).push(s);
+
+        const body = Object.keys(bySection).sort().map(section => `
+            <section>
+                <h2>${escapeHtml(section)} <span class="count">${bySection[section].length}</span></h2>
+                <table>
+                    ${bySection[section].map(s => `<tr>
+                        <td class="isn">${escapeHtml(s.isNumber)}</td>
+                        <td>${escapeHtml(s.title || '')}</td>
+                        <td class="who">${s.holders.map(h => `${escapeHtml(h.name)}${h.level ? ` (${escapeHtml(h.level)})` : ''}`).join('<br>')}</td>
+                    </tr>`).join('')}
+                </table>
+            </section>`).join('') || '<p>Nobody is approved to test anything yet.</p>';
+
+        printHtmlDocument(`<!DOCTYPE html><html><head>
+            <title>${escapeHtml(appTitle)} — Approved to test</title>
+            <style>
+                body { font-family: Arial, Helvetica, sans-serif; color: #111; font-size: 12px; margin: 16px; }
+                h1 { font-size: 17px; margin: 0 0 2px; }
+                .sub { font-size: 12px; color: #444; margin-bottom: 2px; }
+                .meta { font-size: 10px; color: #666; margin-bottom: 14px; }
+                section { margin-bottom: 18px; page-break-inside: avoid; }
+                h2 { font-size: 13px; margin: 0 0 8px; padding-bottom: 4px; border-bottom: 1.5px solid #111; }
+                h2 .count { font-weight: 600; color: #444; font-size: 11px; }
+                table { width: 100%; border-collapse: collapse; }
+                td { padding: 4px 6px; border-bottom: 1px solid #ddd; vertical-align: top; }
+                td.isn { font-weight: 700; white-space: nowrap; width: 150px; }
+                td.who { width: 200px; }
+                @media print { body { margin: 12px; } section { page-break-inside: avoid; } }
+            </style>
+        </head><body>
+            <h1>${escapeHtml(appTitle)}</h1>
+            <div class="sub">IS Scope — Approved to test</div>
+            <div class="meta">Printed: ${escapeHtml(now)} &nbsp;|&nbsp; ${items.length} standard(s)${sec ? ` in ${escapeHtml(sec)}` : ' across all sections'}</div>
+            ${body}
+        </body></html>`, 'the approved list');
+    } catch (e) {
+        showToast('Could not prepare the approved list.', 'error');
     }
 }
 
