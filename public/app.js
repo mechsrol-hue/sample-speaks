@@ -6512,15 +6512,32 @@ async function saveScopeCatalogue() {
 
 let scopeCoverage = { sections: [], standards: [], counts: {} };
 
+// A missing API route falls through to the SPA's index.html, so response.json()
+// dies on "Unexpected token '<'" — which tells the user nothing. Name the real
+// cause instead: the server is running code older than the page.
+async function scopeFetchJson(url) {
+    const res = await fetch(url);
+    const body = await res.text();
+    let data;
+    try {
+        data = JSON.parse(body);
+    } catch (e) {
+        if (body.trim().startsWith('<')) {
+            throw new Error(`The server does not have ${url} — it is running an older build than this page. Restart it (node server.js) and reload.`);
+        }
+        throw new Error(`${url} returned something that isn't JSON.`);
+    }
+    if (!res.ok) throw new Error(data.error || `${url} failed (${res.status})`);
+    return data;
+}
+
 async function loadScopeCoverage() {
     const listEl = document.getElementById('scopeadm-coverage-list');
     if (listEl && !scopeCoverage.standards.length) {
         listEl.innerHTML = '<div style="padding:20px; color:var(--text-muted); font-size:0.88rem;">Loading…</div>';
     }
     try {
-        const res = await fetch('/api/is-scope/coverage');
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Load failed');
+        const data = await scopeFetchJson('/api/is-scope/coverage');
         scopeCoverage = data;
 
         const secEl = document.getElementById('scopeadm-coverage-section');
@@ -6534,7 +6551,10 @@ async function loadScopeCoverage() {
         }
         renderScopeCoverage();
     } catch (e) {
-        if (listEl) listEl.innerHTML = `<div style="padding:20px; color:var(--danger); font-size:0.88rem;">${escapeHtml(e.message)}</div>`;
+        if (listEl) listEl.innerHTML = `<div style="border:1px solid #fecaca; background:#fef2f2; border-radius:10px; padding:16px 18px;">
+            <div style="font-weight:700; color:#b91c1c; font-size:0.9rem; margin-bottom:4px;">Couldn't load this tab</div>
+            <div style="font-size:0.84rem; color:#7f1d1d;">${escapeHtml(e.message)}</div>
+        </div>`;
     }
 }
 
@@ -6611,7 +6631,13 @@ async function loadScopeSubmissions() {
     const listEl = document.getElementById('scopeadm-review-list');
     try {
         const res = await fetch('/api/is-scope/submissions', { headers: authHeaders() });
-        const data = await res.json();
+        const body = await res.text();
+        let data;
+        try { data = JSON.parse(body); } catch (e) {
+            throw new Error(body.trim().startsWith('<')
+                ? 'The server is running an older build than this page. Restart it (node server.js) and reload.'
+                : 'The submissions endpoint returned something that isn\'t JSON.');
+        }
         if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Load failed'));
         scopeSubmissions = data;
         renderScopeSubmissions();
