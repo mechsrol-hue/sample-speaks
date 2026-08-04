@@ -6180,6 +6180,10 @@ let scopeUnsavedSections = new Set();
 // second. Cleared on a timer so a stray click can't stay armed indefinitely.
 let scopeArmedSection = null;
 let scopeArmedTimer = null;
+// Same two-step for deleting a standard: this table is 264 rows of scrolling, so a
+// single click next to a dropdown is far too easy to hit by accident.
+let scopeArmedDelete = null;
+let scopeArmedDeleteTimer = null;
 
 function switchScopeAdminTab(which) {
     const panels = { filing: 'scopeadm-panel-filing', review: 'scopeadm-panel-review', coverage: 'scopeadm-panel-coverage' };
@@ -6538,6 +6542,7 @@ function renderScopeFilingTable() {
 
     tbody.innerHTML = standards.map(s => {
         const cur = scopeAdminMap[s.isNumber] || '';
+        const armed = scopeArmedDelete === s.isNumber;
         return `<tr>
             <td style="font-weight:700; white-space:nowrap;">${escapeHtml(s.isNumber)}</td>
             <td style="font-size:0.85rem; color:#475569;">${escapeHtml(s.title)}</td>
@@ -6548,8 +6553,24 @@ function renderScopeFilingTable() {
                     ${scopeAdminSections.map(sec => `<option value="${escapeHtml(sec)}"${sec === cur ? ' selected' : ''}>${escapeHtml(sec)}</option>`).join('')}
                 </select>
             </td>
+            <td style="text-align:right; white-space:nowrap;">
+                ${s.id ? `<button type="button" class="scopeadm-del ${armed ? 'is-armed' : ''}"
+                        data-del-is="${escapeHtml(s.isNumber)}" data-del-id="${s.id}"
+                        title="${armed ? 'Click again to delete' : 'Delete this standard'}">${armed ? 'delete?' : '🗑'}</button>`
+                    : '<span style="color:#cbd5e1; font-size:0.78rem;">—</span>'}
+            </td>
         </tr>`;
-    }).join('') || '<tr><td colspan="3" style="text-align:center; padding:26px; color:var(--text-muted);">No standards in IS Intelligence yet.</td></tr>';
+    }).join('') || '<tr><td colspan="4" style="text-align:center; padding:26px; color:var(--text-muted);">No standards in IS Intelligence yet.</td></tr>';
+
+    if (!tbody.dataset.delBound) {
+        tbody.dataset.delBound = '1';
+        tbody.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-del-is]');
+            if (!btn) return;
+            e.preventDefault();
+            deleteScopeStandard(btn.getAttribute('data-del-id'), btn.getAttribute('data-del-is'));
+        });
+    }
 
     renderScopeBySection();
 
@@ -6613,6 +6634,49 @@ function renderScopeBySection() {
                    </div>`).join('')
                 : '<div style="font-size:0.78rem; color:#b45309;">Empty — a TP who picks this section will see nothing.</div>'}
         </div>`).join('');
+}
+
+// Deleting a standard is not a filing edit — it leaves IS Intelligence entirely,
+// taking its conformance limits with it, and it saves immediately rather than
+// waiting for "Save filing". Hence two clicks and a dialog that spells that out.
+async function deleteScopeStandard(id, isNumber) {
+    if (scopeArmedDelete !== isNumber) {
+        scopeArmedDelete = isNumber;
+        if (scopeArmedDeleteTimer) clearTimeout(scopeArmedDeleteTimer);
+        scopeArmedDeleteTimer = setTimeout(() => { scopeArmedDelete = null; renderScopeFilingTable(); }, 5000);
+        renderScopeFilingTable();
+        showToast(`Click again to delete ${isNumber}.`, 'info');
+        return;
+    }
+    scopeArmedDelete = null;
+    if (scopeArmedDeleteTimer) { clearTimeout(scopeArmedDeleteTimer); scopeArmedDeleteTimer = null; }
+
+    if (!confirm(`Delete ${isNumber} from IS Intelligence?\n\nIts extraction and conformance limits are removed and it disappears from every section and every TP's list. The report format file is archived to is_templates/_deleted/, so the extraction can be restored.\n\nThis happens immediately — it is not part of "Save filing".`)) {
+        renderScopeFilingTable();
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/is-intelligence/standards/${id}`, { method: 'DELETE', headers: authHeaders() });
+        const body = await res.text();
+        let data;
+        try { data = JSON.parse(body); } catch (e) {
+            throw new Error(body.trim().startsWith('<')
+                ? 'The server is running an older build than this page. Restart it and reload.'
+                : 'The server returned something that isn\'t JSON.');
+        }
+        if (!res.ok) {
+            throw new Error(res.status === 401 || res.status === 403
+                ? describeAuthFailure(res.status, data.error)
+                : (data.error || 'Delete failed'));
+        }
+        delete scopeAdminMap[isNumber];
+        showToast(`${data.removed || isNumber} deleted${data.formatArchived ? ' · report format archived' : ''}.`, 'success');
+        loadScopeAdmin();
+    } catch (e) {
+        showToast(e.message, 'error');
+        renderScopeFilingTable();
+    }
 }
 
 function setScopeFiling(isNumber, section) {

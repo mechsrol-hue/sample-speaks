@@ -3247,10 +3247,11 @@ app.get('/api/is-scope/catalogue', async (req, res) => {
         const sections = await readPref(SCOPE_SECTIONS_KEY, DEFAULT_SECTIONS);
         const sectionMap = await readPref(SCOPE_MAP_KEY, {});
         const { data: rows, error } = await supabase
-            .from('is_standards_vault').select('isNumber, title');
+            .from('is_standards_vault').select('id, isNumber, title');
         if (error) throw error;
         const standards = (rows || [])
             .map(r => ({
+                id: r.id,
                 isNumber: r.isNumber,
                 title: r.title || '',
                 // Admin's own filing wins; otherwise fall back to the lab's filing sheet.

@@ -4980,6 +4980,28 @@ html {
 .scopeadm-btn:hover:not(:disabled) { background: #f8fafc; border-color: #94a3b8; }
 .scopeadm-btn:disabled { color: #94a3b8; background: #f1f5f9; border-color: #e2e8f0; cursor: not-allowed; }
 
+.scopeadm-del {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #cbd5e1;
+    font-size: 0.85rem;
+    line-height: 1;
+    padding: 4px 7px;
+    cursor: pointer;
+    transition: color 0.12s, background 0.12s, border-color 0.12s;
+}
+tr:hover .scopeadm-del { color: #94a3b8; }
+.scopeadm-del:hover { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
+.scopeadm-del.is-armed {
+    background: #b91c1c;
+    color: #fff;
+    border-color: #b91c1c;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 9px;
+}
+
 .scopeadm-outstanding {
     border: 1px solid #e2e8f0;
     border-radius: 11px;
