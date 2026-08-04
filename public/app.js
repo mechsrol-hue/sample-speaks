@@ -5311,8 +5311,6 @@ let scopeChosenIS = new Set();
 // When OIC hasn't filed an IS under a section yet, remember which section the TP
 // claimed it under so step 2 can still group + select it.
 let scopeLocalFiling = {};
-const SCOPE_OTHER_KEY = '__OTHER__';
-let scopeOtherSectionText = '';
 // 'browse' = step 2, ticking what you run. 'select' = step 3 unlocked, writing the
 // recommendation. Splitting the two keeps "what I test" separate from "what the lab
 // should carry on testing" — the second is advice the OIC approves, not a claim.
@@ -5329,9 +5327,6 @@ let scopeShowAllCatalogue = false;
 let scopeApproved = [];
 
 function scopeActiveSectionLabel() {
-    if (scopeChosenSections.has(SCOPE_OTHER_KEY)) {
-        return scopeOtherSectionText.trim() || 'Other';
-    }
     return [...scopeChosenSections][0] || '';
 }
 
@@ -5424,7 +5419,6 @@ async function loadMyISScope() {
         scopeChosenSections = new Set();
         scopeChosenIS = new Set();
         scopeLocalFiling = {};
-        scopeOtherSectionText = '';
         scopeStage = 'browse';
         scopeRecommended = new Set();
         scopeReasons = {};
@@ -5434,9 +5428,6 @@ async function loadMyISScope() {
             const proposed = (scopeMine.proposedSection || '').trim();
             if (one && (scopeCatalogue.sections || []).includes(one)) {
                 scopeChosenSections = new Set([one]);
-            } else if (one || proposed) {
-                scopeChosenSections = new Set([SCOPE_OTHER_KEY]);
-                scopeOtherSectionText = proposed || one || '';
             }
             scopeChosenIS = new Set(scopeMine.isNumbers || []);
             for (const r of (scopeMine.recommendations || [])) {
@@ -6147,20 +6138,56 @@ function renderScopeAdminSections() {
     }).join('');
 }
 
-function addScopeSection() {
+// Saves on add. A section is a heading, not an edit in progress — making the admin
+// remember a separate Save step for it is how one gets typed, looked at, and lost.
+// Removing a section stays behind Save: it drops every filing pointing at it.
+async function addScopeSection() {
     const input = document.getElementById('scopeadm-new-section');
+    const btn = input && input.nextElementSibling;
     const name = (input.value || '').trim();
     if (!name) return;
     if (scopeAdminSections.some(s => s.toLowerCase() === name.toLowerCase())) {
         return showToast('That section already exists.', 'error');
     }
-    scopeAdminSections.push(name);
-    scopeUnsavedSections.add(name);
-    input.value = '';
-    scopeDirty = true;
+
+    if (btn) btn.disabled = true;
+    try {
+        const res = await fetch('/api/is-scope/sections', {
+            method: 'POST',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ section: name })
+        });
+        const body = await res.text();
+        let data;
+        try { data = JSON.parse(body); } catch (e) {
+            throw new Error(body.trim().startsWith('<')
+                ? 'The server is running an older build than this page. Restart it (node server.js) and reload.'
+                : 'The server returned something that isn\'t JSON.');
+        }
+        if (!res.ok) {
+            throw new Error(res.status === 401 || res.status === 403
+                ? describeAuthFailure(res.status, data.error)
+                : (data.error || 'Could not save the section.'));
+        }
+        // Server list wins, but keep any section still waiting on a manual save.
+        const stillUnsaved = [...scopeUnsavedSections].filter(x => !(data.sections || []).includes(x));
+        scopeAdminSections = [...(data.sections || []), ...stillUnsaved];
+        scopeUnsavedSections.delete(name);
+        input.value = '';
+        showToast(`“${name}” saved.`, 'success');
+    } catch (e) {
+        // Keep it on the page rather than throwing the typing away — it just has to
+        // go through "Save filing" like every other unsaved change.
+        scopeAdminSections.push(name);
+        scopeUnsavedSections.add(name);
+        scopeDirty = true;
+        input.value = '';
+        showToast(`Couldn't save “${name}” — ${e.message} It is still here; press “Save filing” once that is sorted.`, 'error');
+    } finally {
+        if (btn) btn.disabled = false;
+    }
     renderScopeAdminSections();
     renderScopeFilingTable();
-    showToast(`“${name}” added here — press “Save filing” to keep it.`, 'info');
 }
 
 function removeScopeSection(sec) {

@@ -3241,6 +3241,26 @@ app.get('/api/is-scope/catalogue', async (req, res) => {
     }
 });
 
+// Adding a section on its own. The full catalogue POST below replaces the section
+// list *and* the filing together, so using it to add one section would also commit
+// whatever half-finished filing edits happen to be on the page. This touches only
+// the section list.
+app.post('/api/is-scope/sections', requireAdmin, async (req, res) => {
+    try {
+        const name = String((req.body || {}).section || '').trim();
+        if (!name) return res.status(400).json({ error: 'Section name is required.' });
+        const sections = await readPref(SCOPE_SECTIONS_KEY, DEFAULT_SECTIONS);
+        if (sections.some(s => String(s).toLowerCase() === name.toLowerCase())) {
+            return res.status(409).json({ error: `“${name}” already exists.` });
+        }
+        const next = [...sections, name];
+        await writePref(SCOPE_SECTIONS_KEY, next);
+        res.json({ sections: next, added: name, savedBy: req.sessionUser.username });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Admin files the standards and maintains the section list ("fill the data").
 app.post('/api/is-scope/catalogue', requireAdmin, async (req, res) => {
     try {
