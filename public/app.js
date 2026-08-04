@@ -5324,6 +5324,10 @@ let scopeStage = 'browse';
 // each. Authored by the TA/LO — nothing here is computed.
 let scopeRecommended = new Set();
 let scopeReasons = {};
+// Escape hatch for a section the OIC hasn't filed yet: the TP can opt into the full
+// catalogue. Off by default — showing it automatically made every empty section
+// render the same 270 rows, so the sections looked identical.
+let scopeShowAllCatalogue = false;
 
 function scopeActiveSectionLabel() {
     if (scopeChosenSections.has(SCOPE_OTHER_KEY)) {
@@ -5397,6 +5401,7 @@ async function loadMyISScope() {
         scopeStage = 'browse';
         scopeRecommended = new Set();
         scopeReasons = {};
+        scopeShowAllCatalogue = false;
         if (scopeMine && scopeMine.status === 'pending') {
             const one = (scopeMine.sections || [])[0];
             const proposed = (scopeMine.proposedSection || '').trim();
@@ -5591,6 +5596,7 @@ function toggleScopeSection(sec) {
     scopeStage = 'browse';
     scopeRecommended = new Set();
     scopeReasons = {};
+    scopeShowAllCatalogue = false;
     const searchEl = document.getElementById('scope-step2-search');
     if (searchEl) searchEl.value = '';
     renderScopeSections();
@@ -5736,7 +5742,9 @@ function updateScopeStep2Chrome(opts = {}) {
         } else if (!filedUnder.length) {
             banner.style.display = 'block';
             banner.className = 'myscope-step2-banner is-warn';
-            banner.innerHTML = `<strong>No IS filed under “${escapeHtml(sec)}” yet.</strong> Your OIC groups them in IS Scope Control. Until then this shows the whole lab catalogue (${total} standards).`;
+            banner.innerHTML = scopeShowAllCatalogue
+                ? `<strong>Showing all ${total} standards</strong> — nothing is filed under “${escapeHtml(sec)}”, so anything you tick is claimed under it.`
+                : `<strong>No IS filed under “${escapeHtml(sec)}” yet.</strong> Your OIC groups them in IS Scope Control.`;
         } else {
             banner.style.display = 'block';
             banner.className = 'myscope-step2-banner is-info';
@@ -5764,14 +5772,19 @@ function scopeSectionPool() {
     const all = scopeCatalogue.standards || [];
     const activeLabel = scopeActiveSectionLabel();
     const filed = all.filter(s => s.section === activeLabel);
-    // If OIC hasn't filed anything under the chosen section, fall back to the full
-    // catalogue (anything ticked is claimed under their section locally).
-    return filed.length
-        ? filed
-        : all.map(s => ({
-            ...s,
-            section: s.section || scopeLocalFiling[s.isNumber] || activeLabel || 'Unfiled',
-        }));
+    if (filed.length) return filed;
+    // Nothing filed here. Only show the whole catalogue if the TP explicitly asked
+    // for it — otherwise every unfiled section renders an identical list.
+    if (!scopeShowAllCatalogue) return [];
+    return all.map(s => ({
+        ...s,
+        section: s.section || scopeLocalFiling[s.isNumber] || activeLabel || 'Unfiled',
+    }));
+}
+
+function scopeRevealCatalogue() {
+    scopeShowAllCatalogue = true;
+    renderScopeStandards();
 }
 
 function scopeFilterStandards(pool, q) {
@@ -5890,7 +5903,14 @@ function renderScopeStandards(opts = {}) {
     if (countEl) countEl.textContent = `${scopeChosenIS.size} selected`;
 
     if (!visible.length) {
-        el.innerHTML = '<div class="myscope-empty-box">No standards match that filter.</div>';
+        const total = (scopeCatalogue.standards || []).length;
+        el.innerHTML = (!filedUnder.length && !scopeShowAllCatalogue)
+            ? `<div class="myscope-empty-box myscope-step2-placeholder">
+                   <strong>Nothing filed under ${escapeHtml(scopeActiveSectionLabel())} yet</strong>
+                   <span class="myscope-empty-why">Your OIC files standards into sections in IS Scope Control. If you test something that belongs here, pick it from the full list.</span>
+                   <button type="button" class="myscope-next-btn" style="margin-top:12px;" onclick="scopeRevealCatalogue()">Show all ${total} standards</button>
+               </div>`
+            : '<div class="myscope-empty-box">No standards match that filter.</div>';
         renderScopeSummary();
         return;
     }
