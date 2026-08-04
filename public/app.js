@@ -466,9 +466,13 @@ function logout() {
 // --- PROFILE ---
 function getInitials(name) {
     if (!name) return 'U';
-    const parts = name.trim().split(' ').filter(Boolean);
+    const parts = name.trim().split(/\s+/).filter(Boolean);
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    if (parts.length === 2) {
+        return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+    }
+    // Three or more words → first letter of the first three words (e.g. Sumit Mohan Naik → SMN)
+    return (parts[0].charAt(0) + parts[1].charAt(0) + parts[2].charAt(0)).toUpperCase();
 }
 
 function updateHeaderProfile() {
@@ -6512,9 +6516,9 @@ async function saveScopeCatalogue() {
 
 let scopeCoverage = { sections: [], standards: [], counts: {} };
 
-// A missing API route falls through to the SPA's index.html, so response.json()
-// dies on "Unexpected token '<'" — which tells the user nothing. Name the real
-// cause instead: the server is running code older than the page.
+// A route the running server doesn't have gets Express's default 404, which is an
+// HTML page — so response.json() dies on "Unexpected token '<'", telling the user
+// nothing. Name the real cause: the server booted before this endpoint existed.
 async function scopeFetchJson(url) {
     const res = await fetch(url);
     const body = await res.text();
