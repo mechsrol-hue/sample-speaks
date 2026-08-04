@@ -5347,6 +5347,16 @@ function scopeApprovedKeys() {
     return new Set(scopeApproved.map(a => scopeBaseISNumber(a.isNumber)));
 }
 
+// Standards filed under this section that the TP is already approved for — the
+// baseline step 2 opens with, so unticking one reads as "remove this."
+function scopeHeldISForSection(label) {
+    if (!label) return [];
+    const approvedKeys = scopeApprovedKeys();
+    return (scopeCatalogue.standards || [])
+        .filter(s => s.section === label && approvedKeys.has(scopeBaseISNumber(s.isNumber)))
+        .map(s => s.isNumber);
+}
+
 function renderScopeApproved() {
     const el = document.getElementById('scope-approved-panel');
     if (!el) return;
@@ -5405,6 +5415,7 @@ function scopeClaimIS(isNumber) {
 
 // ── TP screen ──────────────────────────────────────────────────────────────────
 async function loadMyISScope() {
+    initMyScopeInteractions();
     try {
         const [catRes, mineRes] = await Promise.all([
             fetch('/api/is-scope/catalogue'),
@@ -5427,18 +5438,19 @@ async function loadMyISScope() {
         scopeViewStep = null;
         if (scopeMine && scopeMine.status === 'pending') {
             const one = (scopeMine.sections || [])[0];
-            const proposed = (scopeMine.proposedSection || '').trim();
+            // Only restore a catalogue section. Legacy "Other"/custom names are no longer
+            // editable in place — leave the form on step 1 so they pick a real section.
             if (one && (scopeCatalogue.sections || []).includes(one)) {
                 scopeChosenSections = new Set([one]);
+                scopeChosenIS = new Set(scopeMine.isNumbers || []);
+                for (const r of (scopeMine.recommendations || [])) {
+                    if (!scopeChosenIS.has(r.isNumber)) continue;
+                    scopeRecommended.add(r.isNumber);
+                    if (r.reason) scopeReasons[r.isNumber] = r.reason;
+                }
+                // Editing an existing submission — don't make them walk step 2 again.
+                if (scopeChosenIS.size) scopeStage = 'select';
             }
-            scopeChosenIS = new Set(scopeMine.isNumbers || []);
-            for (const r of (scopeMine.recommendations || [])) {
-                if (!scopeChosenIS.has(r.isNumber)) continue;
-                scopeRecommended.add(r.isNumber);
-                if (r.reason) scopeReasons[r.isNumber] = r.reason;
-            }
-            // Editing an existing submission — don't make them walk step 2 again.
-            if (scopeChosenIS.size) scopeStage = 'select';
         }
         const noteEl = document.getElementById('scope-note');
         if (noteEl) noteEl.value = (scopeMine && scopeMine.status === 'pending') ? (scopeMine.note || '') : '';
@@ -5521,7 +5533,7 @@ function renderScopeSections() {
         const on = scopeChosenSections.has(sec);
         const filedCount = counts[sec] || 0;
         const mineCount = [...scopeChosenIS].filter(isNum => scopeSectionForIS(isNum) === sec).length;
-        const countLabel = filedCount ? `${mineCount}/${filedCount} IS` : (mineCount ? `${mineCount} picked` : 'pick IS below');
+        const countLabel = filedCount ? `${mineCount}/${filedCount} IS` : (mineCount ? `${mineCount} picked` : 'then tick IS');
         return `<button type="button" class="myscope-chip ${on ? 'is-on' : ''}" data-scope-section="${escapeHtml(sec)}">
             <span class="myscope-chip-name">${on ? '✓ ' : ''}${escapeHtml(sec)}</span>
             <span class="myscope-chip-meta">${countLabel}</span>
@@ -5575,8 +5587,9 @@ function initMyScopeInteractions() {
     if (progressEl && !progressEl.dataset.bound) {
         progressEl.dataset.bound = '1';
         progressEl.addEventListener('click', (e) => {
-            const stepEl = e.target.closest('.myscope-progress-step.is-clickable[data-progress-step]');
-            if (!stepEl) return;
+            const stepEl = e.target.closest('[data-progress-step]');
+            if (!stepEl || !progressEl.contains(stepEl)) return;
+            e.preventDefault();
             scopeGoToWizardStep(Number(stepEl.getAttribute('data-progress-step')));
         });
     }
@@ -5602,6 +5615,11 @@ function toggleScopeSection(sec) {
         // Re-home locally claimed IS to the new single section.
         for (const isNum of Object.keys(scopeLocalFiling)) {
             scopeLocalFiling[isNum] = targetLabel;
+        }
+        // Open pre-checked with whatever you already hold in this section — the
+        // baseline is "your current scope," and unticking one requests removal.
+        for (const isNum of scopeHeldISForSection(targetLabel)) {
+            scopeChosenIS.add(isNum);
         }
     }
     // A new section means a new list to work through — send them back to step 2.
@@ -5631,17 +5649,13 @@ function scopeWizardFocusStep() {
 function scopeGoToWizardStep(step) {
     const n = Number(step);
     if (!Number.isInteger(n) || n < 1 || n > 4) return;
-    const hasSection = scopeChosenSections.size > 0;
-    const hasIS = scopeChosenIS.size > 0;
-    const shortlisted = hasIS && scopeStage === 'select';
-    const hasReco = scopeRecommended.size > 0;
-    const ready = hasSection && shortlisted && hasReco;
-    const stepUnlocked = [true, hasSection, shortlisted, ready];
-    if (!stepUnlocked[n - 1]) return;
+    // Furthest step the wizard has unlocked — never jump ahead of it.
+    const maxStep = scopeWizardFocusStep();
+    if (n > maxStep) return;
 
+    // View-only navigation: don't collapse scopeStage to 'browse' when revisiting
+    // steps 1–2, or step 3–4 unlock state (and later progress clicks) break.
     scopeViewStep = n;
-    if (n <= 2) scopeStage = 'browse';
-    else if (n === 3 && hasIS) scopeStage = 'select';
 
     renderScopeStandards();
     renderScopeShortlist();
@@ -5659,7 +5673,10 @@ function updateScopeProgress() {
     const hasReco = scopeRecommended.size > 0;
     const ready = hasValidSection && shortlisted && hasReco;
     const autoFocus = scopeWizardFocusStep();
-    const focusStep = scopeViewStep ?? autoFocus;
+    const stepDone = [hasSection, hasIS, hasReco, false];
+    // Unlocked = every step up to the furthest the wizard has reached (incl. current).
+    if (scopeViewStep !== null && (scopeViewStep < 1 || scopeViewStep > autoFocus)) scopeViewStep = null;
+    const resolvedFocus = scopeViewStep ?? autoFocus;
     const secLabel = hasSection ? scopeActiveSectionLabel() : '';
 
     const progress = document.getElementById('myscope-progress');
@@ -5671,12 +5688,14 @@ function updateScopeProgress() {
             ready ? 'active' : 'pending',
         ];
         progress.querySelectorAll('.myscope-progress-step').forEach((el, i) => {
+            const stepNum = i + 1;
+            const unlocked = stepNum <= autoFocus;
             el.classList.remove('is-active', 'is-done', 'is-clickable');
             if (pStates[i] === 'active') el.classList.add('is-active');
-            if (pStates[i] === 'done') {
-                el.classList.add('is-done');
-                if (i + 1 !== focusStep) el.classList.add('is-clickable');
-            }
+            if (pStates[i] === 'done') el.classList.add('is-done');
+            // Any unlocked step is clickable (including the current one).
+            if (unlocked) el.classList.add('is-clickable');
+            if ('disabled' in el) el.disabled = !unlocked;
             const dot = el.querySelector('.myscope-progress-dot');
             if (dot) dot.textContent = pStates[i] === 'done' ? '✓' : String(i + 1);
         });
@@ -5685,16 +5704,14 @@ function updateScopeProgress() {
         });
     }
 
-    const stepDone = [hasSection, hasIS, hasReco, false];
-    const stepUnlocked = [true, hasSection, shortlisted, ready];
     for (let n = 1; n <= 4; n++) {
         const el = document.getElementById(`myscope-step-${n}`);
         if (el) {
             el.classList.remove('myscope-step-focus', 'myscope-step-done', 'myscope-step-locked');
-            if (n === focusStep) el.classList.add('myscope-step-focus');
+            if (n === resolvedFocus) el.classList.add('myscope-step-focus');
             else if (stepDone[n - 1]) el.classList.add('myscope-step-done');
-            else if (!stepUnlocked[n - 1]) el.classList.add('myscope-step-locked');
-            el.hidden = n !== focusStep;
+            else if (n > autoFocus) el.classList.add('myscope-step-locked');
+            el.hidden = n !== resolvedFocus;
         }
         const numEl = document.getElementById(`scope-step${n}-num`);
         if (numEl) numEl.textContent = stepDone[n - 1] ? '✓' : String(n);
@@ -5760,7 +5777,12 @@ function updateScopeStep2Chrome(opts = {}) {
 
     if (search) search.disabled = !hasSection;
     if (selectAll) selectAll.disabled = !hasSection;
-    if (clearAll) clearAll.disabled = !hasSection;
+    if (clearAll) {
+        clearAll.disabled = !hasSection;
+        // Resetting when you hold standards here goes back to your current scope, not
+        // to nothing — "Clear all" only really means empty when there's nothing held.
+        clearAll.textContent = (hasSection && scopeHeldISForSection(sec).length) ? 'Reset to current scope' : 'Clear all';
+    }
     if (nextBtn) {
         nextBtn.disabled = !(namedSection && scopeChosenIS.size);
         nextBtn.textContent = scopeChosenIS.size
@@ -5920,6 +5942,66 @@ function toggleScopeReco(isNumber) {
     }
 }
 
+// Group a list of standards by the section label they'd render under (falls back to
+// local filing / the active section / "Unfiled" — same resolution used everywhere else).
+function scopeGroupBySection(list, sectionLabel) {
+    const bySection = {};
+    for (const s of list) {
+        const sec = s.section || scopeLocalFiling[s.isNumber] || sectionLabel || 'Unfiled';
+        (bySection[sec] = bySection[sec] || []).push(s);
+    }
+    return bySection;
+}
+
+// One IS row. `heldBucket` is whether this row lives in the "already in your scope"
+// group — same checkbox either way, but the badge (and therefore the meaning of
+// unticking it) flips between "will be removed" and "I test this."
+function scopeRenderISRow(s, heldBucket) {
+    const on = scopeChosenIS.has(s.isNumber);
+    let badge = '';
+    if (heldBucket) {
+        badge = on
+            ? '<span class="myscope-is-badge myscope-is-badge-held">already yours</span>'
+            : '<span class="myscope-is-badge myscope-is-badge-remove">will be removed</span>';
+    } else if (on) {
+        badge = '<span class="myscope-is-badge">I test this</span>';
+    }
+    return `<label class="myscope-is-row ${on ? 'is-on' : ''}${heldBucket && !on ? ' is-removing' : ''}">
+        <input type="checkbox" ${on ? 'checked' : ''} data-scope-is="${escapeHtml(s.isNumber)}">
+        <span class="myscope-is-code">${escapeHtml(s.isNumber)}</span>
+        <span class="myscope-is-title">${escapeHtml(s.title || '')}</span>
+        ${badge}
+    </label>`;
+}
+
+// One of the two segregated buckets step 2 shows per section: what's already in scope
+// (uncheck to remove) vs what isn't yet (check to add). Kept as separate cards rather
+// than one flat list — mixing "already yours" and "new" together is exactly what made
+// them hard to tell apart before.
+function scopeRenderGroupBlock(title, list, sectionLabel, heldBucket) {
+    if (!list.length) return '';
+    const bySection = scopeGroupBySection(list, sectionLabel);
+    const pickedCount = list.filter(s => scopeChosenIS.has(s.isNumber)).length;
+    const meta = heldBucket
+        ? `${pickedCount}/${list.length} kept${list.length - pickedCount ? ` · ${list.length - pickedCount} to remove` : ''}`
+        : `${pickedCount}/${list.length} picked`;
+    return `
+    <div class="myscope-bucket ${heldBucket ? 'myscope-bucket-held' : 'myscope-bucket-add'}">
+        <div class="myscope-bucket-head">
+            <span>${escapeHtml(title)}</span>
+            <span class="myscope-sec-group-meta">${meta}</span>
+        </div>
+        ${Object.entries(bySection).map(([sec, secList]) => `
+            <div class="myscope-sec-group">
+                <div class="myscope-sec-group-head">
+                    <span>${escapeHtml(sec)}</span>
+                    <span class="myscope-sec-group-meta">${secList.filter(s => scopeChosenIS.has(s.isNumber)).length}/${secList.length}</span>
+                </div>
+                ${secList.map(s => scopeRenderISRow(s, heldBucket)).join('')}
+            </div>`).join('')}
+    </div>`;
+}
+
 function renderScopeStandards(opts = {}) {
     const el = document.getElementById('scope-standards');
     const countEl = document.getElementById('scope-selected-count');
@@ -5930,7 +6012,7 @@ function renderScopeStandards(opts = {}) {
     if (!scopeChosenSections.size) {
         el.innerHTML = `<div class="myscope-empty-box myscope-step2-placeholder">
             <span class="myscope-empty-icon" aria-hidden="true">①</span>
-            <strong>Pick a section above</strong>
+            <strong>Pick a section in step 1</strong>
             <span class="myscope-empty-why">The standards filed under it appear here — only after you choose where you work.</span>
         </div>`;
         if (countEl) countEl.textContent = '';
@@ -5961,33 +6043,12 @@ function renderScopeStandards(opts = {}) {
         : '';
 
     const approvedKeys = scopeApprovedKeys();
-    const bySection = {};
-    for (const s of visible) {
-        const sec = s.section || scopeLocalFiling[s.isNumber] || sectionLabel || 'Unfiled';
-        (bySection[sec] = bySection[sec] || []).push(s);
-    }
+    const heldVisible = visible.filter(s => approvedKeys.has(scopeBaseISNumber(s.isNumber)));
+    const addVisible = visible.filter(s => !approvedKeys.has(scopeBaseISNumber(s.isNumber)));
 
-    el.innerHTML = notice + Object.entries(bySection).map(([sec, list]) => {
-        const pickedInSec = list.filter(s => scopeChosenIS.has(s.isNumber)).length;
-        return `
-        <div class="myscope-sec-group">
-            <div class="myscope-sec-group-head">
-                <span>${escapeHtml(sec)}</span>
-                <span class="myscope-sec-group-meta">${pickedInSec}/${list.length} selected</span>
-            </div>
-            ${list.map(s => {
-                const on = scopeChosenIS.has(s.isNumber);
-                const held = approvedKeys.has(scopeBaseISNumber(s.isNumber));
-                return `<label class="myscope-is-row ${on ? 'is-on' : ''}">
-                    <input type="checkbox" ${on ? 'checked' : ''} data-scope-is="${escapeHtml(s.isNumber)}">
-                    <span class="myscope-is-code">${escapeHtml(s.isNumber)}</span>
-                    <span class="myscope-is-title">${escapeHtml(s.title || '')}</span>
-                    ${held ? '<span class="myscope-is-badge myscope-is-badge-held">already yours</span>' : ''}
-                    ${on ? '<span class="myscope-is-badge">I test this</span>' : ''}
-                </label>`;
-            }).join('')}
-        </div>`;
-    }).join('');
+    el.innerHTML = notice
+        + scopeRenderGroupBlock('Already in your scope', heldVisible, sectionLabel, true)
+        + scopeRenderGroupBlock('Not yet in your scope', addVisible, sectionLabel, false);
     renderScopeSummary();
 }
 
@@ -6016,7 +6077,9 @@ function scopeSelectAllVisible() {
 }
 
 function scopeClearAllIS() {
-    scopeChosenIS.clear();
+    // Reset to baseline (what you already hold in this section), not to nothing — a
+    // bare clear would silently turn into "remove everything I'm approved for."
+    scopeChosenIS = new Set(scopeHeldISForSection(scopeActiveSectionLabel()));
     scopeLocalFiling = {};
     scopeRecommended = new Set();
     scopeReasons = {};
@@ -6675,41 +6738,70 @@ function renderScopeCoverage() {
     const notRecommended = all.filter(s => s.declaredBy.length && !s.recommendations.length);
     const approved = all.filter(s => s.holders.length);
 
-    const row = (s, right) => `<div class="scopeadm-simple-row">
-        <div>
-            <strong>${escapeHtml(s.isNumber)}</strong>
-            ${s.section ? `<span class="scopeadm-cov-sec">${escapeHtml(s.section)}</span>` : ''}
-            <div class="scopeadm-simple-title">${escapeHtml(s.title || '')}</div>
+    // Approved competency and an unapproved declaration are different states of the
+    // same claim — showing both on the row is what makes the pipeline legible.
+    const people = (s) => {
+        const chips = s.holders.map(h =>
+            `<span class="scopecov-person is-approved" title="Approved competency">${escapeHtml(h.name)}${h.level ? `<em>${escapeHtml(h.level)}</em>` : ''}</span>`);
+        for (const d of s.declaredBy) {
+            if (d.status === 'approved') continue;   // already shown as a holder
+            chips.push(`<span class="scopecov-person is-${escapeHtml(d.status || 'pending')}" title="Declared, ${escapeHtml(d.status || 'pending')}">${escapeHtml(d.by)}<em>${escapeHtml(d.status || 'pending')}</em></span>`);
+        }
+        return chips.length
+            ? `<div class="scopecov-people">${chips.join('')}</div>`
+            : '<div class="scopecov-people"><span class="scopecov-person is-none">Nobody yet</span></div>';
+    };
+
+    const row = (s, extra) => `<div class="scopecov-row">
+        <div class="scopecov-head">
+            <span class="scopecov-is">${escapeHtml(s.isNumber)}</span>
+            ${s.section ? `<span class="scopecov-sec">${escapeHtml(s.section)}</span>` : ''}
         </div>
-        <div class="scopeadm-simple-right">${right}</div>
+        <div class="scopecov-title">${escapeHtml(s.title || '')}</div>
+        ${people(s)}
+        ${extra || ''}
     </div>`;
 
-    const block = (title, hint, tone, items, empty) => `
-        <section class="scopeadm-simple is-${tone}">
-            <header>
-                <h4>${title}</h4>
-                <span class="scopeadm-simple-count">${items.length}</span>
-            </header>
-            <p class="scopeadm-simple-hint">${hint}</p>
-            ${items.length ? items.join('') : `<div class="scopeadm-simple-empty">${empty}</div>`}
-        </section>`;
+    // Open only what needs a decision. "Approved" is reference — a long settled list
+    // that pushes the two lists an OIC has to act on off the screen, so it starts
+    // closed. An empty block collapses to its one line rather than a hollow panel.
+    const block = (title, hint, tone, items, empty, open) => `
+        <details class="scopecov-block is-${tone}" ${open && items.length ? 'open' : ''}>
+            <summary>
+                <span class="scopecov-dot"></span>
+                <span class="scopecov-title-text">${title}</span>
+                <span class="scopecov-count">${items.length}</span>
+            </summary>
+            <p class="scopecov-hint">${hint}</p>
+            <div class="scopecov-rows">
+                ${items.length ? items.join('') : `<div class="scopecov-empty">${empty}</div>`}
+            </div>
+        </details>`;
 
-    listEl.innerHTML =
-        block('Recommended to continue testing', 'A TA or LO has asked the lab to carry on testing these, with their reason.', 'good',
-            recommended.map(s => row(s, s.recommendations.map(r =>
-                `<div class="scopeadm-simple-note"><strong>${escapeHtml(r.by || 'unknown')}</strong>${r.reason ? ` — ${escapeHtml(r.reason)}` : ' — no reason given'}</div>`
-            ).join(''))),
-            'Nothing recommended yet.')
-      + block('Declared but not recommended', 'Someone says they test these, but nobody has recommended continuing them. Worth asking before you approve.', 'warn',
-            notRecommended.map(s => row(s, s.declaredBy.map(d =>
-                `<div class="scopeadm-simple-note">${escapeHtml(d.by)} <span class="scopeadm-rec-status is-${escapeHtml(d.status || 'pending')}">${escapeHtml(d.status || 'pending')}</span></div>`
-            ).join(''))),
-            'Nothing outstanding.')
-      + block('Approved', 'Already written into competencies — auto-assign uses these.', 'done',
-            approved.map(s => row(s, s.holders.map(h =>
-                `<span class="scopeadm-holder">${escapeHtml(h.name)}${h.level ? `<em>${escapeHtml(h.level)}</em>` : ''}</span>`
-            ).join(''))),
-            'Nothing approved yet.');
+    const summary = `<p class="scopecov-summary">
+        <strong>${recommended.length}</strong> recommended ·
+        <strong>${notRecommended.length}</strong> declared without a recommendation ·
+        <strong>${approved.length}</strong> approved${sec ? ` in ${escapeHtml(sec)}` : ''}
+    </p>`;
+
+    listEl.innerHTML = summary +
+        block('Recommended to continue testing',
+            'A TA or LO has asked the lab to carry on testing these, and said why.', 'rec',
+            recommended.map(s => row(s, `<div class="scopecov-reasons">
+                ${s.recommendations.map(r => `<blockquote class="scopecov-reason${r.reason ? '' : ' is-empty'}">
+                    ${r.reason ? escapeHtml(r.reason) : 'No reason given.'}
+                    <cite>${escapeHtml(r.by || 'unknown')}</cite>
+                </blockquote>`).join('')}
+            </div>`)),
+            'Nothing recommended yet.', true)
+      + block('Declared but not recommended',
+            'Someone says they test these, but nobody argued for keeping them. Worth asking before you approve.', 'nrec',
+            notRecommended.map(s => row(s)),
+            'Nothing outstanding.', true)
+      + block('Approved',
+            'Written into competencies — this is what auto-assign reads.', 'appr',
+            approved.map(s => row(s)),
+            'Nothing approved yet.', false);
 }
 
 async function loadScopeSubmissions() {
@@ -6760,6 +6852,21 @@ function scopeRecommendationBlock(sub) {
     </div>`;
 }
 
+// Add / kept / remove chips for a submission — built from the live toAdd/toRemove the
+// /submissions endpoint computes, so the OIC sees exactly what Approve will change
+// instead of just the flat pick list.
+function scopeSubmissionDiffChips(s) {
+    const toAdd = new Set(s.toAdd || []);
+    const toRemove = s.toRemove || [];
+    const addChips = (s.isNumbers || []).filter(n => toAdd.has(n)).map(n =>
+        `<span style="background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:6px; padding:3px 8px; font-size:0.76rem; font-weight:600;">+ ${escapeHtml(n)}</span>`).join('');
+    const keptChips = (s.isNumbers || []).filter(n => !toAdd.has(n)).map(n =>
+        `<span style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:6px; padding:3px 8px; font-size:0.76rem; font-weight:600;">${escapeHtml(n)}</span>`).join('');
+    const removeChips = toRemove.map(c =>
+        `<span style="background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; border-radius:6px; padding:3px 8px; font-size:0.76rem; font-weight:600; text-decoration:line-through;">− ${escapeHtml(c.isNumber)}</span>`).join('');
+    return addChips + keptChips + removeChips;
+}
+
 function renderScopeSubmissions() {
     const kpiEl = document.getElementById('scopeadm-review-kpis');
     const listEl = document.getElementById('scopeadm-review-list');
@@ -6791,14 +6898,14 @@ function renderScopeSubmissions() {
                     ${s.status === 'pending' ? `<div style="display:flex; gap:7px;">
                         <button onclick="decideScope(${s.userId},'approve')" style="background:#10b981; color:#fff; border:none; border-radius:7px; padding:7px 15px; font-size:0.82rem; font-weight:700; cursor:pointer;">✓ Approve</button>
                         <button onclick="decideScope(${s.userId},'reject')" style="background:#fff; color:#b91c1c; border:1px solid #fecaca; border-radius:7px; padding:7px 15px; font-size:0.82rem; font-weight:700; cursor:pointer;">Send back</button>
-                    </div>` : `<span style="font-size:0.76rem; color:var(--text-muted);">${s.reviewedBy ? `by ${escapeHtml(s.reviewedBy)}` : ''}${s.competenciesAdded ? ` · +${s.competenciesAdded} competencies` : ''}</span>`}
+                    </div>` : `<span style="font-size:0.76rem; color:var(--text-muted);">${s.reviewedBy ? `by ${escapeHtml(s.reviewedBy)}` : ''}${(s.competenciesAdded || s.competenciesRemoved) ? ` · +${s.competenciesAdded || 0} / −${s.competenciesRemoved || 0} competencies` : ''}</span>`}
                 </div>
                 <div style="font-size:0.83rem; color:#475569; margin-bottom:7px;">
                     <strong>Sections:</strong> ${s.sections.map(x => escapeHtml(x)).join(', ')}
                     ${s.proposedSection ? ` · <span style="color:#b45309;">proposed new section: “${escapeHtml(s.proposedSection)}”</span>` : ''}
                 </div>
                 <div style="display:flex; flex-wrap:wrap; gap:6px;">
-                    ${s.isNumbers.map(n => `<span style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:6px; padding:3px 8px; font-size:0.76rem; font-weight:600;">${escapeHtml(n)}</span>`).join('')}
+                    ${scopeSubmissionDiffChips(s)}
                 </div>
                 ${scopeRecommendationBlock(s)}
                 ${s.note ? `<div style="margin-top:8px; font-size:0.81rem; color:#64748b; font-style:italic;">“${escapeHtml(s.note)}”</div>` : ''}
@@ -6844,7 +6951,7 @@ async function decideScope(userId, decision) {
         const data = await res.json();
         if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Decision failed'));
         showToast(decision === 'approve'
-            ? `Approved — ${data.competenciesAdded} competency row(s) added.`
+            ? `Approved — +${data.competenciesAdded || 0} added${data.competenciesRemoved ? `, −${data.competenciesRemoved} removed` : ''}.`
             : 'Sent back to the TP.', 'success');
         loadScopeSubmissions();
     } catch (e) {

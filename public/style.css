@@ -4055,6 +4055,18 @@ html {
     flex: 1;
     min-width: 0;
     text-align: center;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+}
+.myscope-progress-step:disabled {
+    cursor: default;
+    opacity: 1;
 }
 .myscope-progress-dot {
     width: 28px;
@@ -4096,6 +4108,16 @@ html {
     font-size: 0.85rem;
 }
 .myscope-progress-step.is-done .myscope-progress-label { color: #15803d; }
+.myscope-progress-step.is-clickable { cursor: pointer; }
+.myscope-progress-step:not(.is-clickable) { cursor: default; pointer-events: none; }
+.myscope-progress-step.is-clickable:hover .myscope-progress-dot {
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
+}
+.myscope-progress-step.is-clickable:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+    border-radius: 8px;
+}
 .myscope-progress-line.is-done { background: #86efac; }
 
 /* Progressive disclosure — rules hidden until needed */
@@ -4136,6 +4158,7 @@ html {
     background: #fff;
     transition: opacity 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
+.myscope-step:not(.myscope-step-focus) { display: none; }
 .myscope-step-head {
     display: flex;
     align-items: flex-start;
@@ -4271,36 +4294,6 @@ html {
     font-size: 0.72rem;
     font-weight: 600;
     opacity: 0.75;
-}
-.myscope-chip-other-wrap {
-    display: inline-flex;
-    flex-direction: column;
-    gap: 6px;
-    align-items: stretch;
-}
-.myscope-chip-other-wrap.is-on .myscope-chip { border-color: #2563eb; }
-.myscope-other-input {
-    width: 100%;
-    min-width: 160px;
-    max-width: 220px;
-    padding: 8px 10px;
-    border: 1px solid #93c5fd;
-    border-radius: 10px;
-    font-size: 0.84rem;
-    font-weight: 500;
-    background: #fff;
-    color: #0f172a;
-    pointer-events: auto;
-    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.08);
-}
-.myscope-other-input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
-.myscope-other-input::placeholder {
-    color: #94a3b8;
-    font-weight: 400;
 }
 .myscope-search-row input,
 .myscope-browse input,
@@ -4462,57 +4455,118 @@ html {
 }
 .scopeadm-reco-why.is-empty { color: #b45309; font-style: italic; }
 
-/* Approved & recommended tab — three plain lists */
-.scopeadm-simple {
-    border: 1px solid #e2e8f0;
-    border-radius: 11px;
-    padding: 14px 16px;
-    margin-bottom: 14px;
-    background: #fff;
-}
-.scopeadm-simple.is-good { border-left: 4px solid #3b82f6; }
-.scopeadm-simple.is-warn { border-left: 4px solid #f59e0b; }
-.scopeadm-simple.is-done { border-left: 4px solid #10b981; }
-.scopeadm-simple header { display: flex; align-items: center; gap: 9px; }
-.scopeadm-simple h4 { margin: 0; font-size: 0.98rem; color: #0f172a; }
-.scopeadm-simple-count {
-    font-size: 0.72rem;
-    font-weight: 800;
-    background: #f1f5f9;
+/* Approved & recommended — three lists, only the ones needing a decision open.
+   One accent colour per block and one text alignment throughout: the point is to
+   be scannable, not decorated. */
+.scopecov-summary {
+    margin: 0 0 14px;
+    font-size: 0.86rem;
     color: #475569;
+}
+.scopecov-summary strong { color: #0f172a; }
+
+.scopecov-block {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    background: #fff;
+    overflow: hidden;
+}
+.scopecov-block > summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 16px;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+.scopecov-block > summary::-webkit-details-marker { display: none; }
+.scopecov-block > summary::after {
+    content: '▸';
+    margin-left: auto;
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+.scopecov-block[open] > summary::after { content: '▾'; }
+.scopecov-block > summary:hover { background: #f8fafc; }
+.scopecov-title-text { font-size: 0.95rem; font-weight: 700; color: #0f172a; }
+.scopecov-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.scopecov-block.is-rec .scopecov-dot { background: #3b82f6; }
+.scopecov-block.is-nrec .scopecov-dot { background: #f59e0b; }
+.scopecov-block.is-appr .scopecov-dot { background: #10b981; }
+.scopecov-count {
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #475569;
+    background: #f1f5f9;
     border-radius: 999px;
     padding: 2px 9px;
 }
-.scopeadm-simple-hint {
-    margin: 4px 0 11px;
+.scopecov-hint {
+    margin: 0 16px 10px;
     font-size: 0.8rem;
     color: var(--text-muted);
-    line-height: 1.45;
+    line-height: 1.5;
 }
-.scopeadm-simple-row {
-    display: flex;
-    gap: 14px;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    padding: 9px 0;
-    border-top: 1px solid #f1f5f9;
+.scopecov-rows { padding: 0 16px 6px; }
+
+.scopecov-row { padding: 11px 0; border-top: 1px solid #f1f5f9; }
+.scopecov-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.scopecov-is { font-size: 0.88rem; font-weight: 700; color: #0f172a; }
+.scopecov-sec {
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #64748b;
+    background: #f1f5f9;
+    border-radius: 999px;
+    padding: 2px 8px;
 }
-.scopeadm-simple-row strong { font-size: 0.86rem; color: #0f172a; }
-.scopeadm-simple-title { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
-.scopeadm-simple-right {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    align-items: flex-end;
-    max-width: 55%;
-    text-align: right;
+.scopecov-title { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; line-height: 1.45; }
+.scopecov-people { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.scopecov-person {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 3px 8px;
+    border: 1px solid transparent;
 }
-.scopeadm-simple-note { font-size: 0.79rem; color: #475569; line-height: 1.45; overflow-wrap: anywhere; }
-.scopeadm-simple-empty {
+.scopecov-person em { font-style: normal; font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; opacity: 0.75; }
+.scopecov-person.is-approved { color: #14532d; background: #f0fdf4; border-color: #bbf7d0; }
+.scopecov-person.is-pending  { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+.scopecov-person.is-rejected { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
+.scopecov-person.is-none     { color: #94a3b8; background: #f8fafc; border-color: #e2e8f0; font-weight: 500; }
+
+.scopecov-reasons { margin-top: 8px; display: grid; gap: 6px; }
+.scopecov-reason {
+    margin: 0;
+    padding: 8px 11px;
+    background: #f8fafc;
+    border-left: 3px solid #bfdbfe;
+    border-radius: 0 7px 7px 0;
+    font-size: 0.82rem;
+    color: #334155;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+.scopecov-reason.is-empty { color: #b45309; font-style: italic; border-left-color: #fcd34d; }
+.scopecov-reason cite {
+    display: block;
+    margin-top: 4px;
+    font-style: normal;
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: #64748b;
+}
+.scopecov-empty {
     font-size: 0.82rem;
     color: var(--text-muted);
-    padding: 10px 0 2px;
+    padding: 10px 0 12px;
     border-top: 1px solid #f1f5f9;
 }
 
@@ -4671,6 +4725,30 @@ html {
     background: #ecfccb;
     border-color: #d9f99d;
 }
+.myscope-is-badge-remove {
+    color: #b91c1c;
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+.myscope-is-row.is-removing { background: #fef2f2; }
+.myscope-is-row.is-removing:hover { background: #fee2e2; }
+/* The two step-2 buckets: what's already in scope vs what isn't yet — kept as
+   separate cards so they read as distinct groups, not one mixed checklist. */
+.myscope-bucket { margin-bottom: 14px; }
+.myscope-bucket-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0f172a;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 4px;
+}
+.myscope-bucket-held .myscope-bucket-head { color: #3f6212; }
+.myscope-bucket-add .myscope-bucket-head { color: #1d4ed8; }
 .myscope-reco { border-radius: 8px; margin: 2px 0; }
 .myscope-reco.is-on { background: #eff6ff; }
 .myscope-reco.is-on .myscope-is-row.is-on { background: transparent; }
