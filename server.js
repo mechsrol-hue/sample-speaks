@@ -3609,9 +3609,14 @@ app.get('/api/is-scope/coverage', async (req, res) => {
         for (const p of (prefs || [])) {
             let sub;
             try { sub = JSON.parse(p.value); } catch (_) { continue; }
-            if (sub.status !== 'approved') continue;
+            const decisions = sub.decisions || {};
             for (const n of (sub.isNumbers || [])) {
-                scopeApprovedKeys.add(`${sub.userId}|${normalizeISNumber(n)}`);
+                // A standard approved on its own counts even while the submission it
+                // came from is still pending — otherwise a per-standard approval writes
+                // the competency but shows up nowhere. Submissions decided before
+                // per-standard decisions existed carry no map, so status stands in.
+                const verdict = decisions[n] || (sub.status === 'approved' ? 'approved' : null);
+                if (verdict === 'approved') scopeApprovedKeys.add(`${sub.userId}|${normalizeISNumber(n)}`);
             }
         }
 
