@@ -3683,13 +3683,26 @@ app.get('/api/is-scope/coverage', async (req, res) => {
 
 app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, res) => {
     try {
-        const { decision, note } = req.body || {};
+        const { decision, note, isNumbers } = req.body || {};
         if (!['approve', 'reject'].includes(decision)) {
             return res.status(400).json({ error: 'decision must be "approve" or "reject".' });
         }
         const key = SCOPE_TP_PREFIX + req.params.userId;
         const sub = await readPref(key, null);
         if (!sub) return res.status(404).json({ error: 'No submission from that user.' });
+
+        // A decision can cover the whole submission or a single standard. Standards
+        // are not equally worth approving — one may be sound and the next premature —
+        // so the OIC can settle them one at a time and the submission keeps a record
+        // of what was settled and how.
+        const declared = new Set(sub.isNumbers || []);
+        const subset = (Array.isArray(isNumbers) && isNumbers.length)
+            ? isNumbers.map(String).filter(n => declared.has(n))
+            : [...declared];
+        if (!subset.length) {
+            return res.status(400).json({ error: 'None of those standards are in this submission.' });
+        }
+        sub.decisions = sub.decisions || {};
 
         let competenciesAdded = 0;
         let competenciesRemoved = 0;
@@ -3703,7 +3716,7 @@ app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, r
             const { data: existing } = await supabase
                 .from('employee_competencies').select('id, isNumber').eq('employeeId', profile.id);
             const have = new Set((existing || []).map(c => normalizeISNumber(c.isNumber)));
-            const toAdd = [...new Set(sub.isNumbers.map(normalizeISNumber))]
+            const toAdd = [...new Set(subset.map(normalizeISNumber))]
                 .filter(n => n && !have.has(n))
                 .map(n => ({ employeeId: profile.id, isNumber: n, proficiencyLevel: SCOPE_DEFAULT_PROFICIENCY, avgTestDurationHours: 8 }));
             if (toAdd.length) {
@@ -3715,10 +3728,13 @@ app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, r
             // Anything already held that belongs to this submission's section but isn't in
             // the desired list is a removal the TP made in step 2 — approving deletes it.
             // A competency filed under a different section is never touched here.
+            // Only when settling the whole submission. Removing on a single-standard
+            // approval would delete competencies the OIC has not looked at yet.
+            const wholeSubmission = subset.length === declared.size;
             const section = (sub.sections || [])[0];
             const sectionByBase = await scopeSectionByBase();
             const desiredBase = new Set(sub.isNumbers.map(normalizeISNumber));
-            const toRemove = (existing || []).filter(c =>
+            const toRemove = !wholeSubmission ? [] : (existing || []).filter(c =>
                 sectionByBase.get(normalizeISNumber(c.isNumber)) === section && !desiredBase.has(normalizeISNumber(c.isNumber)));
             if (toRemove.length) {
                 const { error } = await supabase.from('employee_competencies').delete().in('id', toRemove.map(c => c.id));
@@ -3727,15 +3743,24 @@ app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, r
             }
         }
 
-        sub.status = decision === 'approve' ? 'approved' : 'rejected';
+        for (const n of subset) sub.decisions[n] = decision === 'approve' ? 'approved' : 'rejected';
+
+        // The submission's own status follows from its standards: still pending while
+        // any are undecided, approved once at least one got through, rejected only if
+        // every one was turned down.
+        const settled = [...declared].map(n => sub.decisions[n]);
+        sub.status = settled.some(v => !v) ? 'pending'
+            : settled.some(v => v === 'approved') ? 'approved'
+            : 'rejected';
+
         sub.reviewedBy = req.sessionUser.username;
         sub.reviewedAt = new Date().toISOString();
-        sub.reviewNote = String(note || '').trim();
-        sub.competenciesAdded = competenciesAdded;
-        sub.competenciesRemoved = competenciesRemoved;
+        if (note !== undefined) sub.reviewNote = String(note || '').trim();
+        sub.competenciesAdded = (sub.competenciesAdded || 0) + competenciesAdded;
+        sub.competenciesRemoved = (sub.competenciesRemoved || 0) + competenciesRemoved;
         await writePref(key, sub);
 
-        res.json({ submission: sub, competenciesAdded, competenciesRemoved });
+        res.json({ submission: sub, competenciesAdded, competenciesRemoved, decided: subset });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

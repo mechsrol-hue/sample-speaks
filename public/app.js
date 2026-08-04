@@ -7165,21 +7165,34 @@ function scopeSubmissionStandards(sub) {
     const toAdd = new Set(sub.toAdd || []);
     const reasons = new Map((sub.recommendations || []).map(r => [r.isNumber, r.reason || '']));
     const hasRecs = !!(sub.recommendations || []).length;
+    const decided = sub.decisions || {};
+    const open = sub.status === 'pending';
 
     const rows = (sub.isNumbers || []).map(n => {
         const recommended = reasons.has(n);
-        const state = toAdd.has(n)
-            ? '<span class="scoperev-tag is-new">new</span>'
-            : '<span class="scoperev-tag is-kept">already theirs</span>';
+        const verdict = decided[n];
+        const state = verdict === 'approved' ? '<span class="scoperev-tag is-ok">approved</span>'
+            : verdict === 'rejected' ? '<span class="scoperev-tag is-drop">sent back</span>'
+            : toAdd.has(n)
+                ? '<span class="scoperev-tag is-new">new</span>'
+                : '<span class="scoperev-tag is-kept">already theirs</span>';
+        // Delegated, not inline: an IS number goes inside the attribute as a quoted
+        // JS string and terminates it, which silently produced a dead button.
+        const actions = (open && !verdict)
+            ? `<span class="scoperev-row-actions">
+                   <button class="scoperev-mini is-back" data-decide="reject" data-user="${sub.userId}" data-is="${escapeHtml(n)}" title="Send back only this standard">✕</button>
+                   <button class="scoperev-mini is-ok" data-decide="approve" data-user="${sub.userId}" data-is="${escapeHtml(n)}" title="Approve only this standard">✓</button>
+               </span>` : '';
         const why = !hasRecs ? ''
             : recommended
                 ? `<div class="scoperev-why">${reasons.get(n) ? escapeHtml(reasons.get(n)) : 'Recommended, no reason given.'}</div>`
                 : '<div class="scoperev-why is-none">Not recommended to continue.</div>';
-        return `<div class="scoperev-row${recommended ? ' is-rec' : ''}">
+        return `<div class="scoperev-row${recommended ? ' is-rec' : ''}${verdict ? ' is-settled' : ''}">
             <div class="scoperev-line">
                 ${recommended ? '<span class="scoperev-star" title="Recommended to continue testing">★</span>' : '<span class="scoperev-star is-off"></span>'}
                 <span class="scoperev-is">${escapeHtml(n)}</span>
                 ${state}
+                ${actions}
             </div>
             ${why}
         </div>`;
@@ -7231,6 +7244,8 @@ function renderScopeSubmissions() {
         : s === 'approved' ? '<span style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; border-radius:999px; padding:2px 9px; font-size:0.7rem; font-weight:700;">APPROVED</span>'
         : '<span style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:999px; padding:2px 9px; font-size:0.7rem; font-weight:700;">SENT BACK</span>';
 
+    const undecided = (sub) => (sub.isNumbers || []).filter(n => !(sub.decisions || {})[n]).length;
+
     if (listEl) {
         const subs = scopeSubmissions.submissions || [];
         listEl.innerHTML = subs.length ? subs.map(s => {
@@ -7253,13 +7268,24 @@ function renderScopeSubmissions() {
                 ${s.reviewNote ? `<div class="scoperev-note is-review"><strong>Review note:</strong> ${escapeHtml(s.reviewNote)}</div>` : ''}
                 <div class="scoperev-foot">
                     ${s.status === 'pending' ? `
-                        <button onclick="decideScope(${s.userId},'reject')" class="scoperev-btn is-back">Send back</button>
-                        <button onclick="decideScope(${s.userId},'approve')" class="scoperev-btn is-approve">✓ Approve</button>`
+                        <span class="scoperev-when">${undecided(s)} of ${total} still undecided</span>
+                        <button onclick="decideScope(${s.userId},'reject')" class="scoperev-btn is-back">Send all back</button>
+                        <button onclick="decideScope(${s.userId},'approve')" class="scoperev-btn is-approve">✓ Approve all</button>`
                     : `<span class="scoperev-when">${s.reviewedBy ? `by ${escapeHtml(s.reviewedBy)}` : ''}${(s.competenciesAdded || s.competenciesRemoved) ? ` · +${s.competenciesAdded || 0} / −${s.competenciesRemoved || 0} competencies` : ''}</span>`}
                 </div>
             </div>`;
         }).join('')
             : '<div style="padding:26px; text-align:center; color:var(--text-muted); font-size:0.88rem;">No submissions yet.</div>';
+
+        if (!listEl.dataset.decideBound) {
+            listEl.dataset.decideBound = '1';
+            listEl.addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-decide]');
+                if (!btn) return;
+                e.preventDefault();
+                decideScope(Number(btn.getAttribute('data-user')), btn.getAttribute('data-decide'), btn.getAttribute('data-is'));
+            });
+        }
     }
 
     if (outEl) {
@@ -7290,21 +7316,37 @@ function renderScopeSubmissions() {
     }
 }
 
-async function decideScope(userId, decision) {
-    const note = decision === 'reject'
-        ? (prompt('Tell the TP what to change (optional):') || '')
-        : (prompt('Note for the record (optional):') || '');
+// isNumber given → that one standard only; omitted → the whole submission.
+async function decideScope(userId, decision, isNumber) {
+    const one = !!isNumber;
+    if (one) {
+        const verb = decision === 'approve' ? 'Approve' : 'Send back';
+        if (!confirm(`${verb} ${isNumber} only?\n\nThe rest of this submission stays as it is.`)) return;
+    }
+    // Asking for a note per standard would make settling six of them six prompts.
+    const note = one ? undefined
+        : decision === 'reject'
+            ? (prompt('Tell the TP what to change (optional):') || '')
+            : (prompt('Note for the record (optional):') || '');
     try {
         const res = await fetch(`/api/is-scope/submissions/${userId}/decide`, {
             method: 'POST',
             headers: authHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ decision, note })
+            body: JSON.stringify(one ? { decision, isNumbers: [isNumber] } : { decision, note })
         });
-        const data = await res.json();
+        const body = await res.text();
+        let data;
+        try { data = JSON.parse(body); } catch (e) {
+            throw new Error(body.trim().startsWith('<')
+                ? 'The server is running an older build than this page. Restart it and reload.'
+                : 'The server returned something that isn\'t JSON.');
+        }
         if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Decision failed'));
-        showToast(decision === 'approve'
-            ? `Approved — +${data.competenciesAdded || 0} added${data.competenciesRemoved ? `, −${data.competenciesRemoved} removed` : ''}.`
-            : 'Sent back to the TP.', 'success');
+        showToast(
+            one ? `${isNumber} ${decision === 'approve' ? 'approved' : 'sent back'}.`
+            : decision === 'approve'
+                ? `Approved — +${data.competenciesAdded || 0} added${data.competenciesRemoved ? `, −${data.competenciesRemoved} removed` : ''}.`
+                : 'Sent back to the TP.', 'success');
         loadScopeSubmissions();
     } catch (e) {
         showToast(e.message, 'error');
