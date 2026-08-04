@@ -6184,7 +6184,9 @@ function switchScopeAdminTab(which) {
         el.style.borderBottomColor = key === which ? '#3b82f6' : 'transparent';
         el.style.color = key === which ? '#0f172a' : '#64748b';
     }
-    if (which === 'review') loadScopeSubmissions();
+    // Counts on the review pills come from the coverage roll-up, so it is fetched
+    // with the queue — a pill reading 0 until you click it is worse than the fetch.
+    if (which === 'review') { loadScopeSubmissions(); loadScopeCoverage(); }
     if (which === 'coverage') loadScopeCoverage();
 }
 
@@ -6678,13 +6680,86 @@ async function saveScopeCatalogue() {
 }
 
 let scopeCoverage = { sections: [], standards: [], counts: {} };
-let scopeCoverageView = 'rec';   // 'rec' | 'nrec' | 'appr'
+let scopeReviewView = 'queue';   // 'queue' | 'rec' | 'nrec'
 
-function setScopeCoverageView(view) {
-    scopeCoverageView = view;
-    renderScopeCoverage();
+async function setScopeReviewView(view) {
+    scopeReviewView = view;
+    // The two standard-facing views read the coverage roll-up, which the queue does
+    // not need — so it is only fetched when one of them is actually opened.
+    if (view !== 'queue' && !(scopeCoverage.standards || []).length) await loadScopeCoverage();
+    renderScopeReviewViews();
 }
 
+// Shared by the review tab's two standard lists: the IS number, and everything else
+// behind a click.
+function scopeStandardRow(s, opts = {}) {
+    const chips = s.holders.map(h =>
+        `<span class="scopecov-person is-approved">${escapeHtml(h.name)}<em>${h.viaScope ? 'via scope' : escapeHtml(h.level || 'existing')}</em></span>`);
+    for (const d of s.declaredBy) {
+        if (d.status === 'approved') continue;
+        chips.push(`<span class="scopecov-person is-${escapeHtml(d.status || 'pending')}">${escapeHtml(d.by)}<em>${escapeHtml(d.status || 'pending')}</em></span>`);
+    }
+    return `<details class="scopecov-row">
+        <summary>
+            <span class="scopecov-is">${escapeHtml(s.isNumber)}</span>
+            <span class="scopecov-who">${opts.meta || ''}</span>
+        </summary>
+        <div class="scopecov-detail">
+            ${s.section ? `<span class="scopecov-sec">${escapeHtml(s.section)}</span>` : ''}
+            <div class="scopecov-title">${escapeHtml(s.title || '')}</div>
+            <div class="scopecov-people">${chips.join('') || '<span class="scopecov-person is-none">Nobody yet</span>'}</div>
+            ${opts.reasons ? `<div class="scopecov-reasons">
+                ${s.recommendations.map(r => `<blockquote class="scopecov-reason${r.reason ? '' : ' is-empty'}">
+                    ${r.reason ? escapeHtml(r.reason) : 'No reason given.'}
+                    <cite>${escapeHtml(r.by || 'unknown')}</cite>
+                </blockquote>`).join('')}
+            </div>` : ''}
+        </div>
+    </details>`;
+}
+
+function renderScopeReviewViews() {
+    const navEl = document.getElementById('scopeadm-review-nav');
+    const queueEl = document.getElementById('scopeadm-review-queue');
+    const stdEl = document.getElementById('scopeadm-review-standards');
+    if (!navEl || !queueEl || !stdEl) return;
+
+    const all = scopeCoverage.standards || [];
+    const recommended = all.filter(s => s.recommendations.length);
+    const notRecommended = all.filter(s => s.declaredBy.length && !s.recommendations.length);
+    const pending = (scopeSubmissions.counts || {}).pending || 0;
+
+    const tabs = [
+        { key: 'queue', label: 'To review', tone: 'rec', count: pending },
+        { key: 'rec', label: 'Recommended', tone: 'rec', count: recommended.length },
+        { key: 'nrec', label: 'Not recommended', tone: 'nrec', count: notRecommended.length }
+    ];
+    navEl.innerHTML = tabs.map(t => `
+        <button type="button" class="scopecov-tab is-${t.tone} ${scopeReviewView === t.key ? 'is-on' : ''}"
+                onclick="setScopeReviewView('${t.key}')">
+            <span class="scopecov-dot"></span>${t.label}
+            <span class="scopecov-count">${t.count}</span>
+        </button>`).join('');
+
+    const onQueue = scopeReviewView === 'queue';
+    queueEl.style.display = onQueue ? 'block' : 'none';
+    stdEl.style.display = onQueue ? 'none' : 'block';
+    if (onQueue) return;
+
+    const rec = scopeReviewView === 'rec';
+    const items = rec ? recommended : notRecommended;
+    stdEl.innerHTML = `
+        <section class="scopecov-block is-${rec ? 'rec' : 'nrec'}">
+            <p class="scopecov-hint">${rec
+                ? 'A TA or LO has asked the lab to carry on testing these, and said why. Open one to read the reason.'
+                : 'Someone says they test these, but nobody argued for keeping them. Worth asking before you approve.'}</p>
+            <div class="scopecov-rows">
+                ${items.length
+                    ? items.map(s => scopeStandardRow(s, { reasons: rec, meta: rec ? `${s.recommendations.length} reason${s.recommendations.length === 1 ? '' : 's'}` : '' })).join('')
+                    : `<div class="scopecov-empty">${rec ? 'Nobody has recommended a standard yet.' : 'Nothing declared without a recommendation.'}</div>`}
+            </div>
+        </section>`;
+}
 // A route the running server doesn't have gets Express's default 404, which is an
 // HTML page — so response.json() dies on "Unexpected token '<'", telling the user
 // nothing. Name the real cause: the server booted before this endpoint existed.
@@ -6723,6 +6798,8 @@ async function loadScopeCoverage() {
             if (keep && inUse.includes(keep)) secEl.value = keep;
         }
         renderScopeCoverage();
+        // The review tab's pills count the same data, so they refresh with it.
+        renderScopeReviewViews();
     } catch (e) {
         if (listEl) listEl.innerHTML = `<div style="border:1px solid #fecaca; background:#fef2f2; border-radius:10px; padding:16px 18px;">
             <div style="font-weight:700; color:#b91c1c; font-size:0.9rem; margin-bottom:4px;">Couldn't load this tab</div>
@@ -6733,81 +6810,48 @@ async function loadScopeCoverage() {
 
 function renderScopeCoverage() {
     const listEl = document.getElementById('scopeadm-coverage-list');
-    const navEl = document.getElementById('scopeadm-coverage-nav');
     if (!listEl) return;
 
     const sec = document.getElementById('scopeadm-coverage-section')?.value || '';
-    const all = (scopeCoverage.standards || []).filter(s => !sec || s.section === sec);
+    const items = (scopeCoverage.standards || [])
+        .filter(s => (!sec || s.section === sec) && s.holders.length);
 
-    const views = {
-        rec: {
-            label: 'Recommended',
-            title: 'Recommended to continue testing',
-            hint: 'A TA or LO has asked the lab to carry on testing these, and said why.',
-            empty: 'Nobody has recommended a standard yet.',
-            items: all.filter(s => s.recommendations.length)
-        },
-        nrec: {
-            label: 'Not recommended',
-            title: 'Declared but not recommended',
-            hint: 'Someone says they test these, but nobody argued for keeping them. Worth asking before you approve.',
-            empty: 'Nothing declared without a recommendation.',
-            items: all.filter(s => s.declaredBy.length && !s.recommendations.length)
-        },
-        appr: {
-            label: 'Approved',
-            title: 'Approved to test',
-            hint: 'Competencies auto-assign reads. “via Scope” came through this queue; the rest were set in the Employee Hub or imported from sample history.',
-            empty: 'Nobody is approved to test anything in this section.',
-            items: all.filter(s => s.holders.length)
-        }
-    };
-
-    if (navEl) {
-        navEl.innerHTML = Object.entries(views).map(([key, v]) => `
-            <button type="button" class="scopecov-tab is-${key} ${scopeCoverageView === key ? 'is-on' : ''}"
-                    onclick="setScopeCoverageView('${key}')">
-                <span class="scopecov-dot"></span>${v.label}
-                <span class="scopecov-count">${v.items.length}</span>
-            </button>`).join('');
-    }
-
-    const view = views[scopeCoverageView] || views.rec;
-
-    // Approved competency and an unapproved declaration are two states of the same
-    // claim — showing both on the row is what makes the pipeline legible.
+    // Approved competency and a declaration still in the queue are two states of the
+    // same claim, so the row carries both — but only once opened.
     const people = (s) => {
         const chips = s.holders.map(h =>
             `<span class="scopecov-person is-approved">${escapeHtml(h.name)}<em>${h.viaScope ? 'via scope' : escapeHtml(h.level || 'existing')}</em></span>`);
         for (const d of s.declaredBy) {
-            if (d.status === 'approved') continue;   // already shown as a holder
+            if (d.status === 'approved') continue;
             chips.push(`<span class="scopecov-person is-${escapeHtml(d.status || 'pending')}">${escapeHtml(d.by)}<em>${escapeHtml(d.status || 'pending')}</em></span>`);
         }
-        return chips.length
-            ? `<div class="scopecov-people">${chips.join('')}</div>`
-            : '<div class="scopecov-people"><span class="scopecov-person is-none">Nobody yet</span></div>';
+        return `<div class="scopecov-people">${chips.join('')}</div>`;
     };
 
-    const row = (s) => `<div class="scopecov-row">
-        <div class="scopecov-head">
+    // Just the IS number until asked. A list of 40 standards, each carrying a title
+    // and a row of people, is a wall — the number is what an OIC scans by, and the
+    // rest is what they open when one matters.
+    const row = (s) => `<details class="scopecov-row">
+        <summary>
             <span class="scopecov-is">${escapeHtml(s.isNumber)}</span>
+            <span class="scopecov-who">${s.holders.length === 1 ? '1 tester' : `${s.holders.length} testers`}</span>
+        </summary>
+        <div class="scopecov-detail">
             ${s.section ? `<span class="scopecov-sec">${escapeHtml(s.section)}</span>` : ''}
+            <div class="scopecov-title">${escapeHtml(s.title || '')}</div>
+            ${people(s)}
         </div>
-        <div class="scopecov-title">${escapeHtml(s.title || '')}</div>
-        ${people(s)}
-        ${scopeCoverageView === 'rec' ? `<div class="scopecov-reasons">
-            ${s.recommendations.map(r => `<blockquote class="scopecov-reason${r.reason ? '' : ' is-empty'}">
-                ${r.reason ? escapeHtml(r.reason) : 'No reason given.'}
-                <cite>${escapeHtml(r.by || 'unknown')}</cite>
-            </blockquote>`).join('')}
-        </div>` : ''}
-    </div>`;
+    </details>`;
 
     listEl.innerHTML = `
-        <section class="scopecov-block is-${scopeCoverageView}">
-            <p class="scopecov-hint">${view.hint}</p>
+        <section class="scopecov-block is-appr">
+            <p class="scopecov-hint">
+                Standards someone is approved to test — this is what auto-assign reads.
+                “via scope” means an approved submission from this queue created it; the rest
+                were set in the Employee Hub or imported from sample history.
+            </p>
             <div class="scopecov-rows">
-                ${view.items.length ? view.items.map(row).join('') : `<div class="scopecov-empty">${view.empty}</div>`}
+                ${items.length ? items.map(row).join('') : `<div class="scopecov-empty">Nobody is approved to test anything${sec ? ` in ${escapeHtml(sec)}` : ''} yet.</div>`}
             </div>
         </section>`;
 }
@@ -6826,6 +6870,7 @@ async function loadScopeSubmissions() {
         if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Load failed'));
         scopeSubmissions = data;
         renderScopeSubmissions();
+        renderScopeReviewViews();
     } catch (e) {
         if (listEl) listEl.innerHTML = `<div style="padding:20px; color:var(--danger); font-size:0.88rem;">${escapeHtml(e.message)}</div>`;
     }

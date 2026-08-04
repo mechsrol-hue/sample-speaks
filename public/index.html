@@ -1585,7 +1585,7 @@ window.addEventListener('unhandledrejection', function(e) {
                 <div style="display:flex; gap:8px; margin-bottom:18px; border-bottom:2px solid #e2e8f0;">
                     <button id="scopeadm-tab-filing" onclick="switchScopeAdminTab('filing')" class="scopeadm-tab" style="background:none; border:none; border-bottom:3px solid #3b82f6; color:#0f172a; font-weight:700; padding:9px 14px; cursor:pointer; font-size:0.9rem;">1 · File standards</button>
                     <button id="scopeadm-tab-review" onclick="switchScopeAdminTab('review')" class="scopeadm-tab" style="background:none; border:none; border-bottom:3px solid transparent; color:#64748b; font-weight:700; padding:9px 14px; cursor:pointer; font-size:0.9rem;">2 · Review submissions <span id="scopeadm-pending-pill" style="display:none; margin-left:4px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:999px; padding:1px 7px; font-size:0.7rem;"></span></button>
-                    <button id="scopeadm-tab-coverage" onclick="switchScopeAdminTab('coverage')" class="scopeadm-tab" style="background:none; border:none; border-bottom:3px solid transparent; color:#64748b; font-weight:700; padding:9px 14px; cursor:pointer; font-size:0.9rem;">3 · Approved &amp; recommended</button>
+                    <button id="scopeadm-tab-coverage" onclick="switchScopeAdminTab('coverage')" class="scopeadm-tab" style="background:none; border:none; border-bottom:3px solid transparent; color:#64748b; font-weight:700; padding:9px 14px; cursor:pointer; font-size:0.9rem;">3 · Approved to test</button>
                 </div>
 
                 <!-- Filing -->
@@ -1618,18 +1618,22 @@ window.addEventListener('unhandledrejection', function(e) {
 
                 <!-- Review -->
                 <div id="scopeadm-panel-review" style="display:none;">
-                    <div id="scopeadm-review-kpis" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:18px;"></div>
-                    <div id="scopeadm-review-list"></div>
-                    <div id="scopeadm-outstanding" style="margin-top:20px;"></div>
+                    <!-- The queue plus two readings of it. Which standards were argued
+                         for, and which were claimed with nothing said in their favour,
+                         belong next to the Approve button — not on another tab. -->
+                    <div id="scopeadm-review-nav" class="scopecov-nav"></div>
+                    <div id="scopeadm-review-queue">
+                        <div id="scopeadm-review-kpis" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:18px;"></div>
+                        <div id="scopeadm-review-list"></div>
+                        <div id="scopeadm-outstanding" style="margin-top:20px;"></div>
+                    </div>
+                    <div id="scopeadm-review-standards" style="display:none;"></div>
                 </div>
 
-                <!-- Approved & recommended: the same data as the review queue, turned
-                     around to face the standard instead of the person. Answers "who can
-                     test this, and is anyone asking us to keep testing it?" -->
+                <!-- Approved & recommended: standards a TA/LO asked to keep testing (step 3)
+                     that an OIC then approved (step 2 decide). One simple list — the
+                     standards the lab is actually continuing with. -->
                 <div id="scopeadm-panel-coverage" style="display:none;">
-                    <!-- One list at a time. Three stacked lists meant scrolling past two
-                         answers to reach the third; these switch between them. -->
-                    <div id="scopeadm-coverage-nav" class="scopecov-nav"></div>
                     <div style="display:flex; gap:12px; align-items:center; margin-bottom:16px;">
                         <label style="font-size:0.82rem; font-weight:700; color:#475569;">Section</label>
                         <select id="scopeadm-coverage-section" onchange="renderScopeCoverage()"
