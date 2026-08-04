@@ -6194,9 +6194,7 @@ function switchScopeAdminTab(which) {
         el.style.borderBottomColor = key === which ? '#3b82f6' : 'transparent';
         el.style.color = key === which ? '#0f172a' : '#64748b';
     }
-    // Counts on the review pills come from the coverage roll-up, so it is fetched
-    // with the queue — a pill reading 0 until you click it is worse than the fetch.
-    if (which === 'review') { loadScopeSubmissions(); loadScopeCoverage(); }
+    if (which === 'review') loadScopeSubmissions();
     if (which === 'coverage') loadScopeCoverage();
 }
 
@@ -6266,14 +6264,20 @@ function printHtmlDocument(html, label) {
 }
 
 // Who is approved to test what, as it stands — the paper counterpart of tab 3.
-async function printScopeApproved() {
+// Whichever recommendation list is on screen, on paper.
+async function printScopeRecommendations() {
     try {
         if (!(scopeCoverage.standards || []).length) await loadScopeCoverage();
         const sec = document.getElementById('scopeadm-coverage-section')?.value || '';
-        const items = (scopeCoverage.standards || [])
-            .filter(s => (!sec || s.section === sec) && s.holders.length);
+        const all = (scopeCoverage.standards || []).filter(s => !sec || s.section === sec);
+        const rec = scopeCoverageView !== 'nrec';
+        const items = rec
+            ? all.filter(s => s.recommendations.length)
+            : all.filter(s => s.declaredBy.length && !s.recommendations.length);
+
         const now = new Date().toLocaleString('en-IN');
         const appTitle = 'SRL LIIS';
+        const heading = rec ? 'Recommended to continue testing' : 'Declared but not recommended';
 
         const bySection = {};
         for (const s of items) (bySection[s.section || 'Unfiled'] = bySection[s.section || 'Unfiled'] || []).push(s);
@@ -6284,14 +6288,18 @@ async function printScopeApproved() {
                 <table>
                     ${bySection[section].map(s => `<tr>
                         <td class="isn">${escapeHtml(s.isNumber)}</td>
-                        <td>${escapeHtml(s.title || '')}</td>
-                        <td class="who">${s.holders.map(h => `${escapeHtml(h.name)}${h.level ? ` (${escapeHtml(h.level)})` : ''}`).join('<br>')}</td>
+                        <td>
+                            ${escapeHtml(s.title || '')}
+                            ${rec ? s.recommendations.map(r => `<div class="why"><em>${escapeHtml(r.by || 'unknown')}:</em> ${r.reason ? escapeHtml(r.reason) : 'no reason given'}</div>`).join('') : ''}
+                        </td>
+                        <td class="who">${(rec ? s.recommendations.map(r => r.by) : s.declaredBy.map(d => `${d.by} (${d.status})`))
+                            .map(x => escapeHtml(x || '')).join('<br>')}</td>
                     </tr>`).join('')}
                 </table>
-            </section>`).join('') || '<p>Nobody is approved to test anything yet.</p>';
+            </section>`).join('') || `<p>${rec ? 'Nothing recommended.' : 'Nothing declared without a recommendation.'}</p>`;
 
         printHtmlDocument(`<!DOCTYPE html><html><head>
-            <title>${escapeHtml(appTitle)} — Approved to test</title>
+            <title>${escapeHtml(appTitle)} — ${escapeHtml(heading)}</title>
             <style>
                 body { font-family: Arial, Helvetica, sans-serif; color: #111; font-size: 12px; margin: 16px; }
                 h1 { font-size: 17px; margin: 0 0 2px; }
@@ -6303,17 +6311,19 @@ async function printScopeApproved() {
                 table { width: 100%; border-collapse: collapse; }
                 td { padding: 4px 6px; border-bottom: 1px solid #ddd; vertical-align: top; }
                 td.isn { font-weight: 700; white-space: nowrap; width: 150px; }
-                td.who { width: 200px; }
+                td.who { width: 170px; }
+                .why { margin-top: 3px; color: #333; }
+                .why em { font-style: normal; font-weight: 700; }
                 @media print { body { margin: 12px; } section { page-break-inside: avoid; } }
             </style>
         </head><body>
             <h1>${escapeHtml(appTitle)}</h1>
-            <div class="sub">IS Scope — Approved to test</div>
+            <div class="sub">IS Scope — ${escapeHtml(heading)}</div>
             <div class="meta">Printed: ${escapeHtml(now)} &nbsp;|&nbsp; ${items.length} standard(s)${sec ? ` in ${escapeHtml(sec)}` : ' across all sections'}</div>
             ${body}
-        </body></html>`, 'the approved list');
+        </body></html>`, 'this list');
     } catch (e) {
-        showToast('Could not prepare the approved list.', 'error');
+        showToast('Could not prepare the print list.', 'error');
     }
 }
 
@@ -6873,130 +6883,13 @@ async function saveScopeCatalogue() {
 }
 
 let scopeCoverage = { sections: [], standards: [], counts: {} };
-let scopeReviewView = 'queue';   // 'queue' | 'rec' | 'nrec'
+let scopeCoverageView = 'rec';   // 'rec' | 'nrec'
 
-async function setScopeReviewView(view) {
-    scopeReviewView = view;
-    // The two standard-facing views read the coverage roll-up, which the queue does
-    // not need — so it is only fetched when one of them is actually opened.
-    if (view !== 'queue' && !(scopeCoverage.standards || []).length) await loadScopeCoverage();
-    renderScopeReviewViews();
+function setScopeCoverageView(view) {
+    scopeCoverageView = view;
+    renderScopeCoverage();
 }
 
-// Print-friendly list of review submissions under To review / Recommended / Not recommended.
-async function printScopeReviewSubmissions() {
-    try {
-        // Review tab usually already loaded submissions; coverage may be missing if
-        // the user never opened Recommended / Not recommended.
-        if (!Object.keys(scopeSubmissions.counts || {}).length) await loadScopeSubmissions();
-        if (!(scopeCoverage.standards || []).length) await loadScopeCoverage();
-
-        const all = scopeCoverage.standards || [];
-        const recommended = all
-            .filter(s => s.recommendations && s.recommendations.length)
-            .sort((a, b) => a.isNumber.localeCompare(b.isNumber, undefined, { numeric: true }));
-        const notRecommended = all
-            .filter(s => (s.declaredBy || []).length && !(s.recommendations || []).length)
-            .sort((a, b) => a.isNumber.localeCompare(b.isNumber, undefined, { numeric: true }));
-        const subs = (scopeSubmissions.submissions || []).slice();
-        const pending = (scopeSubmissions.counts || {}).pending || subs.filter(s => s.status === 'pending').length;
-
-        const now = new Date().toLocaleString('en-IN');
-        const appTitle = document.title || 'SRL LIIS';
-        const statusLabel = (s) => s === 'pending' ? 'Pending' : s === 'approved' ? 'Approved' : s === 'rejected' ? 'Sent back' : (s || '');
-
-        const queueRows = subs.length
-            ? subs.map(s => {
-                const who = s.username || ('User #' + s.userId);
-                const sections = (s.sections || []).join(', ') || '—';
-                const isList = (s.isNumbers || []).join(', ') || '—';
-                const recs = (s.recommendations || []).map(r =>
-                    `${r.isNumber}${r.reason ? ': ' + r.reason : ''}`).join(' · ') || '—';
-                const when = s.submittedAt ? new Date(s.submittedAt).toLocaleString('en-IN') : '';
-                return `<tr>
-                    <td class="who">${escapeHtml(who)}</td>
-                    <td class="st">${escapeHtml(statusLabel(s.status))}</td>
-                    <td>${escapeHtml(sections)}</td>
-                    <td class="isn">${escapeHtml(isList)}</td>
-                    <td>${escapeHtml(recs)}</td>
-                    <td class="meta-cell">${escapeHtml(when)}</td>
-                </tr>`;
-            }).join('')
-            : '<tr><td colspan="6" class="empty">No submissions yet.</td></tr>';
-
-        const stdRows = (items, withReasons) => items.length
-            ? items.map(s => {
-                const declared = (s.declaredBy || []).map(d =>
-                    `${d.by || 'unknown'}${d.status ? ' (' + d.status + ')' : ''}`).join(', ') || '—';
-                const reasons = withReasons
-                    ? ((s.recommendations || []).map(r =>
-                        `${r.by || 'unknown'}: ${r.reason || 'No reason given.'}`).join(' · ') || '—')
-                    : '—';
-                return `<tr>
-                    <td class="isn">${escapeHtml(s.isNumber)}</td>
-                    <td>${escapeHtml(s.title || '')}</td>
-                    <td>${escapeHtml(s.section || '—')}</td>
-                    <td>${escapeHtml(declared)}</td>
-                    ${withReasons ? `<td>${escapeHtml(reasons)}</td>` : ''}
-                </tr>`;
-            }).join('')
-            : `<tr><td colspan="${withReasons ? 5 : 4}" class="empty">None</td></tr>`;
-
-        const bodyHtml = `
-            <section>
-                <h2>To review <span class="count">${pending} pending · ${subs.length} total</span></h2>
-                <table>
-                    <thead><tr><th>Submitter</th><th>Status</th><th>Sections</th><th>IS numbers</th><th>Recommendations</th><th>Submitted</th></tr></thead>
-                    <tbody>${queueRows}</tbody>
-                </table>
-            </section>
-            <section>
-                <h2>Recommended <span class="count">${recommended.length}</span></h2>
-                <table>
-                    <thead><tr><th>IS Number</th><th>Title</th><th>Section</th><th>Declared by</th><th>Reasons</th></tr></thead>
-                    <tbody>${stdRows(recommended, true)}</tbody>
-                </table>
-            </section>
-            <section>
-                <h2>Not recommended <span class="count">${notRecommended.length}</span></h2>
-                <table>
-                    <thead><tr><th>IS Number</th><th>Title</th><th>Section</th><th>Declared by</th></tr></thead>
-                    <tbody>${stdRows(notRecommended, false)}</tbody>
-                </table>
-            </section>`;
-
-        printHtmlDocument(`<!DOCTYPE html><html><head>
-            <title>${escapeHtml(appTitle)} — IS Scope Review Submissions</title>
-            <style>
-                body { font-family: Arial, sans-serif; font-size: 12px; margin: 24px; color: #111; }
-                h1 { text-align: center; margin: 0 0 4px; font-size: 16px; }
-                .sub { text-align: center; font-size: 13px; font-weight: 700; margin: 0 0 4px; }
-                .meta { text-align: center; color: #444; margin-bottom: 18px; font-size: 11px; }
-                section { margin-bottom: 20px; page-break-inside: avoid; }
-                h2 { font-size: 13px; margin: 0 0 8px; padding-bottom: 4px; border-bottom: 1.5px solid #111; }
-                h2 .count { font-weight: 600; color: #444; font-size: 11px; }
-                table { width: 100%; border-collapse: collapse; }
-                th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; color: #444; padding: 4px 6px; border-bottom: 1px solid #999; }
-                td { padding: 4px 6px; border-bottom: 1px solid #ddd; vertical-align: top; }
-                td.isn, td.who { font-weight: 700; }
-                td.st { white-space: nowrap; }
-                td.meta-cell { white-space: nowrap; color: #444; font-size: 11px; }
-                td.empty { color: #666; font-style: italic; }
-                @media print {
-                    body { margin: 12px; }
-                    section { page-break-inside: avoid; }
-                }
-            </style>
-        </head><body>
-            <h1>${escapeHtml(appTitle)}</h1>
-            <div class="sub">IS Scope — Review submissions</div>
-            <div class="meta">Printed: ${escapeHtml(now)} &nbsp;|&nbsp; ${pending} to review · ${recommended.length} recommended · ${notRecommended.length} not recommended</div>
-            ${bodyHtml}
-        </body></html>`, 'the review list');
-    } catch (e) {
-        showToast('Could not prepare the review print list.', 'error');
-    }
-}
 
 // Shared by the review tab's two standard lists: the IS number, and everything else
 // behind a click.
@@ -7026,48 +6919,6 @@ function scopeStandardRow(s, opts = {}) {
     </details>`;
 }
 
-function renderScopeReviewViews() {
-    const navEl = document.getElementById('scopeadm-review-nav');
-    const queueEl = document.getElementById('scopeadm-review-queue');
-    const stdEl = document.getElementById('scopeadm-review-standards');
-    if (!navEl || !queueEl || !stdEl) return;
-
-    const all = scopeCoverage.standards || [];
-    const recommended = all.filter(s => s.recommendations.length);
-    const notRecommended = all.filter(s => s.declaredBy.length && !s.recommendations.length);
-    const pending = (scopeSubmissions.counts || {}).pending || 0;
-
-    const tabs = [
-        { key: 'queue', label: 'To review', tone: 'rec', count: pending },
-        { key: 'rec', label: 'Recommended', tone: 'rec', count: recommended.length },
-        { key: 'nrec', label: 'Not recommended', tone: 'nrec', count: notRecommended.length }
-    ];
-    navEl.innerHTML = tabs.map(t => `
-        <button type="button" class="scopecov-tab is-${t.tone} ${scopeReviewView === t.key ? 'is-on' : ''}"
-                onclick="setScopeReviewView('${t.key}')">
-            <span class="scopecov-dot"></span>${t.label}
-            <span class="scopecov-count">${t.count}</span>
-        </button>`).join('');
-
-    const onQueue = scopeReviewView === 'queue';
-    queueEl.style.display = onQueue ? 'block' : 'none';
-    stdEl.style.display = onQueue ? 'none' : 'block';
-    if (onQueue) return;
-
-    const rec = scopeReviewView === 'rec';
-    const items = rec ? recommended : notRecommended;
-    stdEl.innerHTML = `
-        <section class="scopecov-block is-${rec ? 'rec' : 'nrec'}">
-            <p class="scopecov-hint">${rec
-                ? 'A TA or LO has asked the lab to carry on testing these, and said why. Open one to read the reason.'
-                : 'Someone says they test these, but nobody argued for keeping them. Worth asking before you approve.'}</p>
-            <div class="scopecov-rows">
-                ${items.length
-                    ? items.map(s => scopeStandardRow(s, { reasons: rec, meta: rec ? `${s.recommendations.length} reason${s.recommendations.length === 1 ? '' : 's'}` : '' })).join('')
-                    : `<div class="scopecov-empty">${rec ? 'Nobody has recommended a standard yet.' : 'Nothing declared without a recommendation.'}</div>`}
-            </div>
-        </section>`;
-}
 // A route the running server doesn't have gets Express's default 404, which is an
 // HTML page — so response.json() dies on "Unexpected token '<'", telling the user
 // nothing. Name the real cause: the server booted before this endpoint existed.
@@ -7107,7 +6958,6 @@ async function loadScopeCoverage() {
         }
         renderScopeCoverage();
         // The review tab's pills count the same data, so they refresh with it.
-        renderScopeReviewViews();
     } catch (e) {
         if (listEl) listEl.innerHTML = `<div style="border:1px solid #fecaca; background:#fef2f2; border-radius:10px; padding:16px 18px;">
             <div style="font-weight:700; color:#b91c1c; font-size:0.9rem; margin-bottom:4px;">Couldn't load this tab</div>
@@ -7118,43 +6968,47 @@ async function loadScopeCoverage() {
 
 function renderScopeCoverage() {
     const listEl = document.getElementById('scopeadm-coverage-list');
+    const navEl = document.getElementById('scopeadm-coverage-nav');
     if (!listEl) return;
 
     const sec = document.getElementById('scopeadm-coverage-section')?.value || '';
-    const items = (scopeCoverage.standards || [])
-        .filter(s => (!sec || s.section === sec) && s.holders.length);
-
-    // Approved competency and a declaration still in the queue are two states of the
-    // same claim, so the row carries both — but only once opened.
-    const people = (s) => {
-        const chips = s.holders.map(h =>
-            `<span class="scopecov-person is-approved">${escapeHtml(h.name)}<em>${h.viaScope ? 'via scope' : escapeHtml(h.level || 'existing')}</em></span>`);
-        for (const d of s.declaredBy) {
-            if (d.status === 'approved') continue;
-            chips.push(`<span class="scopecov-person is-${escapeHtml(d.status || 'pending')}">${escapeHtml(d.by)}<em>${escapeHtml(d.status || 'pending')}</em></span>`);
+    const all = (scopeCoverage.standards || []).filter(s => !sec || s.section === sec);
+    const views = {
+        rec: {
+            label: 'Recommended',
+            hint: 'A TA or LO has asked the lab to carry on testing these, and said why. Open one to read the reason.',
+            empty: 'Nobody has recommended a standard yet.',
+            items: all.filter(s => s.recommendations.length)
+        },
+        nrec: {
+            label: 'Not recommended',
+            hint: 'Someone says they test these, but nobody argued for keeping them. Worth asking before you approve.',
+            empty: 'Nothing declared without a recommendation.',
+            items: all.filter(s => s.declaredBy.length && !s.recommendations.length)
         }
-        return `<div class="scopecov-people">${chips.join('')}</div>`;
     };
 
-    // Just the IS number until asked. A list of 40 standards, each carrying a title
-    // and a row of people, is a wall — the number is what an OIC scans by, and the
-    // rest is what they open when one matters.
-    const row = (s) => `<details class="scopecov-row">
-        <summary>
-            <span class="scopecov-is">${escapeHtml(s.isNumber)}</span>
-            <span class="scopecov-who">${s.holders.length === 1 ? '1 tester' : `${s.holders.length} testers`}</span>
-        </summary>
-        <div class="scopecov-detail">
-            ${s.section ? `<span class="scopecov-sec">${escapeHtml(s.section)}</span>` : ''}
-            <div class="scopecov-title">${escapeHtml(s.title || '')}</div>
-            ${people(s)}
-        </div>
-    </details>`;
+    if (navEl) {
+        navEl.innerHTML = Object.entries(views).map(([key, v]) => `
+            <button type="button" class="scopecov-tab is-${key} ${scopeCoverageView === key ? 'is-on' : ''}"
+                    onclick="setScopeCoverageView('${key}')">
+                <span class="scopecov-dot"></span>${v.label}
+                <span class="scopecov-count">${v.items.length}</span>
+            </button>`).join('');
+    }
 
+    const rec = scopeCoverageView !== 'nrec';
+    const view = rec ? views.rec : views.nrec;
     listEl.innerHTML = `
-        <section class="scopecov-block is-appr">
+        <section class="scopecov-block is-${rec ? 'rec' : 'nrec'}">
+            <p class="scopecov-hint">${view.hint}</p>
             <div class="scopecov-rows">
-                ${items.length ? items.map(row).join('') : `<div class="scopecov-empty">Nobody is approved to test anything${sec ? ` in ${escapeHtml(sec)}` : ''} yet.</div>`}
+                ${view.items.length
+                    ? view.items.map(s => scopeStandardRow(s, {
+                        reasons: rec,
+                        meta: rec ? `${s.recommendations.length} reason${s.recommendations.length === 1 ? '' : 's'}` : `${s.declaredBy.length} declared`
+                      })).join('')
+                    : `<div class="scopecov-empty">${view.empty}</div>`}
             </div>
         </section>`;
 }
@@ -7173,7 +7027,6 @@ async function loadScopeSubmissions() {
         if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Load failed'));
         scopeSubmissions = data;
         renderScopeSubmissions();
-        renderScopeReviewViews();
     } catch (e) {
         if (listEl) listEl.innerHTML = `<div style="padding:20px; color:var(--danger); font-size:0.88rem;">${escapeHtml(e.message)}</div>`;
     }
