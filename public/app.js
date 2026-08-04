@@ -6057,7 +6057,15 @@ async function submitMyScope() {
         scopeMine = data.submission;
         renderScopeStatus();
         updateScopeNavBadge();
-        showToast(`Sent for approval (${sectionLabel}) — ${scopeRecommended.size} recommended. After approval you can submit another section.`, 'success');
+        // The server is what decides what was stored. If it silently dropped the
+        // recommendation, saying "sent for approval" would be a lie — the OIC gets
+        // a declaration with no reasoning attached and no idea why.
+        const savedRecs = (data.submission && data.submission.recommendations) || [];
+        if (scopeRecommended.size && !savedRecs.length) {
+            showToast('Saved, but your recommendation was NOT recorded — the server is running an older build. Tell your admin to restart it, then submit again.', 'error');
+        } else {
+            showToast(`Sent for approval (${sectionLabel}) — ${savedRecs.length} recommended. After approval you can submit another section.`, 'success');
+        }
     } catch (e) {
         showToast(e.message, 'error');
     } finally {
@@ -6647,8 +6655,15 @@ async function loadScopeSubmissions() {
 function scopeRecommendationBlock(sub) {
     const recs = (sub && sub.recommendations) || [];
     if (!recs.length) {
-        return `<div style="margin-top:10px; font-size:0.8rem; color:#92400e; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:8px 10px;">
-            No recommendation submitted — this declaration predates the step-3 recommendation.
+        // A submission saved by a server that knows about step 3 always carries a
+        // non-empty array — it is required. So a missing one means either an old
+        // submission, or a server that dropped the field on the way in.
+        const stale = !Object.prototype.hasOwnProperty.call(sub || {}, 'recommendations');
+        return `<div style="margin-top:10px; font-size:0.8rem; color:#92400e; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:9px 11px;">
+            <strong>No recommendation recorded.</strong>
+            ${stale
+                ? ' Either this was submitted before step 3 existed, or the server was running an older build when it saved — in which case restart it (node server.js) and ask them to submit again.'
+                : ' The submitter did not mark any standard to continue testing.'}
         </div>`;
     }
     const by = sub.recommendedBy ? ` — by ${escapeHtml(sub.recommendedBy)}` : '';
