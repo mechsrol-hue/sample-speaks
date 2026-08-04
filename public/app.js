@@ -464,15 +464,10 @@ function logout() {
 }
 
 // --- PROFILE ---
-function getInitials(name) {
-    if (!name) return 'U';
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    if (parts.length === 2) {
-        return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
-    }
-    // Three or more words → first letter of the first three words (e.g. Sumit Mohan Naik → SMN)
-    return (parts[0].charAt(0) + parts[1].charAt(0) + parts[2].charAt(0)).toUpperCase();
+// Avatar / profile label = login id exactly (e.g. SSD → SSD, not S or SD)
+function getInitials(loginId) {
+    if (!loginId) return 'U';
+    return String(loginId).trim();
 }
 
 function updateHeaderProfile() {
@@ -2712,14 +2707,8 @@ function toggleAdminViews() {
 
 
 
-    const auditBtn = document.getElementById('tab-btn-audit');
-    if (auditBtn) auditBtn.style.display = isAdmin ? 'inline-block' : 'none';
-    
     const employeesBtn = document.getElementById('tab-btn-employees');
     if (employeesBtn) employeesBtn.style.display = isAdmin ? 'inline-block' : 'none';
-
-    const leavesBtn = document.getElementById('tab-btn-leaves');
-    if (leavesBtn) leavesBtn.style.display = isAdmin ? 'inline-block' : 'none';
 
     // Toggle confidential vault tab
     const confidentialBtn = document.getElementById('profile-btn-confidential');
@@ -6098,6 +6087,10 @@ let scopeSubmissions = { submissions: [], outstanding: [], counts: {} };
 // Filing edits live in memory until "Save filing" — without this flag a whole
 // afternoon of re-filing disappears silently on a tab switch.
 let scopeDirty = false;
+// Sections added in this sitting but not yet written to the database. Adding one is
+// a local edit like every other filing change, and looked identical to a saved
+// section — so it read as "added" right up until the page was reloaded.
+let scopeUnsavedSections = new Set();
 
 function switchScopeAdminTab(which) {
     const panels = { filing: 'scopeadm-panel-filing', review: 'scopeadm-panel-review', coverage: 'scopeadm-panel-coverage' };
@@ -6121,6 +6114,7 @@ async function loadScopeAdmin() {
         const res = await fetch('/api/is-scope/catalogue');
         const cat = await res.json();
         scopeAdminSections = cat.sections || [];
+        scopeUnsavedSections.clear();
         scopeAdminMap = {};
         for (const s of (cat.standards || [])) if (s.section) scopeAdminMap[s.isNumber] = s.section;
         scopeCatalogue = cat;
@@ -6135,11 +6129,14 @@ async function loadScopeAdmin() {
 function renderScopeAdminSections() {
     const el = document.getElementById('scopeadm-sections');
     if (!el) return;
-    el.innerHTML = scopeAdminSections.map(sec => `
-        <span style="display:inline-flex; align-items:center; gap:6px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:999px; padding:5px 8px 5px 13px; font-size:0.83rem; font-weight:600;">
-            ${escapeHtml(sec)}
+    el.innerHTML = scopeAdminSections.map(sec => {
+        const fresh = scopeUnsavedSections.has(sec);
+        return `
+        <span style="display:inline-flex; align-items:center; gap:6px; background:${fresh ? '#fffbeb' : '#f1f5f9'}; border:1px solid ${fresh ? '#fcd34d' : '#e2e8f0'}; border-radius:999px; padding:5px 8px 5px 13px; font-size:0.83rem; font-weight:600; color:${fresh ? '#92400e' : 'inherit'};">
+            ${escapeHtml(sec)}${fresh ? '<em style="font-style:normal; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.3px;">unsaved</em>' : ''}
             <button onclick="removeScopeSection('${escapeHtml(sec)}')" title="Remove this section" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:0.95rem; line-height:1; padding:0 2px;">×</button>
-        </span>`).join('');
+        </span>`;
+    }).join('');
 }
 
 function addScopeSection() {
@@ -6150,10 +6147,12 @@ function addScopeSection() {
         return showToast('That section already exists.', 'error');
     }
     scopeAdminSections.push(name);
+    scopeUnsavedSections.add(name);
     input.value = '';
     scopeDirty = true;
     renderScopeAdminSections();
     renderScopeFilingTable();
+    showToast(`“${name}” added here — press “Save filing” to keep it.`, 'info');
 }
 
 function removeScopeSection(sec) {
@@ -6498,6 +6497,8 @@ function confirmScopeAdd() {
 }
 
 async function saveScopeCatalogue() {
+    const errEl = document.getElementById('scopeadm-save-error');
+    if (errEl) { errEl.style.display = 'none'; errEl.innerHTML = ''; }
     try {
         const res = await fetch('/api/is-scope/catalogue', {
             method: 'POST',
@@ -6507,10 +6508,19 @@ async function saveScopeCatalogue() {
         const data = await res.json();
         if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Save failed'));
         scopeDirty = false;
+        scopeUnsavedSections.clear();
         showToast(`Saved — ${data.filed} standard(s) filed across ${data.sections.length} section(s).`, 'success');
         loadScopeAdmin();
     } catch (e) {
         showToast(e.message, 'error');
+        if (errEl) {
+            errEl.style.display = 'block';
+            errEl.innerHTML = `<div style="border:1px solid #fecaca; background:#fef2f2; border-radius:9px; padding:12px 14px;">
+                <div style="font-weight:700; color:#b91c1c; font-size:0.88rem;">Nothing was saved</div>
+                <div style="font-size:0.83rem; color:#7f1d1d; margin-top:3px;">${escapeHtml(e.message)}</div>
+                <div style="font-size:0.79rem; color:#7f1d1d; margin-top:6px;">Your edits are still here — fix the problem and press Save filing again. Leaving this page discards them.</div>
+            </div>`;
+        }
     }
 }
 
@@ -6564,71 +6574,52 @@ async function loadScopeCoverage() {
 
 function renderScopeCoverage() {
     const listEl = document.getElementById('scopeadm-coverage-list');
-    const kpiEl = document.getElementById('scopeadm-coverage-kpis');
-    const countEl = document.getElementById('scopeadm-coverage-count');
     if (!listEl) return;
 
-    const c = scopeCoverage.counts || {};
-    if (kpiEl) {
-        const card = (n, label, color, hint) => `<div class="glass-panel" style="padding:13px; text-align:center; border-top:4px solid ${color};">
-            <div style="font-size:1.5rem; font-weight:800; color:#0f172a;">${n || 0}</div>
-            <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:#334155;">${label}</div>
-            <div style="font-size:0.68rem; color:var(--text-muted); margin-top:2px;">${hint}</div></div>`;
-        kpiEl.innerHTML = card(c.covered, 'Have a tester', '#10b981', 'someone is approved')
-            + card(c.singleTester, 'Only one tester', '#f59e0b', 'single point of failure')
-            + card(c.uncovered, 'No tester', '#ef4444', 'filed but nobody approved')
-            + card(c.recommended, 'Recommended', '#3b82f6', 'a TA/LO asked to continue');
-    }
-
-    const q = (document.getElementById('scopeadm-coverage-search')?.value || '').trim().toLowerCase();
     const sec = document.getElementById('scopeadm-coverage-section')?.value || '';
-    const f = document.getElementById('scopeadm-coverage-filter')?.value || 'filed';
+    const all = (scopeCoverage.standards || []).filter(s => !sec || s.section === sec);
 
-    const rows = (scopeCoverage.standards || []).filter(s => {
-        if (q && !`${s.isNumber} ${s.title}`.toLowerCase().includes(q)) return false;
-        if (sec && s.section !== sec) return false;
-        if (f === 'filed') return !!s.section;
-        if (f === 'recommended') return s.recommendations.length > 0;
-        if (f === 'approved') return s.holders.length > 0;
-        if (f === 'uncovered') return !!s.section && s.holders.length === 0;
-        if (f === 'single') return s.holders.length === 1;
-        return true;
-    });
+    // Three answers, in the order an OIC needs them: what am I being asked to keep
+    // testing, what was declared without that backing, and what is already settled.
+    const recommended = all.filter(s => s.recommendations.length);
+    const notRecommended = all.filter(s => s.declaredBy.length && !s.recommendations.length);
+    const approved = all.filter(s => s.holders.length);
 
-    if (countEl) countEl.textContent = `${rows.length} of ${(scopeCoverage.standards || []).length} standards`;
+    const row = (s, right) => `<div class="scopeadm-simple-row">
+        <div>
+            <strong>${escapeHtml(s.isNumber)}</strong>
+            ${s.section ? `<span class="scopeadm-cov-sec">${escapeHtml(s.section)}</span>` : ''}
+            <div class="scopeadm-simple-title">${escapeHtml(s.title || '')}</div>
+        </div>
+        <div class="scopeadm-simple-right">${right}</div>
+    </div>`;
 
-    if (!rows.length) {
-        listEl.innerHTML = '<div style="padding:26px; text-align:center; color:var(--text-muted); font-size:0.88rem;">Nothing matches that filter.</div>';
-        return;
-    }
+    const block = (title, hint, tone, items, empty) => `
+        <section class="scopeadm-simple is-${tone}">
+            <header>
+                <h4>${title}</h4>
+                <span class="scopeadm-simple-count">${items.length}</span>
+            </header>
+            <p class="scopeadm-simple-hint">${hint}</p>
+            ${items.length ? items.join('') : `<div class="scopeadm-simple-empty">${empty}</div>`}
+        </section>`;
 
-    listEl.innerHTML = rows.map(s => {
-        const holders = s.holders.length
-            ? s.holders.map(h => `<span class="scopeadm-holder">${escapeHtml(h.name)}${h.level ? `<em>${escapeHtml(h.level)}</em>` : ''}</span>`).join('')
-            : '<span class="scopeadm-nobody">No approved tester yet</span>';
-        const recs = s.recommendations.length
-            ? `<div class="scopeadm-cov-recs">
-                    ${s.recommendations.map(r => `<div class="scopeadm-cov-rec">
-                        <div class="scopeadm-cov-rec-head">
-                            <strong>${escapeHtml(r.by || 'unknown')}</strong>
-                            <span class="scopeadm-rec-status is-${escapeHtml(r.status || 'pending')}">${escapeHtml(r.status || 'pending')}</span>
-                        </div>
-                        <div class="scopeadm-cov-rec-why">${r.reason ? escapeHtml(r.reason) : 'No reason given'}</div>
-                    </div>`).join('')}
-               </div>`
-            : '';
-        return `<div class="scopeadm-cov-row${s.holders.length === 1 ? ' is-thin' : ''}${!s.holders.length ? ' is-bare' : ''}">
-            <div class="scopeadm-cov-main">
-                <div>
-                    <strong style="font-size:0.9rem;">${escapeHtml(s.isNumber)}</strong>
-                    ${s.section ? `<span class="scopeadm-cov-sec">${escapeHtml(s.section)}</span>` : '<span class="scopeadm-cov-sec is-unfiled">unfiled</span>'}
-                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${escapeHtml(s.title || '')}</div>
-                </div>
-                <div class="scopeadm-holders">${holders}</div>
-            </div>
-            ${recs}
-        </div>`;
-    }).join('');
+    listEl.innerHTML =
+        block('Recommended to continue testing', 'A TA or LO has asked the lab to carry on testing these, with their reason.', 'good',
+            recommended.map(s => row(s, s.recommendations.map(r =>
+                `<div class="scopeadm-simple-note"><strong>${escapeHtml(r.by || 'unknown')}</strong>${r.reason ? ` — ${escapeHtml(r.reason)}` : ' — no reason given'}</div>`
+            ).join(''))),
+            'Nothing recommended yet.')
+      + block('Declared but not recommended', 'Someone says they test these, but nobody has recommended continuing them. Worth asking before you approve.', 'warn',
+            notRecommended.map(s => row(s, s.declaredBy.map(d =>
+                `<div class="scopeadm-simple-note">${escapeHtml(d.by)} <span class="scopeadm-rec-status is-${escapeHtml(d.status || 'pending')}">${escapeHtml(d.status || 'pending')}</span></div>`
+            ).join(''))),
+            'Nothing outstanding.')
+      + block('Approved', 'Already written into competencies — auto-assign uses these.', 'done',
+            approved.map(s => row(s, s.holders.map(h =>
+                `<span class="scopeadm-holder">${escapeHtml(h.name)}${h.level ? `<em>${escapeHtml(h.level)}</em>` : ''}</span>`
+            ).join(''))),
+            'Nothing approved yet.');
 }
 
 async function loadScopeSubmissions() {

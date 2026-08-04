@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SRL LIIS</title>
-    <link rel="stylesheet" href="style.css?v=1.4.2">
+    <link rel="stylesheet" href="style.css?v=1.4.3">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <script>
@@ -891,8 +891,8 @@ window.addEventListener('unhandledrejection', function(e) {
             </div>
             
             <div class="user-profile" onclick="openProfileModal()" style="cursor:pointer; display: flex; align-items: center; gap: 10px; margin-right: 10px;">
-                <div class="avatar" id="header-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-user" style="color: white; font-size: 1.1rem;"></i>
+                <div class="avatar" id="header-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                    <span id="header-avatar-initials" class="header-avatar-initials">U</span>
                 </div>
                 <div class="user-details" style="display: flex; flex-direction: column; text-align: left;">
                     <span class="user-email" id="header-user-email" style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">user@bis.gov.in <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 2px;"></i></span>
@@ -929,46 +929,12 @@ window.addEventListener('unhandledrejection', function(e) {
         </a>
         <div class="sub-menu" style="display: none;">
             <a href="#" class="sub-nav-item tab-btn" id="nav-new-sample-receive" onclick="switchTab('tab-new-sample-receive')">New Sample Receive SRL</a>
-            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Suppl. Sample Receive<span class="nav-soon-badge">Soon</span></a>
-            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Amend. Sample Receive<span class="nav-soon-badge">Soon</span></a>
-            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Pending Amend. Requests<span class="nav-soon-badge">Soon</span></a>
-
             <a href="#" class="sub-nav-item tab-btn" id="tab-btn-lis" onclick="switchTab('tab-liis')" style="display:none;">Verify Test Results</a>
-            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Reports Pending<span class="nav-soon-badge">Soon</span></a>
-            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Amend. Reports Pending<span class="nav-soon-badge">Soon</span></a>
             <a href="#" class="sub-nav-item tab-btn" onclick="switchTab('tab-new-sample-receive'); showTestingCompleted()">Testing Completed</a>
         </div>
 
-        <a href="#" class="nav-item toggle-menu">
-            <i class="fas fa-comments main-icon"></i> Sample Clarifications
-            <i class="fas fa-chevron-right chevron"></i>
-        </a>
-        <div class="sub-menu" style="display: none;">
-            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Pending Clarifications<span class="nav-soon-badge">Soon</span></a>
-            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Resolved Clarifications<span class="nav-soon-badge">Soon</span></a>
-        </div>
-
-        <a href="#" class="nav-item toggle-menu">
-            <i class="fas fa-warehouse main-icon"></i> Store
-            <i class="fas fa-chevron-right chevron"></i>
-        </a>
-        <div class="sub-menu" style="display: none;">
-            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Inventory<span class="nav-soon-badge">Soon</span></a>
-            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Requisitions<span class="nav-soon-badge">Soon</span></a>
-        </div>
-
-        <a href="#" class="nav-item toggle-menu">
-            <i class="fas fa-check main-icon"></i> Equipment
-            <i class="fas fa-chevron-right chevron"></i>
-        </a>
-        <div class="sub-menu" style="display: none;">
-            <a href="#" class="sub-nav-item tab-btn" id="tab-btn-equipment" onclick="switchTab('tab-equipment')">Equipment List</a>
-            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Maintenance Log<span class="nav-soon-badge">Soon</span></a>
-        </div>
-
-        <!-- Formula Mapping (New - matches screenshot) -->
-        <a href="#" class="nav-item tab-btn" onclick="showComingSoon()">
-            <i class="fas fa-table main-icon"></i> Formula Mapping SRL <span class="nav-soon-badge">Soon</span>
+        <a href="#" class="nav-item tab-btn" id="tab-btn-equipment" onclick="switchTab('tab-equipment')">
+            <i class="fas fa-check main-icon"></i> Equipment List
         </a>
 
         <!-- Admin Control (Hidden for standard OIC layout visualization) -->
@@ -979,28 +945,11 @@ window.addEventListener('unhandledrejection', function(e) {
         <div class="sub-menu" style="display: none;">
             <a href="#" class="sub-nav-item tab-btn" id="tab-btn-employees" onclick="switchTab('tab-employees')">Employee Hub</a>
             <a href="#" class="sub-nav-item tab-btn" id="tab-btn-is-scope-admin" onclick="switchTab('tab-is-scope-admin')">IS Scope Control<span id="nav-scope-admin-badge" style="display:none; margin-left:6px; background:#ef4444; color:#fff; border-radius:999px; padding:1px 6px; font-size:0.62rem; font-weight:700;">0</span></a>
-            <a href="#" class="sub-nav-item tab-btn" id="tab-btn-leaves" onclick="switchTab('tab-leaves')">Leaves Manager</a>
+            <a href="#" class="sub-nav-item tab-btn" id="tab-btn-is-manager" onclick="switchTab('tab-is-manager')" style="display:none;">IS Standards &amp; Report Formats</a>
             <a href="#" class="sub-nav-item tab-btn" id="tab-btn-assigner" onclick="switchTab('tab-assigner')">Auto Assigner</a>
             <a href="#" class="sub-nav-item tab-btn" id="tab-btn-preferences" onclick="switchTab('tab-preferences')">Preferences</a>
-            <a href="#" class="sub-nav-item tab-btn" id="tab-btn-audit" onclick="switchTab('tab-audit')">Audit Log</a>
             <a href="#" class="sub-nav-item tab-btn" id="tab-btn-super-admin" onclick="switchTab('tab-super-admin')">Confidential Vault</a>
         </div>
-
-        <a href="#" class="nav-item toggle-menu">
-            <i class="fas fa-users main-icon"></i> Report
-            <i class="fas fa-chevron-right chevron"></i>
-        </a>
-        <div class="sub-menu" style="display: none;">
-            <!-- Admin-only: retiring a standard or re-linking it to Master changes what the
-                 whole lab tests against, so the entry is hidden for TP accounts. -->
-            <a href="#" class="sub-nav-item tab-btn" id="tab-btn-is-manager" onclick="switchTab('tab-is-manager')" style="display:none;">IS Standards &amp; Report Formats</a>
-            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Generate Report<span class="nav-soon-badge">Soon</span></a>
-            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Archived Reports<span class="nav-soon-badge">Soon</span></a>
-        </div>
-
-        <a href="#" class="nav-item tab-btn" onclick="showComingSoon()">
-            <i class="fas fa-book main-icon"></i> User Manual <span class="nav-soon-badge">Soon</span>
-        </a>
     </nav>
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <div class="app-right-wrapper">
@@ -1663,6 +1612,7 @@ window.addEventListener('unhandledrejection', function(e) {
                             <tbody id="scopeadm-filing-tbody"></tbody>
                         </table>
                     </div>
+                    <div id="scopeadm-save-error" style="display:none; margin-top:14px;"></div>
                     <button id="scopeadm-save-btn" onclick="saveScopeCatalogue()" style="margin-top:14px; background:#3b82f6; color:#fff; border:none; padding:11px 22px; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.92rem;">Save filing</button>
                 </div>
 
@@ -1677,22 +1627,10 @@ window.addEventListener('unhandledrejection', function(e) {
                      around to face the standard instead of the person. Answers "who can
                      test this, and is anyone asking us to keep testing it?" -->
                 <div id="scopeadm-panel-coverage" style="display:none;">
-                    <div id="scopeadm-coverage-kpis" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:18px;"></div>
-                    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
-                        <input type="text" id="scopeadm-coverage-search" oninput="renderScopeCoverage()" placeholder="Search IS number or title…"
-                               style="flex:1; min-width:200px; padding:9px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.87rem; background:#fff; color:#0f172a;">
+                    <div style="display:flex; gap:12px; align-items:center; margin-bottom:16px;">
+                        <label style="font-size:0.82rem; font-weight:700; color:#475569;">Section</label>
                         <select id="scopeadm-coverage-section" onchange="renderScopeCoverage()"
                                 style="padding:9px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.87rem; background:#fff; color:#0f172a;"></select>
-                        <select id="scopeadm-coverage-filter" onchange="renderScopeCoverage()"
-                                style="padding:9px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.87rem; background:#fff; color:#0f172a;">
-                            <option value="filed">Filed standards</option>
-                            <option value="recommended">Recommended only</option>
-                            <option value="approved">Has an approved tester</option>
-                            <option value="uncovered">No tester yet</option>
-                            <option value="single">Only one tester</option>
-                            <option value="all">Everything, including unfiled</option>
-                        </select>
-                        <span id="scopeadm-coverage-count" style="font-size:0.82rem; color:var(--text-muted);"></span>
                     </div>
                     <div id="scopeadm-coverage-list"></div>
                 </div>
@@ -3841,7 +3779,7 @@ window.addEventListener('unhandledrejection', function(e) {
 
 <script src="specs_db.js"></script>
 <script src="standards_db.js?v=2.0"></script>
-<script src="app.js?v=2.6.5"></script>
+<script src="app.js?v=2.6.7"></script>
 </body>
 
 </html>

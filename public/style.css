@@ -2557,6 +2557,27 @@ html {
     flex-wrap: wrap;
 }
 
+.header-avatar-initials {
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.62rem;
+    line-height: 1.05;
+    text-align: center;
+    padding: 0 3px;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+#profile-avatar-initials-large {
+    display: block;
+    text-align: center;
+    line-height: 1.05;
+    padding: 0 6px;
+    word-break: break-word;
+    font-size: clamp(0.7rem, 2.2vw, 1.35rem);
+    max-width: 100%;
+}
+
 .profile-avatar-large {
     width: 100px;
     height: 100px;
@@ -2569,6 +2590,8 @@ html {
     font-size: 3rem;
     font-weight: 700;
     box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    overflow: hidden;
+    text-align: center;
 }
 
 .profile-hero-info h2 {
@@ -4438,6 +4461,60 @@ html {
     overflow-wrap: anywhere;
 }
 .scopeadm-reco-why.is-empty { color: #b45309; font-style: italic; }
+
+/* Approved & recommended tab — three plain lists */
+.scopeadm-simple {
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    background: #fff;
+}
+.scopeadm-simple.is-good { border-left: 4px solid #3b82f6; }
+.scopeadm-simple.is-warn { border-left: 4px solid #f59e0b; }
+.scopeadm-simple.is-done { border-left: 4px solid #10b981; }
+.scopeadm-simple header { display: flex; align-items: center; gap: 9px; }
+.scopeadm-simple h4 { margin: 0; font-size: 0.98rem; color: #0f172a; }
+.scopeadm-simple-count {
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 999px;
+    padding: 2px 9px;
+}
+.scopeadm-simple-hint {
+    margin: 4px 0 11px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+.scopeadm-simple-row {
+    display: flex;
+    gap: 14px;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 9px 0;
+    border-top: 1px solid #f1f5f9;
+}
+.scopeadm-simple-row strong { font-size: 0.86rem; color: #0f172a; }
+.scopeadm-simple-title { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+.scopeadm-simple-right {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+    max-width: 55%;
+    text-align: right;
+}
+.scopeadm-simple-note { font-size: 0.79rem; color: #475569; line-height: 1.45; overflow-wrap: anywhere; }
+.scopeadm-simple-empty {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    padding: 10px 0 2px;
+    border-top: 1px solid #f1f5f9;
+}
 
 /* Approved & recommended tab */
 .scopeadm-cov-row {

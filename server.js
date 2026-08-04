@@ -3534,14 +3534,24 @@ app.get('/api/is-scope/coverage', async (req, res) => {
             });
         }
 
+        // Two different things per standard: who declared they test it (step 2), and
+        // who recommended the lab carries on testing it (step 3). A standard declared
+        // but not recommended is the one an OIC most needs to see.
         const recsByIS = new Map();
+        const declByIS = new Map();
         for (const p of (prefs || [])) {
             let sub;
             try { sub = JSON.parse(p.value); } catch (_) { continue; }
+            const who = sub.username || `User #${sub.userId}`;
+            const recommended = new Set((sub.recommendations || []).map(r => r.isNumber));
+            for (const n of (sub.isNumbers || [])) {
+                if (!declByIS.has(n)) declByIS.set(n, []);
+                declByIS.get(n).push({ by: who, status: sub.status, recommended: recommended.has(n) });
+            }
             for (const r of (sub.recommendations || [])) {
                 if (!recsByIS.has(r.isNumber)) recsByIS.set(r.isNumber, []);
                 recsByIS.get(r.isNumber).push({
-                    by: sub.recommendedBy || sub.username || '',
+                    by: sub.recommendedBy || who,
                     reason: r.reason || '',
                     status: sub.status,
                     section: (sub.sections || [])[0] || ''
@@ -3554,7 +3564,8 @@ app.get('/api/is-scope/coverage', async (req, res) => {
             title: r.title || '',
             section: sectionMap[r.isNumber] || scopeDefaultSectionFor(r.isNumber) || null,
             holders: holdersByBase.get(normalizeISNumber(r.isNumber)) || [],
-            recommendations: recsByIS.get(r.isNumber) || []
+            recommendations: recsByIS.get(r.isNumber) || [],
+            declaredBy: declByIS.get(r.isNumber) || []
         })).sort((a, b) => String(a.isNumber).localeCompare(String(b.isNumber), undefined, { numeric: true }));
 
         const inUse = [...new Set(standards.map(s => s.section).filter(Boolean))];
@@ -3563,10 +3574,9 @@ app.get('/api/is-scope/coverage', async (req, res) => {
             standards,
             counts: {
                 total: standards.length,
-                covered: standards.filter(s => s.holders.length).length,
-                uncovered: standards.filter(s => s.section && !s.holders.length).length,
-                singleTester: standards.filter(s => s.holders.length === 1).length,
-                recommended: standards.filter(s => s.recommendations.length).length
+                approved: standards.filter(s => s.holders.length).length,
+                recommended: standards.filter(s => s.recommendations.length).length,
+                notRecommended: standards.filter(s => s.declaredBy.length && !s.recommendations.length).length
             }
         });
     } catch (e) {
