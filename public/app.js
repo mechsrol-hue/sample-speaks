@@ -7170,6 +7170,13 @@ function scopeSubmissionDiffChips(s) {
     return addChips + keptChips + removeChips;
 }
 
+function scopeShowOutstanding() {
+    const el = document.querySelector('.scopeadm-outstanding');
+    if (!el) return;
+    el.open = true;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 function renderScopeSubmissions() {
     const kpiEl = document.getElementById('scopeadm-review-kpis');
     const listEl = document.getElementById('scopeadm-review-list');
@@ -7177,11 +7184,15 @@ function renderScopeSubmissions() {
     const c = scopeSubmissions.counts || {};
 
     if (kpiEl) {
-        const card = (n, label, color) => `<div class="glass-panel" style="padding:13px; text-align:center; border-top:4px solid ${color};">
+        const card = (n, label, color, opts = {}) => `<div class="glass-panel${opts.click ? ' scopeadm-kpi-click' : ''}" ${opts.click ? `onclick="${opts.click}" title="${escapeHtml(opts.title || '')}" role="button" tabindex="0"` : ''} style="padding:13px; text-align:center; border-top:4px solid ${color};">
             <div style="font-size:1.5rem; font-weight:800; color:#0f172a;">${n || 0}</div>
             <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:#334155;">${label}</div></div>`;
         kpiEl.innerHTML = card(c.pending, 'Pending', '#f59e0b') + card(c.approved, 'Approved', '#10b981')
-            + card(c.rejected, 'Sent back', '#ef4444') + card(c.outstanding, 'Not responded', '#94a3b8');
+            + card(c.rejected, 'Sent back', '#ef4444')
+            // The count is the question; the names are the answer. Clicking the one
+            // should give you the other, rather than hunting for a row further down.
+            + card(c.outstanding, 'Not responded', '#94a3b8',
+                c.outstanding ? { click: 'scopeShowOutstanding()', title: 'Show who has not submitted yet' } : {});
     }
 
     const pill = (s) => s === 'pending' ? '<span style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; border-radius:999px; padding:2px 9px; font-size:0.7rem; font-weight:700;">PENDING</span>'
