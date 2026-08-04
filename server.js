@@ -84,6 +84,21 @@ function cleanName(name) {
 }
 
 // --- Normalize IS Standard Numbers (e.g. "IS 4985 (2021)" -> "IS 4985") ---
+// Competency matching key. normalizeISNumber() collapses a standard to "IS 2556",
+// which makes nine different parts indistinguishable — approving Part 2 then reads
+// as competence in Parts 3 through 16. This keeps the part, and still ignores the
+// edition year and punctuation, so the same standard written three different ways
+// across LIMS uploads and the vault still matches.
+//   "IS 2556 : Part 2 (2004)" → "IS 2556 P2"
+//   "IS 2556-Part 2"          → "IS 2556 P2"
+//   "IS 4985:2021"            → "IS 4985"
+function isMatchKey(isStr) {
+    const base = normalizeISNumber(isStr);
+    if (!base) return '';
+    const part = String(isStr || '').match(/part\s*(\d+)/i);
+    return part ? `${base} P${part[1]}` : base;
+}
+
 function normalizeISNumber(isStr) {
     if (!isStr) return '';
     let match = isStr.toString().match(/IS\s*\d+/i);
@@ -128,7 +143,7 @@ async function loadSampleHistoryAccountCandidates() {
     const profileMap = new Map((profiles || []).map(p => [normalizePersonKey(p.fullName), p]));
     const competencyMap = new Map();
     (competencies || []).forEach(c => {
-        const key = `${c.employeeId}::${normalizeISNumber(c.isNumber)}`;
+        const key = `${c.employeeId}::${isMatchKey(c.isNumber)}`;
         competencyMap.set(key, c);
     });
 
@@ -146,7 +161,7 @@ async function loadSampleHistoryAccountCandidates() {
         }
         const row = candidates.get(personKey);
         row.sampleCount += 1;
-        const isKey = normalizeISNumber(sample.isNumber) || 'UNKNOWN';
+        const isKey = isMatchKey(sample.isNumber) || 'UNKNOWN';
         row.isCounts[isKey] = (row.isCounts[isKey] || 0) + 1;
     });
 
@@ -162,7 +177,7 @@ async function loadSampleHistoryAccountCandidates() {
                     isNumber,
                     sampleCount: count,
                     inferredLevel: inferCompetencyLevel(count),
-                    alreadyExists: !!(profile && competencyMap.has(`${profile.id}::${normalizeISNumber(isNumber)}`)),
+                    alreadyExists: !!(profile && competencyMap.has(`${profile.id}::${isMatchKey(isNumber)}`)),
                 }));
 
             return {
@@ -304,7 +319,7 @@ async function loadMasterListAccountCandidates() {
     const profileMap = new Map((profiles.data || []).map(p => [normalizePersonKey(p.fullName), p]));
     const competencyMap = new Map();
     (competencies.data || []).forEach(c => {
-        competencyMap.set(`${c.employeeId}::${normalizeISNumber(c.isNumber)}`, c);
+        competencyMap.set(`${c.employeeId}::${isMatchKey(c.isNumber)}`, c);
     });
 
     return [...candidates.values()]
@@ -318,7 +333,7 @@ async function loadMasterListAccountCandidates() {
                     isNumber,
                     sampleCount: count,
                     inferredLevel: inferCompetencyLevel(count),
-                    alreadyExists: !!(profile && competencyMap.has(`${profile.id}::${normalizeISNumber(isNumber)}`)),
+                    alreadyExists: !!(profile && competencyMap.has(`${profile.id}::${isMatchKey(isNumber)}`)),
                 }));
 
             return {
@@ -1957,7 +1972,7 @@ app.get('/api/admin/templates', async (req, res) => {
             // Build competency map
             const compMap = {};
             (competencies || []).forEach(c => {
-                const normC = normalizeISNumber(c.isNumber);
+                const normC = isMatchKey(c.isNumber);
                 if (!compMap[normC]) compMap[normC] = [];
                 compMap[normC].push(c);
                 if (c.isNumber !== normC) {
@@ -2134,7 +2149,7 @@ app.get('/api/admin/templates', async (req, res) => {
                 // FIFO within bucket is enforced by the EDF queue order above; score reflects age for tie-breaking
                 const fifoBoost = Math.min(pendencyDays, 30);
 
-                const matchingComps = compMap[sample.isNumber] || compMap[sampleNorm] || [];
+                const matchingComps = compMap[sample.isNumber] || compMap[isMatchKey(sample.isNumber)] || [];
                 let bestEmployee = null;
                 let bestScore = -Infinity;
                 let bestReason = '';
@@ -3239,7 +3254,7 @@ async function scopeSectionByBase() {
     const byBase = new Map();
     for (const r of (rows || [])) {
         const section = sectionMap[r.isNumber] || scopeDefaultSectionFor(r.isNumber) || null;
-        if (section) byBase.set(normalizeISNumber(r.isNumber), section);
+        if (section) byBase.set(isMatchKey(r.isNumber), section);
     }
     return byBase;
 }
@@ -3574,13 +3589,13 @@ app.get('/api/is-scope/submissions', async (req, res) => {
             const section = (sub.sections || [])[0];
             const profile = profileByUserId.get(String(sub.userId));
             const sectionComps = profile
-                ? (compsByEmployee.get(profile.id) || []).filter(c => sectionByBase.get(normalizeISNumber(c.isNumber)) === section)
+                ? (compsByEmployee.get(profile.id) || []).filter(c => sectionByBase.get(isMatchKey(c.isNumber)) === section)
                 : [];
-            const haveBase = new Set(sectionComps.map(c => normalizeISNumber(c.isNumber)));
-            const desiredBase = new Set((sub.isNumbers || []).map(normalizeISNumber));
-            sub.toAdd = (sub.isNumbers || []).filter(n => !haveBase.has(normalizeISNumber(n)));
+            const haveBase = new Set(sectionComps.map(c => isMatchKey(c.isNumber)));
+            const desiredBase = new Set((sub.isNumbers || []).map(isMatchKey));
+            sub.toAdd = (sub.isNumbers || []).filter(n => !haveBase.has(isMatchKey(n)));
             sub.toRemove = sectionComps
-                .filter(c => !desiredBase.has(normalizeISNumber(c.isNumber)))
+                .filter(c => !desiredBase.has(isMatchKey(c.isNumber)))
                 .map(c => ({ isNumber: c.isNumber, proficiencyLevel: c.proficiencyLevel || '' }));
         }
 
@@ -3634,14 +3649,14 @@ app.get('/api/is-scope/coverage', async (req, res) => {
                 // the competency but shows up nowhere. Submissions decided before
                 // per-standard decisions existed carry no map, so status stands in.
                 const verdict = decisions[n] || (sub.status === 'approved' ? 'approved' : null);
-                if (verdict === 'approved') scopeApprovedKeys.add(`${sub.userId}|${normalizeISNumber(n)}`);
+                if (verdict === 'approved') scopeApprovedKeys.add(`${sub.userId}|${isMatchKey(n)}`);
             }
         }
 
         const holdersByBase = new Map();
         for (const c of (comps || [])) {
             const p = profileById.get(c.employeeId);
-            const base = normalizeISNumber(c.isNumber);
+            const base = isMatchKey(c.isNumber);
             if (!base) continue;
             if (!holdersByBase.has(base)) holdersByBase.set(base, []);
             holdersByBase.get(base).push({
@@ -3683,7 +3698,7 @@ app.get('/api/is-scope/coverage', async (req, res) => {
             isNumber: r.isNumber,
             title: r.title || '',
             section: sectionMap[r.isNumber] || scopeDefaultSectionFor(r.isNumber) || null,
-            holders: holdersByBase.get(normalizeISNumber(r.isNumber)) || [],
+            holders: holdersByBase.get(isMatchKey(r.isNumber)) || [],
             recommendations: recsByIS.get(r.isNumber) || [],
             declaredBy: declByIS.get(r.isNumber) || []
         })).sort((a, b) => String(a.isNumber).localeCompare(String(b.isNumber), undefined, { numeric: true }));
@@ -3738,9 +3753,12 @@ app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, r
             }
             const { data: existing } = await supabase
                 .from('employee_competencies').select('id, isNumber').eq('employeeId', profile.id);
-            const have = new Set((existing || []).map(c => normalizeISNumber(c.isNumber)));
-            const toAdd = [...new Set(subset.map(normalizeISNumber))]
-                .filter(n => n && !have.has(n))
+            // Store the standard as the lab writes it, not collapsed to "IS 2556" —
+            // the row is read by people as well as by the matcher.
+            const have = new Set((existing || []).map(c => isMatchKey(c.isNumber)));
+            const seen = new Set();
+            const toAdd = subset
+                .filter(n => { const k = isMatchKey(n); if (!k || have.has(k) || seen.has(k)) return false; seen.add(k); return true; })
                 .map(n => ({ employeeId: profile.id, isNumber: n, proficiencyLevel: SCOPE_DEFAULT_PROFICIENCY, avgTestDurationHours: 8 }));
             if (toAdd.length) {
                 const { error } = await supabase.from('employee_competencies').insert(toAdd);
@@ -3756,9 +3774,9 @@ app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, r
             const wholeSubmission = subset.length === declared.size;
             const section = (sub.sections || [])[0];
             const sectionByBase = await scopeSectionByBase();
-            const desiredBase = new Set(sub.isNumbers.map(normalizeISNumber));
+            const desiredBase = new Set(sub.isNumbers.map(isMatchKey));
             const toRemove = !wholeSubmission ? [] : (existing || []).filter(c =>
-                sectionByBase.get(normalizeISNumber(c.isNumber)) === section && !desiredBase.has(normalizeISNumber(c.isNumber)));
+                sectionByBase.get(isMatchKey(c.isNumber)) === section && !desiredBase.has(isMatchKey(c.isNumber)));
             if (toRemove.length) {
                 const { error } = await supabase.from('employee_competencies').delete().in('id', toRemove.map(c => c.id));
                 if (error) throw new Error(`Competency removal failed: ${error.message}`);

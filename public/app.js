@@ -5341,9 +5341,14 @@ function scopeFiledUnderActiveSection() {
     return (scopeCatalogue.standards || []).filter(s => s.section === label);
 }
 
+// Mirrors isMatchKey() on the server: keeps the part, drops the edition year, so
+// "already yours" doesn't mark all nine parts of IS 2556 because one was approved.
 function scopeBaseISNumber(isNumber) {
     const m = String(isNumber || '').match(/IS\s*\d+/i);
-    return m ? m[0].toUpperCase().replace(/\s+/g, ' ') : String(isNumber || '').trim();
+    if (!m) return String(isNumber || '').trim();
+    const base = m[0].toUpperCase().replace(/\s+/g, ' ');
+    const part = String(isNumber || '').match(/part\s*(\d+)/i);
+    return part ? `${base} P${part[1]}` : base;
 }
 
 function scopeApprovedKeys() {
