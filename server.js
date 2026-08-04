@@ -441,10 +441,12 @@ app.post('/api/login', async (req, res) => {
         .from('users')
         .select('*')
         .ilike('username', username)
-        .eq('password', password)
         .maybeSingle();
 
-    if (error || !row) return res.status(401).json({ error: 'Invalid credentials.' });
+    if (error) return res.status(500).json({ error: 'Login failed.' });
+    if (!row) return res.status(401).json({ error: 'User not found.', code: 'user_not_found' });
+    if (row.password !== password) return res.status(401).json({ error: 'Wrong password.', code: 'wrong_password' });
+
     const token = issueSession(row);
     res.json({ message: 'Login successful', token, user: { id: row.id, username: row.username, role: row.role } });
 });
@@ -3172,7 +3174,10 @@ app.delete('/api/is-intelligence/standards/:id', requireAdmin, async (req, res) 
 const SCOPE_SECTIONS_KEY = 'is_scope_sections';
 const SCOPE_MAP_KEY = 'is_scope_section_map';
 const SCOPE_TP_PREFIX = 'is_scope_tp_';
-const DEFAULT_SECTIONS = ['Plastic', 'Metal', 'Gas Stove', 'Cement', 'Miscellaneous'];
+// Section list and the standards that sit in each come from the lab's own filing
+// sheet (server/is-scope-defaults.js). Defaults only — anything the admin saves in
+// IS Scope Control is stored in system_preferences and overrides this.
+const { DEFAULT_SECTIONS, defaultSectionFor: scopeDefaultSectionFor } = require('./server/is-scope-defaults');
 // New competencies start as Trainee, not Standard: Trainee is excluded from priority
 // samples and weighted 0.6, so an approval can't silently put an untested declaration
 // at full weight. Admin promotes from the Employee Hub as usual.
@@ -3214,10 +3219,20 @@ app.get('/api/is-scope/catalogue', async (req, res) => {
             .from('is_standards_vault').select('isNumber, title');
         if (error) throw error;
         const standards = (rows || [])
-            .map(r => ({ isNumber: r.isNumber, title: r.title || '', section: sectionMap[r.isNumber] || null }))
+            .map(r => ({
+                isNumber: r.isNumber,
+                title: r.title || '',
+                // Admin's own filing wins; otherwise fall back to the lab's filing sheet.
+                section: sectionMap[r.isNumber] || scopeDefaultSectionFor(r.isNumber) || null
+            }))
             .sort((a, b) => String(a.isNumber).localeCompare(String(b.isNumber), undefined, { numeric: true }));
+        // A section that holds standards has to be pickable, even when it isn't in the
+        // saved section list — otherwise the filing sheet's sections stay invisible to
+        // every TP until an admin happens to re-save the list.
+        const inUse = [...new Set(standards.map(s => s.section).filter(Boolean))];
+        const allSections = [...new Set([...sections, ...inUse])];
         res.json({
-            sections,
+            sections: allSections,
             standards,
             unfiled: standards.filter(s => !s.section).length
         });
@@ -3383,25 +3398,41 @@ app.get('/api/is-scope/mine/:userId', async (req, res) => {
 
 app.post('/api/is-scope/mine', async (req, res) => {
     try {
-        const { userId, username, sections, isNumbers, proposedSection, note } = req.body || {};
+        const { userId, username, sections, isNumbers, proposedSection, note, recommendations, recommendedBy } = req.body || {};
         if (!userId) return res.status(400).json({ error: 'Missing user.' });
-        if (!Array.isArray(sections) || !sections.length) {
-            return res.status(400).json({ error: 'Select at least one section.' });
+        const cleanSections = [...new Set((sections || []).map(s => String(s).trim()).filter(Boolean))];
+        // One section per submission — TP can submit again later for another section.
+        if (cleanSections.length !== 1) {
+            return res.status(400).json({ error: 'Pick exactly one section. Submit again later for another section.' });
         }
         if (!Array.isArray(isNumbers) || !isNumbers.length) {
             return res.status(400).json({ error: 'Select at least one standard you test.' });
+        }
+        // The recommendation is the thing the OIC actually approves, so it is written
+        // by the TA/LO here and only ever read on the admin side. Recommending a
+        // standard the user didn't declare would be meaningless, so it is filtered.
+        const declared = new Set(isNumbers.map(String));
+        const cleanRecommendations = (Array.isArray(recommendations) ? recommendations : [])
+            .map(r => ({ isNumber: String((r && r.isNumber) || '').trim(), reason: String((r && r.reason) || '').trim() }))
+            .filter(r => r.isNumber && declared.has(r.isNumber));
+        if (!cleanRecommendations.length) {
+            return res.status(400).json({ error: 'Recommend at least one standard to continue testing.' });
         }
         const prev = await readPref(SCOPE_TP_PREFIX + userId, null);
         const submission = {
             userId,
             username: username || (prev && prev.username) || '',
-            sections: [...new Set(sections.map(String))],
+            sections: cleanSections,
             isNumbers: [...new Set(isNumbers.map(String))],
             proposedSection: String(proposedSection || '').trim(),
+            recommendations: cleanRecommendations,
+            recommendedBy: String(recommendedBy || username || '').trim(),
+            recommendedAt: new Date().toISOString(),
             note: String(note || '').trim(),
             status: 'pending',
             submittedAt: new Date().toISOString(),
             // Re-submitting after a decision clears the old verdict but keeps the history.
+            // Prior approved competencies stay in employee_competencies (approve is additive).
             previousStatus: prev ? prev.status : null,
             reviewedBy: null,
             reviewedAt: null,

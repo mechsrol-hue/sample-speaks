@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SRL LIIS</title>
-    <link rel="stylesheet" href="style.css?v=1.1.0">
+    <link rel="stylesheet" href="style.css?v=1.4.2">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <script>
@@ -607,6 +607,10 @@ window.addEventListener('unhandledrejection', function(e) {
             transition: border-color 0.2s;
         }
 
+        .login-input-group .login-password-wrap input {
+            padding-right: 42px;
+        }
+
         .login-input-group input:focus {
             border-color: #2b6fd4;
             background: #fff;
@@ -820,14 +824,21 @@ window.addEventListener('unhandledrejection', function(e) {
                 <h2>Login</h2>
                 <p>Please login with your Email and Password.</p>
 
-                <div class="login-input-group">
+                <div class="login-input-group" id="username-input-group">
                     <label>User Name <span>*</span></label>
                     <input type="text" id="username" placeholder="" autocomplete="username">
+                    <p class="login-field-error" id="username-error" role="alert" hidden></p>
                 </div>
 
-                <div class="login-input-group">
+                <div class="login-input-group" id="password-input-group">
                     <label>Password <span>*</span></label>
-                    <input type="password" id="password" placeholder="" autocomplete="current-password">
+                    <div class="login-password-wrap">
+                        <input type="password" id="password" placeholder="" autocomplete="current-password">
+                        <button type="button" class="login-password-toggle" id="password-toggle" aria-label="Show password" aria-pressed="false">
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <p class="login-field-error" id="password-error" role="alert" hidden></p>
                 </div>
 
                 <div class="login-input-group">
@@ -1220,108 +1231,106 @@ window.addEventListener('unhandledrejection', function(e) {
 
         <!-- Tab: New Sample Receive SRL (Merged with Allotted/Pending) -->
         <div id="tab-new-sample-receive" class="tab-content">
-            <!-- KPI / Overview (From Allotted/Pending) -->
-            <div class="kpi-row" style="margin-bottom: 10px;">
-                <div class="kpi-card glass-panel clickable" id="kpi-card-total" onclick="toggleKpiFilter('ALL')">
-                    <h4>Total Pending</h4>
-                    <div id="kpi-total" class="kpi-val">0</div>
+            <!-- Calm header: one job — find & work samples -->
+            <div class="nsr-calm-header">
+                <div class="nsr-calm-title-row">
+                    <div>
+                        <h2 class="nsr-calm-title">Sample queue</h2>
+                        <p class="nsr-calm-sub">Search or filter, then open a sample to work it.</p>
+                    </div>
+                    <div class="nsr-calm-actions">
+                        <div id="admin-bulk-actions" style="display: none; align-items:center; gap:8px;">
+                            <span id="selected-count-label" style="font-size:0.8rem; color:#64748b; font-weight:600;">0 Selected</span>
+                            <button id="bulk-delete-btn" onclick="deleteSelectedSamples()" class="nsr-btn nsr-btn-danger" disabled>Delete</button>
+                        </div>
+                        <button id="auto-assign-btn" onclick="openAutoAssignerModal()" class="nsr-btn nsr-btn-ghost">Auto assign</button>
+                        <button id="master-upload-btn" onclick="openModal('upload-center-modal')" class="nsr-btn nsr-btn-primary">Upload</button>
+                        <button onclick="printMasterList()" class="nsr-btn nsr-btn-ghost">Print</button>
+                    </div>
                 </div>
-                <div class="kpi-card glass-panel clickable" id="kpi-card-submitted" onclick="toggleKpiFilter('Submitted')">
-                    <h4>Testing Completed</h4>
-                    <div id="kpi-submitted" class="kpi-val">0</div>
-                </div>
-                <div class="kpi-card glass-panel clickable" id="kpi-card-unassigned" onclick="toggleKpiFilter('Unassigned')" style="border-left: 4px solid var(--primary); display: none;">
-                    <h4>📦 Unalloted Samples</h4>
-                    <div id="kpi-unassigned" class="kpi-val">0</div>
+
+                <!-- View chips (replaces large KPI cards) — keep same IDs for JS -->
+                <div class="kpi-row nsr-view-chips" style="margin-bottom: 0;">
+                    <button type="button" class="nsr-chip kpi-card clickable" id="kpi-card-total" onclick="toggleKpiFilter('ALL')">
+                        <span>Pending</span>
+                        <strong id="kpi-total" class="kpi-val">0</strong>
+                    </button>
+                    <button type="button" class="nsr-chip kpi-card clickable" id="kpi-card-submitted" onclick="toggleKpiFilter('Submitted')">
+                        <span>Completed</span>
+                        <strong id="kpi-submitted" class="kpi-val">0</strong>
+                    </button>
+                    <button type="button" class="nsr-chip kpi-card clickable" id="kpi-card-unassigned" onclick="toggleKpiFilter('Unassigned')" style="display:none;">
+                        <span>Unalloted</span>
+                        <strong id="kpi-unassigned" class="kpi-val">0</strong>
+                    </button>
+                    <span id="pending-count-badge" class="nsr-count-pill">0</span>
                 </div>
             </div>
-
-            <!-- Compact Aging Breakdown (From Allotted/Pending) -->
-            <div class="glass-panel" style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; padding: 7px 14px; border-radius: 8px; background: #ffffff; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px -1px rgba(0,0,0,0.04);">
-                <div style="font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">
-                    ⏱️ Aging Breakdown
-                </div>
-                <div style="display: flex; gap: 6px; flex-wrap: wrap; flex: 1; justify-content: flex-start;">
-                    <div class="aging-pill clickable" id="pill-age15" style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; color: #047857; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;" onclick="toggleKpiFilter('Age15')">
-                        0-15 Days: <strong id="pend-age-15" style="margin-left: 3px;">0</strong>
-                    </div>
-                    <div class="aging-pill clickable" id="pill-age30" style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; color: #b45309; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;" onclick="toggleKpiFilter('Age30')">
-                        16-30 Days: <strong id="pend-age-30" style="margin-left: 3px;">0</strong>
-                    </div>
-                    <div class="aging-pill clickable" id="pill-age45" style="background: rgba(249, 115, 22, 0.1); border: 1px solid #f97316; color: #c2410c; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;" onclick="toggleKpiFilter('Age45')">
-                        31-45 Days: <strong id="pend-age-45" style="margin-left: 3px;">0</strong>
-                    </div>
-                    <div class="aging-pill clickable" id="pill-age90" style="background: rgba(234, 88, 12, 0.1); border: 1px solid #ea580c; color: #9a3412; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;" onclick="toggleKpiFilter('Age90')">
-                        46-90 Days: <strong id="pend-age-90" style="margin-left: 3px;">0</strong>
-                    </div>
-                    <div class="aging-pill clickable" id="pill-ageold" style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #b91c1c; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;" onclick="toggleKpiFilter('Age>90')">
-                        > 90 Days: <strong id="pend-age-old" style="margin-left: 3px;">0</strong>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section Label: Newly Received Queue SRL (Removed as per user feedback) -->
-
-
 
             <!-- NSR Section 2: Allotted / Pending Queue -->
             <div id="nsr-sub-pending" class="nsr-sub-content">
-                <!-- Filter & Search (From Allotted/Pending) -->
-                <div class="filter-panel" style="grid-template-columns: unset;">
-                    <div class="filter-grid" style="grid-template-columns: 2fr 1.5fr 1fr 1.5fr 1.5fr;">
-                        <div class="filter-group">
-                            <label>Encoded Sample Code</label>
-                            <input type="text" id="search-input" placeholder="Search code..." oninput="renderTable()">
+                <!-- Search first; advanced filters collapsed -->
+                <div class="filter-panel nsr-search-bar" style="grid-template-columns: unset;">
+                    <div class="nsr-search-row">
+                        <input type="text" id="search-input" placeholder="Search sample code…" oninput="renderTable()" aria-label="Search sample code">
+                        <button type="button" class="nsr-btn nsr-btn-ghost" id="nsr-filters-toggle" onclick="toggleNsrFilters()" aria-expanded="false">Filters</button>
+                    </div>
+                    <div id="nsr-advanced-filters" class="nsr-advanced-filters" hidden>
+                        <div class="filter-grid" style="grid-template-columns: repeat(4, 1fr);">
+                            <div class="filter-group">
+                                <label>IS Number</label>
+                                <select id="is-filter" onchange="renderTable()">
+                                    <option value="ALL">All IS Numbers</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Priority</label>
+                                <select id="priority-filter" onchange="renderTable()">
+                                    <option value="ALL">All</option>
+                                    <option value="Priority">Priority</option>
+                                    <option value="Non-Priority">Non-Priority</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Received Date</label>
+                                <select id="date-filter" onchange="renderTable()">
+                                    <option value="ALL">All Dates</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Testing Person</label>
+                                <select id="assigned-filter" onchange="renderTable()">
+                                    <option value="ALL">All Persons</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="filter-group">
-                            <label>IS Number</label>
-                            <select id="is-filter" onchange="renderTable()">
-                                <option value="ALL">All IS Numbers</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Priority</label>
-                            <select id="priority-filter" onchange="renderTable()">
-                                <option value="ALL">All</option>
-                                <option value="Priority">Priority</option>
-                                <option value="Non-Priority">Non-Priority</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Received Date</label>
-                            <select id="date-filter" onchange="renderTable()">
-                                <option value="ALL">All Dates</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Testing Person</label>
-                            <select id="assigned-filter" onchange="renderTable()">
-                                <option value="ALL">All Persons</option>
-                            </select>
+                        <!-- Aging kept, but only when Filters is open -->
+                        <div class="glass-panel nsr-aging-panel" id="nsr-aging-panel">
+                            <div class="nsr-aging-label">Age</div>
+                            <div class="nsr-aging-pills">
+                                <div class="aging-pill clickable" id="pill-age15" onclick="toggleKpiFilter('Age15')">
+                                    0–15d <strong id="pend-age-15">0</strong>
+                                </div>
+                                <div class="aging-pill clickable" id="pill-age30" onclick="toggleKpiFilter('Age30')">
+                                    16–30d <strong id="pend-age-30">0</strong>
+                                </div>
+                                <div class="aging-pill clickable" id="pill-age45" onclick="toggleKpiFilter('Age45')">
+                                    31–45d <strong id="pend-age-45">0</strong>
+                                </div>
+                                <div class="aging-pill clickable" id="pill-age90" onclick="toggleKpiFilter('Age90')">
+                                    46–90d <strong id="pend-age-90">0</strong>
+                                </div>
+                                <div class="aging-pill clickable" id="pill-ageold" onclick="toggleKpiFilter('Age>90')">
+                                    &gt;90d <strong id="pend-age-old">0</strong>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sample Queue Table Heading -->
-                <div class="table-section-header" style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px; margin-top:6px;">
-                    <!-- Row 1: Title + Print — always on the same line -->
-                    <div style="display:flex; align-items:center; justify-content:space-between;">
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <h3 style="margin:0; font-size:1.2rem; color:var(--primary-blue); font-weight: 700; text-transform: uppercase;">MASTER SAMPLE QUEUE</h3>
-                            <span id="pending-count-badge" style="background:var(--accent); color:white; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:700;">0</span>
-                        </div>
-                        <button onclick="printMasterList()" style="background: linear-gradient(135deg, #0f766e, #0d9488); color:white; border:none; font-size:0.85rem; padding:8px 16px; border-radius:6px; font-weight:600; cursor:pointer; box-shadow: 0 4px 6px rgba(13, 148, 136, 0.2); transition: all 0.2s; white-space:nowrap;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">🖨️ Print List</button>
-                    </div>
-                    <!-- Row 2: Action buttons — wrap on small screens -->
-                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                        <!-- Admin Bulk Actions (Hidden by default, shown when checkboxes selected) -->
-                        <div id="admin-bulk-actions" style="display: none; align-items:center; gap:10px;">
-                            <span id="selected-count-label" style="font-size:0.85rem; color:#64748b; font-weight:600;">0 Selected</span>
-                            <button id="bulk-delete-btn" onclick="deleteSelectedSamples()" style="background:#ef4444; color:white; border:none; font-size:0.85rem; padding:8px 16px; border-radius:6px; font-weight:600; cursor:pointer; transition: all 0.2s;" onmouseover="this.style.background='#dc2626';" onmouseout="this.style.background='#ef4444';" disabled>Delete Selected</button>
-                        </div>
-                        <button id="auto-assign-btn" onclick="openAutoAssignerModal()" style="background: linear-gradient(135deg, #8b5cf6, #6366f1); color:white; border:none; font-size:0.85rem; padding:8px 16px; border-radius:6px; font-weight:600; cursor:pointer; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">🤖 Auto Assign Recommendations</button>
-                        <button id="master-upload-btn" onclick="openModal('upload-center-modal')" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color:white; border:none; font-size:0.85rem; padding:8px 16px; border-radius:6px; font-weight:600; cursor:pointer; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">📤 Upload Doc</button>
-                    </div>
+                <!-- Kept for JS that targets .table-section-header; visually quiet -->
+                <div class="table-section-header nsr-table-label" style="display:none;" aria-hidden="true">
+                    <h3 id="table-section-title" style="margin:0;">Sample queue</h3>
                 </div>
 
                 <!-- Table Container -->
@@ -1470,64 +1479,135 @@ window.addEventListener('unhandledrejection', function(e) {
         </div>
 
         <!-- Tab: My IS Scope (TP-facing) -->
-        <!-- Every TP declares the sections they work in, then the standards they
-             actually test. Submitted for admin approval; only on approval does it
-             become a competency the auto-assigner will act on. -->
+        <!-- Flow: (1) pick section → (2) tick the IS you handle out of that section →
+             (3) the system recommends which of those to continue testing, with reasons →
+             (4) submit for OIC approval. Step 3 is advice, not a second pick: the TP does
+             not choose there, and the OIC only approves what comes out of it. -->
         <div id="tab-my-is-scope" class="tab-content">
-            <div class="glass-panel admin-panel" style="padding:25px;">
-                <div style="margin-bottom:18px;">
-                    <h3 style="margin:0; font-size:1.4rem; display:flex; align-items:center; gap:10px;"><span>🎯</span> My IS Scope</h3>
-                    <p style="color:var(--text-muted); margin:5px 0 0 0; font-size:0.9rem;">
-                        Tell us which sections you work in, then tick the standards you actually test. Your OIC reviews it before it takes effect.
-                    </p>
+            <div class="myscope-layout">
+                <div class="myscope-main glass-panel admin-panel">
+                    <div class="myscope-header">
+                        <h2 class="myscope-title">My IS Scope</h2>
+                        <p class="myscope-sub">Declare what you test, and what the lab should keep testing.</p>
+                    </div>
+
+                    <nav class="myscope-progress" id="myscope-progress" aria-label="Submission progress">
+                        <div class="myscope-progress-step" data-progress-step="1">
+                            <span class="myscope-progress-dot" aria-hidden="true">1</span>
+                            <span class="myscope-progress-label">Pick section</span>
+                        </div>
+                        <div class="myscope-progress-line" aria-hidden="true"></div>
+                        <div class="myscope-progress-step" data-progress-step="2">
+                            <span class="myscope-progress-dot" aria-hidden="true">2</span>
+                            <span class="myscope-progress-label">Tick your IS</span>
+                        </div>
+                        <div class="myscope-progress-line" aria-hidden="true"></div>
+                        <div class="myscope-progress-step" data-progress-step="3">
+                            <span class="myscope-progress-dot" aria-hidden="true">3</span>
+                            <span class="myscope-progress-label">Recommendation</span>
+                        </div>
+                        <div class="myscope-progress-line" aria-hidden="true"></div>
+                        <div class="myscope-progress-step" data-progress-step="4">
+                            <span class="myscope-progress-dot" aria-hidden="true">4</span>
+                            <span class="myscope-progress-label">Submit</span>
+                        </div>
+                    </nav>
+
+
+                    <div id="scope-status-banner" style="display:none; margin-bottom:16px;"></div>
+
+                    <!-- Step 1: sections -->
+                    <section class="myscope-step myscope-step-focus" id="myscope-step-1" aria-labelledby="scope-step1-title">
+                        <div class="myscope-step-head">
+                            <span class="myscope-step-num" id="scope-step1-num">1</span>
+                            <div>
+                                <h3 id="scope-step1-title">Pick your section</h3>
+                                <p id="scope-step1-sub">One section at a time — submit again later for another.</p>
+                            </div>
+                        </div>
+                        <div id="scope-sections" class="myscope-section-chips"></div>
+                    </section>
+
+                    <!-- Step 2: the IS filed under that section — tick the ones you handle -->
+                    <section class="myscope-step myscope-step-locked" id="myscope-step-2" aria-labelledby="scope-step2-title">
+                        <div class="myscope-step-head">
+                            <span class="myscope-step-num" id="scope-step2-num">2</span>
+                            <div style="flex:1;">
+                                <h3 id="scope-step2-title">Standards in this section</h3>
+                                <p id="scope-step2-sub">Tick the IS you personally run.</p>
+                            </div>
+                            <span id="scope-selected-count" class="myscope-count"></span>
+                        </div>
+                        <div id="scope-step2-banner" class="myscope-step2-banner" style="display:none;"></div>
+                        <div class="myscope-search-row" id="scope-step2-tools">
+                            <input type="text" id="scope-step2-search" oninput="renderScopeStandards()" placeholder="Search by IS number or title…" disabled aria-label="Search standards in this section">
+                            <button type="button" class="myscope-link-btn" id="scope-select-all-btn" onclick="scopeSelectAllVisible()" disabled>Select all shown</button>
+                            <button type="button" class="myscope-link-btn" id="scope-clear-all-btn" onclick="scopeClearAllIS()" disabled>Clear all</button>
+                        </div>
+                        <div id="scope-standards" class="myscope-standards-box">
+                            <div class="myscope-empty-box myscope-step2-placeholder">
+                                <span class="myscope-empty-icon" aria-hidden="true">①</span>
+                                <strong>Pick a section above</strong>
+                                <span class="myscope-empty-why">The standards filed under it appear here — only after you choose where you work.</span>
+                            </div>
+                        </div>
+                        <div class="myscope-step-actions">
+                            <button type="button" class="myscope-next-btn" id="scope-to-shortlist-btn" onclick="scopeGoToShortlist()" disabled>Next — see the recommendation</button>
+                        </div>
+                    </section>
+
+                    <!-- Step 3: the recommendation itself. Written by hand by the TA/LO —
+                         which of the step-2 picks the lab should carry on testing, and why.
+                         The OIC does not author this; they only approve it in IS Scope Control. -->
+                    <section class="myscope-step myscope-step-locked" id="myscope-step-3" aria-labelledby="scope-step3-title">
+                        <div class="myscope-step-head">
+                            <span class="myscope-step-num" id="scope-step3-num">3</span>
+                            <div style="flex:1;">
+                                <h3 id="scope-step3-title">Recommend which to continue testing</h3>
+                                <p id="scope-step3-sub">Mark what the lab should carry on testing, and why.</p>
+                            </div>
+                            <span id="scope-shortlist-count" class="myscope-count"></span>
+                        </div>
+                        <div id="scope-shortlist" class="myscope-standards-box">
+                            <div class="myscope-empty-box myscope-step2-placeholder">
+                                <span class="myscope-empty-icon" aria-hidden="true">②</span>
+                                <strong>Tick your standards in step 2 first</strong>
+                                <span class="myscope-empty-why">You then recommend from that list — only what you ticked can be recommended.</span>
+                            </div>
+                        </div>
+                        <p class="myscope-step-next" id="scope-step3-next" aria-live="polite"></p>
+                    </section>
+
+                    <!-- Step 4: submit -->
+                    <section class="myscope-step myscope-step-locked" id="myscope-step-4" aria-labelledby="scope-step4-title">
+                        <div class="myscope-step-head">
+                            <span class="myscope-step-num" id="scope-step4-num">4</span>
+                            <div>
+                                <h3 id="scope-step4-title">Submit for approval</h3>
+                                <p id="scope-step4-sub">Your OIC reviews and approves.</p>
+                            </div>
+                        </div>
+                        <p class="myscope-submit-hint" id="scope-submit-hint" aria-live="polite">Start with step 1 — pick your section.</p>
+                        <div class="myscope-submit-row">
+                            <button id="scope-submit-btn" onclick="submitMyScope()" class="myscope-submit-btn" disabled>Submit for approval</button>
+                            <input type="text" id="scope-note" placeholder="Note for your OIC (optional)" disabled aria-label="Optional note for OIC">
+                        </div>
+                    </section>
                 </div>
 
-                <div id="scope-status-banner" style="display:none; margin-bottom:18px;"></div>
-
-                <!-- Step 1 -->
-                <div style="margin-bottom:22px;">
-                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                        <span style="width:24px; height:24px; border-radius:50%; background:#3b82f6; color:#fff; font-size:0.78rem; font-weight:700; display:flex; align-items:center; justify-content:center;">1</span>
-                        <strong style="font-size:1rem;">Which sections do you work in?</strong>
-                        <span style="font-size:0.78rem; color:var(--text-muted);">Pick one or more</span>
+                <!-- Sticky summary -->
+                <aside class="myscope-summary glass-panel" id="scope-summary-card">
+                    <h3>Your declaration</h3>
+                    <div class="myscope-summary-block">
+                        <div class="myscope-summary-label">Section <span id="scope-summary-step1-badge" class="myscope-mini-badge">pending</span></div>
+                        <div id="scope-summary-sections" class="myscope-summary-body myscope-summary-empty">Pick a section in step 1</div>
                     </div>
-                    <div id="scope-sections" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
-                    <div style="margin-top:10px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                        <input type="text" id="scope-other-section" placeholder="Section not listed? Type it here"
-                               style="padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.85rem; min-width:240px; background:#fff; color:#0f172a;">
-                        <span style="font-size:0.75rem; color:var(--text-muted);">Sent to your OIC with your submission</span>
+                    <div class="myscope-summary-block">
+                        <div class="myscope-summary-label">Standards you test <span id="scope-summary-step2-badge" class="myscope-mini-badge">pending</span></div>
+                        <div id="scope-summary-is" class="myscope-summary-body myscope-summary-empty">Tick at least one in step 2</div>
                     </div>
-                </div>
-
-                <!-- Step 2 -->
-                <div style="margin-bottom:22px;">
-                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
-                        <span style="width:24px; height:24px; border-radius:50%; background:#3b82f6; color:#fff; font-size:0.78rem; font-weight:700; display:flex; align-items:center; justify-content:center;">2</span>
-                        <strong style="font-size:1rem;">Which of these standards do you test?</strong>
-                        <span id="scope-selected-count" style="font-size:0.78rem; color:var(--text-muted);"></span>
-                    </div>
-                    <div id="scope-standards" style="border:1px solid #e2e8f0; border-radius:10px; padding:6px; max-height:420px; overflow-y:auto; background:#fff;"></div>
-                </div>
-
-                <!-- Every standard the lab holds, not just the picked sections. A TP has to
-                     be able to see the whole published list to know whether the section they
-                     chose is the right one. -->
-                <details id="scope-all-standards" style="margin-bottom:22px; border:1px solid #e2e8f0; border-radius:10px; background:#fff;">
-                    <summary style="cursor:pointer; padding:13px 16px; font-weight:600; font-size:0.9rem; color:#334155;">
-                        📋 Browse all published standards <span id="scope-all-count" style="color:var(--text-muted); font-weight:500;"></span>
-                    </summary>
-                    <div style="padding:0 10px 10px;">
-                        <input type="text" id="scope-all-search" oninput="renderScopeAllStandards()" placeholder="Search IS number or title…"
-                               style="width:100%; margin:4px 0 8px; padding:9px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.85rem; background:#fff; color:#0f172a;">
-                        <div id="scope-all-list" style="max-height:360px; overflow-y:auto;"></div>
-                    </div>
-                </details>
-
-                <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-                    <button id="scope-submit-btn" onclick="submitMyScope()" style="background:#3b82f6; color:#fff; border:none; padding:11px 22px; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.92rem;">Submit for approval</button>
-                    <input type="text" id="scope-note" placeholder="Anything your OIC should know (optional)"
-                           style="flex:1; min-width:240px; padding:10px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.85rem; background:#fff; color:#0f172a;">
-                </div>
+                    <p class="myscope-summary-foot">Approved entries become your auto-assign competencies.</p>
+                </aside>
             </div>
         </div>
 
@@ -1690,6 +1770,7 @@ window.addEventListener('unhandledrejection', function(e) {
                         <option value="linked">Linked to master</option>
                         <option value="unlinked">Not linked</option>
                         <option value="flags">Needs review</option>
+                        <option value="recommended">Recommended to continue</option>
                     </select>
                     <span id="ism-result-count" style="font-size:0.82rem; color:var(--text-muted);"></span>
                 </div>
@@ -3723,7 +3804,7 @@ window.addEventListener('unhandledrejection', function(e) {
 
 <script src="specs_db.js"></script>
 <script src="standards_db.js?v=2.0"></script>
-<script src="app.js?v=2.3.0"></script>
+<script src="app.js?v=2.6.5"></script>
 </body>
 
 </html>
