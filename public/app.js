@@ -6247,13 +6247,15 @@ function printHtmlDocument(html, label) {
         };
         window.addEventListener('afterprint', done);
 
-        // One paint before printing, so the injected markup has been laid out.
-        requestAnimationFrame(() => {
+        // A timer, not requestAnimationFrame: rAF does not fire in a backgrounded or
+        // occluded tab, so the print would silently never happen. The delay still
+        // gives the injected markup a beat to lay out.
+        setTimeout(() => {
             try { window.print(); } catch (e) {
                 done();
                 showToast(`Could not print ${label || 'this page'}: ${e.message}`, 'error');
             }
-        });
+        }, 60);
         // Safari never fires afterprint in some versions; don't leave the class on.
         setTimeout(done, 60000);
         return true;
@@ -6274,7 +6276,7 @@ async function printScopeRecommendations() {
         const rec = key === 'rec';
         const items = key === 'rec' ? all.filter(s => s.recommendations.length)
             : key === 'nrec' ? all.filter(s => s.declaredBy.length && !s.recommendations.length)
-            : all.filter(s => s.holders.length);
+            : all.filter(s => s.holders.some(h => h.viaScope));
 
         const now = new Date().toLocaleString('en-IN');
         const appTitle = 'SRL LIIS';
@@ -6993,9 +6995,12 @@ function renderScopeCoverage() {
         },
         appr: {
             label: 'Approved',
-            hint: 'Standards someone is approved to test — this is what auto-assign reads. “via scope” means an approved submission here created it; the rest were set in the Employee Hub or imported from sample history.',
-            empty: 'Nobody is approved to test anything here yet.',
-            items: all.filter(s => s.holders.length)
+            hint: 'Standards approved through this queue — an OIC pressed Approve on a submission and it was written into that person\'s competencies.',
+            empty: 'Nothing has been approved here yet. Approving a submission in tab 2 puts it in this list.',
+            // Only what this queue produced. A competency set in the Employee Hub or
+            // imported from sample history is real, but it was never approved here —
+            // counting it made the tab claim approvals that never happened.
+            items: all.filter(s => s.holders.some(h => h.viaScope))
         }
     };
 
@@ -7013,6 +7018,12 @@ function renderScopeCoverage() {
     const meta = (s) => key === 'rec' ? `${s.recommendations.length} reason${s.recommendations.length === 1 ? '' : 's'}`
         : key === 'nrec' ? `${s.declaredBy.length} declared`
         : `${s.holders.length} tester${s.holders.length === 1 ? '' : 's'}`;
+    // Competencies that exist but did not come from here. Real, and needed when
+    // asking "can anyone test this?" — but not an approval, so kept apart and shut.
+    const elsewhere = key === 'appr'
+        ? all.filter(s => s.holders.length && !s.holders.some(h => h.viaScope))
+        : [];
+
     listEl.innerHTML = `
         <section class="scopecov-block is-${key}">
             <p class="scopecov-hint">${view.hint}</p>
@@ -7021,7 +7032,15 @@ function renderScopeCoverage() {
                     ? view.items.map(s => scopeStandardRow(s, { reasons: key === 'rec', meta: meta(s) })).join('')
                     : `<div class="scopecov-empty">${view.empty}</div>`}
             </div>
-        </section>`;
+        </section>
+        ${elsewhere.length ? `
+        <details class="scopeadm-outstanding" style="margin-top:12px;">
+            <summary>Testable, but not approved here — ${elsewhere.length}</summary>
+            <div style="padding:0 15px 14px;">
+                <p class="scopecov-hint" style="margin:0 0 6px;">Competencies set in the Employee Hub or imported from sample history. Auto-assign uses them, but nobody approved them through this queue.</p>
+                ${elsewhere.map(s => scopeStandardRow(s, { meta: `${s.holders.length} tester${s.holders.length === 1 ? '' : 's'}` })).join('')}
+            </div>
+        </details>` : ''}`;
 }
 
 async function loadScopeSubmissions() {
