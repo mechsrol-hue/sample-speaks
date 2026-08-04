@@ -4396,8 +4396,11 @@ html {
 .myscope-is-row.is-static:hover { background: transparent; }
 .myscope-step-actions {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
+    gap: 10px;
     margin-top: 12px;
+    flex-wrap: wrap;
 }
 .myscope-next-btn {
     background: #2563eb;
@@ -5082,6 +5085,7 @@ tr:hover .scopeadm-del { color: #94a3b8; }
 .scoperev-tag.is-kept { color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; }
 .scoperev-tag.is-drop { color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; }
 .scoperev-tag.is-ok { color: #166534; background: #dcfce7; border: 1px solid #86efac; }
+.scoperev-tag.is-file { color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; text-transform: none; letter-spacing: 0; }
 .scoperev-row.is-settled { opacity: 0.72; }
 /* Always on show. Revealing them on hover hid the whole per-standard decision
    from anyone who didn't happen to mouse over a row. */

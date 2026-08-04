@@ -1513,6 +1513,7 @@ window.addEventListener('unhandledrejection', function(e) {
                             </div>
                         </div>
                         <div class="myscope-step-actions">
+                            <button type="button" class="myscope-link-btn" id="scope-show-unfiled-btn" onclick="scopeRevealCatalogue()" style="margin-right:auto;">Missing a standard you test?</button>
                             <button type="button" class="myscope-next-btn" id="scope-to-shortlist-btn" onclick="scopeGoToShortlist()" disabled>Next — see the recommendation</button>
                         </div>
                     </section>
@@ -1617,6 +1618,7 @@ window.addEventListener('unhandledrejection', function(e) {
                                 style="padding:8px 11px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.86rem; background:#fff; color:#0f172a;">
                             <option value="unfiled">Not filed yet</option>
                             <option value="filed">Already filed</option>
+                            <option value="nottested">We don't test these</option>
                             <option value="all">All standards</option>
                         </select>
                         <span id="scopeadm-filing-count" style="font-size:0.8rem; color:var(--text-muted);"></span>

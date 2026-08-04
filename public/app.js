@@ -5305,6 +5305,9 @@ async function syncISToMaster(isNumber) {
 // file the standards into sections and approve the declarations ("IS Scope Control").
 // Approval is what writes employee_competencies — the table the auto-assigner reads.
 let scopeCatalogue = { sections: [], standards: [], unfiled: 0 };
+// Mirrors the server: a standard the lab does not test. Not a section — it never
+// reaches a TP and is not counted as outstanding work.
+const SCOPE_NOT_TESTED = '__NOT_TESTED__';
 let scopeMine = null;                 // this TP's saved submission
 let scopeChosenSections = new Set();
 let scopeChosenIS = new Set();
@@ -5790,6 +5793,17 @@ function updateScopeStep2Chrome(opts = {}) {
         // to nothing — "Clear all" only really means empty when there's nothing held.
         clearAll.textContent = (hasSection && scopeHeldISForSection(sec).length) ? 'Reset to current scope' : 'Clear all';
     }
+
+    // Claiming an unfiled standard is how the lab's unfiled backlog gets sorted: the
+    // people who actually run them say so, and the OIC confirms on approval. Hidden
+    // once the pool is showing — the button's job is done.
+    const unfiledBtn = document.getElementById('scope-show-unfiled-btn');
+    if (unfiledBtn) {
+        const unfiledCount = (scopeCatalogue.standards || []).filter(x => !x.section && !x.notTested).length;
+        const useful = hasSection && unfiledCount && !scopeShowAllCatalogue && filedUnder.length;
+        unfiledBtn.style.display = useful ? '' : 'none';
+        unfiledBtn.textContent = `Missing one you test? Show ${unfiledCount} unfiled`;
+    }
     if (nextBtn) {
         nextBtn.disabled = !(namedSection && scopeChosenIS.size);
         nextBtn.textContent = scopeChosenIS.size
@@ -5841,14 +5855,15 @@ function scopeSectionPool() {
     const all = scopeCatalogue.standards || [];
     const activeLabel = scopeActiveSectionLabel();
     const filed = all.filter(s => s.section === activeLabel);
-    if (filed.length) return filed;
-    // Nothing filed here. Only show the whole catalogue if the TP explicitly asked
-    // for it — otherwise every unfiled section renders an identical list.
-    if (!scopeShowAllCatalogue) return [];
-    return all.map(s => ({
-        ...s,
-        section: s.section || scopeLocalFiling[s.isNumber] || activeLabel || 'Unfiled',
-    }));
+    // Standards the TP has claimed into this section but that nobody has filed yet —
+    // they belong in the list whether or not the unfiled pool is on show.
+    const claimed = all.filter(s => !s.section && scopeLocalFiling[s.isNumber] === activeLabel);
+    if (!scopeShowAllCatalogue) return [...filed, ...claimed];
+
+    // Asked for the rest: only what nobody has filed. Showing standards already filed
+    // under another section would invite claiming them away from it.
+    const unfiled = all.filter(s => !s.section && !s.notTested && !claimed.includes(s));
+    return [...filed, ...claimed, ...unfiled.map(s => ({ ...s, section: null }))];
 }
 
 function scopeRevealCatalogue() {
@@ -6036,11 +6051,12 @@ function renderScopeStandards(opts = {}) {
 
     if (!visible.length) {
         const total = (scopeCatalogue.standards || []).length;
+        const unfiledCount = (scopeCatalogue.standards || []).filter(x => !x.section && !x.notTested).length;
         el.innerHTML = (!filedUnder.length && !scopeShowAllCatalogue)
             ? `<div class="myscope-empty-box myscope-step2-placeholder">
                    <strong>Nothing filed under ${escapeHtml(scopeActiveSectionLabel())} yet</strong>
-                   <span class="myscope-empty-why">Your OIC files standards into sections in IS Scope Control. If you test something that belongs here, pick it from the full list.</span>
-                   <button type="button" class="myscope-next-btn" style="margin-top:12px;" onclick="scopeRevealCatalogue()">Show all ${total} standards</button>
+                   <span class="myscope-empty-why">Your OIC files standards into sections in IS Scope Control. If you test something that belongs here, add it from the standards nobody has filed yet.</span>
+                   <button type="button" class="myscope-next-btn" style="margin-top:12px;" onclick="scopeRevealCatalogue()">Show ${unfiledCount} unfiled standard(s)</button>
                </div>`
             : '<div class="myscope-empty-box">No standards match that filter.</div>';
         renderScopeSummary();
@@ -6546,8 +6562,10 @@ function renderScopeFilingTable() {
     const scope = document.getElementById('scopeadm-filing-scope')?.value || 'unfiled';
     const standards = all.filter(s => {
         if (q && !`${s.isNumber} ${s.title || ''}`.toLowerCase().includes(q)) return false;
-        if (scope === 'unfiled') return !scopeAdminMap[s.isNumber];
-        if (scope === 'filed') return !!scopeAdminMap[s.isNumber];
+        const filing = scopeAdminMap[s.isNumber];
+        if (scope === 'unfiled') return !filing;
+        if (scope === 'filed') return !!filing && filing !== SCOPE_NOT_TESTED;
+        if (scope === 'nottested') return filing === SCOPE_NOT_TESTED;
         return true;
     });
 
@@ -6565,6 +6583,7 @@ function renderScopeFilingTable() {
                         style="width:100%; padding:7px 9px; border:1px solid ${cur ? '#e2e8f0' : '#fcd34d'}; border-radius:7px; font-size:0.84rem; background:${cur ? '#fff' : '#fffbeb'}; color:#0f172a;">
                     <option value="">— unfiled —</option>
                     ${scopeAdminSections.map(sec => `<option value="${escapeHtml(sec)}"${sec === cur ? ' selected' : ''}>${escapeHtml(sec)}</option>`).join('')}
+                    <option value="${SCOPE_NOT_TESTED}"${cur === SCOPE_NOT_TESTED ? ' selected' : ''}>— we don't test this —</option>
                 </select>
             </td>
             <td style="text-align:right; white-space:nowrap;">
@@ -6597,12 +6616,13 @@ function renderScopeFilingTable() {
     }
 
     // An unfiled standard is invisible to every TP, so it can't be a silent state.
-    const unfiled = standards.filter(s => !scopeAdminMap[s.isNumber]).length;
+    const unfiled = all.filter(s => !scopeAdminMap[s.isNumber]).length;
+    const notTested = all.filter(s => scopeAdminMap[s.isNumber] === SCOPE_NOT_TESTED).length;
     if (warn) {
         warn.style.display = unfiled ? 'block' : 'none';
         warn.innerHTML = unfiled
             ? `<div style="background:#fffbeb; border:1px solid #fde68a; border-radius:9px; padding:11px 14px; font-size:0.85rem; color:#92400e;">
-                 <strong>${unfiled} standard${unfiled === 1 ? '' : 's'} not filed yet.</strong> Unfiled standards do not appear to any TP.
+                 <strong>${unfiled} standard${unfiled === 1 ? '' : 's'} not filed yet.</strong> They appear to no TP. File the ones this lab tests; mark the rest “we don't test this”.${notTested ? ` <span style="color:#78350f;">(${notTested} already marked.)</span>` : ''}
                </div>` : '';
     }
 }
@@ -7190,6 +7210,7 @@ function scopeSubmissionStandards(sub) {
     const rows = (sub.isNumbers || []).map(n => {
         const recommended = reasons.has(n);
         const verdict = decided[n];
+        const claimed = (sub.proposedFiling || []).find(f => f.isNumber === n);
         const state = verdict === 'approved' ? '<span class="scoperev-tag is-ok">approved</span>'
             : verdict === 'rejected' ? '<span class="scoperev-tag is-drop">sent back</span>'
             : toAdd.has(n)
@@ -7211,6 +7232,7 @@ function scopeSubmissionStandards(sub) {
                 ${recommended ? '<span class="scoperev-star" title="Recommended to continue testing">★</span>' : '<span class="scoperev-star is-off"></span>'}
                 <span class="scoperev-is">${escapeHtml(n)}</span>
                 ${state}
+                ${claimed && !verdict ? `<span class="scoperev-tag is-file">files under ${escapeHtml(claimed.section)}</span>` : ''}
                 ${actions}
             </div>
             ${why}
@@ -7362,9 +7384,9 @@ async function decideScope(userId, decision, isNumber) {
         }
         if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Decision failed'));
         showToast(
-            one ? `${isNumber} ${decision === 'approve' ? 'approved' : 'sent back'}.`
+            one ? `${isNumber} ${decision === 'approve' ? 'approved' : 'sent back'}${data.filedByApproval ? ` · filed into its section` : ''}.`
             : decision === 'approve'
-                ? `Approved — +${data.competenciesAdded || 0} added${data.competenciesRemoved ? `, −${data.competenciesRemoved} removed` : ''}.`
+                ? `Approved — +${data.competenciesAdded || 0} added${data.competenciesRemoved ? `, −${data.competenciesRemoved} removed` : ''}${data.filedByApproval ? ` · ${data.filedByApproval} newly filed` : ''}.`
                 : 'Sent back to the TP.', 'success');
         loadScopeSubmissions();
     } catch (e) {

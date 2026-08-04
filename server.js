@@ -3184,6 +3184,10 @@ const SCOPE_TP_PREFIX = 'is_scope_tp_';
 // sheet (server/is-scope-defaults.js). Defaults only — anything the admin saves in
 // IS Scope Control is stored in system_preferences and overrides this.
 const { DEFAULT_SECTIONS, defaultSectionFor: scopeDefaultSectionFor } = require('./server/is-scope-defaults');
+// A standard the lab does not test at all. Stored in the same filing map so it needs
+// no migration, but it is not a section: it never reaches a TP, and it is excluded
+// from the unfiled count so that count stays a list of real work.
+const SCOPE_NOT_TESTED = '__NOT_TESTED__';
 // New competencies start as Trainee, not Standard: Trainee is excluded from priority
 // samples and weighted 0.6, so an approval can't silently put an untested declaration
 // at full weight. Admin promotes from the Employee Hub as usual.
@@ -3250,13 +3254,18 @@ app.get('/api/is-scope/catalogue', async (req, res) => {
             .from('is_standards_vault').select('id, isNumber, title');
         if (error) throw error;
         const standards = (rows || [])
-            .map(r => ({
-                id: r.id,
-                isNumber: r.isNumber,
-                title: r.title || '',
-                // Admin's own filing wins; otherwise fall back to the lab's filing sheet.
-                section: sectionMap[r.isNumber] || scopeDefaultSectionFor(r.isNumber) || null
-            }))
+            .map(r => {
+                const filed = sectionMap[r.isNumber];
+                const notTested = filed === SCOPE_NOT_TESTED;
+                return {
+                    id: r.id,
+                    isNumber: r.isNumber,
+                    title: r.title || '',
+                    notTested,
+                    // Admin's own filing wins; otherwise fall back to the lab's sheet.
+                    section: notTested ? null : (filed || scopeDefaultSectionFor(r.isNumber) || null)
+                };
+            })
             .sort((a, b) => String(a.isNumber).localeCompare(String(b.isNumber), undefined, { numeric: true }));
         // A section that holds standards has to be pickable, even when it isn't in the
         // saved section list — otherwise the filing sheet's sections stay invisible to
@@ -3266,7 +3275,11 @@ app.get('/api/is-scope/catalogue', async (req, res) => {
         res.json({
             sections: allSections,
             standards,
-            unfiled: standards.filter(s => !s.section).length
+            // Only standards still awaiting a decision. One marked "not tested" has had
+            // its decision made, so counting it as outstanding would make the warning
+            // permanent and therefore ignorable.
+            unfiled: standards.filter(s => !s.section && !s.notTested).length,
+            notTested: standards.filter(s => s.notTested).length
         });
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -3304,8 +3317,10 @@ app.post('/api/is-scope/catalogue', requireAdmin, async (req, res) => {
         const cleanMap = {};
         for (const [isNumber, section] of Object.entries(sectionMap || {})) {
             // Drop filings that point at a section that no longer exists, otherwise a
-            // renamed section would leave standards invisible to every TP.
-            if (section && cleanSections.includes(section)) cleanMap[isNumber] = section;
+            // renamed section would leave standards invisible to every TP. The
+            // not-tested marker is not a section and always survives.
+            if (section === SCOPE_NOT_TESTED) cleanMap[isNumber] = section;
+            else if (section && cleanSections.includes(section)) cleanMap[isNumber] = section;
         }
         await writePref(SCOPE_SECTIONS_KEY, cleanSections);
         await writePref(SCOPE_MAP_KEY, cleanMap);
@@ -3467,7 +3482,7 @@ app.get('/api/is-scope/mine/:userId', async (req, res) => {
 
 app.post('/api/is-scope/mine', async (req, res) => {
     try {
-        const { userId, username, sections, isNumbers, proposedSection, note, recommendations, recommendedBy } = req.body || {};
+        const { userId, username, sections, isNumbers, proposedSection, note, recommendations, recommendedBy, proposedFiling } = req.body || {};
         if (!userId) return res.status(400).json({ error: 'Missing user.' });
         const cleanSections = [...new Set((sections || []).map(s => String(s).trim()).filter(Boolean))];
         // One section per submission — TP can submit again later for another section.
@@ -3494,6 +3509,9 @@ app.post('/api/is-scope/mine', async (req, res) => {
             sections: cleanSections,
             isNumbers: [...new Set(isNumbers.map(String))],
             proposedSection: String(proposedSection || '').trim(),
+            proposedFiling: (Array.isArray(proposedFiling) ? proposedFiling : [])
+                .map(f => ({ isNumber: String((f && f.isNumber) || '').trim(), section: String((f && f.section) || '').trim() }))
+                .filter(f => f.isNumber && f.section && declared.has(f.isNumber)),
             recommendations: cleanRecommendations,
             recommendedBy: String(recommendedBy || username || '').trim(),
             recommendedAt: new Date().toISOString(),
@@ -3748,6 +3766,19 @@ app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, r
             }
         }
 
+        // Approving also files the standards the TP said belong in their section —
+        // the point of showing them the unfiled pool. Existing filing is never
+        // overwritten: only standards nobody has filed can be claimed this way.
+        let filedByApproval = 0;
+        if (decision === 'approve') {
+            const claims = (sub.proposedFiling || []).filter(f => subset.includes(f.isNumber));
+            if (claims.length) {
+                const map = await readPref(SCOPE_MAP_KEY, {});
+                for (const f of claims) if (!map[f.isNumber]) { map[f.isNumber] = f.section; filedByApproval++; }
+                if (filedByApproval) await writePref(SCOPE_MAP_KEY, map);
+            }
+        }
+
         for (const n of subset) sub.decisions[n] = decision === 'approve' ? 'approved' : 'rejected';
 
         // The submission's own status follows from its standards: still pending while
@@ -3765,7 +3796,7 @@ app.post('/api/is-scope/submissions/:userId/decide', requireAdmin, async (req, r
         sub.competenciesRemoved = (sub.competenciesRemoved || 0) + competenciesRemoved;
         await writePref(key, sub);
 
-        res.json({ submission: sub, competenciesAdded, competenciesRemoved, decided: subset });
+        res.json({ submission: sub, competenciesAdded, competenciesRemoved, decided: subset, filedByApproval });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
