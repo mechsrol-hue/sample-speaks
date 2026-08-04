@@ -7125,13 +7125,15 @@ function renderScopeSubmissions() {
 
     if (outEl) {
         const out = scopeSubmissions.outstanding || [];
+        // A dozen names nobody is acting on right now, sitting under the queue that
+        // does need acting on. Kept to one line until asked for.
         outEl.innerHTML = out.length ? `
-            <div style="border:1px solid #e2e8f0; border-radius:11px; padding:15px; background:#f8fafc;">
-                <div style="font-weight:700; font-size:0.9rem; margin-bottom:8px;">Not responded yet — ${out.length}</div>
-                <div style="display:flex; flex-wrap:wrap; gap:7px;">
-                    ${out.map(o => `<span style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px 10px; font-size:0.79rem;">${escapeHtml(o.fullName || ('User #' + o.userId))}</span>`).join('')}
+            <details class="scopeadm-outstanding">
+                <summary>Not responded yet — ${out.length}</summary>
+                <div class="scopeadm-outstanding-names">
+                    ${out.map(o => `<span>${escapeHtml(o.fullName || ('User #' + o.userId))}</span>`).join('')}
                 </div>
-            </div>` : '';
+            </details>` : '';
     }
 
     const pendingPill = document.getElementById('scopeadm-pending-pill');

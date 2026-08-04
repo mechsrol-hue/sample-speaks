@@ -4980,6 +4980,39 @@ html {
 .scopeadm-btn:hover:not(:disabled) { background: #f8fafc; border-color: #94a3b8; }
 .scopeadm-btn:disabled { color: #94a3b8; background: #f1f5f9; border-color: #e2e8f0; cursor: not-allowed; }
 
+.scopeadm-outstanding {
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+    background: #f8fafc;
+    overflow: hidden;
+}
+.scopeadm-outstanding > summary {
+    padding: 13px 15px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #334155;
+    list-style: none;
+    user-select: none;
+}
+.scopeadm-outstanding > summary::-webkit-details-marker { display: none; }
+.scopeadm-outstanding > summary::before { content: '▸ '; color: #94a3b8; }
+.scopeadm-outstanding[open] > summary::before { content: '▾ '; }
+.scopeadm-outstanding > summary:hover { background: #f1f5f9; }
+.scopeadm-outstanding-names {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 0 15px 15px;
+}
+.scopeadm-outstanding-names span {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.79rem;
+}
+
 /* Print target. Lives in the page but is only ever visible on paper: printing a
    popup is blocked and printing an iframe is unreliable, so the print document is
    injected here and every other top-level node is hidden for the print run. */
