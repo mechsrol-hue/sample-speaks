@@ -7170,9 +7170,15 @@ function scopeSubmissionDiffChips(s) {
     return addChips + keptChips + removeChips;
 }
 
+// The counter is the only way in: the list stays out of the page until asked for,
+// rather than sitting at the bottom as a second thing to notice.
 function scopeShowOutstanding() {
-    const el = document.querySelector('.scopeadm-outstanding');
-    if (!el) return;
+    const wrap = document.getElementById('scopeadm-outstanding');
+    const el = wrap && wrap.querySelector('.scopeadm-outstanding');
+    if (!wrap || !el) return;
+    const showing = wrap.style.display !== 'none';
+    if (showing) { wrap.style.display = 'none'; el.open = false; return; }
+    wrap.style.display = 'block';
     el.open = true;
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
@@ -7232,6 +7238,8 @@ function renderScopeSubmissions() {
         const out = scopeSubmissions.outstanding || [];
         // A dozen names nobody is acting on right now, sitting under the queue that
         // does need acting on. Kept to one line until asked for.
+        // Hidden until the Not responded counter is clicked.
+        outEl.style.display = 'none';
         outEl.innerHTML = out.length ? `
             <details class="scopeadm-outstanding">
                 <summary>Not responded yet — ${out.length}</summary>
