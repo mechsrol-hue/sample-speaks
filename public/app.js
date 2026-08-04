@@ -5323,6 +5323,8 @@ let scopeReasons = {};
 // catalogue. Off by default — showing it automatically made every empty section
 // render the same 270 rows, so the sections looked identical.
 let scopeShowAllCatalogue = false;
+// When set, overrides auto-advance so completed progress steps can be revisited.
+let scopeViewStep = null;
 // Standards already written into this user's competencies by a past approval.
 let scopeApproved = [];
 
@@ -5385,7 +5387,6 @@ function scopeClaimIS(isNumber) {
     // Filed under a different section → switch to that section (still one at a time).
     if (filed && filed !== activeSec) {
         scopeChosenSections = new Set([filed]);
-        scopeOtherSectionText = '';
         for (const isNum of [...scopeChosenIS]) {
             const secFor = scopeSectionForIS(isNum);
             if (secFor && secFor !== filed) {
@@ -5423,6 +5424,7 @@ async function loadMyISScope() {
         scopeRecommended = new Set();
         scopeReasons = {};
         scopeShowAllCatalogue = false;
+        scopeViewStep = null;
         if (scopeMine && scopeMine.status === 'pending') {
             const one = (scopeMine.sections || [])[0];
             const proposed = (scopeMine.proposedSection || '').trim();
@@ -5526,18 +5528,7 @@ function renderScopeSections() {
         </button>`;
     }).join('');
 
-    const otherOn = scopeChosenSections.has(SCOPE_OTHER_KEY);
-    const otherMeta = scopeOtherSectionText.trim() || 'type section name';
-    const otherChip = `
-        <div class="myscope-chip-other-wrap ${otherOn ? 'is-on' : ''}">
-            <button type="button" class="myscope-chip myscope-chip-other ${otherOn ? 'is-on' : ''}" data-scope-section="${SCOPE_OTHER_KEY}">
-                <span class="myscope-chip-name">${otherOn ? '✓ ' : ''}Other</span>
-                <span class="myscope-chip-meta">${escapeHtml(otherMeta)}</span>
-            </button>
-            ${otherOn ? `<input type="text" id="scope-other-section" class="myscope-other-input" placeholder="Type section name…" value="${escapeHtml(scopeOtherSectionText)}">` : ''}
-        </div>`;
-
-    el.innerHTML = chips + otherChip || '<span class="myscope-empty">No sections set up yet — ask your OIC to configure IS Scope Control.</span>' + otherChip;
+    el.innerHTML = chips || '<span class="myscope-empty">No sections set up yet — ask your OIC to configure IS Scope Control.</span>';
     renderScopeSummary();
 }
 
@@ -5546,23 +5537,10 @@ function initMyScopeInteractions() {
     if (sectionsEl && !sectionsEl.dataset.bound) {
         sectionsEl.dataset.bound = '1';
         sectionsEl.addEventListener('click', (e) => {
-            if (e.target.closest('#scope-other-section')) return;
             const btn = e.target.closest('[data-scope-section]');
             if (!btn) return;
             e.preventDefault();
             toggleScopeSection(btn.getAttribute('data-scope-section'));
-        });
-        sectionsEl.addEventListener('input', (e) => {
-            if (e.target.id !== 'scope-other-section') return;
-            scopeOtherSectionText = e.target.value;
-            renderScopeSummary();
-            updateScopeStep2Chrome();
-            updateScopeStep3Chrome();
-            const wrap = e.target.closest('.myscope-chip-other-wrap');
-            const chipMeta = wrap?.querySelector('.myscope-chip-meta');
-            if (chipMeta) {
-                chipMeta.textContent = scopeOtherSectionText.trim() || 'type section name';
-            }
         });
     }
 
@@ -5592,6 +5570,16 @@ function initMyScopeInteractions() {
             updateScopeProgress();
         });
     }
+
+    const progressEl = document.getElementById('myscope-progress');
+    if (progressEl && !progressEl.dataset.bound) {
+        progressEl.dataset.bound = '1';
+        progressEl.addEventListener('click', (e) => {
+            const stepEl = e.target.closest('.myscope-progress-step.is-clickable[data-progress-step]');
+            if (!stepEl) return;
+            scopeGoToWizardStep(Number(stepEl.getAttribute('data-progress-step')));
+        });
+    }
 }
 
 function toggleScopeSection(sec) {
@@ -5600,10 +5588,8 @@ function toggleScopeSection(sec) {
         scopeChosenSections.clear();
         scopeChosenIS.clear();
         scopeLocalFiling = {};
-        if (sec === SCOPE_OTHER_KEY) scopeOtherSectionText = '';
     } else {
         scopeChosenSections = new Set([sec]);
-        if (sec !== SCOPE_OTHER_KEY) scopeOtherSectionText = '';
         const targetLabel = scopeActiveSectionLabel();
         // Drop IS claimed under a different section when switching.
         for (const isNum of [...scopeChosenIS]) {
@@ -5623,30 +5609,57 @@ function toggleScopeSection(sec) {
     scopeRecommended = new Set();
     scopeReasons = {};
     scopeShowAllCatalogue = false;
+    scopeViewStep = null;
     const searchEl = document.getElementById('scope-step2-search');
     if (searchEl) searchEl.value = '';
     renderScopeSections();
     renderScopeStandards({ scroll: scopeChosenSections.size === 1 });
     renderScopeShortlist();
-    if (scopeChosenSections.has(SCOPE_OTHER_KEY)) {
-        requestAnimationFrame(() => {
-            const inp = document.getElementById('scope-other-section');
-            if (inp) inp.focus();
-        });
-    }
+}
+
+function scopeWizardFocusStep() {
+    const hasSection = scopeChosenSections.size > 0;
+    const hasIS = scopeChosenIS.size > 0;
+    const shortlisted = hasIS && scopeStage === 'select';
+    const hasReco = scopeRecommended.size > 0;
+    if (!hasSection) return 1;
+    if (!shortlisted) return 2;
+    if (!hasReco) return 3;
+    return 4;
+}
+
+function scopeGoToWizardStep(step) {
+    const n = Number(step);
+    if (!Number.isInteger(n) || n < 1 || n > 4) return;
+    const hasSection = scopeChosenSections.size > 0;
+    const hasIS = scopeChosenIS.size > 0;
+    const shortlisted = hasIS && scopeStage === 'select';
+    const hasReco = scopeRecommended.size > 0;
+    const ready = hasSection && shortlisted && hasReco;
+    const stepUnlocked = [true, hasSection, shortlisted, ready];
+    if (!stepUnlocked[n - 1]) return;
+
+    scopeViewStep = n;
+    if (n <= 2) scopeStage = 'browse';
+    else if (n === 3 && hasIS) scopeStage = 'select';
+
+    renderScopeStandards();
+    renderScopeShortlist();
+    updateScopeProgress();
+    const el = document.getElementById(`myscope-step-${n}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function updateScopeProgress() {
     const hasSection = scopeChosenSections.size > 0;
-    const hasValidSection = hasSection && (
-        !scopeChosenSections.has(SCOPE_OTHER_KEY) || scopeOtherSectionText.trim()
-    );
+    const hasValidSection = hasSection;
     const hasIS = scopeChosenIS.size > 0;
     // Advanced past step 2 into the recommendation.
     const shortlisted = hasIS && scopeStage === 'select';
     const hasReco = scopeRecommended.size > 0;
     const ready = hasValidSection && shortlisted && hasReco;
-    const focusStep = !hasSection ? 1 : (!shortlisted || !hasValidSection ? 2 : (!hasReco ? 3 : 4));
+    const autoFocus = scopeWizardFocusStep();
+    const focusStep = scopeViewStep ?? autoFocus;
     const secLabel = hasSection ? scopeActiveSectionLabel() : '';
 
     const progress = document.getElementById('myscope-progress');
@@ -5658,9 +5671,12 @@ function updateScopeProgress() {
             ready ? 'active' : 'pending',
         ];
         progress.querySelectorAll('.myscope-progress-step').forEach((el, i) => {
-            el.classList.remove('is-active', 'is-done');
+            el.classList.remove('is-active', 'is-done', 'is-clickable');
             if (pStates[i] === 'active') el.classList.add('is-active');
-            if (pStates[i] === 'done') el.classList.add('is-done');
+            if (pStates[i] === 'done') {
+                el.classList.add('is-done');
+                if (i + 1 !== focusStep) el.classList.add('is-clickable');
+            }
             const dot = el.querySelector('.myscope-progress-dot');
             if (dot) dot.textContent = pStates[i] === 'done' ? '✓' : String(i + 1);
         });
@@ -5678,6 +5694,7 @@ function updateScopeProgress() {
             if (n === focusStep) el.classList.add('myscope-step-focus');
             else if (stepDone[n - 1]) el.classList.add('myscope-step-done');
             else if (!stepUnlocked[n - 1]) el.classList.add('myscope-step-locked');
+            el.hidden = n !== focusStep;
         }
         const numEl = document.getElementById(`scope-step${n}-num`);
         if (numEl) numEl.textContent = stepDone[n - 1] ? '✓' : String(n);
@@ -5698,8 +5715,6 @@ function updateScopeProgress() {
         if (ready) {
             hint.textContent = `Ready — ${scopeChosenIS.size} standard(s) in ${secLabel}, ${scopeRecommended.size} recommended. Submit when it looks right.`;
             hint.classList.add('is-ready');
-        } else if (hasSection && scopeChosenSections.has(SCOPE_OTHER_KEY) && !scopeOtherSectionText.trim()) {
-            hint.textContent = 'Type your section name under Other in step 1, then carry on.';
         } else if (hasSection && !hasIS) {
             hint.textContent = `Tick the standards you test in ${secLabel} — step 2.`;
         } else if (hasSection && !shortlisted) {
@@ -5738,7 +5753,7 @@ function updateScopeStep2Chrome(opts = {}) {
     const clearAll = document.getElementById('scope-clear-all-btn');
     const nextBtn = document.getElementById('scope-to-shortlist-btn');
     const hasSection = scopeChosenSections.size > 0;
-    const namedSection = hasSection && (!scopeChosenSections.has(SCOPE_OTHER_KEY) || scopeOtherSectionText.trim());
+    const namedSection = hasSection;
     const sec = hasSection ? scopeActiveSectionLabel() : '';
     const filedUnder = hasSection ? scopeFiledUnderActiveSection() : [];
     const total = (scopeCatalogue.standards || []).length;
@@ -5785,11 +5800,9 @@ function updateScopeStep2Chrome(opts = {}) {
 
 function scopeGoToShortlist() {
     if (!scopeChosenSections.size) return showToast('Pick a section in step 1 first.', 'info');
-    if (scopeChosenSections.has(SCOPE_OTHER_KEY) && !scopeOtherSectionText.trim()) {
-        return showToast('Type your section name under Other first.', 'info');
-    }
     if (!scopeChosenIS.size) return showToast('Tick at least one IS in step 2 first.', 'info');
     scopeStage = 'select';
+    scopeViewStep = null;
     updateScopeStep2Chrome();
     renderScopeShortlist({ scroll: true });
 }
@@ -5894,6 +5907,7 @@ function toggleScopeReco(isNumber) {
     } else {
         scopeRecommended.add(isNumber);
     }
+    if (scopeRecommended.has(isNumber) && scopeViewStep === 3) scopeViewStep = null;
     renderScopeShortlist();
     renderScopeSummary();
     // Focus the reason box straight away — a recommendation without a why is no use
@@ -6008,6 +6022,7 @@ function scopeClearAllIS() {
     scopeReasons = {};
     // Nothing left to recommend from — fall back to picking.
     scopeStage = 'browse';
+    scopeViewStep = null;
     renderScopeSections();
     renderScopeStandards();
     renderScopeShortlist();
@@ -6015,14 +6030,11 @@ function scopeClearAllIS() {
 
 async function submitMyScope() {
     if (scopeChosenSections.size !== 1) return showToast('Pick exactly one section.', 'error');
-    const isOther = scopeChosenSections.has(SCOPE_OTHER_KEY);
-    const otherName = scopeOtherSectionText.trim();
-    if (isOther && !otherName) return showToast('Type your section name under Other.', 'error');
     if (!scopeChosenIS.size) return showToast('Tick at least one standard you test.', 'error');
     if (!scopeRecommended.size) return showToast('Recommend at least one standard in step 3.', 'error');
     const btn = document.getElementById('scope-submit-btn');
     if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
-    const sectionLabel = isOther ? otherName : scopeActiveSectionLabel();
+    const sectionLabel = scopeActiveSectionLabel();
     try {
         const res = await fetch('/api/is-scope/mine', {
             method: 'POST',
@@ -6032,7 +6044,7 @@ async function submitMyScope() {
                 username: currentUser.username,
                 sections: [sectionLabel],
                 isNumbers: [...scopeChosenIS],
-                proposedSection: isOther ? otherName : '',
+                proposedSection: '',
                 recommendations: [...scopeRecommended].sort().map(isNumber => ({
                     isNumber,
                     reason: (scopeReasons[isNumber] || '').trim()
@@ -6090,6 +6102,11 @@ let scopeDirty = false;
 // a local edit like every other filing change, and looked identical to a saved
 // section — so it read as "added" right up until the page was reloaded.
 let scopeUnsavedSections = new Set();
+// Removing a section unfiles every standard under it, and the × sits inside a small
+// chip right beside the name — so it arms on the first click and only removes on a
+// second. Cleared on a timer so a stray click can't stay armed indefinitely.
+let scopeArmedSection = null;
+let scopeArmedTimer = null;
 
 function switchScopeAdminTab(which) {
     const panels = { filing: 'scopeadm-panel-filing', review: 'scopeadm-panel-review', coverage: 'scopeadm-panel-coverage' };
@@ -6130,10 +6147,15 @@ function renderScopeAdminSections() {
     if (!el) return;
     el.innerHTML = scopeAdminSections.map(sec => {
         const fresh = scopeUnsavedSections.has(sec);
+        const armed = scopeArmedSection === sec;
+        const bg = armed ? '#fef2f2' : (fresh ? '#fffbeb' : '#f1f5f9');
+        const bd = armed ? '#fecaca' : (fresh ? '#fcd34d' : '#e2e8f0');
+        const fg = armed ? '#b91c1c' : (fresh ? '#92400e' : 'inherit');
         return `
-        <span style="display:inline-flex; align-items:center; gap:6px; background:${fresh ? '#fffbeb' : '#f1f5f9'}; border:1px solid ${fresh ? '#fcd34d' : '#e2e8f0'}; border-radius:999px; padding:5px 8px 5px 13px; font-size:0.83rem; font-weight:600; color:${fresh ? '#92400e' : 'inherit'};">
-            ${escapeHtml(sec)}${fresh ? '<em style="font-style:normal; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.3px;">unsaved</em>' : ''}
-            <button onclick="removeScopeSection('${escapeHtml(sec)}')" title="Remove this section" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:0.95rem; line-height:1; padding:0 2px;">×</button>
+        <span style="display:inline-flex; align-items:center; gap:6px; background:${bg}; border:1px solid ${bd}; border-radius:999px; padding:5px 8px 5px 13px; font-size:0.83rem; font-weight:600; color:${fg};">
+            ${escapeHtml(sec)}${fresh && !armed ? '<em style="font-style:normal; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.3px;">unsaved</em>' : ''}
+            <button onclick="removeScopeSection('${escapeHtml(sec)}')" title="${armed ? 'Click again to remove' : 'Remove this section'}"
+                    style="background:${armed ? '#b91c1c' : 'none'}; color:${armed ? '#fff' : '#94a3b8'}; border:none; border-radius:${armed ? '999px' : '0'}; cursor:pointer; font-size:${armed ? '0.68rem' : '0.95rem'}; font-weight:700; line-height:1; padding:${armed ? '3px 8px' : '0 2px'};">${armed ? 'remove?' : '×'}</button>
         </span>`;
     }).join('');
 }
@@ -6190,14 +6212,47 @@ async function addScopeSection() {
     renderScopeFilingTable();
 }
 
+function disarmScopeSection(rerender) {
+    scopeArmedSection = null;
+    if (scopeArmedTimer) { clearTimeout(scopeArmedTimer); scopeArmedTimer = null; }
+    if (rerender) renderScopeAdminSections();
+}
+
 function removeScopeSection(sec) {
     const filed = Object.values(scopeAdminMap).filter(v => v === sec).length;
-    if (filed && !confirm(`${filed} standard(s) are filed under “${sec}”. Removing it will leave them unfiled. Continue?`)) return;
+
+    // First click arms only.
+    if (scopeArmedSection !== sec) {
+        scopeArmedSection = sec;
+        if (scopeArmedTimer) clearTimeout(scopeArmedTimer);
+        scopeArmedTimer = setTimeout(() => disarmScopeSection(true), 5000);
+        renderScopeAdminSections();
+        showToast(filed
+            ? `Click again to remove “${sec}” — ${filed} standard(s) filed under it will become unfiled.`
+            : `Click again to remove “${sec}”.`, 'info');
+        return;
+    }
+
+    disarmScopeSection(false);
+    // Losing filing work is worse than an extra keystroke, so a section that holds
+    // standards needs the name typed rather than a reflex OK.
+    if (filed) {
+        const typed = prompt(`Removing “${sec}” will unfile ${filed} standard(s) and hide them from every TP.\n\nType the section name to confirm:`);
+        if ((typed || '').trim().toLowerCase() !== sec.toLowerCase()) {
+            renderScopeAdminSections();
+            return showToast(typed === null ? 'Nothing removed.' : 'Name did not match — nothing removed.', 'info');
+        }
+    }
+
     scopeAdminSections = scopeAdminSections.filter(s => s !== sec);
+    scopeUnsavedSections.delete(sec);
     for (const [k, v] of Object.entries(scopeAdminMap)) if (v === sec) delete scopeAdminMap[k];
+    // Every other filing edit marks the form dirty; this one did not, so a removal
+    // left the Save button looking as if there was nothing to save.
+    scopeDirty = true;
     renderScopeAdminSections();
     renderScopeFilingTable();
-    renderScopeBySection();
+    showToast(`“${sec}” removed here${filed ? ` — ${filed} standard(s) now unfiled` : ''}. Press “Save filing” to make it stick.`, 'info');
 }
 
 function renderScopeFilingTable() {
