@@ -7059,7 +7059,8 @@ function renderScopeCoverage() {
         },
         appr: {
             label: 'Approved',
-            hint: 'Standards approved through this queue — an OIC pressed Approve on a submission and it was written into that person\'s competencies.',
+            // No hint: the pill already says Approved, and each row names its tester.
+            hint: '',
             empty: 'Nothing has been approved here yet. Approving a submission in tab 2 puts it in this list.',
             // Only what this queue produced. A competency set in the Employee Hub or
             // imported from sample history is real, but it was never approved here —
@@ -7090,7 +7091,7 @@ function renderScopeCoverage() {
 
     listEl.innerHTML = `
         <section class="scopecov-block is-${key}">
-            <p class="scopecov-hint">${view.hint}</p>
+            ${view.hint ? `<p class="scopecov-hint">${view.hint}</p>` : ''}
             <div class="scopecov-rows">
                 ${view.items.length
                     ? view.items.map(s => scopeStandardRow(s, { reasons: key === 'rec', meta: meta(s) })).join('')
