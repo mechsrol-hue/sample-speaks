@@ -915,6 +915,13 @@ window.addEventListener('unhandledrejection', function(e) {
             <i class="fas fa-bullseye main-icon"></i> My IS Scope
             <span id="nav-scope-badge" style="display:none; margin-left:8px; background:#ef4444; color:#fff; border-radius:999px; padding:1px 7px; font-size:0.62rem; font-weight:700;">!</span>
         </a>
+        <!-- The OIC counterpart. Top-level for the same reason, and because the Admin
+             Control submenu it used to live in is only ever shown to super admins —
+             an OIC could not reach the screen where they approve their own TPs. -->
+        <a href="#" class="nav-item tab-btn" id="nav-is-scope-control" onclick="switchTab('tab-is-scope-admin')" style="display:none;">
+            <i class="fas fa-folder-open main-icon"></i> IS Scope Control
+            <span id="nav-scope-control-badge" style="display:none; margin-left:8px; background:#ef4444; color:#fff; border-radius:999px; padding:1px 7px; font-size:0.62rem; font-weight:700;">0</span>
+        </a>
 
         <a href="#" class="nav-item toggle-menu">
             <i class="fas fa-list-alt main-icon"></i> Sample Handling

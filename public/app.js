@@ -2747,6 +2747,10 @@ function toggleAdminViews() {
     if (myScopeBtn) myScopeBtn.style.display = (currentUser && !isAdmin) ? '' : 'none';
     const scopeAdminBtn = document.getElementById('tab-btn-is-scope-admin');
     if (scopeAdminBtn) scopeAdminBtn.style.display = isAdmin ? '' : 'none';
+    // Top-level entry: the submenu above is super-admin-only, so without this an OIC
+    // has no route to the screen where they approve their TPs' declarations.
+    const scopeControlNav = document.getElementById('nav-is-scope-control');
+    if (scopeControlNav) scopeControlNav.style.display = isAdmin ? '' : 'none';
     if (currentUser && !isAdmin) updateScopeNavBadge();
     if (isAdmin && typeof loadScopeSubmissions === 'function') { try { loadScopeSubmissions(); } catch (e) {} }
 
@@ -6572,8 +6576,9 @@ function renderScopeSubmissions() {
         pendingPill.style.display = c.pending ? 'inline-block' : 'none';
         pendingPill.textContent = c.pending || '';
     }
-    const navBadge = document.getElementById('nav-scope-admin-badge');
-    if (navBadge) {
+    for (const id of ['nav-scope-admin-badge', 'nav-scope-control-badge']) {
+        const navBadge = document.getElementById(id);
+        if (!navBadge) continue;
         navBadge.style.display = c.pending ? 'inline-block' : 'none';
         navBadge.textContent = c.pending || '';
     }
