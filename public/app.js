@@ -5720,8 +5720,15 @@ function updateScopeProgress() {
     const step3Next = document.getElementById('scope-step3-next');
     if (step3Next) {
         step3Next.textContent = !shortlisted ? ''
-            : hasReco ? `✓ ${scopeRecommended.size} recommended — submit for approval.`
+            : hasReco ? `✓ ${scopeRecommended.size} recommended — continue when you're done ticking.`
             : 'Tick at least one you recommend the lab carries on testing.';
+    }
+    const toSubmitBtn = document.getElementById('scope-to-submit-btn');
+    if (toSubmitBtn) {
+        toSubmitBtn.disabled = !hasReco;
+        toSubmitBtn.textContent = hasReco
+            ? `Continue to submit — ${scopeRecommended.size} recommended`
+            : 'Continue to submit';
     }
 
     const hint = document.getElementById('scope-submit-hint');
@@ -5824,7 +5831,8 @@ function scopeGoToShortlist() {
     if (!scopeChosenSections.size) return showToast('Pick a section in step 1 first.', 'info');
     if (!scopeChosenIS.size) return showToast('Tick at least one IS in step 2 first.', 'info');
     scopeStage = 'select';
-    scopeViewStep = null;
+    // Pin step 3 — don't leave scopeViewStep null or the first reco tick auto-jumps to 4.
+    scopeViewStep = 3;
     updateScopeStep2Chrome();
     renderScopeShortlist({ scroll: true });
 }
@@ -5929,7 +5937,9 @@ function toggleScopeReco(isNumber) {
     } else {
         scopeRecommended.add(isNumber);
     }
-    if (scopeRecommended.has(isNumber) && scopeViewStep === 3) scopeViewStep = null;
+    // Stay on step 3 so multiple IS can be recommended before submit.
+    // (Clearing scopeViewStep used to auto-focus step 4 and hide the shortlist.)
+    scopeViewStep = 3;
     renderScopeShortlist();
     renderScopeSummary();
     // Focus the reason box straight away — a recommendation without a why is no use
@@ -6194,16 +6204,141 @@ async function loadScopeAdmin() {
     try {
         const res = await fetch('/api/is-scope/catalogue');
         const cat = await res.json();
-        scopeAdminSections = cat.sections || [];
-        scopeUnsavedSections.clear();
-        scopeAdminMap = {};
-        for (const s of (cat.standards || [])) if (s.section) scopeAdminMap[s.isNumber] = s.section;
         scopeCatalogue = cat;
+        // This re-runs on every visit to the tab, not just a page reload — switching to
+        // another tab and back is enough. Overwriting the filing state while a section
+        // add or a filing change is still waiting on "Save filing" would throw it away
+        // just as surely as the reload the unsaved-section flow was built to survive,
+        // through a door that gets used far more often.
+        if (!scopeDirty) {
+            scopeAdminSections = cat.sections || [];
+            scopeUnsavedSections.clear();
+            scopeAdminMap = {};
+            for (const s of (cat.standards || [])) if (s.section) scopeAdminMap[s.isNumber] = s.section;
+        }
         renderScopeAdminSections();
         renderScopeFilingTable();
         loadScopeSubmissions();
     } catch (e) {
         showToast('Could not load IS Scope Control.', 'error');
+    }
+}
+
+// Print-friendly list of every standard grouped by filing section (plus Unfiled).
+// Printing used to open a blank popup and write into it, which browsers block by
+// default — the button appeared to do nothing at all. A same-origin iframe is not
+// popup-blocked, prints identically, and needs no permission from the user.
+function printHtmlDocument(html, label) {
+    try {
+        const frame = document.createElement('iframe');
+        frame.setAttribute('aria-hidden', 'true');
+        frame.style.cssText = 'position:fixed; right:0; bottom:0; width:0; height:0; border:0; visibility:hidden;';
+        document.body.appendChild(frame);
+
+        const cleanup = () => { try { frame.remove(); } catch (e) {} };
+        frame.onload = () => {
+            try {
+                frame.contentWindow.focus();
+                frame.contentWindow.print();
+            } catch (e) {
+                showToast(`Could not print ${label || 'this page'}: ${e.message}`, 'error');
+            }
+            // Chrome's print dialog is modal on the frame, so the node can only go
+            // once it closes; a minute is far longer than any dialog stays open.
+            setTimeout(cleanup, 60000);
+        };
+
+        const doc = frame.contentWindow.document;
+        doc.open();
+        doc.write(html);
+        doc.close();
+        return true;
+    } catch (e) {
+        showToast(`Could not print ${label || 'this page'}: ${e.message}`, 'error');
+        return false;
+    }
+}
+
+async function printScopeFiledStandards() {
+    try {
+        let standards = scopeCatalogue.standards || [];
+        let sections = scopeAdminSections.slice();
+        let map = scopeAdminMap;
+
+        if (!standards.length) {
+            const res = await fetch('/api/is-scope/catalogue');
+            const cat = await res.json();
+            standards = cat.standards || [];
+            sections = cat.sections || [];
+            map = {};
+            for (const s of standards) if (s.section) map[s.isNumber] = s.section;
+            scopeCatalogue = cat;
+            scopeAdminSections = sections;
+            scopeAdminMap = map;
+        }
+
+        const titleOf = {};
+        standards.forEach(s => { titleOf[s.isNumber] = s.title || ''; });
+
+        const groups = sections.map(sec => ({
+            section: sec,
+            items: standards
+                .filter(s => map[s.isNumber] === sec)
+                .sort((a, b) => a.isNumber.localeCompare(b.isNumber, undefined, { numeric: true }))
+        }));
+        const unfiled = standards
+            .filter(s => !map[s.isNumber])
+            .sort((a, b) => a.isNumber.localeCompare(b.isNumber, undefined, { numeric: true }));
+        if (unfiled.length) groups.push({ section: 'Unfiled', items: unfiled, warn: true });
+
+        const total = standards.length;
+        const filedCount = total - unfiled.length;
+        const now = new Date().toLocaleString('en-IN');
+        const appTitle = document.title || 'SRL LIIS';
+
+        const bodyHtml = groups.map(g => {
+            const rows = g.items.length
+                ? g.items.map(s => {
+                    const n = s.isNumber || s;
+                    const t = s.title != null ? s.title : (titleOf[n] || '');
+                    return `<tr><td class="isn">${escapeHtml(n)}</td><td>${escapeHtml(t)}</td></tr>`;
+                }).join('')
+                : '<tr><td colspan="2" class="empty">No standards filed here</td></tr>';
+            return `
+            <section class="${g.warn ? 'unfiled' : ''}">
+                <h2>${escapeHtml(g.section)} <span class="count">${g.items.length}</span></h2>
+                <table><tbody>${rows}</tbody></table>
+            </section>`;
+        }).join('') || '<p>No standards in the catalogue.</p>';
+
+        printHtmlDocument(`<!DOCTYPE html><html><head>
+            <title>${escapeHtml(appTitle)} — IS Scope Filed Standards</title>
+            <style>
+                body { font-family: Arial, sans-serif; font-size: 12px; margin: 24px; color: #111; }
+                h1 { text-align: center; margin: 0 0 4px; font-size: 16px; }
+                .sub { text-align: center; font-size: 13px; font-weight: 700; margin: 0 0 4px; }
+                .meta { text-align: center; color: #444; margin-bottom: 18px; font-size: 11px; }
+                section { margin-bottom: 18px; page-break-inside: avoid; }
+                h2 { font-size: 13px; margin: 0 0 8px; padding-bottom: 4px; border-bottom: 1.5px solid #111; }
+                h2 .count { font-weight: 600; color: #444; font-size: 11px; }
+                section.unfiled h2 { border-bottom-color: #92400e; color: #92400e; }
+                table { width: 100%; border-collapse: collapse; }
+                td { padding: 4px 6px; border-bottom: 1px solid #ddd; vertical-align: top; }
+                td.isn { font-weight: 700; white-space: nowrap; width: 140px; }
+                td.empty { color: #666; font-style: italic; }
+                @media print {
+                    body { margin: 12px; }
+                    section { page-break-inside: avoid; }
+                }
+            </style>
+        </head><body>
+            <h1>${escapeHtml(appTitle)}</h1>
+            <div class="sub">IS Scope — Filed Standards</div>
+            <div class="meta">Printed: ${escapeHtml(now)} &nbsp;|&nbsp; ${filedCount} filed · ${unfiled.length} unfiled · ${total} total</div>
+            ${bodyHtml}
+        </body></html>`, 'the filed standards');
+    } catch (e) {
+        showToast('Could not prepare the print list.', 'error');
     }
 }
 
@@ -6690,6 +6825,121 @@ async function setScopeReviewView(view) {
     renderScopeReviewViews();
 }
 
+// Print-friendly list of review submissions under To review / Recommended / Not recommended.
+async function printScopeReviewSubmissions() {
+    try {
+        // Review tab usually already loaded submissions; coverage may be missing if
+        // the user never opened Recommended / Not recommended.
+        if (!Object.keys(scopeSubmissions.counts || {}).length) await loadScopeSubmissions();
+        if (!(scopeCoverage.standards || []).length) await loadScopeCoverage();
+
+        const all = scopeCoverage.standards || [];
+        const recommended = all
+            .filter(s => s.recommendations && s.recommendations.length)
+            .sort((a, b) => a.isNumber.localeCompare(b.isNumber, undefined, { numeric: true }));
+        const notRecommended = all
+            .filter(s => (s.declaredBy || []).length && !(s.recommendations || []).length)
+            .sort((a, b) => a.isNumber.localeCompare(b.isNumber, undefined, { numeric: true }));
+        const subs = (scopeSubmissions.submissions || []).slice();
+        const pending = (scopeSubmissions.counts || {}).pending || subs.filter(s => s.status === 'pending').length;
+
+        const now = new Date().toLocaleString('en-IN');
+        const appTitle = document.title || 'SRL LIIS';
+        const statusLabel = (s) => s === 'pending' ? 'Pending' : s === 'approved' ? 'Approved' : s === 'rejected' ? 'Sent back' : (s || '');
+
+        const queueRows = subs.length
+            ? subs.map(s => {
+                const who = s.username || ('User #' + s.userId);
+                const sections = (s.sections || []).join(', ') || '—';
+                const isList = (s.isNumbers || []).join(', ') || '—';
+                const recs = (s.recommendations || []).map(r =>
+                    `${r.isNumber}${r.reason ? ': ' + r.reason : ''}`).join(' · ') || '—';
+                const when = s.submittedAt ? new Date(s.submittedAt).toLocaleString('en-IN') : '';
+                return `<tr>
+                    <td class="who">${escapeHtml(who)}</td>
+                    <td class="st">${escapeHtml(statusLabel(s.status))}</td>
+                    <td>${escapeHtml(sections)}</td>
+                    <td class="isn">${escapeHtml(isList)}</td>
+                    <td>${escapeHtml(recs)}</td>
+                    <td class="meta-cell">${escapeHtml(when)}</td>
+                </tr>`;
+            }).join('')
+            : '<tr><td colspan="6" class="empty">No submissions yet.</td></tr>';
+
+        const stdRows = (items, withReasons) => items.length
+            ? items.map(s => {
+                const declared = (s.declaredBy || []).map(d =>
+                    `${d.by || 'unknown'}${d.status ? ' (' + d.status + ')' : ''}`).join(', ') || '—';
+                const reasons = withReasons
+                    ? ((s.recommendations || []).map(r =>
+                        `${r.by || 'unknown'}: ${r.reason || 'No reason given.'}`).join(' · ') || '—')
+                    : '—';
+                return `<tr>
+                    <td class="isn">${escapeHtml(s.isNumber)}</td>
+                    <td>${escapeHtml(s.title || '')}</td>
+                    <td>${escapeHtml(s.section || '—')}</td>
+                    <td>${escapeHtml(declared)}</td>
+                    ${withReasons ? `<td>${escapeHtml(reasons)}</td>` : ''}
+                </tr>`;
+            }).join('')
+            : `<tr><td colspan="${withReasons ? 5 : 4}" class="empty">None</td></tr>`;
+
+        const bodyHtml = `
+            <section>
+                <h2>To review <span class="count">${pending} pending · ${subs.length} total</span></h2>
+                <table>
+                    <thead><tr><th>Submitter</th><th>Status</th><th>Sections</th><th>IS numbers</th><th>Recommendations</th><th>Submitted</th></tr></thead>
+                    <tbody>${queueRows}</tbody>
+                </table>
+            </section>
+            <section>
+                <h2>Recommended <span class="count">${recommended.length}</span></h2>
+                <table>
+                    <thead><tr><th>IS Number</th><th>Title</th><th>Section</th><th>Declared by</th><th>Reasons</th></tr></thead>
+                    <tbody>${stdRows(recommended, true)}</tbody>
+                </table>
+            </section>
+            <section>
+                <h2>Not recommended <span class="count">${notRecommended.length}</span></h2>
+                <table>
+                    <thead><tr><th>IS Number</th><th>Title</th><th>Section</th><th>Declared by</th></tr></thead>
+                    <tbody>${stdRows(notRecommended, false)}</tbody>
+                </table>
+            </section>`;
+
+        printHtmlDocument(`<!DOCTYPE html><html><head>
+            <title>${escapeHtml(appTitle)} — IS Scope Review Submissions</title>
+            <style>
+                body { font-family: Arial, sans-serif; font-size: 12px; margin: 24px; color: #111; }
+                h1 { text-align: center; margin: 0 0 4px; font-size: 16px; }
+                .sub { text-align: center; font-size: 13px; font-weight: 700; margin: 0 0 4px; }
+                .meta { text-align: center; color: #444; margin-bottom: 18px; font-size: 11px; }
+                section { margin-bottom: 20px; page-break-inside: avoid; }
+                h2 { font-size: 13px; margin: 0 0 8px; padding-bottom: 4px; border-bottom: 1.5px solid #111; }
+                h2 .count { font-weight: 600; color: #444; font-size: 11px; }
+                table { width: 100%; border-collapse: collapse; }
+                th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; color: #444; padding: 4px 6px; border-bottom: 1px solid #999; }
+                td { padding: 4px 6px; border-bottom: 1px solid #ddd; vertical-align: top; }
+                td.isn, td.who { font-weight: 700; }
+                td.st { white-space: nowrap; }
+                td.meta-cell { white-space: nowrap; color: #444; font-size: 11px; }
+                td.empty { color: #666; font-style: italic; }
+                @media print {
+                    body { margin: 12px; }
+                    section { page-break-inside: avoid; }
+                }
+            </style>
+        </head><body>
+            <h1>${escapeHtml(appTitle)}</h1>
+            <div class="sub">IS Scope — Review submissions</div>
+            <div class="meta">Printed: ${escapeHtml(now)} &nbsp;|&nbsp; ${pending} to review · ${recommended.length} recommended · ${notRecommended.length} not recommended</div>
+            ${bodyHtml}
+        </body></html>`, 'the review list');
+    } catch (e) {
+        showToast('Could not prepare the review print list.', 'error');
+    }
+}
+
 // Shared by the review tab's two standard lists: the IS number, and everything else
 // behind a click.
 function scopeStandardRow(s, opts = {}) {
@@ -6845,11 +7095,6 @@ function renderScopeCoverage() {
 
     listEl.innerHTML = `
         <section class="scopecov-block is-appr">
-            <p class="scopecov-hint">
-                Standards someone is approved to test — this is what auto-assign reads.
-                “via scope” means an approved submission from this queue created it; the rest
-                were set in the Employee Hub or imported from sample history.
-            </p>
             <div class="scopecov-rows">
                 ${items.length ? items.map(row).join('') : `<div class="scopecov-empty">Nobody is approved to test anything${sec ? ` in ${escapeHtml(sec)}` : ''} yet.</div>`}
             </div>
