@@ -1358,6 +1358,10 @@ tr:hover td {
 .is-vault-item {
     display: flex;
     align-items: center;
+    /* The status block is badge + Link button and does not shrink, so in this 360px
+       column it took 203px and squeezed the title to 77px — one word per line, 100px
+       tall. Wrapping lets it drop below the title instead of crushing it. */
+    flex-wrap: wrap;
     gap: 12px;
     padding: 12px 14px;
     border: 1px solid var(--border-light);
@@ -1386,7 +1390,7 @@ tr:hover td {
 }
 
 .is-vault-item-info {
-    flex: 1;
+    flex: 1 1 150px;
     min-width: 0;
 }
 
@@ -1403,10 +1407,19 @@ tr:hover td {
     font-size: 0.75rem;
     color: var(--text-muted);
     margin-top: 2px;
+    /* Titles run long — "Steel tubes for automotive purposes - Specification (Third
+       Revision)". One line with an ellipsis, like the IS number above it. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .is-vault-item-status {
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
 }
 
 /* Confidence / Status Badges */
