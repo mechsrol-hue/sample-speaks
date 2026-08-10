@@ -2744,6 +2744,10 @@ function toggleAdminViews() {
     // has no route to the screen where they approve their TPs' declarations.
     const scopeControlNav = document.getElementById('nav-is-scope-control');
     if (scopeControlNav) scopeControlNav.style.display = isAdmin ? '' : 'none';
+    // Extraction retires and re-links standards for the whole lab, so it stays admin-only
+    // — same reasoning as Report ▸ IS Standards & Report Formats.
+    const extractionNav = document.getElementById('nav-is-extraction');
+    if (extractionNav) extractionNav.style.display = isAdmin ? '' : 'none';
     if (currentUser && !isAdmin) updateScopeNavBadge();
     if (isAdmin && typeof loadScopeSubmissions === 'function') { try { loadScopeSubmissions(); } catch (e) {} }
 
@@ -5230,6 +5234,31 @@ async function fetchISVault() {
     }
 }
 
+function isCataloguedOnlyISDoc(doc) {
+    if (!doc) return false;
+    if (doc.status === 'catalogued') return true;
+    const clauseCount = Number(doc.clauseCount || 0);
+    const tableCount = Number(doc.tableCount || 0);
+    const paramCount = Number(doc.paramCount || 0);
+    const noConfidence = doc.confidenceScore == null || doc.confidenceScore === '';
+    return /not extracted/i.test(String(doc.pdfFileName || ''))
+        && !doc.hasReportFormat
+        && clauseCount === 0
+        && tableCount === 0
+        && paramCount === 0
+        && noConfidence;
+}
+
+function getISVaultStatusBadge(doc) {
+    if (isCataloguedOnlyISDoc(doc)) {
+        return '<span class="is-badge is-badge-low">○ Pending Extract</span>';
+    }
+    if (doc.status === 'has_uncertainties') {
+        return '<span class="is-badge is-badge-medium">⚠ Flags</span>';
+    }
+    return '<span class="is-badge is-badge-high">✓ Ready</span>';
+}
+
 // --- Render Empty State ---
 function renderISEmptyState() {
     const listEl = document.getElementById('is-vault-list');
@@ -5263,9 +5292,7 @@ function renderISVault() {
 
     listEl.innerHTML = isVaultData.map(doc => {
         const isActive = isActiveDocument && isActiveDocument.id === doc.id;
-        const statusBadge = doc.status === 'has_uncertainties'
-            ? '<span class="is-badge is-badge-medium">⚠ Flags</span>'
-            : '<span class="is-badge is-badge-high">✓ Ready</span>';
+        const statusBadge = getISVaultStatusBadge(doc);
         const date = new Date(doc.uploadedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
         return `
             <div class="is-vault-item ${isActive ? 'active' : ''}" onclick="selectISDocument(${doc.id})">
@@ -7685,6 +7712,18 @@ async function selectISDocument(docId) {
                     <div style="font-size:0.7rem; color:var(--text-muted); margin-top:3px;">Clause-by-clause template — open "Generate Report" for the live testing report.</div>
                 </div>
             `;
+        } else if (statusEl && isCataloguedOnlyISDoc(doc)) {
+            statusEl.style.display = 'flex';
+            statusEl.className = 'is-parse-status warning';
+            statusEl.innerHTML = `
+                <span style="font-size:1.2rem;">🗂️</span>
+                <div class="is-parse-progress">
+                    <div style="font-size:0.88rem; font-weight:600; color:var(--warning);">${escapeHtml(doc.isNumber)} — Catalogued only</div>
+                    <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">This standard was added from IS Scope, but its PDF has not been extracted yet.</div>
+                    <div class="is-parse-progress-bar" style="margin-top:6px;"><div class="is-parse-progress-fill" style="width:10%; background:var(--warning);"></div></div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-top:3px;">Upload the standard PDF in IS Intelligence to load clauses, parameters, and the test report.</div>
+                </div>
+            `;
         } else if (statusEl) {
             const conf = doc.confidenceScore || 0;
             const confPct = Math.round(conf * 100);
@@ -7715,6 +7754,7 @@ async function selectISDocument(docId) {
 function renderISSimpleResults() {
     const doc = isActiveDocument;
     if (!doc) return;
+    const reportBlocked = isCataloguedOnlyISDoc(doc) && !isActiveTemplate;
 
     const emptyEl = document.getElementById('is-empty-state');
     const resultsEl = document.getElementById('is-results-panel');
@@ -7725,20 +7765,34 @@ function renderISSimpleResults() {
     // so they're not repeated here.
     const headerEl = document.getElementById('is-results-header');
     if (headerEl) {
+        const reportBtnStyle = reportBlocked
+            ? 'background:#e2e8f0; color:#94a3b8; border:1px solid #cbd5e1; padding:9px 16px; border-radius:8px; cursor:not-allowed; font-weight:600; font-size:0.88rem; white-space:nowrap;'
+            : 'background:rgba(59,130,246,0.15); color:#93c5fd; border:1px solid rgba(59,130,246,0.3); padding:9px 16px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.88rem; white-space:nowrap;';
         headerEl.innerHTML = `
             <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:16px 20px; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:10px;">
                 <div>
                     <div style="font-size:1.1rem; font-weight:700; color:var(--text-main);">${escapeHtml(doc.isNumber)}</div>
                     <div style="font-size:0.85rem; color:var(--text-muted); margin-top:3px;">${escapeHtml(doc.title || '')}</div>
                 </div>
-                <button onclick="openISReport()" class="btn-premium" style="background:rgba(59,130,246,0.15); color:#93c5fd; border:1px solid rgba(59,130,246,0.3); padding:9px 16px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.88rem; white-space:nowrap;">📋 Generate Report</button>
+                <button ${reportBlocked ? 'disabled title="Upload the standard PDF in IS Intelligence first."' : 'onclick="openISReport()"'} class="btn-premium" style="${reportBtnStyle}">📋 ${reportBlocked ? 'Extract PDF First' : 'Generate Report'}</button>
             </div>
         `;
     }
 
     // Dimension/OD table — or, when an agent template exists, a clause-by-clause parameter overview.
     const odEl = document.getElementById('is-od-table-section');
-    if (odEl && isActiveTemplate) {
+    if (odEl && reportBlocked) {
+        odEl.style.display = 'block';
+        odEl.innerHTML = `
+            <div style="padding:18px 20px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.24); border-radius:10px;">
+                <div style="font-weight:700; font-size:0.92rem; color:var(--text-main);">PDF extraction pending</div>
+                <div style="font-size:0.82rem; color:var(--text-muted); margin-top:6px; line-height:1.55;">
+                    This standard is present in the vault as a catalogue entry from IS Scope, but it does not have extracted clauses, tables, or report parameters yet.
+                    Upload the source PDF here to extract it fully and unlock the report.
+                </div>
+            </div>
+        `;
+    } else if (odEl && isActiveTemplate) {
         const params = isActiveTemplate.parameters || [];
         const esc = s => escapeHtml(String(s == null ? '' : s));
         odEl.style.display = 'block';
@@ -7801,7 +7855,7 @@ function renderISSimpleResults() {
     // Clauses accordion — hide the old pipeline clauses when an agent template is the source of truth.
     const clausesSection = document.getElementById('is-clauses-section');
     if (clausesSection) {
-        clausesSection.style.display = (!isActiveTemplate && isParsedClauses.length > 0) ? 'block' : 'none';
+        clausesSection.style.display = (!reportBlocked && !isActiveTemplate && isParsedClauses.length > 0) ? 'block' : 'none';
         if (!isActiveTemplate) renderISClauses();
     }
 }
@@ -7818,6 +7872,10 @@ function isVaultReport4985() {
 async function openISReport() {
     const doc = isActiveDocument;
     if (!doc) { showToast('Select a standard first.', 'error'); return; }
+    if (isCataloguedOnlyISDoc(doc)) {
+        showToast('This standard is catalogued in IS Scope, but its PDF has not been extracted yet.', 'error');
+        return;
+    }
     const modal = document.getElementById('is-report-modal');
     const tbody = document.getElementById('is-report-tbody');
     const titleEl = document.getElementById('is-report-title');

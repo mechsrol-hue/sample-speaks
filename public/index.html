@@ -918,6 +918,13 @@ window.addEventListener('unhandledrejection', function(e) {
         <!-- The OIC counterpart. Top-level for the same reason, and because the Admin
              Control submenu it used to live in is only ever shown to super admins —
              an OIC could not reach the screen where they approve their own TPs. -->
+        <!-- Upload a standard and run the agent extraction. It had no sidebar entry at
+             all: the only ways in were a button inside Report ▸ IS Standards & Report
+             Formats and a tile in the profile modal, so the screen was effectively
+             unreachable unless you already knew where it hid. -->
+        <a href="#" class="nav-item tab-btn" id="nav-is-extraction" onclick="switchTab('tab-is-intelligence')" style="display:none;">
+            <i class="fas fa-file-import main-icon"></i> IS Extraction
+        </a>
         <a href="#" class="nav-item tab-btn" id="nav-is-scope-control" onclick="switchTab('tab-is-scope-admin')" style="display:none;">
             <i class="fas fa-folder-open main-icon"></i> IS Scope Control
             <span id="nav-scope-control-badge" style="display:none; margin-left:8px; background:#ef4444; color:#fff; border-radius:999px; padding:1px 7px; font-size:0.62rem; font-weight:700;">0</span>
@@ -929,12 +936,46 @@ window.addEventListener('unhandledrejection', function(e) {
         </a>
         <div class="sub-menu" style="display: none;">
             <a href="#" class="sub-nav-item tab-btn" id="nav-new-sample-receive" onclick="switchTab('tab-new-sample-receive')">New Sample Receive SRL</a>
+            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Suppl. Sample Receive<span class="nav-soon-badge">Soon</span></a>
+            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Amend. Sample Receive<span class="nav-soon-badge">Soon</span></a>
+            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Pending Amend. Requests<span class="nav-soon-badge">Soon</span></a>
+
             <a href="#" class="sub-nav-item tab-btn" id="tab-btn-lis" onclick="switchTab('tab-liis')" style="display:none;">Verify Test Results</a>
+            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Reports Pending<span class="nav-soon-badge">Soon</span></a>
+            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Amend. Reports Pending<span class="nav-soon-badge">Soon</span></a>
             <a href="#" class="sub-nav-item tab-btn" onclick="switchTab('tab-new-sample-receive'); showTestingCompleted()">Testing Completed</a>
         </div>
 
-        <a href="#" class="nav-item tab-btn" id="tab-btn-equipment" onclick="switchTab('tab-equipment')">
-            <i class="fas fa-check main-icon"></i> Equipment List
+        <a href="#" class="nav-item toggle-menu">
+            <i class="fas fa-comments main-icon"></i> Sample Clarifications
+            <i class="fas fa-chevron-right chevron"></i>
+        </a>
+        <div class="sub-menu" style="display: none;">
+            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Pending Clarifications<span class="nav-soon-badge">Soon</span></a>
+            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Resolved Clarifications<span class="nav-soon-badge">Soon</span></a>
+        </div>
+
+        <a href="#" class="nav-item toggle-menu">
+            <i class="fas fa-warehouse main-icon"></i> Store
+            <i class="fas fa-chevron-right chevron"></i>
+        </a>
+        <div class="sub-menu" style="display: none;">
+            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Inventory<span class="nav-soon-badge">Soon</span></a>
+            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Requisitions<span class="nav-soon-badge">Soon</span></a>
+        </div>
+
+        <a href="#" class="nav-item toggle-menu">
+            <i class="fas fa-check main-icon"></i> Equipment
+            <i class="fas fa-chevron-right chevron"></i>
+        </a>
+        <div class="sub-menu" style="display: none;">
+            <a href="#" class="sub-nav-item tab-btn" id="tab-btn-equipment" onclick="switchTab('tab-equipment')">Equipment List</a>
+            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Maintenance Log<span class="nav-soon-badge">Soon</span></a>
+        </div>
+
+        <!-- Formula Mapping (New - matches screenshot) -->
+        <a href="#" class="nav-item tab-btn" onclick="showComingSoon()">
+            <i class="fas fa-table main-icon"></i> Formula Mapping SRL <span class="nav-soon-badge">Soon</span>
         </a>
 
         <!-- Admin Control (Hidden for standard OIC layout visualization) -->
@@ -945,11 +986,28 @@ window.addEventListener('unhandledrejection', function(e) {
         <div class="sub-menu" style="display: none;">
             <a href="#" class="sub-nav-item tab-btn" id="tab-btn-employees" onclick="switchTab('tab-employees')">Employee Hub</a>
             <a href="#" class="sub-nav-item tab-btn" id="tab-btn-is-scope-admin" onclick="switchTab('tab-is-scope-admin')">IS Scope Control<span id="nav-scope-admin-badge" style="display:none; margin-left:6px; background:#ef4444; color:#fff; border-radius:999px; padding:1px 6px; font-size:0.62rem; font-weight:700;">0</span></a>
-            <a href="#" class="sub-nav-item tab-btn" id="tab-btn-is-manager" onclick="switchTab('tab-is-manager')" style="display:none;">IS Standards &amp; Report Formats</a>
+            <a href="#" class="sub-nav-item tab-btn" id="tab-btn-leaves" onclick="switchTab('tab-leaves')">Leaves Manager</a>
             <a href="#" class="sub-nav-item tab-btn" id="tab-btn-assigner" onclick="switchTab('tab-assigner')">Auto Assigner</a>
             <a href="#" class="sub-nav-item tab-btn" id="tab-btn-preferences" onclick="switchTab('tab-preferences')">Preferences</a>
+            <a href="#" class="sub-nav-item tab-btn" id="tab-btn-audit" onclick="switchTab('tab-audit')">Audit Log</a>
             <a href="#" class="sub-nav-item tab-btn" id="tab-btn-super-admin" onclick="switchTab('tab-super-admin')">Confidential Vault</a>
         </div>
+
+        <a href="#" class="nav-item toggle-menu">
+            <i class="fas fa-users main-icon"></i> Report
+            <i class="fas fa-chevron-right chevron"></i>
+        </a>
+        <div class="sub-menu" style="display: none;">
+            <!-- Admin-only: retiring a standard or re-linking it to Master changes what the
+                 whole lab tests against, so the entry is hidden for TP accounts. -->
+            <a href="#" class="sub-nav-item tab-btn" id="tab-btn-is-manager" onclick="switchTab('tab-is-manager')" style="display:none;">IS Standards &amp; Report Formats</a>
+            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Generate Report<span class="nav-soon-badge">Soon</span></a>
+            <a href="#" class="sub-nav-item tab-btn" onclick="showComingSoon()">Archived Reports<span class="nav-soon-badge">Soon</span></a>
+        </div>
+
+        <a href="#" class="nav-item tab-btn" onclick="showComingSoon()">
+            <i class="fas fa-book main-icon"></i> User Manual <span class="nav-soon-badge">Soon</span>
+        </a>
     </nav>
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <div class="app-right-wrapper">
