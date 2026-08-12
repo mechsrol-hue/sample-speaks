@@ -8049,7 +8049,7 @@ function renderVaultISReportRows() {
         if (p.section && p.section !== lastSection) { rows.push({ section: p.section }); lastSection = p.section; }
 
         if (p.conditionalOn && !tplCondMet(p.conditionalOn, sel)) {
-            rows.push({ clause: p.clauseRef, name: p.parameterName, method: p.testMethod, spec: '—', na: true });
+            rows.push({ clause: p.clauseRef, name: p.parameterName, method: p.testMethod, testClass: p.acceptanceOrType, spec: '—', na: true });
             return;
         }
         // A parameter that names the construction it belongs to only applies to that
@@ -8065,11 +8065,11 @@ function renderVaultISReportRows() {
             const e = p.valueTable[p.variesBy.map(d => sel[d]).join('|')];
             const isQ = p.limitType === 'qualitative' || p.limitType === 'text';
             if (!e) {
-                rows.push({ clause: p.clauseRef, name: p.parameterName, method: p.testMethod,
+                rows.push({ clause: p.clauseRef, name: p.parameterName, method: p.testMethod, testClass: p.acceptanceOrType,
                     spec: '— (pending re-extract)', type: isQ ? 'Qualitative' : 'Quantitative', needsReview: true });
             } else {
                 rows.push({
-                    clause: p.clauseRef, name: p.parameterName, method: p.testMethod,
+                    clause: p.clauseRef, name: p.parameterName, method: p.testMethod, testClass: p.acceptanceOrType,
                     spec: specFromEntry(e, p.unit, p.specText),
                     min: e.min != null ? e.min : '', max: e.max != null ? e.max : '',
                     expected: e.expected != null ? e.expected : (p.expected || ''),
@@ -8082,7 +8082,7 @@ function renderVaultISReportRows() {
             p.gridRows.forEach(gr => {
                 const val = grid ? tplResolvePath(grid, gr.path, sel) : null;
                 rows.push({
-                    clause: p.clauseRef, name: `${p.parameterName} (${gr.label})`, method: p.testMethod,
+                    clause: p.clauseRef, name: `${p.parameterName} (${gr.label})`, method: p.testMethod, testClass: p.acceptanceOrType,
                     spec: (val == null) ? '— (pending re-extract)' : `${gr.label} ${val} ${p.unit || ''}`.trim(),
                     min: gr.limit === 'min' ? val : '', max: gr.limit === 'max' ? val : '',
                     type: 'Quantitative', needsReview: val == null,
@@ -8118,6 +8118,12 @@ function renderTemplateRowsToTbody(rows) {
             return `<tr class="tpl-section"><td colspan="4" style="padding:9px 10px; background:rgba(99,102,241,0.10); font-weight:700; font-size:0.8rem; color:var(--text-main); letter-spacing:0.4px;">${escapeHtml(r.section)}</td></tr>`;
         }
         const methodSub = r.method ? `<div style="font-size:0.68rem; color:var(--text-muted); margin-top:2px;">method: ${escapeHtml(r.method)}</div>` : '';
+        // Table 1's classification, captured at extraction but invisible until now.
+        // Single-valued: a test the schedule lists under several groups (conductor
+        // resistance is routine AND acceptance AND type) shows its primary class.
+        const classChip = r.testClass
+            ? ` <span title="Test classification per the standard's test schedule (Table 1)" style="font-size:0.6rem; background:rgba(97,175,239,0.15); color:#61afef; padding:1px 6px; border-radius:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.3px;">${escapeHtml(r.testClass)}</span>`
+            : '';
         const flag = r.needsReview ? ` <span style="font-size:0.62rem; background:rgba(245,158,11,0.18); color:var(--warning); padding:1px 6px; border-radius:8px; font-weight:700;">REVIEW</span>` : '';
         let observed;
         if (r.na) {
@@ -8132,7 +8138,7 @@ function renderTemplateRowsToTbody(rows) {
         }
         return `<tr>
             <td style="${cell} white-space:nowrap; font-weight:600;">${escapeHtml(String(r.clause || ''))}</td>
-            <td style="${cell}">${escapeHtml(String(r.name || ''))}${flag}${methodSub}</td>
+            <td style="${cell}">${escapeHtml(String(r.name || ''))}${classChip}${flag}${methodSub}</td>
             <td style="${cell} color:#61afef;">${escapeHtml(String(r.spec || ''))}</td>
             <td style="${cell}">${observed}</td>
         </tr>`;
