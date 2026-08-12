@@ -1,0 +1,19 @@
+#!/bin/sh
+# Runs the IS pipeline harness (template contract + IS 694 golden report) before a
+# commit that touches templates, the report renderer, or the extraction agent — the
+# surfaces where the IS 694 silent-failure family lives. Turns `npm test` from
+# opt-in into always-on. Skip a one-off with `git commit --no-verify`.
+#
+# Enable once per clone:  git config core.hooksPath .githooks
+
+changed=$(git diff --cached --name-only)
+echo "$changed" | grep -Eq '^(public/is_templates/|public/app\.js|server/agent/(template-|is-report-agent)|scripts/(test_report_golden|check_all_template_contracts|check_template_completeness)\.js)' || exit 0
+
+echo "[pre-commit] IS pipeline changed — running harness…"
+if ! npm test --silent; then
+  echo ""
+  echo "[pre-commit] BLOCKED: the template contract or golden report failed."
+  echo "             Fix it, or bypass once with: git commit --no-verify"
+  exit 1
+fi
+echo "[pre-commit] harness green."
