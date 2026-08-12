@@ -5321,7 +5321,11 @@ async function syncISToMaster(isNumber) {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? describeAuthFailure(res.status, data.error) : (data.error || 'Link failed'));
-        showToast(`${data.isNumber}: ${data.paramsMatchedToHours}/${data.paramsInIntelligence} params matched to hours · ${data.limitsSynced} limits`, 'success');
+        if (data.limitsError) {
+            showToast(`${data.isNumber}: linked, but conformance limits did NOT sync — ${data.limitsError}`, 'error');
+        } else {
+            showToast(`${data.isNumber}: ${data.paramsMatchedToHours}/${data.paramsInIntelligence} params matched to hours · ${data.limitsSynced} limits`, 'success');
+        }
     } catch (e) {
         showToast(e.message, 'error');
     }

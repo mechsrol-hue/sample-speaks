@@ -32,5 +32,15 @@ try { tpl = JSON.parse(fs.readFileSync(tplPath, 'utf8')); }
 catch (e) { console.error('cannot read template:', e.message); process.exit(2); }
 
 const rep = C.checkTemplateCompleteness(tpl, fullText);
+
+// Contract check — the loud failure the IS 694 bug never had. Completeness asks
+// "did you read the whole standard?"; this asks "can the report actually use what
+// you wrote?". An ungated construction row or an unresolvable valueTable key fails
+// the extraction here instead of printing a wrong number on a report months later.
+const { validateTemplateContract } = require('../server/agent/template-contract');
+const contract = validateTemplateContract(tpl);
+rep.contract = contract;
+if (!contract.ok) rep.complete = false;
+
 console.log(JSON.stringify(rep, null, 2));
 process.exit(rep.complete ? 0 : 1);

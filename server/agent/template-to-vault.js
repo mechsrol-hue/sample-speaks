@@ -28,6 +28,15 @@ function agentTemplateToVaultParams(tpl) {
             section: p.section || '',
             test_method: p.testMethod || '',
             spec_text: p.specText || '',
+            // Gating fields. Dropping these is how the IS 694 bug reached every vault
+            // consumer: a twin-cord limit keyed variety "4" was indistinguishable from a
+            // single-core one, and no reader could filter because the construction label
+            // no longer existed. Carried verbatim so /params, the report fallback and the
+            // conformance sync can all gate by construction — and varies_by says which
+            // dimensions the variety key was built from, so "4|2" is decodable.
+            applies_to: p.appliesTo || '',
+            conditional_on: (p.conditionalOn && typeof p.conditionalOn === 'object') ? p.conditionalOn : null,
+            varies_by: Array.isArray(p.variesBy) ? p.variesBy : [],
         };
         const vt = (p.valueTable && typeof p.valueTable === 'object') ? p.valueTable : null;
         if (vt && Object.keys(vt).length) {

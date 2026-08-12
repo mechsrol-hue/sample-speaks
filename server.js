@@ -4286,10 +4286,16 @@ app.post('/api/is-intelligence/sync-to-master/:isNumber', requireAdmin, async (r
                 limitType: limitTypeMap[p.limit_type] || 'range',
             }));
         let limitsSynced = 0;
+        let limitsError = null;
         if (limitsPayload.length) {
             const { error: limErr } = await supabase.from('is_conformance_limits')
                 .upsert(limitsPayload, { onConflict: 'isNumber, clauseRef, parameter, varietyTag' });
-            if (!limErr) limitsSynced = limitsPayload.length;
+            // A failed limits write used to be swallowed here: the response still said
+            // success and only the count stayed 0 — so conformance quietly kept stale
+            // limits while everyone believed the sync worked. Same silent-failure family
+            // as the IS 694 report bug. Surface it.
+            if (limErr) limitsError = limErr.message;
+            else limitsSynced = limitsPayload.length;
         }
 
         // (b) Master Template — attach IS-Intelligence parameters, preserve hours.
@@ -4334,6 +4340,7 @@ app.post('/api/is-intelligence/sync-to-master/:isNumber', requireAdmin, async (r
             paramsInIntelligence: flat.length,
             paramsMatchedToHours: matchedToHours,
             limitsSynced,
+            limitsError,
             clausesWithHours: Object.keys(template.activeClauses).length,
         });
     } catch (err) {
