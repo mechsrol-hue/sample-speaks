@@ -4144,12 +4144,23 @@ app.post('/api/is-intelligence/agent-extract', upload.single('pdf'), async (req,
                         parameterizationDims: tpl.parameterizationDims || [],
                         dimensionOptions: tpl.dimensionOptions || {},
                         defaults: tpl.defaults || {},
+                        // Without this, vault consumers can see each row's gate but not
+                        // which combinations the standard offers at all — the class-5
+                        // half of the IS 694 bug, reproduced downstream.
+                        dimensionConstraints: tpl.dimensionConstraints || {},
                     }),
                     ...(fullText ? { fullText } : {}),
                 };
                 console.log(`[agent] projected ${vaultParams.flat.length} flat param rows from template (${(tpl.parameters || []).length} parameters) for ${isNumber}`);
-                const { data: existing, error: selErr } = await supabase.from('is_standards_vault').select('id').eq('isNumber', isNumber).limit(1);
+                // Exact-match dedup created duplicate vault rows: the agent's spelling
+                // "IS 694 : 2010" did not eq-match the existing "IS 694:2010", so the
+                // same standard existed twice and updates scattered across both rows.
+                // Compare punctuation-insensitively instead.
+                const { data: candidates, error: selErr } = await supabase.from('is_standards_vault')
+                    .select('id, isNumber').ilike('isNumber', `%${normalizeISNumber(isNumber).replace(/[^a-zA-Z0-9 ]/g, '%')}%`);
                 if (selErr) throw selErr;
+                const canon = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                const existing = (candidates || []).filter(r => canon(r.isNumber) === canon(isNumber));
                 if (existing && existing.length) {
                     const { error } = await supabase.from('is_standards_vault').update(vaultRow).eq('id', existing[0].id);
                     if (error) throw error;
@@ -4273,8 +4284,9 @@ app.post('/api/is-intelligence/sync-to-master/:isNumber', requireAdmin, async (r
 
         // (a) Conformance limits — same mapping as the pipeline phase-5 sync.
         const limitTypeMap = { two_sided: 'range', max_only: 'max', min_only: 'min', qualitative: null };
-        const limitsPayload = flat
-            .filter(p => limitTypeMap[p.limit_type] !== null && limitTypeMap[p.limit_type] !== undefined)
+        const limitSrc = flat
+            .filter(p => limitTypeMap[p.limit_type] !== null && limitTypeMap[p.limit_type] !== undefined);
+        const limitsPayload = limitSrc
             .map(p => ({
                 isNumber: canonicalIS,
                 clauseRef: p.clause || '',
@@ -4287,13 +4299,28 @@ app.post('/api/is-intelligence/sync-to-master/:isNumber', requireAdmin, async (r
             }));
         let limitsSynced = 0;
         let limitsError = null;
+        let limitsNote = null;
         if (limitsPayload.length) {
-            const { error: limErr } = await supabase.from('is_conformance_limits')
-                .upsert(limitsPayload, { onConflict: 'isNumber, clauseRef, parameter, varietyTag' });
+            // Gating columns ride along so a limit can be matched to the construction
+            // and category it belongs to — a twin-cord limit keyed varietyTag "4" is
+            // otherwise indistinguishable from a single-core one. The columns come from
+            // migrations/2026-08-13_add_conformance_gating.sql; until that runs, retry
+            // without them and say so instead of failing the whole link.
+            const gatedPayload = limitsPayload.map((l, i) => ({
+                ...l,
+                appliesTo: limitSrc[i].applies_to || '',
+                conditionalOn: limitSrc[i].conditional_on ? JSON.stringify(limitSrc[i].conditional_on) : '',
+            }));
+            let { error: limErr } = await supabase.from('is_conformance_limits')
+                .upsert(gatedPayload, { onConflict: 'isNumber, clauseRef, parameter, varietyTag' });
+            if (limErr && /column|schema/i.test(limErr.message || '')) {
+                limitsNote = 'limits saved WITHOUT construction/category gating — run migrations/2026-08-13_add_conformance_gating.sql';
+                ({ error: limErr } = await supabase.from('is_conformance_limits')
+                    .upsert(limitsPayload, { onConflict: 'isNumber, clauseRef, parameter, varietyTag' }));
+            }
             // A failed limits write used to be swallowed here: the response still said
             // success and only the count stayed 0 — so conformance quietly kept stale
-            // limits while everyone believed the sync worked. Same silent-failure family
-            // as the IS 694 report bug. Surface it.
+            // limits while everyone believed the sync worked. Surface it.
             if (limErr) limitsError = limErr.message;
             else limitsSynced = limitsPayload.length;
         }
@@ -4341,6 +4368,7 @@ app.post('/api/is-intelligence/sync-to-master/:isNumber', requireAdmin, async (r
             paramsMatchedToHours: matchedToHours,
             limitsSynced,
             limitsError,
+            limitsNote,
             clausesWithHours: Object.keys(template.activeClauses).length,
         });
     } catch (err) {

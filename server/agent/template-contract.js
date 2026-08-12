@@ -95,6 +95,26 @@ function validateTemplateContract(tpl) {
         }
     }
 
+    // defaults: every dimension needs one, it must be a real option, and it must
+    // satisfy the constraints of the default construction — otherwise the report
+    // OPENS on a combination the standard does not define.
+    const defaults = (tpl && tpl.defaults) || {};
+    for (const d of dims) {
+        if (defaults[d] === undefined) { warnings.push(`defaults has no value for dimension "${d}" — the report opens with an empty selection`); continue; }
+        if (!optionStrings[d].includes(String(defaults[d]))) errors.push(`defaults.${d}="${defaults[d]}" is not one of that dimension's options`);
+    }
+    if (dc && typeof dc === 'object') {
+        for (const [key, cons] of Object.entries(dc)) {
+            const ownerDim = dims.find(d => optionStrings[d].includes(String(key)));
+            if (!ownerDim || String(defaults[ownerDim]) !== String(key)) continue;
+            for (const [dim, allowed] of Object.entries(cons || {})) {
+                if (Array.isArray(allowed) && allowed.length && !allowed.map(String).includes(String(defaults[dim]))) {
+                    errors.push(`defaults.${dim}="${defaults[dim]}" violates dimensionConstraints["${key}"] (allowed: ${allowed.join(', ')})`);
+                }
+            }
+        }
+    }
+
     return { ok: errors.length === 0, errors, warnings };
 }
 
