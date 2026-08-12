@@ -9,7 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const hoursModel = require('./server/ml/hours-model');
 // IS Intelligence single input = Claude Agent SDK path (/api/is-intelligence/agent-extract).
-// The OpenRouter 6-phase pipeline (server/pipeline/is-pipeline.js) was retired as an input on
+// The OpenRouter 6-phase pipeline was retired as an input (engine deleted) on
 // 2026-06-24; the file stays on disk (unreferenced) for reversibility. specs_db.js is kept only
 // as the canonical IS 4985 report reference, never as an extraction input.
 
@@ -2947,21 +2947,72 @@ function findRelevantPages(pages, query, topN = 3) {
     return selected;
 }
 
+function parseVaultJson(value, fallback) {
+    try {
+        if (value == null || value === '') return fallback;
+        return typeof value === 'string' ? JSON.parse(value) : value;
+    } catch (_) {
+        return fallback;
+    }
+}
+
+function normalizeVaultTestParameters(value) {
+    const raw = parseVaultJson(value, null);
+    if (Array.isArray(raw)) return { flat: raw, sections: [], referenced_standards: [] };
+    if (raw && typeof raw === 'object') {
+        return {
+            flat: Array.isArray(raw.flat) ? raw.flat : [],
+            sections: Array.isArray(raw.sections) ? raw.sections : [],
+            referenced_standards: Array.isArray(raw.referenced_standards) ? raw.referenced_standards : []
+        };
+    }
+    return { flat: [], sections: [], referenced_standards: [] };
+}
+
+function summarizeVaultRow(row) {
+    const clauses = Array.isArray(parseVaultJson(row.extractedClauses, [])) ? parseVaultJson(row.extractedClauses, []) : [];
+    const tables = Array.isArray(parseVaultJson(row.extractedTables, [])) ? parseVaultJson(row.extractedTables, []) : [];
+    const uncertainItems = Array.isArray(parseVaultJson(row.uncertainItems, [])) ? parseVaultJson(row.uncertainItems, []) : [];
+    const dimensionData = parseVaultJson(row.dimensionData, null);
+    const testParameters = normalizeVaultTestParameters(row.testParameters);
+    const reportFormat = readISReportFormat(row.isNumber);
+    const openFlags = uncertainItems.filter(item => !item || !item.resolved).length;
+    const looksUnextracted = /not extracted/i.test(String(row.pdfFileName || ''));
+    const hasDimensionTables = !!(dimensionData && Array.isArray(dimensionData.tables) && dimensionData.tables.length);
+    const hasConfidence = row.confidenceScore != null && row.confidenceScore !== '';
+    const hasExtractedData = !!(
+        clauses.length ||
+        tables.length ||
+        testParameters.flat.length ||
+        hasDimensionTables ||
+        reportFormat ||
+        hasConfidence
+    );
+    let status = 'catalogued';
+    if (openFlags > 0) status = 'has_uncertainties';
+    else if (hasExtractedData) status = 'parsed';
+    else if (!looksUnextracted) status = 'parsed';
+
+    return {
+        clauses,
+        tables,
+        uncertainItems,
+        dimensionData,
+        testParameters,
+        reportFormat,
+        openFlags,
+        hasExtractedData,
+        status
+    };
+}
+
 // 1. Vault List
 app.get('/api/is-intelligence/vault', async (req, res) => {
     try {
-        const { data: rows, error } = await supabase.from('is_standards_vault').select('id, isNumber, title, pdfFileName, uncertainItems, extractedClauses, extractedTables, confidenceScore, uploadedAt').order('id', { ascending: false });
+        const { data: rows, error } = await supabase.from('is_standards_vault').select('id, isNumber, title, pdfFileName, uncertainItems, extractedClauses, extractedTables, testParameters, dimensionData, confidenceScore, uploadedAt').order('id', { ascending: false });
         if (error) throw error;
-        const parseLen = (v) => {
-            try { const a = typeof v === 'string' ? JSON.parse(v || '[]') : (v || []); return Array.isArray(a) ? a.length : 0; }
-            catch (e) { return 0; }
-        };
         const formatted = (rows || []).map(r => {
-            let uncertain = [];
-            try {
-                uncertain = typeof r.uncertainItems === 'string' ? JSON.parse(r.uncertainItems || '[]') : (r.uncertainItems || []);
-            } catch(e){}
-            const hasUncertainties = uncertain.some(item => !item.resolved);
+            const meta = summarizeVaultRow(r);
             return {
                 id: r.id,
                 isNumber: r.isNumber,
@@ -2969,9 +3020,12 @@ app.get('/api/is-intelligence/vault', async (req, res) => {
                 pdfFileName: r.pdfFileName,
                 uploadedAt: r.uploadedAt,
                 confidenceScore: r.confidenceScore,
-                status: hasUncertainties ? 'has_uncertainties' : 'parsed',
-                clauseCount: parseLen(r.extractedClauses),
-                tableCount: parseLen(r.extractedTables)
+                status: meta.status,
+                clauseCount: meta.clauses.length,
+                tableCount: meta.tables.length,
+                paramCount: meta.testParameters.flat.length,
+                hasReportFormat: !!meta.reportFormat,
+                hasExtractedData: meta.hasExtractedData
             };
         });
         res.json({ vault: formatted });
@@ -2987,18 +3041,23 @@ app.get('/api/is-intelligence/vault/:id', async (req, res) => {
         if (error || !row) {
             return res.status(404).json({ error: "Document not found" });
         }
+        const meta = summarizeVaultRow(row);
         res.json({
             id: row.id,
             isNumber: row.isNumber,
             title: row.title,
             pdfFileName: row.pdfFileName,
-            clauses: typeof row.extractedClauses === 'string' ? JSON.parse(row.extractedClauses || '[]') : (row.extractedClauses || []),
-            tables: typeof row.extractedTables === 'string' ? JSON.parse(row.extractedTables || '[]') : (row.extractedTables || []),
-            uncertainItems: typeof row.uncertainItems === 'string' ? JSON.parse(row.uncertainItems || '[]') : (row.uncertainItems || []),
-            dimensionData: typeof row.dimensionData === 'string' ? JSON.parse(row.dimensionData || 'null') : (row.dimensionData || null),
+            clauses: meta.clauses,
+            tables: meta.tables,
+            uncertainItems: meta.uncertainItems,
+            dimensionData: meta.dimensionData,
             isFullyResolved: row.isFullyResolved === 1 || row.isFullyResolved === true,
             confidenceScore: row.confidenceScore,
-            uploadedAt: row.uploadedAt
+            uploadedAt: row.uploadedAt,
+            status: meta.status,
+            paramCount: meta.testParameters.flat.length,
+            hasReportFormat: !!meta.reportFormat,
+            hasExtractedData: meta.hasExtractedData
         });
     } catch(e) {
         res.status(500).json({ error: e.message });
