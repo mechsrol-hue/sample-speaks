@@ -89,6 +89,17 @@ Follow these steps EXACTLY:
    - Include ALL testing parameters (acceptance AND type tests); tag "acceptanceOrType"; drop none.
    - EXCLUDE sampling / acceptance-number / "scale of sampling" tables entirely.
    - If unsure whether something is a testing parameter, include it with "needsReview": true.
+   - GATE EVERY VARIANT-SPECIFIC PARAMETER (the IS 694 failure: a twin-cord dimension printed on a
+     single-core report because nothing declared who it belonged to). If a parameter exists only for one
+     construction/variant, set "appliesTo": "<that dimensionOptions value>". If it applies to a subset,
+     set "conditionalOn": {"<dim>": <value or [values]>} — lists are allowed ("FR and FR-LSH" →
+     {"category":["FR","FR-LSH"]}). NEVER encode applicability only in the section name or parameter name.
+   - If the standard has a test schedule (a "Tests" table listing which tests apply to which
+     category/variant), model that axis as a dimension and gate each affected parameter with conditionalOn.
+   - If a dimension table is valid only for certain values of another dimension (e.g. a header like
+     "(Class 1 or Class 2)"), declare top-level "dimensionConstraints":
+     {"<controlling option>": {"<dim>": [allowed values]}} so the report cannot offer combinations the
+     standard does not define. Constraints must come from the printed standard, never guessed.
 
    DENSE / ROTATED / UNREADABLE TABLES (this is the #1 failure mode — read carefully):
    - Some tables (e.g. wall-thickness vs SDR, mass vs size) are printed ROTATED (landscape) and so dense

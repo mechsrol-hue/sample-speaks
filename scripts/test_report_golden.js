@@ -32,7 +32,20 @@ function appliesToSelection(appliesTo, tpl, sel) {
     return true;
 }
 function condMet(cond, sel) {
-    return Object.entries(cond || {}).every(([k, v]) => String(sel[k]) === String(v));
+    return Object.entries(cond || {}).every(([k, v]) => Array.isArray(v)
+        ? v.map(String).includes(String(sel[k]))
+        : String(sel[k]) === String(v));
+}
+// Mirror of the renderer's constraint snapping: an out-of-range selection lands on
+// the construction's first legal value, exactly as the dropdown does.
+function applyConstraints(sel) {
+    const cons = (tpl.dimensionConstraints || {})[sel.cableType] || {};
+    const out = { ...sel };
+    for (const [dim, allowed] of Object.entries(cons)) {
+        const list = (allowed || []).map(String);
+        if (list.length && !list.includes(String(out[dim]))) out[dim] = list[0];
+    }
+    return out;
 }
 function renderRows(sel) {
     const rows = [];
@@ -69,7 +82,7 @@ const fail = (msg) => { failures++; console.error('  FAIL', msg); };
 
 // 1. No foreign construction row may appear on a single-core rigid report.
 {
-    const rows = renderRows({ cableType: SINGLE_CORE_RIGID, size: 4, cores: 3, class: 2 });
+    const rows = renderRows({ cableType: SINGLE_CORE_RIGID, size: 4, cores: 1, class: 2, category: '01' });
     for (const r of rows) {
         if (FOREIGN_CLAUSES.some(c => String(r.clause || '').startsWith(c))) {
             fail(`foreign row on single-core report: ${r.clause} ${r.name}`);
@@ -88,7 +101,7 @@ const fail = (msg) => { failures++; console.error('  FAIL', msg); };
     else {
         for (const [size, byClass] of Object.entries(TABLE3)) {
             for (const [cls, [wantTi, wantOd]] of Object.entries(byClass)) {
-                const sel = { cableType: SINGLE_CORE_RIGID, size, class: cls, cores: 1 };
+                const sel = { cableType: SINGLE_CORE_RIGID, size, class: cls, cores: 1, category: '01' };
                 const rows = renderRows(sel);
                 const gotTi = rows.find(r => r.name === ti.parameterName);
                 const gotOd = rows.find(r => r.name === od.parameterName);
@@ -104,6 +117,32 @@ const fail = (msg) => { failures++; console.error('  FAIL', msg); };
     const { validateTemplateContract } = require('../server/agent/template-contract');
     const c = validateTemplateContract(tpl);
     for (const e of c.errors) fail(`contract: ${e}`);
+}
+
+// 4. The class axis: Table 3 exists only for Class 1/2, so a Class 5 selection on
+// the rigid construction must snap — never resolve Table 3 values as Class 5.
+{
+    const cons = (tpl.dimensionConstraints || {})[SINGLE_CORE_RIGID];
+    if (!cons || !Array.isArray(cons.class)) fail('rigid single-core has no class constraint — Class 5 can select Table 3 values again');
+    else {
+        if (cons.class.map(String).some(c => !['1', '2'].includes(c))) fail(`rigid single-core class constraint is ${JSON.stringify(cons.class)}, standard says Class 1 or 2`);
+        const snapped = applyConstraints({ cableType: SINGLE_CORE_RIGID, size: '1.5', class: '5', cores: 1, category: '01' });
+        if (String(snapped.class) === '5') fail('constraint did not snap Class 5 on the rigid construction');
+    }
+}
+
+// 5. The category axis (Table 1): FR-LSH-only tests must not appear on a Cat-01
+// report, and must appear on an FR-LSH one.
+{
+    const base = { cableType: SINGLE_CORE_RIGID, size: '1.5', class: '1', cores: 1 };
+    const cat01 = renderRows({ ...base, category: '01' }).map(r => r.name);
+    const lsh = renderRows({ ...base, category: 'FR-LSH' }).map(r => r.name);
+    for (const n of ['Halogen acid gas evolution, Max', 'Smoke density rating, Max']) {
+        if (cat01.includes(n)) fail(`Table 1 violated: FR-LSH-only test "${n}" on a Category 01 report`);
+        if (!lsh.includes(n)) fail(`"${n}" missing from an FR-LSH report`);
+    }
+    if (cat01.includes('Additional ageing test (OU cables)')) fail('Cat-02-only ageing test on a Category 01 report');
+    if (!renderRows({ ...base, category: '02' }).map(r => r.name).includes('Additional ageing test (OU cables)')) fail('Cat-02 ageing test missing from a Category 02 report');
 }
 
 if (failures) {

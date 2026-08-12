@@ -45,8 +45,12 @@ function validateTemplateContract(tpl) {
 
         if (p.conditionalOn && typeof p.conditionalOn === 'object') {
             for (const [k, v] of Object.entries(p.conditionalOn)) {
-                if (!dims.includes(k)) errors.push(`"${name}": conditionalOn references unknown dimension "${k}"`);
-                else if (!optionStrings[k].includes(String(v))) errors.push(`"${name}": conditionalOn ${k}="${v}" is not one of that dimension's options`);
+                if (!dims.includes(k)) { errors.push(`"${name}": conditionalOn references unknown dimension "${k}"`); continue; }
+                const vals = Array.isArray(v) ? v : [v];
+                if (!vals.length) errors.push(`"${name}": conditionalOn ${k} is an empty list — the row can never appear`);
+                for (const one of vals) {
+                    if (!optionStrings[k].includes(String(one))) errors.push(`"${name}": conditionalOn ${k}="${one}" is not one of that dimension's options`);
+                }
             }
         }
 
@@ -71,6 +75,25 @@ function validateTemplateContract(tpl) {
             warnings.push(`"${name}": name looks construction-specific but has no appliesTo/conditionalOn — it will appear on every construction's report (the IS 694 bug shape)`);
         }
     });
+
+    // dimensionConstraints: each key must be an option of some dimension, each
+    // constrained dim must exist, each allowed value must be one of its options,
+    // and a constraint may never empty a dropdown.
+    const dc = (tpl && tpl.dimensionConstraints) || null;
+    if (dc && typeof dc === 'object') {
+        for (const [key, cons] of Object.entries(dc)) {
+            const owned = Object.values(optionStrings).some(list => list.includes(String(key)));
+            if (!owned) { errors.push(`dimensionConstraints key "${key}" matches no dimensionOptions value`); continue; }
+            for (const [dim, allowed] of Object.entries(cons || {})) {
+                if (!dims.includes(dim)) { errors.push(`dimensionConstraints["${key}"] constrains unknown dimension "${dim}"`); continue; }
+                const list = Array.isArray(allowed) ? allowed : [];
+                if (!list.length) errors.push(`dimensionConstraints["${key}"].${dim} is empty — it would empty the dropdown`);
+                for (const v of list) {
+                    if (!optionStrings[dim].includes(String(v))) errors.push(`dimensionConstraints["${key}"].${dim} allows "${v}" which is not one of that dimension's options`);
+                }
+            }
+        }
+    }
 
     return { ok: errors.length === 0, errors, warnings };
 }

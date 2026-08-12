@@ -7982,7 +7982,11 @@ function tplAppliesToSelection(appliesTo, tpl, sel) {
 }
 
 function tplCondMet(cond, sel) {
-    return Object.entries(cond || {}).every(([k, v]) => String(sel[k]) === String(v));
+    // A condition value may be a list — IS 694 Table 1 marks tests as applying to
+    // "FR and FR-LSH", which is {category: ['FR','FR-LSH']}, not a single value.
+    return Object.entries(cond || {}).every(([k, v]) => Array.isArray(v)
+        ? v.map(String).includes(String(sel[k]))
+        : String(sel[k]) === String(v));
 }
 
 function tplResolvePath(gridForSize, path, sel) {
@@ -8014,6 +8018,30 @@ function renderVaultISReportRows() {
         const el = document.getElementById('tpl-dim-' + d);
         sel[d] = el ? el.value : (tpl.defaults || {})[d];
     });
+
+    // The standard's own combination rules. IS 694 Table 3 exists only for Class 1/2
+    // rigid conductors, yet the class dropdown offered 5 — and a size-only parameter
+    // then resolved a real 0.7 mm for a combination the standard never defines. The
+    // template's dimensionConstraints (keyed by the selected cableType) prune the
+    // other dropdowns to what the standard actually offers, snapping an invalid
+    // selection to its first legal value.
+    const constraints = (tpl.dimensionConstraints || {})[sel.cableType] || {};
+    for (const dim of (tpl.parameterizationDims || [])) {
+        if (dim === 'cableType') continue;
+        const full = ((tpl.dimensionOptions || {})[dim] || []).map(String);
+        const allowed = (constraints[dim] || []).map(String).filter(v => full.includes(v));
+        const list = allowed.length ? allowed : full;
+        if (!list.length) continue;
+        const el = document.getElementById('tpl-dim-' + dim);
+        if (!el) continue;
+        const want = list.includes(String(sel[dim])) ? String(sel[dim]) : list[0];
+        const have = [...el.options].map(o => o.value);
+        if (have.length !== list.length || have.some((v, i) => v !== list[i])) {
+            el.innerHTML = list.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+        }
+        el.value = want;
+        sel[dim] = want;
+    }
     const grid = (tpl.dimensionGrid || {})[String(sel.size)] || null;
     const rows = [];
     let lastSection = null;
