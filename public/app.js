@@ -7964,6 +7964,19 @@ function renderVaultISReportFromTemplate(tpl) {
     renderVaultISReportRows();
 }
 
+// `appliesTo` names one option of one dimension — for IS 694 a cableType such as
+// "Two/Three core flat cable (Cl 22, Table 10)". Resolve which dimension owns that
+// option rather than hard-coding cableType, so the same rule works for any standard.
+function tplAppliesToSelection(appliesTo, tpl, sel) {
+    const opts = tpl.dimensionOptions || {};
+    for (const dim of Object.keys(opts)) {
+        const list = (opts[dim] || []).map(String);
+        if (list.includes(String(appliesTo))) return String(sel[dim]) === String(appliesTo);
+    }
+    // Names a construction no dimension offers — show it rather than silently drop it.
+    return true;
+}
+
 function tplCondMet(cond, sel) {
     return Object.entries(cond || {}).every(([k, v]) => String(sel[k]) === String(v));
 }
@@ -8007,6 +8020,12 @@ function renderVaultISReportRows() {
             rows.push({ clause: p.clauseRef, name: p.parameterName, method: p.testMethod, spec: '—', na: true });
             return;
         }
+        // A parameter that names the construction it belongs to only applies to that
+        // one. Without this a report for a single-core rigid cable listed the flat-cable
+        // and twin-cord dimensions too — and, worse, filled one in: "Parallel twin cord
+        // max overall dimension" resolved 4.8 x 9.6 from Table 7 purely because the
+        // selected size existed there. Wrong table, wrong construction, plausible number.
+        if (p.appliesTo && !tplAppliesToSelection(p.appliesTo, tpl, sel)) return;
         // General per-parameter value table — keyed by the selected option values of variesBy
         // ("16" for ["size"], "16|Fe 500" for ["size","grade"]). Works for ANY dimension, so
         // grade/class/type limits auto-fill the exact value and drive green/red, not just size.
