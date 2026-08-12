@@ -5458,7 +5458,7 @@ async function loadMyISScope() {
     try {
         const [catRes, mineRes] = await Promise.all([
             fetch('/api/is-scope/catalogue'),
-            fetch(`/api/is-scope/mine/${currentUser ? currentUser.id : 0}`)
+            fetch(`/api/is-scope/mine/${currentUser ? currentUser.id : 0}`, { headers: authHeaders() })
         ]);
         scopeCatalogue = await catRes.json();
         const mine = await mineRes.json();
@@ -6163,7 +6163,7 @@ async function submitMyScope() {
     try {
         const res = await fetch('/api/is-scope/mine', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({
                 userId: currentUser.id,
                 username: currentUser.username,
@@ -6210,7 +6210,7 @@ async function updateScopeNavBadge() {
     const badge = document.getElementById('nav-scope-badge');
     if (!badge || !currentUser || isAdminOrSuperAdmin()) return;
     try {
-        const r = await fetch(`/api/is-scope/mine/${currentUser.id}`);
+        const r = await fetch(`/api/is-scope/mine/${currentUser.id}`, { headers: authHeaders() });
         const d = await r.json();
         badge.style.display = d.submission ? 'none' : 'inline-block';
     } catch (e) {}
@@ -7067,8 +7067,8 @@ function scopeStandardRow(s, opts = {}) {
 // A route the running server doesn't have gets Express's default 404, which is an
 // HTML page — so response.json() dies on "Unexpected token '<'", telling the user
 // nothing. Name the real cause: the server booted before this endpoint existed.
-async function scopeFetchJson(url) {
-    const res = await fetch(url);
+async function scopeFetchJson(url, opts) {
+    const res = await fetch(url, opts);
     const body = await res.text();
     let data;
     try {
@@ -7089,7 +7089,7 @@ async function loadScopeCoverage() {
         listEl.innerHTML = '<div style="padding:20px; color:var(--text-muted); font-size:0.88rem;">Loading…</div>';
     }
     try {
-        const data = await scopeFetchJson('/api/is-scope/coverage');
+        const data = await scopeFetchJson('/api/is-scope/coverage', { headers: authHeaders() });
         scopeCoverage = data;
 
         const secEl = document.getElementById('scopeadm-coverage-section');

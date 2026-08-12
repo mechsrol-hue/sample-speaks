@@ -54,6 +54,21 @@ function issueSession(user) {
 
 // 401 = "you are not signed in / your session expired", 403 = "signed in, wrong role".
 // The client distinguishes them so it can tell the user which one actually happened.
+// Any signed-in user, with the caller's session attached. Scope declarations are
+// named judgements about colleagues' work: before this, a plain curl could submit
+// as any TP or read every declaration — proven during the 2026-08 audit.
+function requireSession(req, res, next) {
+    const token = req.get('x-session-token') || '';
+    const session = SESSIONS.get(token);
+    if (!session || session.expiresAt <= Date.now()) {
+        SESSIONS.delete(token);
+        return res.status(401).json({ error: 'Sign in to continue.' });
+    }
+    req.sessionUser = session;
+    next();
+}
+const sessionIsAdmin = (s) => !!(s && ADMIN_ROLES.has(s.role));
+
 function requireAdmin(req, res, next) {
     const token = req.get('x-session-token') || '';
     const session = SESSIONS.get(token);
@@ -3528,7 +3543,10 @@ app.post('/api/is-scope/standards/bulk', requireAdmin, async (req, res) => {
 });
 
 // A TP's own submission.
-app.get('/api/is-scope/mine/:userId', async (req, res) => {
+app.get('/api/is-scope/mine/:userId', requireSession, async (req, res) => {
+    if (String(req.sessionUser.userId) !== String(req.params.userId) && !sessionIsAdmin(req.sessionUser)) {
+        return res.status(403).json({ error: 'You can only view your own IS scope.' });
+    }
     try {
         const sub = await readPref(SCOPE_TP_PREFIX + req.params.userId, null);
         // Only one submission is kept per user, so an approved declaration is otherwise
@@ -3554,7 +3572,10 @@ app.get('/api/is-scope/mine/:userId', async (req, res) => {
     }
 });
 
-app.post('/api/is-scope/mine', async (req, res) => {
+app.post('/api/is-scope/mine', requireSession, async (req, res) => {
+    if (String(req.sessionUser.userId) !== String((req.body || {}).userId) && !sessionIsAdmin(req.sessionUser)) {
+        return res.status(403).json({ error: 'You can only submit your own IS scope.' });
+    }
     try {
         const { userId, username, sections, isNumbers, proposedSection, note, recommendations, recommendedBy, proposedFiling } = req.body || {};
         if (!userId) return res.status(400).json({ error: 'Missing user.' });
@@ -3608,10 +3629,9 @@ app.post('/api/is-scope/mine', async (req, res) => {
     }
 });
 
-// Admin review queue. Read-only, so no admin token required — it exposes nothing
-// beyond what /api/admin/employees already returns, and gating it would make the
-// queue invisible in demo mode for no security gain. The DECISION below is guarded.
-app.get('/api/is-scope/submissions', async (req, res) => {
+// Admin review queue. Was deliberately open when it held only names; it now carries
+// per-person recommendations and reasons, so it is admin-gated like the decision.
+app.get('/api/is-scope/submissions', requireAdmin, async (req, res) => {
     try {
         const { data: prefs, error } = await supabase
             .from('system_preferences').select('key, value').like('key', `${SCOPE_TP_PREFIX}%`);
@@ -3678,7 +3698,7 @@ app.get('/api/is-scope/submissions', async (req, res) => {
 // standard, and who has recommended the lab keeps testing it. The review queue
 // answers "what is this person asking for"; this answers "where does the lab
 // actually stand" — the question you can't get by reading submissions one by one.
-app.get('/api/is-scope/coverage', async (req, res) => {
+app.get('/api/is-scope/coverage', requireAdmin, async (req, res) => {
     try {
         const sectionMap = await readPref(SCOPE_MAP_KEY, {});
         const sections = await readPref(SCOPE_SECTIONS_KEY, DEFAULT_SECTIONS);
@@ -5797,7 +5817,23 @@ app.get('/api/conformance-limits/:isNumber', async (req, res) => {
             // Table might not exist yet
             return res.json({ limits: [], latestAmendment });
         }
-        res.json({ limits: data || [], latestAmendment });
+        // Gate by construction/category when the caller says what it is testing —
+        // varietyTag alone cannot tell a twin-cord "4" from a single-core "4".
+        // Rows without gates (older syncs) always pass, so nothing vanishes.
+        const ctxApplies = req.query.appliesTo;
+        const ctxCategory = req.query.category;
+        let limits = data || [];
+        if (ctxApplies) limits = limits.filter(r => !r.appliesTo || r.appliesTo === ctxApplies);
+        if (ctxCategory) limits = limits.filter(r => {
+            if (!r.conditionalOn) return true;
+            try {
+                const c = JSON.parse(r.conditionalOn);
+                if (!c || !c.category) return true;
+                const list = Array.isArray(c.category) ? c.category : [c.category];
+                return list.map(String).includes(String(ctxCategory));
+            } catch (_) { return true; }
+        });
+        res.json({ limits, latestAmendment });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
